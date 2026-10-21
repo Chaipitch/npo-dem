@@ -27,6 +27,9 @@ export default class DonorDashboard extends LightningElement {
     "Education|More Girls in School|Your support helps provide scholarships and learning resources for girls in underserved areas.;" +
     "Environment|Greener Communities for Generations|Tree planting and conservation efforts are creating healthier communities.";
   @api donatePath = "/donate";
+  @api bannerImageUrl =
+    "https://images.unsplash.com/photo-1761415451904-0a0a2c630ea9?auto=format&fit=crop&w=2000&q=80";
+  @api bannerImageCredit = "Photo: Ben Kupke / Unsplash";
   @api agentSuggestions =
     "Explore my causes;View giving history;Show next milestones";
 

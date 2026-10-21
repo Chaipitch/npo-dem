@@ -120,3 +120,29 @@ tests use Unpaid/Pending.
 
 LWC rewrites `id` attributes in templates, so `fill="url(#gradient)"` silently renders nothing. Use CSS
 gradients on the container or solid fills instead.
+
+### D-15 · Dedicated agent "ABC Hope Donor Assistant" — Accepted (user, 2026‑10‑21)
+
+Agentforce Service Agent defined in source as Agent Script (`aiAuthoringBundles/ABC_Hope_Donor_Assistant`),
+published + activated with `sf agent publish authoring-bundle` / `sf agent activate`. Runs as the existing
+`ServiceAgent Agentforce` Einstein agent user + permission set `ABC_Hope_Agent_Actions`.
+Topics → Apex actions: Campaign & donation FAQ (`AbcHopeAgentCampaignInfo`), My giving & impact
+(`AbcHopeAgentGivingSummary`), Manage monthly gifts (`AbcHopeAgentMonthlyGifts`, wraps NPC standard actions
+`pauseGiftCommitmentSchedule`, `resumeGiftCommitmentSchedule`, `manageRcrGiftCmtSchd`, `closeGiftCommitment`),
+Update contact details (`AbcHopeAgentUpdateProfile`). The existing Donor Support Agent is untouched.
+**Identity:** personal actions resolve the donor only via `MessagingEndUser.AuthenticatedEndUserId`
+(verified site user) — never from typed input or pre-chat contact matching; the session Id is bound from
+`@variables.RoutableId`, not slot-filled. Mutations require explicit user confirmation (agent instructions).
+NPC standard actions need Id inputs as Strings; schedule changes must target the open-ended schedule.
+
+### D-16 · One flow exception: `ABC_Hope_Chat_Routing` — Accepted (user, 2026‑10‑21)
+
+Omni-Channel routing flow, copied from `NGO_Donor_Support_MIAW`, with `routingType = Copilot` →
+`ABC_Hope_Donor_Assistant`. Messaging channel `ABC_Hope_Chat` uses it, in `Auth` mode with guests allowed
+(signed-in donors are verified, visitors chat anonymously). No other flows exist in this project.
+
+### D-17 · Photography from Unsplash (hotlinked) — Accepted (user, 2026‑10‑21)
+
+Hero (Christian Bowen), dashboard banner (Ben Kupke), sidebar sprout (Artem Makarov) are served from
+`images.unsplash.com` (CSP Trusted Site `Unsplash_Images`, img-src, Communities) — not downloaded. Credits
+shown on hero and banner. SVG illustrations remain as fallbacks when the URL properties are cleared.

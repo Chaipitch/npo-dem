@@ -11,18 +11,24 @@ Guest donations create real NPC records (payment simulated). One manual step lef
 
 ## Status
 
-| Area                                  | State                                                                                                                                                                                                                                  |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Demo data                             | ✅ Campaign _Christmas Giving 2026_, designations (School Supplies, Learning Kits, Where Most Needed), campaign default designation, source code `XMAS26-EMAIL`, Maya's 2023–2025 gift history (`scripts/apex/seed*.apex`, idempotent) |
-| Apex                                  | ✅ `DonationIntakeController/Service`, `DonorPortalController` — 22 tests pass, 91–98% coverage                                                                                                                                        |
-| LWC                                   | ✅ `donationJourney` (10 Jest tests pass), `abcHopeHero`, `donorDashboard` (view=home/giving), `donorProfile`, `abcHopeIcon`, theme layouts `abcHopePublicLayout`, `abcHopePortalLayout`                                               |
-| Site                                  | ✅ Live, public access on; Home + Donate public, portal pages require login; guest profile → `DonationIntakeController` only                                                                                                           |
-| Signed-in donor                       | ✅ Maya Grande portal user `005g700000EemAjAAJ` (Customer Community Login, permset `ABC_Hope_Donor_Portal`), no password set                                                                                                           |
-| Chat                                  | 🟨 Deployment `ABC_Hope_Chat` + channel created (unauth, guests allowed). **Needs Embedded Messaging component placed in Builder** (D-09)                                                                                              |
-| Git                                   | ✅ Pushed to `git@github.com:Chaipitch/npo-dem.git` (`main`)                                                                                                                                                                           |
-| Flows / VRs / custom objects / fields | None created (user instruction)                                                                                                                                                                                                        |
+| Area                                  | State                                                                                                                                                                                                                                          |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Demo data                             | ✅ Campaign _Christmas Giving 2026_, designations (School Supplies, Learning Kits, Where Most Needed), campaign default designation, source code `XMAS26-EMAIL`, Maya's 2023–2025 gift history (`scripts/apex/seed*.apex`, idempotent)         |
+| Apex                                  | ✅ `DonationIntakeController/Service`, `DonorPortalController` — 22 tests pass, 91–98% coverage                                                                                                                                                |
+| LWC                                   | ✅ `donationJourney` (10 Jest tests pass), `abcHopeHero`, `donorDashboard` (view=home/giving), `donorProfile`, `abcHopeIcon`, theme layouts `abcHopePublicLayout`, `abcHopePortalLayout`                                                       |
+| Site                                  | ✅ Live, public access on; Home + Donate public, portal pages require login; guest profile → `DonationIntakeController` only                                                                                                                   |
+| Signed-in donor                       | ✅ Maya Grande portal user `005g700000EemAjAAJ` (Customer Community Login, permset `ABC_Hope_Donor_Portal`), no password set                                                                                                                   |
+| Chat / Agent                          | ✅ ABC Hope Donor Assistant (Agent Script, active) + routing flow `ABC_Hope_Chat_Routing` + channel/deployment `ABC_Hope_Chat` (Auth, guests allowed). 🟨 Embedded Messaging component still to place in Builder (enable Experience-site auth) |
+| Git                                   | ✅ Pushed to `git@github.com:Chaipitch/npo-dem.git` (`main`)                                                                                                                                                                                   |
+| Flows / VRs / custom objects / fields | None created (user instruction)                                                                                                                                                                                                                |
 
-## How to see the signed-in portal
+## How to sign in as Maya
+
+Site login: https://te1791557923677.my.site.com/ → **Sign in**, username `maya.grande@abchope.demo.00dg700000kmyyx`.
+Password: set Maya's user email to an inbox you control, then **Reset Password** and choose one from the email.
+No password is stored in this repo.
+
+## How to see the signed-in portal (no password)
 
 Setup → Contacts → **Maya Grande** → **Log in to Experience as User** → ABC Hope → opens `/dashboard`.
 

@@ -63,6 +63,16 @@ ol {
   inset: 0;
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  object-position: center 60%;
+}
+.banner-credit {
+  position: absolute;
+  right: 14px;
+  bottom: 8px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  z-index: 1;
 }
 .banner-shade {
   position: absolute;

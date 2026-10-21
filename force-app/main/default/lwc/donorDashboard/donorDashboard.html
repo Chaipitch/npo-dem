@@ -2,40 +2,46 @@
   <div class="dash">
     <!-- Banner -->
     <section class="banner">
-      <svg
-        class="banner-art"
-        viewBox="0 0 1200 260"
-        preserveAspectRatio="xMidYMid slice"
-        aria-hidden="true"
-      >
-        <path
-          d="M0 120 120 70 230 110 360 50 500 100 640 40 780 95 900 55 1040 100 1200 60V260H0Z"
-          fill="#7d9fb8"
-          opacity=".55"
-        />
-        <path
-          d="M0 150 140 100 260 140 420 85 560 130 700 80 840 125 980 90 1200 130V260H0Z"
-          fill="#5f8a6a"
-        />
-        <path
-          d="M0 185 160 140 320 175 480 130 640 170 820 135 1000 165 1200 140V260H0Z"
-          fill="#3f6f45"
-        />
-        <path
-          d="M560 260c40-40 120-50 180-70 70-22 130-20 200-40 60-17 110-12 160-30v30c-50 16-100 16-160 32-70 18-130 20-200 42-60 18-120 26-150 36Z"
-          fill="#b7d8ee"
-          opacity=".9"
-        />
-        <g fill="#24492b">
-          <path d="M40 260 62 196 84 260Z" />
-          <path d="M80 260 106 180 132 260Z" />
-          <path d="M128 260 148 206 168 260Z" />
-          <path d="M980 260 1004 190 1028 260Z" />
-          <path d="M1030 260 1060 170 1090 260Z" />
-          <path d="M1090 260 1112 200 1134 260Z" />
-          <path d="M1140 260 1166 184 1192 260Z" />
-        </g>
-      </svg>
+      <template lwc:if={bannerImageUrl}>
+        <img class="banner-art" src={bannerImageUrl} alt="" />
+        <span class="banner-credit">{bannerImageCredit}</span>
+      </template>
+      <template lwc:else>
+        <svg
+          class="banner-art"
+          viewBox="0 0 1200 260"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden="true"
+        >
+          <path
+            d="M0 120 120 70 230 110 360 50 500 100 640 40 780 95 900 55 1040 100 1200 60V260H0Z"
+            fill="#7d9fb8"
+            opacity=".55"
+          />
+          <path
+            d="M0 150 140 100 260 140 420 85 560 130 700 80 840 125 980 90 1200 130V260H0Z"
+            fill="#5f8a6a"
+          />
+          <path
+            d="M0 185 160 140 320 175 480 130 640 170 820 135 1000 165 1200 140V260H0Z"
+            fill="#3f6f45"
+          />
+          <path
+            d="M560 260c40-40 120-50 180-70 70-22 130-20 200-40 60-17 110-12 160-30v30c-50 16-100 16-160 32-70 18-130 20-200 42-60 18-120 26-150 36Z"
+            fill="#b7d8ee"
+            opacity=".9"
+          />
+          <g fill="#24492b">
+            <path d="M40 260 62 196 84 260Z" />
+            <path d="M80 260 106 180 132 260Z" />
+            <path d="M128 260 148 206 168 260Z" />
+            <path d="M980 260 1004 190 1028 260Z" />
+            <path d="M1030 260 1060 170 1090 260Z" />
+            <path d="M1090 260 1112 200 1134 260Z" />
+            <path d="M1140 260 1166 184 1192 260Z" />
+          </g>
+        </svg>
+      </template>
       <div class="banner-shade" aria-hidden="true"></div>
       <div class="banner-text">
         <h1 class="banner-title">{title}</h1>

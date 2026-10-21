@@ -12,7 +12,9 @@ export default class AbcHopeHero extends LightningElement {
     "Help give children the tools to learn, grow and build a brighter tomorrow.";
   @api ctaLabel = "Donate Now";
   @api ctaPath = "/donate";
-  @api backgroundImageUrl;
+  @api backgroundImageUrl =
+    "https://images.unsplash.com/photo-1606916693216-69bd7e1cf2fa?auto=format&fit=crop&w=2000&q=80";
+  @api imageCredit = "Photo: Christian Bowen / Unsplash";
   @api benefits =
     "More Learning Opportunities,Stronger Communities,Brighter Futures";
   @api dashboardPath = "/dashboard";
@@ -32,6 +34,10 @@ export default class AbcHopeHero extends LightningElement {
       ? `?src=${encodeURIComponent(this.sourceCode)}`
       : "";
     return `${basePath || ""}${path}${query}`;
+  }
+
+  get heroClass() {
+    return this.backgroundImageUrl ? "hero hero_photo" : "hero";
   }
 
   get isSignedIn() {

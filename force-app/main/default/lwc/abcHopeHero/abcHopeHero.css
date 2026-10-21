@@ -172,3 +172,49 @@
     justify-items: start;
   }
 }
+
+/* Photo mode: children and tree sit left of centre, so the copy moves right over the fireplace. */
+.hero_photo {
+  justify-content: flex-end;
+}
+.hero_photo .photo {
+  object-position: 30% 55%;
+}
+.hero_photo .shade {
+  background: linear-gradient(
+    270deg,
+    rgba(20, 10, 8, 0.88) 0%,
+    rgba(20, 10, 8, 0.6) 34%,
+    rgba(20, 10, 8, 0) 60%
+  );
+}
+.credit {
+  position: absolute;
+  left: 14px;
+  bottom: 10px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.75);
+  z-index: 1;
+}
+@media (max-width: 760px) {
+  .hero_photo {
+    justify-content: flex-start;
+  }
+  .hero_photo .photo {
+    object-position: 35% 40%;
+  }
+  .hero_photo .shade {
+    background: linear-gradient(
+      0deg,
+      rgba(20, 10, 8, 0.95) 0%,
+      rgba(20, 10, 8, 0.7) 50%,
+      rgba(20, 10, 8, 0.05) 100%
+    );
+  }
+  .credit {
+    left: auto;
+    right: 12px;
+    top: 10px;
+    bottom: auto;
+  }
+}

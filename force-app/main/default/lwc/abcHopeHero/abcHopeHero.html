@@ -1,8 +1,13 @@
 <template>
   <section class="hero-wrap">
-    <div class="hero">
+    <div class={heroClass}>
       <template lwc:if={backgroundImageUrl}>
-        <img class="photo" src={backgroundImageUrl} alt="" />
+        <img
+          class="photo"
+          src={backgroundImageUrl}
+          alt="Two children in Christmas pyjamas sitting by a decorated tree"
+        />
+        <span class="credit">{imageCredit}</span>
       </template>
       <template lwc:else>
         <svg
