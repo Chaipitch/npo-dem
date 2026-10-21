@@ -1,0 +1,256 @@
+.THIS .slds-button .slds-button_destructive {
+    padding: 8px;
+ 	margin-top: 20px;
+ 	border-radius: 4px;
+}
+
+.THIS .slds-icon {
+ 	fill:#747474;
+}
+
+.THIS .dismiss-button {
+    font-weight:600;
+}
+
+.THIS .slds-form-element__control {
+    padding-top:0px;
+}
+
+.THIS .slds-form-element__label {
+      display : none;
+      visibility : hidden;
+}
+
+.THIS .roundborder {
+    border-radius: 1.25rem 1.25rem 0 0;
+}
+
+.THIS .lastButton {
+    border-radius : 0 15rem 15rem 0 !important;
+}
+
+.THIS .firstButton {
+    border-radius : 15rem 0 0 15rem !important;
+}
+
+.THIS .messaging-textarea
+{
+    resize: none;
+}
+
+.THIS .flex-row {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+}
+
+.THIS .conversation-log-section {
+	border-top: solid 1px rgb(229, 229, 229);
+}
+
+.THIS .scrollable {
+	height: 389px;    
+}
+
+.THIS .toolbar
+{
+    padding-top:12px;
+    padding-bottom:12px;
+}
+
+.THIS.runtime_service_liveagentBaseToolbar.toolbar {
+    display: flex;
+    flex-direction: row;
+    background: rgb(243, 242, 242);
+    padding: 0.25rem;
+    border-top: 1px solid rgb(221, 219, 218);
+    border-left: 1px solid rgb(221, 219, 218);
+    border-right: 1px solid rgb(221, 219, 218);
+}
+.THIS.slds-button-group .slds-button-group-list {
+    display: inline-flex;
+}
+.THIS.runtime_service_liveagentBaseToolbar .toolbarMiddle {
+    flex-grow: 1;
+}
+                                    
+.THIS.runtime_sales_insightsInsightsContainer {
+    border: none;
+    padding-bottom: 2px;
+}
+
+.THIS.runtime_sales_insightsInsightsContainer.SFX_HOME .slds-card__header {
+    padding: 0;
+}
+
+.THIS.runtime_sales_insightsInsightsContainer h2.einstein-logo-hdr {
+    display: inline;
+    width: 100%;
+}
+
+.THIS .runtime_sales_insightsEinsteinHeader.einstein-header-wrapper {
+    background-image: url(/resource/einstein_images/einstein_header_background.svg);
+    background-repeat: repeat-x;
+    background-size: auto 81px;
+    border-radius: .25rem .25rem 0 0;
+    border-color: rgb(221, 219, 218);
+    height: 81px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    position: relative;
+}
+
+.THIS .runtime_sales_insightsEinsteinHeader .einstein-label {
+    padding-left: .75rem;
+    background: transparent;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: rgb(22, 50, 92);
+}
+                                    
+.THIS .runtime_sales_insightsEinsteinHeader .uiImage {
+    padding: .95rem .75rem 0 0;
+    margin-left: auto;
+}
+
+.THIS .predictive-header {
+    font-size: 14px;
+}
+
+                                    
+.THIS .einsteinHolder {                                   
+    display: flex;
+    background-image: url(/img/analytics/einsteindatadiscovery/einstein_header_background.svg),url(/sfsites/c/img/analytics/einsteindatadiscovery/einstein_header_background.svg);
+    background-repeat: no-repeat;
+    background-position: right 0 bottom 6px;
+    background-size: cover;
+    align-items: center;
+}
+                                    
+.THIS.customCardClass > header.slds-card__header.slds-grid {
+    padding-top:0px;
+}
+
+.THIS.slds-grid {
+	margin-top:-22px;
+}
+
+                                    
+.THIS.scrt-button-group-row {
+    margin-inline-start: 0.25rem;
+}
+                                        
+                                        
+.THIS .summary-header {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap-reverse;
+}
+                                        
+.THIS .summary-title{
+    font-weight: bold;
+    padding-bottom: 0.25rem;
+    line-height: 1.2rem;
+}
+                                        
+.THIS .summary-container.collapsed {
+    max-height: 39px;
+    overflow-y: hidden;
+    transition: max-height 0.5s ease-out;
+}
+
+
+.THIS .summary-container {
+    flex: 0 1 auto;
+    overflow-y: scroll;
+    min-height: 39px;
+    max-height: var(--scrt-max-height-expanded);
+    transition: max-height 0.5s ease-out;
+    padding-inline-end: 0.75rem;
+}
+                                                
+.THIS .summary-text {
+    padding-bottom: 0.75rem;
+}
+                                                
+.THIS .issue-section {
+    display: block;
+    padding: 0.75 0;
+    border-top: 1px solid rgb(229, 229, 229);
+}
+                                                
+.THIS .issue-title {
+    font-weight: bold;
+}
+                                                
+.THIS .summary-expanded-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: var(--lwc-spacingXSmall);
+    column-gap: var(--lwc-spacingXSmall);
+    border-top: var(--scrt-content-border);
+    padding-top: var(--lwc-spacingMedium);
+    box-shadow: 0px -6px 12px 6px var(--scrt-background-color);
+    margin-inline-end: var(--lwc-spacingSmall);
+    padding-bottom: var(--lwc-spacingXxSmall);
+}
+                                                                                    
+.THIS .hideSummary {
+	display: none;                                                                                   
+}
+                                                                                    
+.THIS .conversation-scope-notifications-section {
+    z-index: 50;
+    position: absolute;
+    width: 100%;
+    align-items: flex-start;
+	border-radius: 0.5rem;
+    background-color: #e5e5e5;
+	color : #5c5c5c;
+}
+                                    
+.THIS .conversationSummaryColor {                                        
+	color : #5c5c5c;
+	font-weight: 600;
+}
+                                                                                    
+.THIS .feedback-question {
+    display: inline;
+}
+                                                                                    
+.THIS .feedback-button-group {
+    display: inline-flex;
+    min-width: 52px;
+    flex: 1 1 auto;
+}
+                                                                                    
+.THIS .show-less-container {
+    flex: 1 1 auto;
+}
+                                                                                    
+.THIS .slds-float_right {
+    float: inline-end;
+}
+
+.THIS .vote-button {
+	height: 24px;
+}
+
+.THIS .slds-button_icon {
+	color: #0250d9;
+}
+                                                                                    
+.THIS .omniChatMonitor .actionBarArea{
+	padding:5px;
+	border-top:1px solid var(--slds-g-color-neutral-base-80, #c9c9c9);
+	background-color:rgb(242, 242, 242);
+	height:43px
+}

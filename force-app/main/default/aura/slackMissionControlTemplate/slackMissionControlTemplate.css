@@ -1,0 +1,12 @@
+.THIS.slack-mission-control,
+.THIS .slack-mission-control {
+    display: grid;
+    grid-template-columns: 100%;
+    gap: 0.75rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.THIS .slack-mission-control__col {
+    min-width: 0;
+}

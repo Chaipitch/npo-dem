@@ -1,0 +1,30 @@
+.gray-button{
+    color: white;
+    background-color: #c9c9c9;
+}
+
+.slds-text-heading_medium {
+  font-weight: normal; 
+}
+
+.slds-text-heading_large{
+    color: #009ddc;
+    font-weight: normal;
+}
+
+.blue{
+    color:#0176d3;
+    font-weight: normal;
+}
+
+.slds-card__body{
+    height:300px;
+}
+
+.slds-chat-message__text_inbound{
+    background-color: #eeeeee;
+}
+
+div{
+    font-family: 'Salesforce Sans';
+}

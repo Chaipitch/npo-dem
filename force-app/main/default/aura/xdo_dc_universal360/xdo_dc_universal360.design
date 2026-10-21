@@ -1,0 +1,31 @@
+<design:component label="Universal 360 Profile">
+    <design:attribute name="backgroundColor" label="Card Background Color" default="#067AA8" />
+    <design:attribute name="overrideBackground" label="Override Background Image"
+        description="Use any image URL. Image size should be 314 x 507px. This overrides the background color attribute." />
+    <design:attribute name="inverseIconColors" label="Inverse Icon &amp; Text Color" default="true" description="Use this for dark background colors"/>
+    <design:attribute name="reverseColor"  label="Reverse Progressbar Color" default="false"  />
+
+    <!-- Column design! -->
+    <design:attribute name="twoColumn" label="Displays Section 2 and 3 in two columns" default="true" />
+     
+
+    <!-- Progress Bars -->
+    <design:attribute name="dynamicProgressBar" label="Red/Yellow/Green Progress Bar" default="true"
+        description="Check for dynamic progress bar colors based on thresholds, uncheck for solid color" />
+    <design:attribute name="threshold1" label="Lower Threshold" default="30" />
+    <design:attribute name="threshold2" label="Upper Threshold" default="80" />
+
+
+     <!-- Which solutions power this data? -->
+     <design:attribute name="Analytics" label="Display Analytics Footer Icon" default="true" />
+     <design:attribute name="Commerce" label="Display Commerce Footer Icon" default="true" />
+     <design:attribute name="Marketing" label="Display Marketing Footer Icon" default="true" />
+     <design:attribute name="Mulesoft" label="Display Mulesoft Footer Icon" default="true" />
+     <design:attribute name="Sales" label="Display Sales Footer Icon" default="true" />
+     <design:attribute name="Service" label="Display Service Footer Icon" default="true" />
+     <design:attribute name="SageMaker" label="Display SageMaker Footer Icon" default="true" />
+     <design:attribute name="Snowflake" label="Display Snowflake Footer Icon" default="true" />
+     <design:attribute name="displayPencil" label="Display Pencil Icon to edit U360 Config" default="true" />
+
+     
+</design:component>

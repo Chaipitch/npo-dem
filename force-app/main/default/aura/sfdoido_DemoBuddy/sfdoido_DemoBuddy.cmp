@@ -1,0 +1,4 @@
+<aura:component implements="lightning:utilityItem,force:lightningQuickAction">
+    <aura:attribute name="AppURL" type="String" access="Global"></aura:attribute>
+    <iframe src="{!v.AppURL}" height="100%" width="100%"></iframe>
+</aura:component>

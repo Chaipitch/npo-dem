@@ -1,0 +1,180 @@
+<template>
+    <lightning-card title="Process Gift Tributes" icon-name="standard:gift_tribute">
+        
+        <div slot="actions">
+            <lightning-button-icon 
+                icon-name="utility:refresh" 
+                variant="border-filled" 
+                alternative-text="Reload Transaction" 
+                title="Reload Transaction"
+                onclick={fetchTransaction}>
+            </lightning-button-icon>
+        </div>
+
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            
+            <template if:true={parentTransaction}>
+                <div class="slds-text-color_success slds-m-bottom_medium">
+                    <lightning-icon icon-name="utility:success" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    <strong>Linked to recent Gift Transaction</strong>
+                </div>
+            </template>
+            <template if:false={parentTransaction}>
+                <div class="slds-text-color_error slds-m-bottom_medium">
+                    <lightning-icon icon-name="utility:warning" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    <strong>No recent Gift Transaction found.</strong>
+                </div>
+            </template>
+
+            <template for:each={tributes} for:item="tribute" for:index="index">
+                <div key={tribute.key} class="slds-box slds-theme_shade slds-m-bottom_medium">
+                    <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                        <h3 class="slds-text-heading_small">Tribute Gift #{tribute.rowNumber}</h3>
+                        <lightning-button-icon 
+                            if:true={index} 
+                            icon-name="utility:delete" 
+                            variant="bare" 
+                            alternative-text="Remove Tribute" 
+                            title="Remove"
+                            data-index={index}
+                            onclick={removeTributeRow}>
+                        </lightning-button-icon>
+                    </div>
+
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-combobox
+                                label="Tribute Type"
+                                value={tribute.TributeType}
+                                options={tributeTypeValues}
+                                data-index={index}
+                                data-field="TributeType"
+                                onchange={handleFieldChange}>
+                            </lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2"></div>
+
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-record-picker
+                                label="Honoree Contact (Person Account)"
+                                object-api-name="Account" 
+                                value={tribute.HonoreeContactId}
+                                data-index={index}
+                                data-field="HonoreeContactId"
+                                onchange={handleLookupChange}>
+                            </lightning-record-picker>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <template if:false={tribute.hasHonoreeContact}>
+                                <lightning-input
+                                    label="Honoree Name"
+                                    value={tribute.HonoreeName}
+                                    data-index={index}
+                                    data-field="HonoreeName"
+                                    onchange={handleFieldChange}>
+                                </lightning-input>
+                            </template>
+                        </div>
+
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-record-picker
+                                label="Notification Contact (Person Account)"
+                                object-api-name="Account"
+                                value={tribute.NotificationContactId}
+                                data-index={index}
+                                data-field="NotificationContactId"
+                                onchange={handleLookupChange}>
+                            </lightning-record-picker>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <template if:false={tribute.hasNotificationContact}>
+                                <lightning-input
+                                    label="Notification Contact Name"
+                                    value={tribute.NotificationContactName}
+                                    data-index={index}
+                                    data-field="NotificationContactName"
+                                    onchange={handleFieldChange}>
+                                </lightning-input>
+                            </template>
+                        </div>
+
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input
+                                type="date"
+                                label="Notification Date"
+                                value={tribute.NotificationDate}
+                                data-index={index}
+                                data-field="NotificationDate"
+                                onchange={handleFieldChange}>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-combobox
+                                label="Notification Channel"
+                                value={tribute.NotificationChannel}
+                                options={notificationChannelValues}
+                                data-index={index}
+                                data-field="NotificationChannel"
+                                onchange={handleFieldChange}>
+                            </lightning-combobox>
+                        </div>
+
+                        <template if:false={tribute.hasNotificationContact}>
+                            <div class="slds-col slds-size_1-of-1">
+                                <lightning-input
+                                    type="email"
+                                    label="Notification Email"
+                                    value={tribute.NotificationEmail}
+                                    data-index={index}
+                                    data-field="NotificationEmail"
+                                    onchange={handleFieldChange}>
+                                </lightning-input>
+                            </div>
+                        </template>
+
+                        <div class="slds-col slds-size_1-of-1">
+                            <lightning-textarea
+                                label="Notification Information"
+                                value={tribute.NotificationInfo}
+                                data-index={index}
+                                data-field="NotificationInfo"
+                                onchange={handleFieldChange}>
+                            </lightning-textarea>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1">
+                            <lightning-textarea
+                                label="Notification Message"
+                                value={tribute.NotificationMessage}
+                                data-index={index}
+                                data-field="NotificationMessage"
+                                onchange={handleFieldChange}>
+                            </lightning-textarea>
+                        </div>
+
+                    </div>
+                </div>
+            </template>
+
+            <div class="slds-grid slds-grid_align-center slds-m-top_medium">
+                <lightning-button 
+                    label="Add Another Tribute" 
+                    icon-name="utility:add" 
+                    onclick={addTributeRow} 
+                    class="slds-m-right_small">
+                </lightning-button>
+                
+                <lightning-button 
+                    variant="brand" 
+                    label="Create Tributes" 
+                    onclick={handleSave}
+                    disabled={isProcessing}>
+                </lightning-button>
+            </div>
+
+            <template if:true={isProcessing}>
+                <lightning-spinner alternative-text="Processing" size="medium"></lightning-spinner>
+            </template>
+        </div>
+    </lightning-card>
+</template>

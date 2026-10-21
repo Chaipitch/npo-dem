@@ -1,0 +1,58 @@
+<aura:component implements="force:lightningQuickAction" controller="NGO_MissionControl_UpdateDates">
+    
+    <!-- Attributes -->
+    <aura:attribute name="isProcessing" type="Boolean" default="false"/>
+    <aura:attribute name="isComplete" type="Boolean" default="false"/>
+    <aura:attribute name="message" type="String" default=""/>
+    <aura:attribute name="messageType" type="String" default=""/>
+    
+    <!-- Component Body -->
+    <div class="slds-modal__container">
+        <header class="slds-modal__header">
+            <h2 class="slds-text-heading_medium">Update Records</h2>
+        </header>
+        
+        <div class="slds-modal__content slds-p-around_medium">
+            
+            <aura:if isTrue="{!v.message != ''}">
+                <div class="{!'slds-notify slds-notify_alert slds-theme_' + v.messageType + ' slds-m-bottom_small'}" role="alert">
+                    <span class="slds-assistive-text">{!v.messageType}</span>
+                    <h2>{!v.message}</h2>
+                </div>
+            </aura:if>
+            
+            <div class="slds-text-body_regular slds-m-bottom_medium">
+                <p>This action will update the following records:</p>
+                <ul class="slds-list_dotted slds-m-top_small">
+                    <li>Task (NGO_MissionControl.1) - DueDate to today</li>
+                    <li>Opportunity (NGO_MissionControl.1) - CloseDate to today</li>
+                    <li>ApplicationReview (NGOGrants.19) - DueDate to 3 days from today</li>
+                    <li>App Menu - Reorder applications in predefined sequence</li>
+                    <li>Favorites Menu will be reset to Mission Control hero records</li>
+                </ul>
+            </div>
+            
+        </div>
+        
+        <footer class="slds-modal__footer">
+            <aura:if isTrue="{!v.isComplete}">
+                <lightning:button 
+                    variant="brand" 
+                    label="Finished" 
+                    onclick="{!c.handleFinished}"/>
+                <aura:set attribute="else">
+                    <lightning:button 
+                        variant="neutral" 
+                        label="Cancel" 
+                        onclick="{!c.handleCancel}"/>
+                    <lightning:button 
+                        variant="brand" 
+                        label="Update Records" 
+                        onclick="{!c.handleUpdate}"
+                        disabled="{!v.isProcessing}"/>
+                </aura:set>
+            </aura:if>
+        </footer>
+    </div>
+    
+</aura:component>

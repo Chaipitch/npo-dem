@@ -1,0 +1,91 @@
+.message-block{
+    width: 100%;
+    margin-top: 0.75rem;
+}
+.message-block {
+    position: relative;
+    border-radius: 0.25rem;
+    padding: 0.25rem;
+    transition: background-color 0.2s ease-in-out;
+    font-size: 1rem;
+    flex-grow: 1;
+}
+.message-block_inbound:hover, .message-block_inbound:focus-within {
+    background-color: var(--sds-g-color-neutral-base-95, #f3f3f3);
+    --slds-g-color-palette-neutral-95: rgb(229, 229, 229);
+    flex-grow: 1;
+}
+.slds-chat-listitem_inbound+.slds-chat-listitem_inbound, .slds-chat-listitem_outbound+.slds-chat-listitem_outbound {
+    margin-top: 0.25rem;
+}
+.slds-chat-listitem_inbound.outbound {
+    margin-top: 0.25rem;
+}
+.outbound-wrapper{
+    background: var(--runtime_copilot-base-user-avatar-background-color, var(--slds-g-color-palette-cloud-blue-90, #cfe9fe));
+}
+/* .slds-chat-message {
+    display: flex;
+}
+.slds-chat-message__body {
+    display: flex;
+    flex-direction: column;
+} */
+.slds-chat-message__body{
+    width: -webkit-fill-available;
+}
+/* .slds-chat-message__text_outbound {
+    margin-left: auto;
+    background-color:  rgb(1, 68, 134);
+}
+.slds-chat-message__text_inbound {
+    margin-right: auto;
+    background-color: rgb(243, 243, 243);
+    border-radius: var(--lwc-borderRadiusLarge, 0.5rem) var(--lwc-borderRadiusLarge, 0.5rem) var(--lwc-borderRadiusLarge, 0.5rem) 0;
+    color: var(--slds-g-color-neutral-base-10, var(--lwc-colorTextDefault, rgb(24, 24, 24)));
+} */
+.sds-overrides {
+    background-color: inherit;
+    padding: 0 var(--lwc-spacingXxSmall, 4px);
+    color: var(--slds-g-color-neutral-base-10, #181818);
+    width: 100%;
+}
+.message-full-width {
+    max-width: 100%;
+}
+.dynamic-message {
+    width: 100%;
+    max-width:300px;
+}
+.message-actionable_body{
+    padding-top: 8px;
+}
+/* .message-actionable_body.rich-text-grey {
+    background: #f3f3f3;
+    padding: 5px 15px;
+    border-radius: 5px;
+} */
+.text-container{
+    background-color: var(--slds-g-color-palette-neutral-95, rgb(229, 229, 229));
+    border-radius: var(--lwc-borderRadiusLarge, 8px);
+    padding: var(--lwc-spacingXSmall, 8px);
+    border: 1.5px solid transparent;
+}
+.message-actionable_footer {
+    padding-top: var(--lwc-spacingXSmall, 8px);
+}
+@media only screen 
+  and (min-device-width: 375px) 
+  and (max-device-width: 812px) 
+  and (-webkit-min-device-pixel-ratio: 3)
+  and (orientation: portrait) { 
+    .text-container{
+        background-color: var(--slds-g-color-palette-neutral-100, #ffffff);
+    }
+}
+img.einstein-icon {
+    height: 32px;
+    width: 32px;
+    background-color: #CFE9FE;
+    border-radius: 2.5px;
+}

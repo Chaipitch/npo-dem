@@ -1,0 +1,94 @@
+<template>
+    <div class="card">
+        <!-- Distinct bold banner block -->
+        <div class="banner">
+            <p class="banner-title">{bannerTitle}</p>
+            <p class="banner-note">{bannerNote}</p>
+        </div>
+
+        <!-- Red call-to-action box: enable Demo Mode to hide all enablement cards -->
+        <div class="hidebox">
+            <p class="hidebox-text">
+                <span class="hidebox-lead">To Hide All Enablement:</span>
+                <a
+                    href="#"
+                    class="hidebox-link"
+                    onclick={handleEnableDemoMode}
+                    role="button"
+                    >Enable Demo Mode</a
+                >
+            </p>
+            <p class="hidebox-help">
+                <a href={howtoUrl} target="_blank" rel="noopener noreferrer"
+                    >How to use Demo Mode →</a
+                >
+            </p>
+        </div>
+
+        <!-- IDO card: full value/story content (this project's pages) -->
+        <template if:true={isIdoCard}>
+            <!-- Soundbite + Platform tie-in surfaced at the top -->
+            <p><strong>🗣️ Soundbite:</strong> <em>“{soundbite}”</em></p>
+            <p><strong>⚡ Platform tie-in:</strong> {platformTieIn}</p>
+
+            <p><strong>📍 Where you are:</strong> {orientation}</p>
+            <p><strong>👤 Who you’re speaking as:</strong> {persona}</p>
+            <p><strong>💬 The value story:</strong> {valueStory}</p>
+
+            <p><strong>🧩 Components to call out:</strong></p>
+            <ul>
+                <template for:each={components} for:item="c">
+                    <li key={c.key}><strong>{c.name}</strong> — {c.value}</li>
+                </template>
+            </ul>
+
+            <!-- Neutral callout: custom (non-standard) metadata on this page, grouped by type.
+                 Shown only when the page has any custom pieces. -->
+            <template if:true={hasCustomItems}>
+                <div class="custombox">
+                    <p class="custombox-title">🎨 Custom on this page</p>
+                    <p class="custombox-note">
+                        Custom-built pieces (not standard out-of-the-box Salesforce):
+                    </p>
+                    <template for:each={customGroups} for:item="g">
+                        <div key={g.key} class="custombox-group">
+                            <p class="custombox-group-title">{g.label}</p>
+                            <ul class="custombox-list">
+                                <template for:each={g.items} for:item="it">
+                                    <li key={it.key}>{it.name}</li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </template>
+
+        <!-- Template card: lightweight "from SDO Template" note + contributing brix -->
+        <template if:true={isTemplateCard}>
+            <p class="tmpl-origin">
+                📦 <strong>From the SDO Template</strong> — this page ships with the base
+                demo org (the SDO), not built by the Nonprofit IDO project.
+            </p>
+            <template if:true={hasBrix}>
+                <p class="custombox-group-title">Possibly contributed by</p>
+                <ul class="custombox-list">
+                    <template for:each={brixList} for:item="b">
+                        <li key={b.key}>{b.name}</li>
+                    </template>
+                </ul>
+                <p class="tmpl-note">
+                    For troubleshooting: if this page misbehaves, these are the brix to
+                    check. Attribution is by page-name match and may list more than one
+                    candidate.
+                </p>
+            </template>
+            <template if:false={hasBrix}>
+                <p class="tmpl-note">
+                    No contributing brix matched — likely a standard/licensed platform
+                    page that ships with the org.
+                </p>
+            </template>
+        </template>
+    </div>
+</template>

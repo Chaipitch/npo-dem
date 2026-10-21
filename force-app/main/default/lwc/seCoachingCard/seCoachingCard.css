@@ -1,0 +1,126 @@
+.card {
+    border: 1px solid #c9c9c9;
+    border-left: 6px solid #0176d3;
+    background: #f3f9ff;
+    padding: 12px 16px;
+    border-radius: 6px;
+}
+
+.banner {
+    background: #0176d3;
+    color: #ffffff;
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+
+.banner-title {
+    font-size: 16px;
+    color: #ffffff;
+    font-weight: 700;
+    margin: 0;
+}
+
+.banner-note {
+    font-size: 12px;
+    color: #ffffff;
+    font-weight: 700;
+    margin: 4px 0 0 0;
+}
+
+.hidebox {
+    border: 2px solid #ba0517;
+    background: #fef1ee;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+}
+
+.hidebox-text {
+    color: #ba0517;
+    margin: 0;
+}
+
+.hidebox-lead {
+    font-weight: 400;
+    font-style: italic;
+}
+
+.hidebox-link {
+    color: #ba0517;
+    text-decoration: underline;
+    font-weight: 700;
+    font-style: normal;
+    cursor: pointer;
+}
+
+.hidebox-help {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+}
+
+.card ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.card li {
+    margin-bottom: 4px;
+}
+
+/* Neutral, low-contrast callout for custom components present on the page */
+.custombox {
+    background: #f4f2ef;
+    border: 1px solid #d8d3cc;
+    border-left: 4px solid #a39b8f;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-top: 16px;
+}
+
+.custombox-title {
+    color: #514f4a;
+    font-weight: 700;
+    margin: 0;
+}
+
+.custombox-note {
+    color: #706e6b;
+    font-size: 12px;
+    margin: 2px 0 6px 0;
+}
+
+.custombox-group {
+    margin-top: 6px;
+}
+
+.custombox-group-title {
+    color: #706e6b;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0;
+}
+
+.custombox-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.custombox-list li {
+    color: #514f4a;
+    margin-bottom: 2px;
+}
+
+/* Template ("from SDO Template") card variant */
+.tmpl-origin {
+    margin: 0 0 8px 0;
+}
+
+.tmpl-note {
+    color: #706e6b;
+    font-size: 12px;
+    font-style: italic;
+    margin: 4px 0 0 0;
+}

@@ -1,0 +1,69 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global">
+
+    <aura:attribute name="conversationEntry" type="AI_Agent_Conversation_Entry__c"/> 
+    <aura:attribute name="contactName" type="String" />
+    <aura:attribute name="userAgentName" type="String" />
+    
+    <aura:if isTrue="{!v.conversationEntry.Type__c == 'Speech'}">
+        <!-- CUSTOMER -->
+        <aura:if isTrue="{!v.conversationEntry.Spoken_By__c == 'Customer'}">
+            <li class="slds-chat-listitem slds-chat-listitem_inbound">
+                <div class="slds-chat-message">
+                    <div class="slds-chat-message__body">
+                        <div class="slds-chat-message__text slds-chat-message__text_inbound">
+                            <span>{!v.conversationEntry.Transcript__c}</span>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li class="slds-chat-listitem slds-chat-listitem_inbound">
+                <div class="slds-chat-message__meta" aria-label="{!'said ' + v.contactName}">{!v.contactName} • <lightning:formattedDateTime value="{!v.conversationEntry.Entry_Time__c}" year="numeric" month="numeric" day="numeric" hour="2-digit"
+                                 minute="2-digit" timeZoneName="short" hour12="true" /></div>
+            </li>
+        </aura:if>
+        <!-- AGENT -->
+        <aura:if isTrue="{!v.conversationEntry.Spoken_By__c == 'Agent'}">
+            <li class="slds-chat-listitem slds-chat-listitem_outbound">
+                <div class="slds-chat-message">                                                        
+                    <div class="slds-chat-message__body">
+                        <div class="slds-chat-message__text slds-chat-message__text_outbound">
+                            <span>{!v.conversationEntry.Transcript__c}</span>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li class="slds-chat-listitem slds-chat-listitem_outbound">
+                <div class="slds-chat-message__meta" aria-label="{!'said ' + v.userAgentName}">{!v.userAgentName} • <lightning:formattedDateTime value="{!v.conversationEntry.Entry_Time__c}" year="numeric" month="numeric" day="numeric" hour="2-digit"
+                                                                                                                                                 minute="2-digit" timeZoneName="short" hour12="true" /></div>
+            </li>
+        </aura:if> 
+        <!-- BOT -->
+        <aura:if isTrue="{!v.conversationEntry.Spoken_By__c == 'Bot'}">
+            <li class="slds-chat-listitem slds-chat-listitem_outbound">
+                <div class="slds-chat-message">                                                        
+                    <div class="slds-chat-message__body">
+                        <div class="slds-chat-message__text slds-chat-message__text_outbound" style="background-color: #747474" >
+                            <span>{!v.conversationEntry.Transcript__c}</span>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li class="slds-chat-listitem slds-chat-listitem_outbound">
+                <div class="slds-chat-message__meta" aria-label="{!'said ' + v.userAgentName}">{!v.userAgentName} • <lightning:formattedDateTime value="{!v.conversationEntry.Entry_Time__c}" year="numeric" month="numeric" day="numeric" hour="2-digit"
+                                                                                                                                                 minute="2-digit" timeZoneName="short" hour12="true" /></div>
+            </li>
+        </aura:if>
+    </aura:if>
+    <aura:if isTrue="{!v.conversationEntry.Type__c == 'Participant Change'}">
+        <li class="slds-chat-listitem slds-chat-listitem_event">
+            <div class="slds-chat-event">
+                <div class="slds-chat-event__body">
+                    <span class="slds-icon_container slds-icon-utility-change_owner slds-chat-icon">
+                        <lightning:icon iconName="utility:change_owner" size="x-small"></lightning:icon>
+                    </span>
+                    <span class="slds-rich-text-editor__output">{!v.conversationEntry.Transcript__c}</span>
+                </div>
+            </div>
+        </li>
+    </aura:if>
+</aura:component>

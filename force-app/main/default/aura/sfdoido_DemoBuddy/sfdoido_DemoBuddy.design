@@ -1,0 +1,4 @@
+<design:component label="DemoBuddy">
+   	<design:attribute name="AppURL" label="App URL"
+                      description="Please provide the URL to the Invision board that this app should point to."></design:attribute>
+</design:component>

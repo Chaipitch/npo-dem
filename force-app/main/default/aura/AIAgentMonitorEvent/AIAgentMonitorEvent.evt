@@ -1,0 +1,4 @@
+<aura:event type="APPLICATION" description="Sends messages from the monitoring component to the VF page">
+    <aura:attribute name="messageType" type="String" />
+    <aura:attribute name="conversationId" type="String" />
+</aura:event>

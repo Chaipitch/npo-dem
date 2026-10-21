@@ -1,0 +1,5 @@
+<design:component label="Slack Mission Control">
+    <flexipage:template>
+        <flexipage:region name="center" defaultWidth="LARGE"/>
+    </flexipage:template>
+</design:component>

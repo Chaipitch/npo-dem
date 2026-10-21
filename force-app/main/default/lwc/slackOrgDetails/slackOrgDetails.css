@@ -1,0 +1,12 @@
+:host {
+    display: block;
+    background-color: #f3f4f6;
+    padding: 0.5rem;
+    --slds-c-button-text-color: #4a154b;
+    --slds-g-color-on-surface-3: #4a154b;
+}
+
+.disconnect-spinner {
+    width: 1.5rem;
+    height: 1.5rem;
+}

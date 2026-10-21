@@ -1,0 +1,13 @@
+<aura:component implements="lightning:appHomeTemplate" description="Slack Mission Control App Page template">
+    <aura:attribute name="center" type="Aura.Component[]" access="GLOBAL"/>
+
+    <aura:html tag="style">
+        app_flexipage-header { display: none !important; }
+    </aura:html>
+
+    <div class="slack-mission-control">
+        <div class="slack-mission-control__col slack-mission-control__col--center">
+            {!v.center}
+        </div>
+    </div>
+</aura:component>

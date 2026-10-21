@@ -1,0 +1,32 @@
+<template>
+    <div class="demo-mode-toggle slds-p-around_medium">
+        <!-- Status Section -->
+        <div class="slds-text-align_center slds-m-bottom_medium">
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </template>
+
+            <template if:false={isLoading}>
+                <p class="slds-text-heading_medium">{statusMessage}</p>
+            </template>
+        </div>
+
+        <!-- Action Section -->
+        <template if:false={isLoading}>
+            <div class="slds-text-align_center">
+                <lightning-button
+                    variant={buttonVariant}
+                    label={buttonLabel}
+                    onclick={handleToggle}
+                    disabled={isSaving}
+                ></lightning-button>
+            </div>
+
+            <template if:true={isSaving}>
+                <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small slds-text-align_center">
+                    Applying changes… the page will refresh automatically once they finish processing.
+                </p>
+            </template>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="uuid-2bddb953-63fd-4b14-a11a-07d108578b35" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" width="449" height="151.6" viewBox="0 0 449 151.6">
+  <g id="uuid-193071a5-b3f2-49d2-b574-127dcc957d5d" data-name="Layer 1-2">
+    <g>
+      <g>
+        <path d="M130.2,149.9v.8c0,.4-.5.9-4.7.9h-51c-4.3,0-4.8-.6-4.7-.9v-.8l.7.3h58.9l.8-.3h0Z" fill="none" stroke-width="0"/>
+        <path d="M130.2,149.6v.8c0,.4-.5.9-4.7.9h-51c-4.3,0-4.8-.6-4.7-.9v-.8l.7.3h58.9l.8-.3h0Z" fill="#c6c7ca" fill-rule="evenodd" stroke-width="0"/>
+        <path id="uuid-00bb5f0f-53bb-4f71-b3c7-2379fc32bc55" data-name="d" d="M122.5,146.3c1.1,1.6,7.4,2.9,7.4,2.9,0,0,1.7,1.2-4.5,1.2h-51c-6.2,0-4.5-1.2-4.5-1.2,0,0,6.4-1.3,7.4-2.9s2.9-23.3,2.9-23.3h39.4s1.8,21.6,2.9,23.3h0Z" fill="#d8d8d8" fill-rule="evenodd" stroke-width="0"/>
+      </g>
+      <g>
+        <rect id="uuid-102b7842-9a2c-4f37-8537-0ff1841f71ae" data-name="b" width="200" height="123.6" rx="3.9" ry="3.9" fill="#000" stroke-width="0"/>
+        <rect id="uuid-ec2e7af2-69a4-46fb-bcd1-76de5049aef3" data-name="b-2" width="200" height="123.6" rx="3.9" ry="3.9" fill="#e1e1e1" stroke-width="0"/>
+        <rect x="6.7" y="8.7" width="186.5" height="104.2" fill="#fff" stroke-width="0"/>
+      </g>
+      <g>
+        <rect x="11.7" y="14.2" width="130.4" height="93.1" fill="#54698d" stroke-width="0"/>
+        <rect x="147.5" y="14.2" width="40.6" height="93.1" fill="#54698d" stroke-width="0"/>
+        <rect x="141.9" y="14.2" width="8" height="93.1" fill="#9faab5" stroke-width="0"/>
+      </g>
+      <g>
+        <path d="M379.2,149.9v.8c0,.4-.5.9-4.7.9h-51c-4.3,0-4.8-.6-4.7-.9v-.8l.7.3h58.9l.8-.3h0Z" fill="none" stroke-width="0"/>
+        <path d="M379.2,149.6v.8c0,.4-.5.9-4.7.9h-51c-4.3,0-4.8-.6-4.7-.9v-.8l.7.3h58.9l.8-.3h0Z" fill="#c6c7ca" fill-rule="evenodd" stroke-width="0"/>
+        <path id="uuid-6e1ca97f-d490-4525-85ee-91eb699ed13f" data-name="c" d="M371.5,146.3c1.1,1.6,7.4,2.9,7.4,2.9,0,0,1.7,1.2-4.5,1.2h-51c-6.2,0-4.5-1.2-4.5-1.2,0,0,6.4-1.3,7.4-2.9s2.9-23.3,2.9-23.3h39.4s1.8,21.6,2.9,23.3h0Z" fill="#d8d8d8" fill-rule="evenodd" stroke-width="0"/>
+      </g>
+      <g>
+        <rect id="uuid-2ffbaa82-cbff-482f-86ef-38097cc45506" data-name="a" x="249" width="200" height="123.6" rx="3.9" ry="3.9" fill="#000" stroke-width="0"/>
+        <rect id="uuid-de592bc9-d8cc-441a-ac3f-09a22fcd51c9" data-name="a-2" x="249" width="200" height="123.6" rx="3.9" ry="3.9" fill="#e1e1e1" stroke-width="0"/>
+        <rect x="255.7" y="8.7" width="186.5" height="104.2" fill="#fff" stroke-width="0"/>
+      </g>
+      <g>
+        <rect x="260.7" y="14.2" width="170.8" height="93.1" fill="#54698d" stroke-width="0"/>
+        <g>
+          <rect x="429.94" y="14.2" width="7.8" height="93.1" fill="#9faab5" stroke-width="0"/>
+          <path d="M431.69,61.5l3.31-2.1c.19-.2.49,0,.68.3v4.6c0,.3-.19.6-.49.6s-.19,0-.19,0l-3.31-2.1c-.19-.2-.29-.5-.19-.8,0-.1.1-.2.19-.3v-.2Z" fill="#fff" fill-rule="evenodd" stroke-width="0"/>
+        </g>
+      </g>
+    </g>
+    <path d="M147.83,61.21l-3.4,1.62c-.2.1-.5,0-.7-.19v-3.44c0-.29.2-.48.5-.48s.2,0,.2,0l3.4,1.62c.2.1.3.38.2.67,0,0-.1.19-.2.19h0Z" fill="#fff" fill-rule="evenodd" stroke-width="0"/>
+    <polygon points="55.95 107.3 53.9 107.3 53.9 14.2 56 14.2 55.95 107.3" fill="#fff" fill-rule="evenodd" stroke-width="0"/>
+    <polygon points="319.79 107.35 317.74 107.35 317.74 14.25 319.84 14.25 319.79 107.35" fill="#fff" fill-rule="evenodd" stroke-width="0"/>
+  </g>
+</svg>

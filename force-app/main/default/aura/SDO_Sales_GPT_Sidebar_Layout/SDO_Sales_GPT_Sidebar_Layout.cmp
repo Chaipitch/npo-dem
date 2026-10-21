@@ -1,0 +1,30 @@
+<aura:component implements="lightning:recordHomeTemplate" description="Main column and collapsible right sidebar, no header.">
+    <aura:attribute name="main" type="Aura.Component[]" description="Main region"/>
+    <aura:attribute name="sidebar" type="Aura.Component[]" description="Collapsible sidebar region"/>
+    <aura:attribute name="isSidebarCollapsed" type="Boolean" access="PRIVATE" default="false" />
+    
+    <div class="main-container">
+        
+        <lightning:layout class="layout-container">
+            <lightning:layoutItem flexibility="grow" class="main-section">
+                <c:SDO_Sales_GPT_EinsteinIcon isSidebarCollapsed="{!v.isSidebarCollapsed}"/>
+                
+                <div class="main-content">
+                	{!v.main}
+                    </div>
+            </lightning:layoutItem>
+            <lightning:layoutItem flexibility="no-grow">
+                
+                <div class="toggleBar">
+                    <lightning:buttonIcon onclick ="{!c.toggleSection}"
+                                          size="xx-small" variant="bare"
+                                          iconName="{! v.isSidebarCollapsed ? 'utility:left' : 'utility:right' }" 
+                                          alternativeText="{! v.isSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar' }" />
+                </div>
+            </lightning:layoutItem>
+            <lightning:layoutItem class="{! v.isSidebarCollapsed ? 'side-panel collapsed' : 'side-panel expanded einstein-sidebar' }" flexibility="no-grow">
+                {!v.sidebar}
+            </lightning:layoutItem>
+        </lightning:layout>
+    </div>
+</aura:component>

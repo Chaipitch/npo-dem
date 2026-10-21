@@ -1,0 +1,179 @@
+<!-- sldsValidatorIgnore -->
+<template>
+    <template if:true={overlayMode}>
+        <div class={einsteinMenuIconClass} onclick={toggleOverlay} style={iconStyling}>
+            <template if:false={mobileMode}>
+                <lightning-icon size="small" class="blueIcon" src={agentforce}
+                    alternative-text="Agentforce"></lightning-icon>
+            </template>
+        </div>
+    </template>
+    <!-- <div class="sidebar right" style={componentStyle}> -->
+    <div class={containerClass} style={overlayWidth} iscontainer="true" aura:id="scrollableDiv">
+        <template if:true={overlayMode}>
+            <template if:false={mobileMode}>
+                <div class="toggleBar" onclick={toggleOverlay}>
+                    <lightning-button-icon icon-name={panelToggleIconClass} size="xx-small" variant="bare"
+                        alternative-text="View More">
+                    </lightning-button-icon>
+
+                </div>
+            </template>
+        </template>
+        <div class="header">
+            <!-- <lightning-icon src={agentforce} alternative-text="Agentforce" size="small"
+                title="Agentforce" class="agentforce-icon"></lightning-icon> -->
+            <h2>{headerTitle}</h2>
+            <lightning-icon icon-name="utility:info" alternative-text="Einstein Info" size="x-small"
+                class="slds-var-m-left_x-small" title="Add some quip doc link here"></lightning-icon>
+            <!-- <lightning-badge label="Beta" class="slds-var-m-left_x-small"></lightning-badge> -->
+            <template if:true={overlayMode}>
+                <template if:false={mobileMode}>
+                    <div class="icons-right">
+                        <lightning-icon icon-name="utility:pinned" alternative-text="Pinned!" title="Pinned"
+                            class="pinned-button-right" size="x-small"></lightning-icon>
+                        <lightning-button-icon variant="bare" icon-name="utility:close" alternative-text="Close"
+                            class="slds-var-m-horizontal_x-small" title="Close"
+                            onclick={toggleOverlay}></lightning-button-icon>
+                    </div>
+                </template>
+            </template>
+        </div>
+        <div class="content">
+            <template if:true={showWelcomePanel}>
+                <div lwc-fsdkqfscv9="" class="welcome-container" style={welcomeBackground}>
+                    <div lwc-fsdkqfscv9="" class="welcome-wrapper">
+                        <img class="copilot-welcome-image" src={einsteinWelcomeImageUrl} alt="copilot-welcome-image">
+                        <p lwc-fsdkqfscv9="" class="copilot-welcome-heading" tabindex="0">Let's chat!</p>
+                        <template if:true={showWelcomeLoading}>
+                            <section class="copilot-loading">
+                                <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+                            </section>
+                        </template>
+                        <template if:false={showWelcomeLoading}>
+                            <section class="copilot-welcome-text">
+                                <div lwc-7hr770bl8cm="" class="welcome-message-text">
+                                    <lightning-formatted-rich-text value={einsteinGreeting}
+                                        class="text-none slds-rich-text-editor__output"></lightning-formatted-rich-text>
+                                    <p lwc-7hr770bl8cm=""></p>
+                                </div>
+                            </section>
+                            <section class="slds-grid slds-grid_vertical recommendations-wrapper">
+                                <div class="view-component-container">
+                                    <section class="slds-grid slds-grid_vertical slds-row-gap">
+                                        <template if:true={showSuggestedAction1}>
+                                            <div class="slds-col">
+                                                <div class="recommendation-card slds-box"
+                                                    data-value={suggestAction1.value} data-label={suggestAction1.label}
+                                                    onclick={suggestedActionClick}>
+                                                    <div class="recommendation-card-body">
+                                                        <div class="recommendation-text">
+                                                            <p>
+                                                                <lightning-formatted-rich-text
+                                                                    value={suggestAction1.label}
+                                                                    class="text-none slds-rich-text-editor__output"></lightning-formatted-rich-text>
+                                                            </p>
+                                                        </div>
+                                                        <lightning-icon class="recommendation-send-icon"
+                                                            icon-name="utility:send" size="x-small"></lightning-icon>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template if:true={showSuggestedAction2}>
+                                            <div class="slds-col">
+                                                <div class="recommendation-card slds-box"
+                                                    data-value={suggestAction2.value} data-label={suggestAction2.label}
+                                                    onclick={suggestedActionClick}>
+                                                    <div class="recommendation-card-body">
+                                                        <div class="recommendation-text">
+                                                            <p>
+                                                                <lightning-formatted-rich-text
+                                                                    value={suggestAction2.label}
+                                                                    class="text-none slds-rich-text-editor__output"></lightning-formatted-rich-text>
+                                                            </p>
+                                                        </div>
+                                                        <lightning-icon class="recommendation-send-icon"
+                                                            icon-name="utility:send" size="x-small"></lightning-icon>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </section>
+                                </div>
+                            </section>
+                        </template>
+                    </div>
+                </div>
+            </template>
+            <template if:true={showMessagePanel}>
+                <div class="message-container">
+
+                    <c-sdo-sales-gpt-bot-message message={einsteinGreeting}></c-sdo-sales-gpt-bot-message>
+                    <template for:each={messages} for:item="message" for:index="i">
+                        <div key={message.i} class={message.class}>
+                            <c-sdo-sales-gpt-bot-message message={message}></c-sdo-sales-gpt-bot-message>
+                        </div>
+                    </template>
+
+                    <article lwc:if={flowVisible} class="slds-card slds-card_narrow slds-m-horizontal_medium slds-m-bottom_medium">
+                        <div class="slds-card__body slds-card__body_inner">
+                            <lightning-flow flow-api-name={flowAPIName} flow-finish-behavior="NONE" onstatuschange={handleStatusChange}
+                                flow-input-variables={inputVariables}>
+                            </lightning-flow>
+                        </div>
+                    </article>
+
+                    <template if:true={showLoadingPanel}>
+                        <!-- <div class="spinner-container slds-size_1-of-1"> -->
+                        <!-- <lightning-spinner size="small"></lightning-spinner> -->
+                        <c-sdo-sales-gpt-loading></c-sdo-sales-gpt-loading>
+                        <!-- </div> -->
+                    </template>
+                </div>
+            </template>
+        </div>
+        <div class="footerPrompt">
+            <div class="input-box">
+                <div class="slds-grid slds-wrap">
+                    <template if:true={showMessagePanel}>
+                        <template if:true={showSuggestedAction1}>
+                            <div class="slds-size_1-of-1">
+                                <div class="slds-text-body_regular">Suggested Actions</div>
+                            </div>
+                            <div class="slds-size_1-of-1 slds-p-vertical_medium">
+                                <template if:true={showSuggestedAction2}>
+                                    <lightning-button label={suggestAction2.label} data-value={suggestAction2.value}
+                                        data-label={suggestAction2.label} title="Suggested Action 1"
+                                        onclick={suggestedActionClick}
+                                        class="slds-float_right slds-m-right_x-small"></lightning-button>
+                                </template>
+                                <template if:true={showSuggestedAction1}>
+                                    <lightning-button label={suggestAction1.label} data-value={suggestAction1.value}
+                                        data-label={suggestAction1.label} title="Suggested Action 1"
+                                        onclick={suggestedActionClick}
+                                        class="slds-float_right slds-m-right_x-small"></lightning-button>
+                                </template>
+                            </div>
+                        </template>
+                    </template>
+                    <div class="slds-size_1-of-1">
+                        <textarea class="einstein-text-area" name="einsteinTextArea"
+                            placeholder="Describe your task or ask a question..." onkeypress={handleInputCommit}
+                            data-tracking="true" data-tracking-id={NANOID} data-tracking-dom-event="keypress"
+                            data-tracking-version={VERSION} data-tracking-type="reporting"
+                            data-tracking-event="conversion" data-tracking-action="Einstein Co Pilot Conversation"
+                            data-tracking-delay="10" data-tracking-minutes-saved="2"
+                            data-tracking-condition="event.keyCode === 13">
+                            </textarea>
+                        <lightning-icon size="x-small" class="send-icon" icon-name="utility:send"
+                            onclick={handleCommit}></lightning-icon>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="slds-docked_container">
+        <c-sdo-sales-gpt-docked-email email={emailBody}></c-sdo-sales-gpt-docked-email>
+    </div>
+</template>

@@ -1,0 +1,9 @@
+<apex:page controller="NGO_Base_RecentRecordCTRL" action="{!runEmployment}">
+<apex:pageBlock >
+<apex:pageblocksection >
+<apex:outputText style="font-size:20px"  value="Your update has run and you can close this tab." />
+    <apex:pageBlockSectionItem />
+<apex:image width="20%" value="https://sfdo-ngo-ido.s3.us-east-2.amazonaws.com/Codey_bearhugs.png"/>
+</apex:pageblocksection>
+</apex:pageBlock>
+</apex:page>

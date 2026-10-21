@@ -1,0 +1,61 @@
+.generation-card {
+    /* Input - Inline */
+  
+    box-sizing: border-box;
+  
+    /* Auto layout */
+  
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 8px 4px;
+    gap: 10px;
+    isolation: isolate;
+  
+    /* Foundation/Gray/Neutral-100 */
+  
+    background: #ffffff;
+    /* Foundation/Gray/Neutral-90 */
+  
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+  
+    /* Inside auto layout */
+  
+    flex: none;
+    order: 0;
+    align-self: stretch;
+    flex-grow: 0;
+  }
+  
+  .generation-cancel{
+    font-size: 10px;
+    color:gray
+  }
+
+   
+   .spinner-container{
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    height: 340px;
+  }
+.email-composer {
+  height: 535px;
+  z-index: 99999;
+}
+.slds-docked-composer__body {
+  overflow-x: hidden;
+}
+.email-composer.slds-is-open {
+  z-index: 99999;
+}
+.email-body {
+  /* min-height: 329px; */
+}
+.slds-dropdown-trigger.slds-dropdown-trigger_click.slds-is-open {
+  top: 1px;
+}
+:host {
+  --sds-c-textarea-sizing-min-height: 281px;
+}

@@ -1,0 +1,205 @@
+{
+  "Product_Product2.001": {
+    "External_ID__c": "Product2.001",
+    "ProductDetailImages": ["Battery, High Capacity 1", "Battery, High Capacity2", "Battery, High Capacity 3"],
+    "ProductImages": ["Battery, High Capacity 1", "Battery, High Capacity2"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.002": {
+    "External_ID__c": "Product2.002",
+    "ProductDetailImages": ["Starter Kit"],
+    "ProductImages": ["Starter Kit"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.003": {
+    "External_ID__c": "Product2.003",
+    "ProductDetailImages": ["SDO Service Install"],
+    "ProductImages": ["SDO Service Install"],
+    "Attachments": ["Terms"]
+  },
+  "Product_Product2.004": {
+    "External_ID__c": "Product2.004",
+    "ProductDetailImages": ["Maintenance Contract"],
+    "ProductImages": ["Maintenance Contract"],
+    "Attachments": ["Terms"]
+  },
+  "Product_Product2.005": {
+    "External_ID__c": "Product2.005",
+    "ProductDetailImages": ["Small Turbine 1", "Small Turbine 2", "Small Turbine 3"],
+    "ProductImages": ["Small Turbine 1", "Small Turbine 2"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.006": {
+    "External_ID__c": "Product2.006",
+    "ProductDetailImages": ["Large Turbine 1", "Large Turbine 2", "Large Turbine 3"],
+    "ProductImages": ["Large Turbine 1", "Large Turbine 2"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.007": {
+    "External_ID__c": "Product2.007",
+    "ProductDetailImages": ["Solar Panel 1", "Solar Panel 2", "Solar Panel 3"],
+    "ProductImages": ["Solar Panel 1", "Solar Panel 2"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.008": {
+    "External_ID__c": "Product2.008",
+    "ProductDetailImages": ["Remote Monitoring Service"],
+    "ProductImages": ["Remote Monitoring Service"],
+    "Attachments": ["Terms"]
+  },
+  "Product_Product2.009": {
+    "External_ID__c": "Product2.009",
+    "ProductDetailImages": ["Service Optimization"],
+    "ProductImages": ["Service Optimization"],
+    "Attachments": ["Terms"]
+  },
+  "Product_Product2.010": {
+    "External_ID__c": "Product2.010",
+    "ProductDetailImages": ["Power Inverter 1", "Power Inverter 2", "Power Inverter 3"],
+    "ProductImages": ["Power Inverter 1", "Power Inverter 2"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.012": {
+    "External_ID__c": "Product2.012",
+    "ProductDetailImages": ["Energy Meter 1", "Energy Meter 2", "Energy Meter 3"],
+    "ProductImages": ["Energy Meter 1", "Energy Meter 2"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.016": {
+    "External_ID__c": "Product2.016",
+    "ProductDetailImages": ["Battery, Low Capacity 1", "Battery, Low Capacity 2", "Battery, Low Capacity 3"],
+    "ProductImages": ["Battery, Low Capacity 1", "Battery, Low Capacity 2"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.017": {
+    "External_ID__c": "Product2.017",
+    "ProductDetailImages": ["SDO Onsite Labor"],
+    "ProductImages": ["SDO Onsite Labor"],
+    "Attachments": ["Terms"]
+  },
+  "Product_Product2.018": {
+    "External_ID__c": "Product2.018",
+    "ProductDetailImages": ["Mounting System 4", "Mounting System 1", "Mounting System 2", "Mounting System 3"],
+    "ProductImages": ["Mounting System 4"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.019": {
+    "External_ID__c": "Product2.019",
+    "ProductDetailImages": ["Fuses 1", "Fuses 2"],
+    "ProductImages": ["Fuses 1"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.020": {
+    "External_ID__c": "Product2.020",
+    "ProductDetailImages": ["Connector Cables 1", "Connector Cables 2", "Connector Cables 3", "Connector Cables 4"],
+    "ProductImages": ["Connector Cables 1", "Connector Cables 2"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.021": {
+    "External_ID__c": "Product2.021",
+    "ProductDetailImages": ["Hydraulic Unit"],
+    "ProductImages": ["Hydraulic Unit"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.022": {
+    "External_ID__c": "Product2.022",
+    "ProductDetailImages": ["Yaw 1"],
+    "ProductImages": ["Yaw 1"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.023": {
+    "External_ID__c": "Product2.023",
+    "ProductDetailImages": ["Gearbox 1", "Gearbox 2", "Gearbox 3"],
+    "ProductImages": ["Gearbox 1", "Gearbox 2"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.024": {
+    "External_ID__c": "Product2.024",
+    "ProductDetailImages": ["Turbine Blade 1", "Turbine Blade 2"],
+    "ProductImages": ["Turbine Blade 1", "Turbine Blade 2"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.025": {
+    "External_ID__c": "Product2.025",
+    "ProductDetailImages": ["Solar Panel 1", "Solar Panel 2", "Solar Panel 3"],
+    "ProductImages": ["Solar Panel 1", "Solar Panel 2"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.027": {
+    "External_ID__c": "Product2.027",
+    "ProductDetailImages": ["Service Category"],
+    "ProductImages": ["Service Category"],
+    "Attachments": ["Terms"]
+  },
+  "Product_Product2.029": {
+    "External_ID__c": "Product2.029",
+    "ProductDetailImages": ["Wind Generator 1", "Wind Generator 2", "Wind Generator 3"],
+    "ProductImages": ["Wind Generator 1", "Wind Generator 2"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.053": {
+    "External_ID__c": "Product2.053",
+    "ProductDetailImages": ["Lubricant"],
+    "ProductImages": ["Lubricant"]
+  },
+  "Product_Product2.063": {
+    "External_ID__c": "Product2.063",
+    "ProductDetailImages": ["Maintenance Bundle 1", "Battery, High Capacity 1", "Battery, High Capacity2", "Battery, High Capacity 3", "Power Inverter 1", "Power Inverter 2", "Fuses 1"],
+    "ProductImages": ["Maintenance Bundle 1"],
+    "Attachments": ["Terms"]
+  },
+  "Product_Product2.068": {
+    "External_ID__c": "Product2.068",
+    "ProductDetailImages": ["Cirrus Warranty 1"],
+    "ProductImages": ["Cirrus Warranty 1"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.D2C.004": {
+    "External_ID__c": "Product2.D2C.004",
+    "ProductDetailImages": ["Ultimate Solar Generator 1"],
+    "ProductImages": ["Ultimate Solar Generator 1"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.D2C.007": {
+    "External_ID__c": "Product2.D2C.007",
+    "ProductDetailImages": ["Portalable Solar Power Bank 1", "Portalable Solar Power Bank 2"],
+    "ProductImages": ["Portalable Solar Power Bank 1"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.060": {
+    "External_ID__c": "Product2.060",
+    "ProductDetailImages": ["Energy Storage System 1", "Energy Storage System 2"],
+    "ProductImages": ["Energy Storage System 1", "Energy Storage System 2"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.062": {
+    "External_ID__c": "Product2.062",
+    "ProductDetailImages": ["Solar Panel 1"],
+    "ProductImages": ["Solar Panel 1"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.054-2": {
+    "External_ID__c": "Product2.054-2",
+    "ProductDetailImages": ["Starter Set 1", "Battery, High Capacity 1", "Connector Cables 1", "Fuses 1"],
+    "ProductImages": ["Starter Set 1"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.053-2": {
+    "External_ID__c": "Product2.053-2",
+    "ProductDetailImages": ["Solar EV Charging Station 1", "Solar EV Charging Station 2"],
+    "ProductImages": ["Solar EV Charging Station 1", "Solar EV Charging Station 2"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.061": {
+    "External_ID__c": "Product2.061",
+    "ProductDetailImages": ["SolarMax PowerBox 1", "SolarMax PowerBox 2"],
+    "ProductImages": ["SolarMax PowerBox 1"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  },
+  "Product_Product2.054": {
+    "External_ID__c": "Product2.054",
+    "ProductDetailImages": ["Energy Bundler"],
+    "ProductImages": ["Energy Bundler"],
+    "Attachments": ["User Manual", "Safety Data Sheet"]
+  }
+}

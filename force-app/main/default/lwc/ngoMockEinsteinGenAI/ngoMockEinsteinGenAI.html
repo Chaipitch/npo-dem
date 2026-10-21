@@ -1,0 +1,57 @@
+<template>
+    <lightning-card title={title} icon-name="utility:einstein" style="height:400px; overflow:auto;">
+        <lightning-button-icon icon="utitlty:info" slot="action"></lightning-button-icon>
+        <template if:true={homePage}>
+            <div class="slds-card__body">
+                <img src={homeImg} alt="Description of image" class="image" />
+                <p class="slds-text-heading_medium slds-text-align_center">Summarize Your Data</p>
+                <p class="slds-text-align_center" >Use this component to start summarizing data with relevant information</p>
+            </div>
+            <footer class="slds-card__footer">
+                <lightning-button variant="brand" icon-name="utility:sparkles" label="Generate Summary" class="full-width-button" onclick={handleHomeButtonClick}></lightning-button>
+            </footer>
+        </template>
+        <template if:true={loadingPage}>
+            <div class="slds-card__body slds-text-align_center" style="height:300px; padding-top:140px;">
+                <p class="slds-text-heading_medium  blue ">✦✦✦</p>
+                <br />
+                <h3 class="slds-text-heading_medium slds-text-align_center">Analyzing your request...</h3>
+            </div>
+            <footer class="slds-card__footer">
+                <lightning-button variant="brand" icon-name="utility:sparkles" label="Generate Summary" class="full-width-button gray-button" onclick={handleLoadingButtonClick}></lightning-button>
+            </footer>
+        </template>
+        <template if:true={summaryPage}>
+            <section role="log" class="slds-chat" style="height:300px;">
+                <ul class="slds-chat-list">
+                    <li class="slds-chat-listitem ">
+                        <div class="slds-chat-message">
+                            <div class="slds-chat-message__body">
+                                <div class="slds-chat-message__text slds-chat-message__text_inbound">
+                                    <span>{summary}</span>
+                                <br />
+                                <br />
+                                <br />
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-p-left_x-large slds-col slds-size_4-of-12" > 
+                                        <lightning-button-icon icon-name="utility:dislike" variant="border-filled"></lightning-button-icon><lightning-button-icon icon-name="utility:like" variant="border-filled"></lightning-button-icon>
+                                    </div>
+                                    <div class="slds-col slds-size_5-of-12">
+                                        <lightning-button variant="neutral" label="Copy"></lightning-button><lightning-button variant="neutral" label="Edit"></lightning-button>
+                                    </div>
+                                    <div class="slds-col slds-size_3-of-12" style="align-items:right;">
+                                        <lightning-button variant="brand" label="Save"></lightning-button>
+                                    </div>
+                                </div>
+                                </div>
+                                </div>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+            <footer class="slds-card__footer">
+                <lightning-button variant="brand" icon-name="utility:sparkles" label="Generate Summary" class="full-width-button" onclick={handleSummaryButtonClick}></lightning-button>
+            </footer>
+        </template>
+    </lightning-card>
+</template>

@@ -1,0 +1,152 @@
+.THIS .slds-card{
+    background-repeat: no-repeat !important;
+    background-size: 100% 100%;
+}
+.THIS .customer-image-container{
+    position: relative;
+    display: inline-block;
+}
+
+.THIS .customer-avatar{
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    border: 3px solid rgb(255, 255, 255);
+}
+.THIS .card-pull-margin{
+    margin-top: -1rem;
+    margin-left: -1rem;
+    margin-right: -1rem;  
+}
+.THIS .slds-text-heading_medium_inverse{
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+}
+.THIS .slds-text-heading_medium{
+    color: rgb(74, 74, 74);
+    font-size: 18px;
+}
+.THIS .slds-text-color_inverse{
+    color: rgb(255, 255, 255, 85%);
+    font-size: 14px;
+    font-weight: 300;
+    margin-right: 5px;
+    display: inline-block;
+}
+.THIS .slds-text-color{
+    color: rgb(74, 74, 74, 85%);
+    font-size: 14px;
+    font-weight: 300;
+    margin-right: 5px;
+    display: inline-block;
+}
+.THIS .contact-info_inverse{
+    color: rgb(255, 255, 255);
+    font-size: 14px;
+    font-weight: 400;
+}
+.THIS .contact-info{
+    color: rgb(74, 74, 74);
+    font-size: 14px;
+    font-weight: 400;
+}
+.THIS .slds-icon{
+    width: 20px;
+    margin-right: 20px;
+}
+.THIS .CustomerMetric{
+    margin-bottom: 20px;
+    height: 25px
+}
+.THIS .metricIcon{
+    width: 30px;
+    margin-right: 5px;
+}
+.THIS .icons{
+    width: 15px;
+    margin-right: 5px;
+}
+.THIS .attributes{
+    padding-left: 8.5px;
+    margin-top: 0.3rem;
+    display: flex;
+    align-items: center;
+}
+.THIS .productIcon{
+    width: 28px;
+    padding: 6px;
+}
+.THIS .slds-border_bottom{
+    border-bottom: 1px solid rgba(74, 74, 74, .3) !important;
+}
+.THIS .slds-border_bottom_inverse{
+    border-bottom: 1px solid rgba(255, 255, 255, .3) !important;
+}
+.THIS .progress-bar .slds-progress-bar{
+    width: 88%;
+    
+}
+.THIS .progress-bar_inverse .slds-progress-bar{
+    width: 88%;
+    background-color: rgb(255, 255, 255, 60%)
+}
+.THIS .progress-bar_inverse .slds-progress-bar__value{
+    background-color: rgb(255, 255, 255);
+}
+.THIS .progress-bar-green .slds-progress-bar{
+    width: 88%;
+    
+}
+.THIS .progress-bar-green .slds-progress-bar__value{
+    background: #4bca81;   
+}
+.THIS .progress-bar-yellow .slds-progress-bar{
+    width: 88%;
+   
+}
+.THIS .progress-bar-yellow .slds-progress-bar__value{
+    background: #ffb75d;   
+}
+.THIS .progress-bar-red .slds-progress-bar{
+    width: 88%;
+    
+}
+.THIS .progress-bar-red .slds-progress-bar__value{
+    background: #d4504c; 
+}
+.THIS .tripStatus{
+    
+  background: rgba(0 0 0 / 20%);
+    border-radius: 1.5rem;
+    position: absolute;
+    top: 8px;
+    right: 5px;
+    /*position: relative;
+    top: 1.5rem;
+    left: 1.5rem;*/
+    
+}
+.THIS .status{
+     padding: 0.3rem;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+}
+.THIS .membership{
+    width: 9%;
+    padding: 0.3rem;
+    border: 1px solid white;
+    border-radius: 50%;
+    margin-right: 0.8rem;
+}
+
+.THIS .slds-card__header.slds-grid.header {
+    display: none;
+}
+
+
+
+.THIS .slds-card__footer.navigationBar{
+    display: none;
+}

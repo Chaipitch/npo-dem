@@ -1,0 +1,685 @@
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId,force:appHostable" controller="DataCloud_Universal360Controller" access="global">
+    <aura:attribute name="xdoToolTrackingEventConstants" type="Map"
+    default="{'COMPONENT_NAME': 'xdo_dc_universal360', 'VERSION': 'v1'}"/>
+
+<aura:attribute name="universalInfo" type="object" access="global" />
+    <aura:attribute name="backgroundColor" type="String"  />
+    <aura:attribute name="overrideBackground" type="String" />
+    <aura:attribute name="cardStyle" type="String" />
+    <aura:attribute name="uId" type="String" />
+    <aura:attribute name="recordId" type="String" />
+
+    <aura:attribute name="isLoaded" type="Boolean" default="false"  />
+    <aura:attribute name="inverseIconColors" type="Boolean" />
+    
+    <aura:attribute name="section3" type="Boolean"  />
+    <aura:attribute name="section4" type="Boolean"   />
+    <aura:attribute name="section5" type="Boolean"   />
+    <aura:attribute name="section6" type="Boolean"   />
+    
+    <aura:attribute name="Analytics" type="Boolean"  />
+    <aura:attribute name="Commerce" type="Boolean"  />
+    <aura:attribute name="Marketing" type="Boolean" />
+    <aura:attribute name="Mulesoft" type="Boolean"  />
+    <aura:attribute name="Sales" type="Boolean"  />
+    <aura:attribute name="Service" type="Boolean"  />
+    <aura:attribute name="SageMaker" type="Boolean"  />
+    <aura:attribute name="Snowflake" type="Boolean"  />
+    
+    <aura:attribute name="displayIllustration" type="Boolean" default="true" />
+    
+    <aura:attribute name="dynamicProgressBar" type="Boolean" default="true" />
+    <aura:attribute name="threshold1" type="integer" default="20" />
+    <aura:attribute name="threshold2"  type="integer" default="80" />
+    <aura:attribute name="reverseColor" type="Boolean" />
+    <aura:attribute name="twoColumn" type="Boolean" />
+    <aura:attribute name="flowHeader" type="String" default="Add Universal Configuration" />
+    <aura:attribute name="flowButton" type="String" default="Add Config" />
+
+    <aura:attribute name="displayPencil" type="Boolean" default="false" />
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <aura:handler event="force:refreshView" action="{!c.doRefresh}" />
+    <aura:handler name="render" value="{!this}" action="{!c.onRender}"/>
+
+    <aura:if isTrue = "{!!(v.displayIllustration)}">
+    
+    <div class="slds-card card" aura:id="card"  style="{!v.cardStyle}">
+        
+        <!-- HEADER SECTION -->
+        <div class="slds-media slds-m-left_large  slds-m-bottom_small" style="padding-top: 0.5rem;">
+           <div class="slds-media_figure">
+               <div class="customer-image-container" style="cursor: pointer;" onclick="{!c.redirectToURL}">
+                           <img src="{!v.universalInfo.Image}" class="customer-avatar" />
+               </div>
+           </div>
+           <div class="slds-media_body slds-m-left_medium slds-m-top_large" style="width:70%;">
+               <div 
+                   class="{!v.inverseIconColors ? 'slds-text-heading_medium_inverse title-weight slds-text-title_bold' : 'slds-text-heading_medium title-weight .slds-text-title_bold'}">
+                   <div onclick="{!c.redirectToURL}" style="cursor: pointer;">{!v.universalInfo.Name}</div>
+                
+                </div>
+               <aura:if isTrue="{!not(empty(v.universalInfo.HeaderSubtitle))}">
+                   <div class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">
+                    {!v.universalInfo.HeaderSubtitle}</div>
+               </aura:if>
+              
+           </div>
+           <aura:if isTrue="{!(v.displayPencil)}">
+           <div class="status">
+            <img onclick="{! c.openModal }"
+            style="width: 50%;"
+            src="{! '/resource/u360_pack1_assets/dc_icons/icon=edit_' + v.inverseIconColors + '.png'}" 
+          ></img>
+           </div>
+        </aura:if>
+       </div>
+     
+       <!-- HEADER SECTION 1  -->
+       <aura:if isTrue="{!(v.universalInfo.Section1)}">
+           <div
+       class="{!v.inverseIconColors ? 'slds-media slds-m-left_medium slds-m-right_x-small slds-m-bottom_small slds-border_bottom_inverse slds-p-bottom_medium' : 'slds-media slds-m-left_x-large slds-m-right_x-large slds-m-bottom_large slds-border_bottom slds-p-bottom_medium'}">
+       <div class="slds-media_body">
+           <aura:if isTrue="{!not(empty(v.universalInfo.Field1))}">
+               <div class="attributes">
+                   <img class="icons"
+                       src="{!v.universalInfo.Field1.icon}"></img>
+                   <span
+                       class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field1.label}:</span>
+                   <span
+                       class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field1.value}</span>
+               </div>
+           </aura:if>
+          
+           <aura:if isTrue="{!not(empty(v.universalInfo.Field2))}">
+               <div class="attributes" style="margin-top: 0.3rem;">
+                   <img class="icons"
+                       src="{!v.universalInfo.Field2.icon}" />
+                   <span class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field2.label}
+                       :</span>
+                   <span
+                       class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field2.value}</span>
+               </div>
+           </aura:if>
+           <aura:if isTrue="{!not(empty(v.universalInfo.Field3))}">
+               <div class="attributes" style="margin-top: 0.3rem;">
+                   <img class="icons"
+                       src="{!v.universalInfo.Field3.icon}" />
+                   <span class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field3.label}
+                       :</span>
+                   <span
+                       class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field3.value}</span>
+               </div>
+           </aura:if>
+           <aura:if
+               isTrue="{!or(not(empty(v.universalInfo.Field4.city_value)),not(empty(v.universalInfo.Field4.street_value)),not(empty(v.universalInfo.Field4.state_value)),not(empty(v.universalInfo.Field4.zip_value))) }">
+    
+               <div class="attributes" style="margin-top: 0.3rem;align-items:self-start">
+                   <div style="display:flex;">
+                       <img class="icons"
+                           src="{!v.universalInfo.Field4.icon}" />
+                       <span class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field4.label}:</span>
+                   </div>
+                   <div style="margin-left: 3px;"><span
+                           class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field4.street_value},
+                       </span>
+                       <aura:if isTrue="{!not(empty(v.universalInfo.Field4.city_value))}">
+                           <span class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">
+                               {!v.universalInfo.Field4.city_value},
+                               {!v.universalInfo.Field4.state_value},&nbsp;{!v.universalInfo.Field4.zip_value}</span>
+                       </aura:if>
+                   </div>
+               </div>
+           </aura:if>
+       </div>
+           </div>
+       </aura:if>
+    
+    <!-- HEADER SECTION 2  -->
+        <aura:if isTrue="{!(v.universalInfo.Section2)}">
+    
+    <aura:if isTrue="{!v.twoColumn}">
+    
+    <div
+    class="{!v.inverseIconColors ? 'slds-media slds-m-left_medium slds-m-right_x-small slds-m-bottom_small slds-border_bottom_inverse slds-p-bottom_medium' : 'slds-media slds-m-left_x-large slds-m-right_x-large slds-m-bottom_large slds-border_bottom slds-p-bottom_medium'}">
+    <div class="slds-size_1-of-2">
+        <div class="slds-media_body">
+            <aura:if isTrue="{!not(empty(v.universalInfo.Field5))}">
+                <div class="attributes" style="margin-top: 0.5rem;">
+                    <img class="icons"
+                        src="{!v.universalInfo.Field5.icon}" />
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field5.label}:</span>
+                    <span class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">
+                       {!v.universalInfo.Field5.value}</span>
+                </div>
+            </aura:if>
+            <aura:if isTrue="{!not(empty(v.universalInfo.Field6))}">
+                <div class="attributes">
+                    <img class="icons"
+                        src="{!v.universalInfo.Field6.icon}" />
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field6.label}:</span>
+                    <span class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">
+                        {!v.universalInfo.Field6.value}</span>
+                </div>
+            </aura:if>
+            <aura:if isTrue="{!not(empty(v.universalInfo.Field7))}">
+                <div class="attributes" style="margin-top: 0.5rem;">
+                    <img class="icons"
+                        src="{!v.universalInfo.Field7.icon}" />
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field7.label}:</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field7.value}</span>
+                </div>
+            </aura:if>
+        </div>
+    </div>
+    <div class="slds-size_1-of-2" style="padding-left:20px;">
+        <div class="slds-media_body">
+            <aura:if isTrue="{!not(empty(v.universalInfo.Field8))}">
+                <div class="attributes">
+                    <img class="icons"
+                        src="{!v.universalInfo.Field8.icon}" />
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field8.label}:</span>
+                    <span class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">
+                        {!v.universalInfo.Field8.value}  
+                    </span>
+                </div>
+            </aura:if>
+    
+            <aura:if isTrue="{!not(empty(v.universalInfo.Field9))}">
+                <div class="attributes" style="margin-top: 0.5rem;">
+                    <img class="icons"
+                        src="{!v.universalInfo.Field9.icon}"></img>
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field9.label}:</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field9.value}</span>
+                </div>
+            </aura:if>
+        </div>
+    </div>
+    </div>
+    <aura:set attribute="else">
+    
+    <div
+    class="{!v.inverseIconColors ? 'slds-media slds-m-left_medium slds-m-right_x-small slds-m-bottom_small slds-border_bottom_inverse slds-p-bottom_medium' : 'slds-media slds-m-left_x-large slds-m-right_x-large slds-m-bottom_large slds-border_bottom slds-p-bottom_medium'}">
+    
+        <div class="slds-media_body">
+            <aura:if isTrue="{!not(empty(v.universalInfo.Field5))}">
+                <div class="attributes" style="margin-top: 0.5rem;">
+                    <img class="icons"
+                        src="{!v.universalInfo.Field5.icon}" />
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field5.label}:</span>
+                    <span class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">
+                       {!v.universalInfo.Field5.value}</span>
+                </div>
+            </aura:if>
+            <aura:if isTrue="{!not(empty(v.universalInfo.Field6))}">
+                <div class="attributes">
+                    <img class="icons"
+                        src="{!v.universalInfo.Field6.icon}" />
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field6.label}:</span>
+                    <span class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">
+                        {!v.universalInfo.Field6.value}</span>
+                </div>
+            </aura:if>
+            <aura:if isTrue="{!not(empty(v.universalInfo.Field7))}">
+                <div class="attributes" style="margin-top: 0.5rem;">
+                    <img class="icons"
+                        src="{!v.universalInfo.Field7.icon}" />
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field7.label}:</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field7.value}</span>
+                </div>
+            </aura:if>
+        
+            <aura:if isTrue="{!not(empty(v.universalInfo.Field8))}">
+                <div class="attributes">
+                    <img class="icons"
+                        src="{!v.universalInfo.Field8.icon}" />
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field8.label}:</span>
+                    <span class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">
+                       {!v.universalInfo.Field8.value}
+                    </span>
+                </div>
+            </aura:if>
+    
+            <aura:if isTrue="{!not(empty(v.universalInfo.Field9))}">
+                <div class="attributes" style="margin-top: 0.5rem;">
+                    <img class="icons"
+                        src="{!v.universalInfo.Field9.icon}"></img>
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field9.label}:</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field9.value}</span>
+                </div>
+            </aura:if>
+        </div>
+    
+    </div>
+    </aura:set>
+    </aura:if>
+    
+    
+        </aura:if>
+    
+        <!-- HEADER SECTION 3  -->
+        <aura:if isTrue="{!(v.universalInfo.Section3)}">
+    <div
+        class="{!v.inverseIconColors ? 'slds-media slds-m-left_medium slds-m-right_x-small slds-m-bottom_small slds-border_bottom_inverse slds-p-bottom_medium' : 'slds-media slds-m-left_x-large slds-m-right_x-large slds-m-bottom_large slds-border_bottom slds-p-bottom_medium'}">
+    
+        <aura:if isTrue="{!v.twoColumn}">
+    
+            <div class="slds-size_1-of-2">
+            <div class="slds-media_body">
+                <aura:if isTrue="{!not(empty(v.universalInfo.Field10))}">
+                    <div class="attributes">
+                        <img src="{!v.universalInfo.Field10.icon}"
+                            class="icons"></img>
+                        <span class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">
+                            {!v.universalInfo.Field10.label}:</span>
+                        <span
+                            class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field10.value}</span>
+                    </div>
+                </aura:if>
+                <aura:if isTrue="{!not(empty(v.universalInfo.Field11))}">
+                    <div class="attributes" >
+                        <img class="icons"
+                            src="{!v.universalInfo.Field11.icon}"></img>
+                        <span
+                            class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field11.label}:</span>
+                        <span
+                            class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field11.value}</span>
+                    </div>
+                </aura:if>
+                <aura:if isTrue="{!not(empty(v.universalInfo.Field12))}">
+                    <div class="attributes" >
+                        <img class="icons"
+                            src="{!v.universalInfo.Field12.icon}"></img>
+                        <span
+                            class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field12.label}:</span>
+                        <span
+                            class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field12.value}</span>
+                    </div>
+                </aura:if>
+                <aura:if isTrue="{!not(empty(v.universalInfo.Field13))}">
+                    <div class="attributes" style="margin-top: 0.5rem;">
+                        <img class="icons"
+                            src="{!v.universalInfo.Field13.icon}" />
+                        <span class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field13.label}:</span>
+                        <span class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">
+                           {!v.universalInfo.Field13.value}
+                        </span>
+                    </div>
+                </aura:if>
+                <aura:if isTrue="{!not(empty(v.universalInfo.Field14))}">
+                    <div class="attributes" style="margin-top: 0.5rem;">
+                        <img class="icons"
+                            src="{!v.universalInfo.Field14.icon}"></img>
+                        <span class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">
+                            {!v.universalInfo.Field14.label}:</span>
+                        <span
+                            class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field14.value}</span>
+                    </div>
+                </aura:if>
+            </div>
+            </div>
+            <div class="slds-size_1-of-2">
+            <div class="slds-media_body">
+                <aura:if isTrue="{!not(empty(v.universalInfo.Field15Image))}">
+                    <div>
+                        <img src="{!v.universalInfo.Field15Image}" style="width:100%;" />
+                    </div>
+                </aura:if>
+    
+            </div>
+            </div>
+            <aura:set attribute="else">
+                <div class="slds-media_body">
+                <aura:if isTrue="{!not(empty(v.universalInfo.Field10))}">
+                    <div class="attributes">
+                        <img src="{!v.universalInfo.Field10.icon}"
+                            class="icons"></img>
+                        <span class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">
+                            {!v.universalInfo.Field10.label}:</span>
+                        <span
+                            class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field10.value}</span>
+                    </div>
+                </aura:if>
+                <aura:if isTrue="{!not(empty(v.universalInfo.Field11))}">
+                    <div class="attributes" >
+                        <img class="icons"
+                            src="{!v.universalInfo.Field11.icon}"></img>
+                        <span
+                            class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field11.label}:</span>
+                        <span
+                            class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field11.value}</span>
+                    </div>
+                </aura:if>
+                <aura:if isTrue="{!not(empty(v.universalInfo.Field12))}">
+                    <div class="attributes" >
+                        <img class="icons"
+                            src="{!v.universalInfo.Field12.icon}"></img>
+                        <span
+                            class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field12.label}:</span>
+                        <span
+                            class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field12.value}</span>
+                    </div>
+                </aura:if>
+                <aura:if isTrue="{!not(empty(v.universalInfo.Field13))}">
+                    <div class="attributes" style="margin-top: 0.5rem;">
+                        <img class="icons"
+                            src="{!v.universalInfo.Field13.icon}" />
+                        <span class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field13.label}:</span>
+                        <span class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">
+                           {!v.universalInfo.Field13.value}
+                        </span>
+                    </div>
+                </aura:if>
+                <aura:if isTrue="{!not(empty(v.universalInfo.Field14))}">
+                    <div class="attributes" style="margin-top: 0.5rem;">
+                        <img class="icons"
+                            src="{!v.universalInfo.Field14.icon}"></img>
+                        <span class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">
+                            {!v.universalInfo.Field14.label}:</span>
+                        <span
+                            class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field14.value}</span>
+                    </div>
+                </aura:if>
+                <aura:if isTrue="{!not(empty(v.universalInfo.Field15Image))}">
+                    <div>
+                        <img src="{!v.universalInfo.Field15Image}" style="width:50%;margin-top:10px;" />
+                    </div>
+                </aura:if>
+                    </div>
+    
+            </aura:set>
+        </aura:if>
+    </div>
+        </aura:if>
+    
+        <!-- HEADER SECTION 4  -->
+        <aura:if isTrue="{!(v.universalInfo.Section4)}">
+    <div class="{!v.inverseIconColors ? 'slds-media slds-m-left_medium ' : 'slds-media slds-m-left_x-large slds-m-right_x-large '}">
+        <div class="slds-media_body" style="width:100%;padding-left:8px;">
+            <aura:if isTrue="{!not(empty(v.universalInfo.Field16))}">
+                <div
+                    style="display: block;margin-top: 0.5rem;">
+                    <img class="icons"
+                        src="{!v.universalInfo.Field16.icon}"></img>
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field16.label}:</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field16.value}</span>
+                </div>
+            </aura:if>
+            <aura:if isTrue="{!not(empty(v.universalInfo.Field17))}">
+                <div
+                    style="margin-bottom:10px;margin-top: 0.5rem">
+                    <img class="icons" src="{!v.universalInfo.Field17.icon}"></img>
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field17.label}:</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field17.value}</span>
+                </div>
+                <aura:if isTrue="{! v.universalInfo.progressBar1Active}">
+                <div
+                    style="margin-bottom:10px;">
+                    <!-- solid progress bar -->
+                    <aura:if isTrue="{! not(v.dynamicProgressBar)}">
+                        <lightning:progressBar
+                            class="{!v.inverseIconColors ? 'progress-bar_inverse' : 'progress-bar'}"
+                            value="{!v.universalInfo.Field17.value}" variant="circular" size="large" />
+    
+                        <!-- dynamic red, yellow, green progress bar -->
+                        <aura:set attribute="else">
+                            <aura:if isTrue="{!lessthanorequal(v.universalInfo.Field17.value, v.threshold1)}">
+                                <div>
+                                    <aura:if isTrue="{! not(v.reverseColor)}">
+                                        <lightning:progressBar value="{!v.universalInfo.Field17.value}" size="large"
+                                            variant="circular" class="progress-bar-red" />
+                                        <aura:set attribute="else">
+                                            <lightning:progressBar value="{!v.universalInfo.Field17.value}" size="large"
+                                                variant="circular" class="progress-bar-green" />
+                                        </aura:set>
+                                    </aura:if>
+                                </div>
+    
+                                <aura:set attribute="else">
+                                    <aura:if isTrue="{!lessthanorequal(v.universalInfo.Field17.value, v.threshold2)}">
+                                        <div>
+                                            <lightning:progressBar value="{!v.universalInfo.Field17.value}" size="large"
+                                                variant="circular" class="progress-bar-yellow" />
+                                        </div>
+                                        <aura:set attribute="else">
+                                            <div>
+                                                <aura:if isTrue="{! not(v.reverseColor)}">
+                                                    <lightning:progressBar value="{!v.universalInfo.Field17.value}"
+                                                        size="large" variant="circular"
+                                                        class="progress-bar-green" />
+                                                    <aura:set attribute="else">
+                                                        <lightning:progressBar value="{!v.universalInfo.Field17.value}"
+                                                            size="large" variant="circular"
+                                                            class="progress-bar-red" />
+                                                    </aura:set>
+                                                </aura:if>
+                                            </div>
+                                        </aura:set>
+                                    </aura:if>
+                                </aura:set>
+                            </aura:if>
+                        </aura:set>
+                    </aura:if>
+                </div>
+                </aura:if>
+            </aura:if>
+        </div>
+    </div>
+    
+    <!-- HEADER SECTION 5 (ENGAGEMENT SCORE.,) -->
+    
+    <aura:if isTrue="{!not(empty(v.universalInfo.Field18))}">
+        <div class="{!v.inverseIconColors ? 'slds-media slds-m-left_medium   ' : 'slds-media slds-m-left_x-large slds-m-right_x-large '}">
+            <div class="slds-media_body" style="width:100%;padding-left:8px;">
+                <div
+                    style="display: block;margin-bottom:10px;">
+                    <img class="icons"
+                        src="{!v.universalInfo.Field18.icon}"></img>
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field18.label}:</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field18.value}</span>
+                </div>
+                <aura:if isTrue="{! v.universalInfo.progressBar2Active}">
+                <div
+                    style="display: block;margin-bottom:10px;">
+                    <!-- solid progress bar -->
+                    <aura:if isTrue="{! not(v.dynamicProgressBar)}">
+                        <lightning:progressBar
+                            class="{!v.inverseIconColors ? 'progress-bar_inverse' : 'progress-bar'}"
+                            value="{!v.universalInfo.Field18.value}" variant="circular" size="large" />
+    
+                        <!-- dynamic red, yellow, green progress bar -->
+                        <aura:set attribute="else">
+                            <aura:if isTrue="{!lessthanorequal(v.universalInfo.Field18.value, v.threshold1)}">
+                                <div>
+                                    <aura:if isTrue="{! not(v.reverseColor)}">
+                                        <lightning:progressBar value="{!v.universalInfo.Field18.value}" size="large"
+                                            variant="circular" class="progress-bar-red" />
+                                        <aura:set attribute="else">
+                                            <lightning:progressBar value="{!v.universalInfo.Field18.value}" size="large"
+                                                variant="circular" class="progress-bar-green" />
+                                        </aura:set>
+                                    </aura:if>
+                                </div>
+    
+                                <aura:set attribute="else">
+                                    <aura:if isTrue="{!lessthanorequal(v.universalInfo.Field18.value, v.threshold2)}">
+                                        <div>
+                                            <lightning:progressBar value="{!v.universalInfo.Field18.value}" size="large"
+                                                variant="circular" class="progress-bar-yellow" />
+                                        </div>
+                                        <aura:set attribute="else">
+                                            <div>
+                                                <aura:if isTrue="{! not(v.reverseColor)}">
+                                                    <lightning:progressBar value="{!v.universalInfo.Field18.value}"
+                                                        size="large" variant="circular"
+                                                        class="progress-bar-green" />
+                                                    <aura:set attribute="else">
+                                                        <lightning:progressBar value="{!v.universalInfo.Field18.value}"
+                                                            size="large" variant="circular"
+                                                            class="progress-bar-red" />
+                                                    </aura:set>
+                                                </aura:if>
+                                            </div>
+                                        </aura:set>
+                                    </aura:if>
+                                </aura:set>
+                            </aura:if>
+                        </aura:set>
+                    </aura:if>
+                </div>
+                </aura:if>
+            </div>
+        </div>
+    </aura:if>
+    
+    <aura:if isTrue="{!not(empty(v.universalInfo.Field19))}">
+        <div class="{!v.inverseIconColors ? 'slds-media slds-m-left_medium  slds-m-bottom_small slds-border_bottom_inverse slds-p-bottom_medium' : 'slds-media slds-m-left_x-large slds-m-right_x-large slds-m-bottom_small slds-border_bottom slds-p-bottom_medium'}">
+            <div class="slds-media_body" style="width:100%;padding-left:8px;">
+                <div
+                    style="display: block;margin-bottom:10px;">
+                    <img class="icons"
+                        src="{!v.universalInfo.Field19.icon}"></img>
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.universalInfo.Field19.label}:</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.universalInfo.Field19.value}</span>
+                </div>
+                <aura:if isTrue="{! v.universalInfo.progressBar3Active}">
+                <div
+                    style="display: block;margin-bottom:10px;">
+                    <!-- solid progress bar -->
+                    <aura:if isTrue="{! not(v.dynamicProgressBar)}">
+                        <lightning:progressBar
+                            class="{!v.inverseIconColors ? 'progress-bar_inverse' : 'progress-bar'}"
+                            value="{!v.universalInfo.Field19.value}" variant="circular" size="large" />
+    
+                        <!-- dynamic red, yellow, green progress bar -->
+                        <aura:set attribute="else">
+                            <aura:if isTrue="{!lessthanorequal(v.universalInfo.Field19.value, v.threshold1)}">
+                                <div>
+                                    <aura:if isTrue="{! not(v.reverseColor)}">
+                                        <lightning:progressBar value="{!v.universalInfo.Field19.value}" size="large"
+                                            variant="circular" class="progress-bar-red" />
+                                        <aura:set attribute="else">
+                                            <lightning:progressBar value="{!v.universalInfo.Field19.value}" size="large"
+                                                variant="circular" class="progress-bar-green" />
+                                        </aura:set>
+                                    </aura:if>
+                                </div>
+    
+                                <aura:set attribute="else">
+                                    <aura:if isTrue="{!lessthanorequal(v.universalInfo.Field19.value, v.threshold2)}">
+                                        <div>
+                                            <lightning:progressBar value="{!v.universalInfo.Field19.value}" size="large"
+                                                variant="circular" class="progress-bar-yellow" />
+                                        </div>
+                                        <aura:set attribute="else">
+                                            <div>
+                                                <aura:if isTrue="{! not(v.reverseColor)}">
+                                                    <lightning:progressBar value="{!v.universalInfo.Field19.value}"
+                                                        size="large" variant="circular"
+                                                        class="progress-bar-green" />
+                                                    <aura:set attribute="else">
+                                                        <lightning:progressBar value="{!v.universalInfo.Field19.value}"
+                                                            size="large" variant="circular"
+                                                            class="progress-bar-red" />
+                                                    </aura:set>
+                                                </aura:if>
+                                            </div>
+                                        </aura:set>
+                                    </aura:if>
+                                </aura:set>
+                            </aura:if>
+                        </aura:set>
+                    </aura:if>
+                </div>
+                </aura:if>
+            </div>
+        </div>
+    
+    </aura:if>
+    <!-- HEADER SECTION 6 (FOOTER.,) -->
+    
+    <div class="slds-media slds-m-left_medium slds-m-right_x-large slds-m-bottom_x-small">
+        <div class="slds-media_body">
+            <div class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">Powered By
+            </div>
+            <aura:if isTrue="{!(v.Analytics)}"><img class="productIcon"
+                    src="{! '/resource/xdo_dc_c360genie/Icons/icon=Analytics_' + v.inverseIconColors + '.png'}"></img>
+            </aura:if>
+            <aura:if isTrue="{!(v.Commerce)}"><img class="productIcon"
+                    src="{! '/resource/xdo_dc_c360genie/Icons/icon=Commerce_' + v.inverseIconColors + '.png'}"></img>
+            </aura:if>
+            <aura:if isTrue="{!(v.Marketing)}"><img class="productIcon"
+                    src="{! '/resource/xdo_dc_c360genie/Icons/icon=Marketing_' + v.inverseIconColors + '.png'}"></img>
+            </aura:if>
+            <aura:if isTrue="{!(v.Mulesoft)}"><img class="productIcon"
+                    src="{! '/resource/xdo_dc_c360genie/Icons/icon=Mulesoft_' + v.inverseIconColors + '.png'}"></img>
+            </aura:if>
+            <aura:if isTrue="{!(v.Sales)}"><img class="productIcon"
+                    src="{! '/resource/xdo_dc_c360genie/Icons/icon=Sales_' + v.inverseIconColors + '.png'}"></img>
+            </aura:if>
+            <aura:if isTrue="{!(v.Service)}"><img class="productIcon"
+                    src="{! '/resource/xdo_dc_c360genie/Icons/icon=Service_' + v.inverseIconColors + '.png'}"></img>
+            </aura:if>
+            <aura:if isTrue="{!(v.SageMaker)}"><img class="productIcon"
+                    src="{! '/resource/xdo_dc_c360genie/Icons/icon=SageMaker_' + v.inverseIconColors + '.png'}"></img>
+            </aura:if>
+            <aura:if isTrue="{!(v.Snowflake)}"><img class="productIcon"
+                    src="{! '/resource/xdo_dc_c360genie/Icons/icon=Snowflake_' + v.inverseIconColors + '.png'}"></img>
+            </aura:if>
+        </div>
+    </div>
+        </aura:if>
+    </div>
+    
+    <aura:set attribute="else">
+        <!-- ILLUSTRATION IMAGE -->
+        <div class="slds-illustration slds-box" aria-hidden="true"  style="text-align: center;background-color:white;">
+            <img src="{!$Resource.u360_dc_messageImage}" style="width:70%" class="slds-illustration__svg" alt=""/>
+                <lightning:button variant="brand" label="Add Universal Config" title="Open Flow" onclick="{! c.openModal }" />
+        </div>                                      
+    </aura:set>
+    </aura:if>
+
+ 
+    <!-- Modal -->
+    <div aura:id="modal" role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" class="slds-modal">
+        <div class="slds-modal__container" style="width: 70%;max-width:100rem">
+            <header class="slds-modal__header">
+                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">{!v.flowHeader}</h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                <!-- Flow Component with recordId and flow name -->
+                <lightning:flow aura:id="flowData" />
+            </div>
+            <footer class="slds-modal__footer">
+                <button class="slds-button slds-button_neutral" onclick="{!c.closeModal}">Close</button>
+                <button class="slds-button slds-button_brand" onclick="{!c.submit}">{!v.flowButton}</button>
+            </footer>
+        </div>
+    </div>
+    <div aura:id="backdrop" class="slds-backdrop"></div>
+
+    <c:xdoToolTrackingEventHandler aura:id="xdoToolTrackingEventHandler"/>
+    </aura:component>

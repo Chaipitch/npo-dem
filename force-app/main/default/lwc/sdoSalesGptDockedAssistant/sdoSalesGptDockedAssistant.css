@@ -1,0 +1,83 @@
+.sidebar {
+    background-color: #f9f9f9;
+    position: flex;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+      height: 600px;
+    overflow: auto;
+  }
+  
+ .scroller {
+  overflow: auto;
+  max-height: 56vh;
+  }
+  
+
+  
+  .sidebar > .slds-card__header-title {
+    font-size: 24px !important;
+    font-weight: regular;
+  }
+  
+  .message {
+    display: flex;
+  }
+  
+  .message > div {
+    flex: 2;
+  }
+  
+   .spinner-container {
+    position: relative;
+    height: 80px;
+  }
+  /*
+  .spinner-container > lightning-spinner {
+    background-color: #f9f9f9;
+  } */
+  
+  .toggle {
+    background-color: white;
+    border-left: 1px solid rgb(229, 229, 229);
+    border-right: 1px solid rgb(229, 229, 229);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 12px;
+  }
+  
+  .stretch {
+    height: 100%;
+  }
+  
+  .input-box {
+    /* background-color: white; */
+    /* box-shadow: 1px -1px 2px rgb(0 0 0 / 10%); */
+    /* flex-shrink: 0; */
+    /* margin-top: auto; */
+    width: 100%;
+}
+  
+  .card-header {
+    background-color: white;
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+  }
+  .einstein-assistant.slds-is-open {
+    height: 74vh;
+    z-index: 999999;
+}
+.slds-docked-composer__footer {
+  background: #ffffff;
+  border-top: 0;
+}
+.message-container {
+  width:100%;
+}
+c-sdo-sales-gpt-bot-message {
+  width:478px;
+}
+.einstein-icon {
+  --sds-c-icon-color-foreground-default: #1b96ff;
+}

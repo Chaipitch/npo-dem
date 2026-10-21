@@ -1,0 +1,54 @@
+<template>
+    <lightning-card title="Historical Order Generator" icon-name="standard:orders">
+        <div class="slds-p-around_medium">
+            <div class="slds-text-color_weak slds-m-bottom_medium">
+                Inject realistic purchase history for this Account into the SDO. Maximum 10 orders and 10 months back allowed to ensure system stability.
+            </div>
+
+            <lightning-combobox 
+                name="buyerSelect" 
+                label="Select Buyer (Contact)" 
+                value={selectedContactId} 
+                placeholder="Choose a Contact..." 
+                options={contactOptions} 
+                onchange={handleContactChange} 
+                required
+                disabled={isFetchingContacts}>
+            </lightning-combobox>
+            
+            <lightning-input 
+                type="number" 
+                name="orderCount"
+                label="Number of Orders to Generate" 
+                min="1" 
+                max="10" 
+                value={numberOfOrders} 
+                onchange={handleOrderCountChange}
+                message-when-range-overflow="Limit exceeded. Maximum allowed is 10."
+                message-when-range-underflow="You must generate at least 1 order."
+                required>
+            </lightning-input>
+            
+            <lightning-input 
+                type="number" 
+                name="monthsBack"
+                label="Time Range (Months Back)" 
+                min="1" 
+                max="10" 
+                value={monthsBack} 
+                onchange={handleMonthsChange}
+                message-when-range-overflow="Limit exceeded. Maximum allowed is 10."
+                message-when-range-underflow="You must select at least 1 month."
+                required>
+            </lightning-input>
+
+            <div class="slds-m-top_large">
+                <lightning-button variant="brand" label="Generate Order Summaries" onclick={handleGenerate} disabled={isButtonDisabled}></lightning-button>
+            </div>
+
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Generating records..."></lightning-spinner>
+            </template>
+        </div>
+    </lightning-card>
+</template>

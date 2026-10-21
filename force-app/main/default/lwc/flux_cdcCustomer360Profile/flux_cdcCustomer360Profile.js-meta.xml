@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+
+    <apiVersion>56.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Flux | CDC Customer 360 Component</masterLabel>
+    <description>Flexible Component to display relevant informations on Contacts and Accounts</description>
+
+    <targets>
+        <target>lightning__RecordPage</target>
+    </targets>
+
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+
+            <property type="String" name="backgroundColor" label="Primary Background Color" default="rgb(6,119,165)" />
+            <property type="String" name="backgroundColor2" label="Secondary Background Color" default="rgb(95,159,180)" />
+            <property type="Integer" name="componentHeight" label="Component height" default="500" />
+
+            <property type="String" name="sObjectName" label="Object Name" default="Account" datasource="Account,Contact,Lead" />
+            <property type="String" name="apiFieldName_AvaterImage" label="Api Fieldname for Profile Image" />
+            <property type="String" name="apiField_FirstName" label="Api Fieldname for Name" default="FirstName" />
+            <property type="String" name="apiField_LastName" label="Api Fieldname for Lastname (optional)" default="LastName" />
+            <property type="String" name="apiField_Location" label="Location" default="BillingCity" />
+
+            <property type="String" name="attribute1Icon" label="Icon for Attribute 1" default="utility:identity" />
+            <property type="String" name="attribute1Label" label="Label for Attribute 1" default="Customer Id" />
+            <property type="String" name="attribute1Value" label="Value for Attribute 1" default="12345678" />
+            <property type="String" name="apiField_Attribute1" label="Api Fieldname for Attribute 1 (opt)" />
+
+            <property type="String" name="attribute2Icon" label="Icon for Attribute 2" default="utility:email" />
+            <property type="String" name="attribute2Label" label="Label for Attribute 2" default="E-Mail Address" />
+            <property type="String" name="attribute2Value" label="Value for Attribute 2" default="lauren.bailey@examplecompany.demo" />
+            <property type="String" name="apiField_Attribute2" label="Api Fieldname for Attribute 2 (opt)" />
+
+            <property type="String" name="attribute3Icon" label="Icon for Attribute 3" default="utility:favorite" />
+            <property type="String" name="attribute3Label" label="Label for Attribute 3" default="Loyalty Status" />
+            <property type="String" name="attribute3Value" label="Value for Attribute 3" default="Silver" />
+            <property type="String" name="apiField_Attribute3" label="Api Fieldname for Attribute 3 (opt)" />
+
+            <property type="String" name="attribute4Icon" label="Icon for Attribute 4" default="utility:einstein" />
+            <property type="String" name="attribute4Label" label="Label for Attribute 4" default="Activity Affinity" />
+            <property type="String" name="attribute4Value" label="Value for Attribute 4" default="Hiking" />
+            <property type="String" name="apiField_Attribute4" label="Api Fieldname for Attribute 4 (opt)" />
+
+            <property type="String" name="attribute5Icon" label="Icon for Attribute 5" default="utility:einstein" />
+            <property type="String" name="attribute5Label" label="Label for Attribute 5" default="Propensity to purchase" />
+            <property type="String" name="attribute5Value" label="Value for Attribute 5" default="Most Likely" />
+            <property type="Boolean" name="attribute5ShowSlider" label="Show Slider for Attribute 5" default="true" />
+            <property type="Integer" name="attribute5Number" label="Number for Attribute 5" min="0" max="100" default="75" />
+            <property type="String" name="apiField_Attribute5" label="Api Fieldname for Attribute 5 (opt)" />
+            <property type="String" name="apiField_Attribute5Number" label="Api Fieldname for Attribute 5 Number" />
+
+            <property type="String" name="attribute6Icon" label="Icon for Attribute 6" default="utility:segments" />
+            <property type="String" name="attribute6Label" label="Label for Attribute 6" default="Segments" />
+            <property type="String" name="attribute6Value" label="Value for Attribute 6" default="High Propensity to Buy Running Shoes" />
+            <property type="String" name="apiField_Attribute6" label="Api Fieldname for Attribute 6 (opt)" />
+
+            <property type="String" name="attribute7Icon" label="Icon for Attribute 7" default="utility:cart" />
+            <property type="String" name="attribute7Label" label="Label for Attribute 7" default="Lifetime Value" />
+            <property type="String" name="attribute7Value" label="Value for Attribute 7" default="3000" />
+            <property type="String" name="apiField_Attribute7" label="Api Fieldname for Attribute 7 (opt)" />
+            <property type="String" name="attribute7Currency" label="Currency" default="EUR" description="Possible values are the ISO 4217 currency codes, such as 'USD' for the US dollar." />
+            <property type="String" name="attribute7CurrencyFormat" label="Display Currency as" default="symbol" datasource="symbol,code,name" />
+
+            <property type="String" name="attribute8Icon" label="Icon for Attribute 8" default="utility:einstein" />
+            <property type="String" name="attribute8Label" label="Label for Attribute 8" default="Engagement Score" />
+            <property type="String" name="attribute8Value" label="Value for Attribute 8" default="76%" />
+            <property type="Boolean" name="attribute8ShowProgress" label="Show Progress for Attribute 8" default="true" />
+            <property type="Integer" name="attribute8Number" label="Number for Attribute 5" min="0" max="100" default="76" />
+            <property type="String" name="apiField_Attribute8" label="Api Fieldname for Attribute 8 (opt)" />
+
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

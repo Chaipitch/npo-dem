@@ -1,0 +1,45 @@
+<template>
+    <lightning-card 
+        title={headerTitle}
+        icon-name="standard:slack"
+    >
+        <template lwc:if={hasOrgDetails}>
+            <lightning-button-group slot="actions">
+                <lightning-button
+                    label="Demo Zone"
+                    onclick={handleOpenDemoZone}
+                ></lightning-button>
+                <lightning-button
+                    label="Slack Setup"
+                    onclick={handleOpenSlackSetup}
+                ></lightning-button>
+                <lightning-button
+                    label="Disconnect"
+                    disabled={disconnecting}
+                    onclick={handleDisconnectSlackOrg}
+                ></lightning-button>
+            </lightning-button-group>
+        </template>
+        <template lwc:else>
+            <lightning-button
+                label="Connect"
+                slot="actions"
+                onclick={handleConnectSlackOrg}
+            ></lightning-button>
+        </template>
+
+        <template lwc:if={disconnecting}>
+            <div class="slds-grid slds-grid_vertical slds-grid_align-center slds-p-vertical_large">
+                <div class="slds-is-relative slds-align_absolute-center disconnect-spinner">
+                    <lightning-spinner
+                        alternative-text="Disconnecting"
+                        size="small"
+                    ></lightning-spinner>
+                </div>
+                <p class="slds-text-align_center slds-text-body_small slds-text-color_weak slds-p-top_medium">
+                    Disconnecting Slack workspace...
+                </p>
+            </div>
+        </template>
+    </lightning-card>
+</template>

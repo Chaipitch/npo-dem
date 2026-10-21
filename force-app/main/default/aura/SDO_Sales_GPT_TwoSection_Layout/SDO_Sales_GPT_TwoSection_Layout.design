@@ -1,0 +1,13 @@
+<design:component label="Einstein Copilot Layout - Left Section, Main Section and Collapsible Right Sidebar">
+    <flexipage:template>
+        <flexipage:region name="left" label="Left Region" defaultWidth="SMALL" />
+        <flexipage:region name="main" label="Main Region" defaultWidth="MEDIUM">
+            <flexipage:formfactor type="MEDIUM" width="SMALL" />
+        </flexipage:region>
+        <flexipage:region name="sidebar" label="Sidebar" defaultWidth="SMALL" />
+    </flexipage:template>
+    <design:supportedFormFactors>
+        <design:supportedFormFactor type="Small" />
+        <design:supportedFormFactor type="Large" />
+    </design:supportedFormFactors>
+</design:component>

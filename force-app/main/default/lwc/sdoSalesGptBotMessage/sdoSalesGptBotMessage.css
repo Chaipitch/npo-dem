@@ -1,0 +1,60 @@
+.message-card {
+    background: #ffffff;
+    border: 1px solid #c9c9c9;
+    border-radius: 4px;
+  }
+  
+  .card-answer {
+    background: #ffffff;
+  }
+  .spacer {
+    height: 0.5rem;
+  }
+  .card-question {
+    background: #ffffff;
+  }
+    
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 2.5px;
+  }
+  
+  .avatar-column {
+    width: 45px;
+}
+.einstein-column {
+  width: 45px;
+}
+  .response-column{
+    padding: 0px 5px;
+    max-width: 86%;
+    /* margin-left: 5px; */
+  }
+  .user-entry{
+    padding: 0px 5px;
+    max-width: 86%;
+    /* text-align: right; */
+  }
+  .user-question {
+    /* float: right;
+    margin-right: 10px; */
+}
+.slds-region__pinned-right .slds-card.message-card {
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(201, 201, 201);
+  border-radius: 0.25rem;
+  background-clip: padding-box;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.10);
+}
+.rich-text-block {
+  border-radius: 4px;
+  background-color: #F3F3F3;
+}
+img.einstein-icon {
+  height: 32px;
+  width: 32px;
+  background-color: #CFE9FE;
+  border-radius: 2.5px;
+}

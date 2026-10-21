@@ -1,0 +1,122 @@
+:host {
+    display: block;
+    background-color: #f3f4f6;
+    padding: 0.5rem;
+    --slds-g-color-on-surface-3: #4a154b;
+}
+
+.slack-users__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.slack-users__row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    column-gap: 0.875rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #f1f1f1;
+    transition: background-color 0.1s ease-in-out;
+}
+
+.slack-users__row:first-child {
+    border-top: none;
+}
+
+.slack-users__row:hover {
+    background-color: #f4ede4;
+}
+
+.slack-users__avatar {
+    display: flex;
+    align-items: center;
+}
+
+.slack-users__body-col {
+    min-width: 0;
+}
+
+.slack-users__title {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.375rem 0.5rem;
+    line-height: 1.2;
+}
+
+.slack-users__name {
+    font-weight: 700;
+    color: #1d1c1d;
+    font-size: 0.9375rem;
+}
+
+.slack-users__handle {
+    color: #616061;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.slack-users__primary-badge {
+    background-color: #f4ecf7;
+    color: #4a154b;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 0.125rem 0.625rem;
+    border-radius: 999px;
+    line-height: 1.4;
+    align-self: center;
+}
+
+.slack-users__email {
+    color: #8d8d8d;
+    font-size: 0.75rem;
+    margin-top: 0.125rem;
+    word-break: break-all;
+}
+
+.slack-users__actions {
+    display: flex;
+    align-items: center;
+}
+
+/* Updated Slack-styled button to reduce visual noise.
+ * Starts as a ghost button (white background) and inverts to Aubergine on hover. */
+.slack-users__login-btn {
+    /* Default state: White background, subtle border, Aubergine text */
+    --slds-c-button-brand-color-background: #ffffff;
+    --slds-c-button-brand-color-border: #d1d5db;
+    --slds-c-button-brand-text-color: #4a154b;
+
+    /* Hover state: Solid Aubergine background and border, white text */
+    --slds-c-button-brand-color-background-hover: #4a154b;
+    --slds-c-button-brand-color-border-hover: #4a154b;
+    --slds-c-button-brand-text-color-hover: #ffffff;
+
+    /* Active/Pressed state: Darker Aubergine */
+    --slds-c-button-brand-color-background-active: #350d36;
+    --slds-c-button-brand-color-border-active: #350d36;
+    --slds-c-button-brand-text-color-active: #ffffff;
+
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+}
+
+.slack-users__empty {
+    color: #616061;
+    text-align: center;
+    flex-direction: column;
+}
+
+.slack-users__empty p {
+    margin: 0;
+}
+
+.slack-users__empty-title {
+    font-weight: 700;
+    color: #1d1c1d;
+    font-size: 0.9375rem;
+    margin-bottom: 0.25rem;
+}

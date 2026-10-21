@@ -1,0 +1,329 @@
+.container {
+  display: block;
+  /* position: fixed; */
+  min-height: 300px;
+  overflow-y: scroll;
+  background-color: #ffffff;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.container::-webkit-scrollbar {
+  display: none;
+}
+
+.containerfixed {
+  position: fixed;
+  z-index: 98;
+  top: 90px;
+  /* width:-webkit-fill-available; */
+  bottom: 35px;
+  right:0px;
+  box-shadow: 0px 0px 3px 0px #333333;
+  overflow-y: scroll;
+  background-color: #ffffff;
+  transition: width 0.5s;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.containerfixed::-webkit-scrollbar {
+  display: none;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 0.5rem;
+  border-bottom: solid 1px #e5e5e5;
+  z-index: 2;
+  width: 100%;
+  position: sticky;
+  top: 0;
+}
+
+.header h2 {
+  margin-left: .5rem;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.icons-right {
+  margin-left: auto;
+}
+
+.pinned-button-right {
+  /* margin-left: auto; */
+  --sds-c-icon-color-foreground-default: #07618b;
+}
+
+.footerPrompt {
+  padding: 0.5rem;
+  background-color: #ffffff;
+  border-top: solid 1px #e5e5e5;
+  bottom: 0;
+  width: 100%;
+  position: sticky;
+  /* Fix text minimizing effect*/
+  /* min-width: 25vw; */
+  display: flex;
+  flex: 0 0 auto;
+    flex-direction: column;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+    align-items: center;
+  /* Fix text minimizing effect*/
+  /* min-width: 25vw; */
+  /* flex-grow: 1; */
+  flex: 1 1 auto;
+    overflow-y: auto;
+    width: 100%;
+}
+
+
+.content-height_min {
+  min-height: calc(100% - 140px);
+}
+
+.content-height_max {
+  min-height: calc(100% - 215px);
+}
+
+
+.pinned-icon {
+  --sds-c-icon-color-foreground-default: #1b96ff;
+}
+
+/* .sidebar > .slds-card__header-title {
+    font-size: 24px !important;
+    font-weight: regular;
+  } */
+
+.message {
+  display: flex;
+}
+
+.message>div {
+  flex: 2;
+}
+
+.toggle {
+  background-color: white;
+  border-left: 1px solid rgb(229, 229, 229);
+  border-right: 1px solid rgb(229, 229, 229);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 12px;
+}
+
+.stretch {
+  height: 100%;
+}
+
+.input-box {
+  background-color: white;
+  /* box-shadow: 1px -1px 2px rgb(0 0 0 / 10%); */
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.card-header {
+  background-color: white;
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.slds-docked_container {
+  z-index: 999999;
+  margin-right: 24vw;
+}
+
+lightning-icon.send-icon.slds-icon-utility-send.slds-icon_container {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+}
+
+/* :host {
+  --sds-c-textarea-sizing-
+} */
+.einstein-text-area {
+  resize: none;
+  min-height: 80px;
+  width: 100%;
+  padding: var(--slds-c-textarea-spacing-block-start, var(--sds-c-textarea-spacing-block-start, .5rem)) var(--slds-c-textarea-spacing-inline-end, var(--sds-c-textarea-spacing-inline-end, .75rem)) var(--slds-c-textarea-spacing-block-end, var(--sds-c-textarea-spacing-block-end, .5rem)) var(--slds-c-textarea-spacing-inline-start, var(--sds-c-textarea-spacing-inline-start, .75rem));
+  background-color: var(--slds-c-textarea-color-background, var(--sds-c-textarea-color-background, var(--slds-g-color-neutral-base-100, #fff)));
+  color: var(--slds-c-textarea-text-color, var(--sds-c-textarea-text-color));
+  border: 1px solid #c9c9c9;
+  border-radius: 0.25rem;
+  box-shadow: var(--slds-c-textarea-shadow, var(--sds-c-textarea-shadow));
+  transition: border .1s linear, background-color .1s linear;
+}
+
+textarea.einstein-text-area:focus-visible {
+  outline: none;
+}
+.einstein-menu-icon {
+  position: fixed;
+  z-index: 100;
+  top: 0.75rem;
+  cursor: pointer;
+}
+
+/* .einsteinMenuIconActive {
+  --slds-c-icon-color-foreground-default: #07618b;
+} */
+
+.toggleBar {
+  display: flex;
+  width: 10px;
+  position: fixed;
+  z-index: 3;
+  flex-direction: column;
+  justify-content: center;
+  bottom: 0;
+  top: 0;
+  cursor: pointer;
+}
+
+.toggleBar:hover {
+  background: var(--slds-c-button-color-background-hover);
+}
+
+/* .scroller {
+    flex: 1;
+    overflow: auto;
+    background-color: #fff;
+  } */
+
+/* .spinner-container {
+    position: relative;
+    height: 130px;
+    margin-bottom:10px;
+  } */
+
+/* .spinner-container > lightning-spinner {
+    background-color: #f9f9f9;
+  } */
+  .welcome-container {
+    background-position: center;
+    text-align: center;
+    height: 100%;
+    background-size: cover;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+.welcome-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+img.copilot-welcome-image {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 250px;
+  width: 250px;
+  margin: 0 auto;
+}
+.copilot-welcome-heading {
+  text-align: center;
+  font-size: 1.25rem;
+  margin-top: 1rem;
+}
+.copilot-welcome-text {
+  text-align: start;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  max-width: 334px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.welcome-message-text {
+  white-space: pre-line;
+}
+.view-component-container {
+  padding: 0rem 1rem 0rem 1rem;
+}
+.recommendations-wrapper {
+  padding-bottom: 2em;
+}
+.recommendation-card{
+  /* --sds-c-container-color-background: var(--sds-g-color-surface-container-1); */
+  /* --sds-c-container-sizing-border: var(--sds-g-sizing-border-1); */
+  /* --sds-c-container-shadow: var(--sds-g-shadow-1); */
+  /* --sds-c-container-color-border: var(--sds-g-color-border-1); */
+  /* --sds-c-container-radius-border:  */
+  border-radius: var(--lwc-borderRadiusMedium, 0.25rem);
+  border: var(--sds-g-sizing-border-1, 1px) solid var(--sds-g-color-border-1, var(--lwc-colorBorder, rgb(229, 229, 229)));
+  padding: 0px;
+  background-color: var(--sds-g-color-surface-container-1);
+  box-shadow: var(--sds-g-shadow-1);
+}
+.recommendation-card:hover {
+  background-color: var(--Foundation-Gray-Neutral-95, #f3f3f3);
+  --sds-c-icon-color-foreground: #0b5cab;
+  
+  cursor: pointer;
+}
+.recommendation-card:hover .recommendation-send-icon {
+  --sds-c-icon-color-foreground: #0b5cab;
+  --sds-c-icon-color-foreground-default: #0b5cab;
+}
+.recommendation-card-body {
+  display: flex;
+  padding: 0 12px;
+  height: 65px;
+  align-items: center;
+  border: 1px rgb(201, 201, 201);
+  justify-content: space-between;
+}
+.recommendation-text{
+  width: -webkit-fill-available;
+  text-align: left;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.recommendation-send-icon {
+  align-items: center;
+  padding-left: 0.5rem;
+}
+.slds-row-gap{
+  row-gap: 5px;
+}
+.copilot-loading {
+  width: 100%;
+}
+.message-container {
+  width: 100%;
+}
+.agentforce-icon {
+  --slds-c-icon-color-foreground: #0176d3;
+}
+.einstein-menu-icon.einsteinMenuIconActive .blueIcon {
+  --slds-c-icon-color-foreground: #0176d3;
+}
+.einstein-menu-icon.einsteinMenuIconInactive .blueIcon {
+  --slds-c-icon-color-foreground: rgba(145, 145, 145, 1);
+}
+.einstein-menu-icon.einsteinMenuIconInverse .blueIcon {
+  --slds-c-icon-color-foreground-default: rgba(255, 255, 255, 0.5);
+}
+
+.einstein-menu-icon.einsteinMenuIconActiveInverse .blueIcon {
+  --slds-c-icon-color-foreground-default: rgba(255, 255, 255, 1);
+}

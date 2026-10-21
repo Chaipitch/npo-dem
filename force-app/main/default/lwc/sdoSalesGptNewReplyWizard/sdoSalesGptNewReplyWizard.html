@@ -1,0 +1,326 @@
+<!-- sldsValidatorIgnore -->
+<template>
+    <!-- <template if:true={recordId}> -->
+    <!-- <lightning-quick-action-panel> -->
+    <div class="wizard-container">
+        <lightning-layout multiple-rows="false">
+            <lightning-layout-item padding="around-small" size="4">
+                <fieldset class="slds-form-element">
+                    <legend class="slds-form-element__legend slds-form-element__label">Select an Einstein
+                        Copilot
+                        Response
+                        Type
+                    </legend>
+                    <div class="slds-form-element__control">
+                        <div class="slds-visual-picker slds-visual-picker_vertical">
+                            <input type="radio" id="visual-picker-email" value="Email" name="visual-picker-copilot"
+                                class="visual-picker-select-me" checked={isEmailType} onchange={typeChanged} />
+                            <label for="visual-picker-email">
+                                <span
+                                    class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
+                                    <span>
+                                        <span class="slds-text-heading_medium slds-m-bottom_x-small">Draft an
+                                            Email</span>
+                                        <span class="slds-text-title">
+                                            Creates an email draft or revises the latest generated email based on user
+                                            input.
+                                        </span>
+                                    </span>
+                                </span>
+                                <span class="slds-icon_container slds-visual-picker__text-check">
+                                    <lightning-icon icon-name="utility:check" size="xx-small"
+                                        variant="inverse"></lightning-icon>
+
+                                </span>
+                            </label>
+                        </div>
+                        <div class="slds-visual-picker slds-visual-picker_vertical">
+                            <input type="radio" id="visual-picker-summary" value="Summarize Record"
+                                name="visual-picker-copilot" checked={isSummaryType} onchange={typeChanged} />
+                            <label for="visual-picker-summary">
+                                <span
+                                    class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
+                                    <span>
+                                        <span class="slds-text-heading_medium slds-m-bottom_x-small">Summarize a
+                                            Record</span>
+                                        <span class="slds-text-title">
+                                            Generate a summary of a Salesforce record formatted based on user provided parameters, such as "bullet points".
+                                        </span>
+                                    </span>
+                                </span>
+                                <span class="slds-icon_container slds-visual-picker__text-check">
+                                    <lightning-icon icon-name="utility:check" size="xx-small"
+                                        variant="inverse"></lightning-icon>
+
+                                </span>
+                            </label>
+                        </div>
+                        <div class="slds-visual-picker slds-visual-picker_vertical">
+                            <input type="radio" id="visual-picker-single" value="Return Single Record"
+                                name="visual-picker-copilot" checked={isSingleRecordType} onchange={typeChanged} />
+                            <label for="visual-picker-single">
+                                <span
+                                    class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
+                                    <span>
+                                        <span class="slds-text-heading_medium slds-m-bottom_x-small">
+                                            Search Single Record
+                                        </span>
+                                        <span class="slds-text-title">
+                                            Finds and retrieves a Salesforce record based on user input and specific
+                                            conditions, such as field values.
+                                        </span>
+                                    </span>
+                                </span>
+                                <span class="slds-icon_container slds-visual-picker__text-check">
+                                    <lightning-icon icon-name="utility:check" size="xx-small"
+                                        variant="inverse"></lightning-icon>
+
+                                </span>
+                            </label>
+                        </div>
+                        <div class="slds-visual-picker slds-visual-picker_vertical">
+                            <input type="radio" id="visual-picker-multiple" value="Return Multiple Records"
+                                name="visual-picker-copilot" checked={isMultipleRecordsType} onchange={typeChanged} />
+                            <label for="visual-picker-multiple">
+                                <span
+                                    class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
+                                    <span>
+                                        <span class="slds-text-heading_medium slds-m-bottom_x-small">
+                                            Search Multiple Records
+                                        </span>
+                                        <span class="slds-text-title">
+                                            Finds and retrieves Salesforce records based on user input and specific
+                                            conditions, such as field values.
+                                        </span>
+                                    </span>
+                                </span>
+                                <span class="slds-icon_container slds-visual-picker__text-check">
+                                    <lightning-icon icon-name="utility:check" size="xx-small"
+                                        variant="inverse"></lightning-icon>
+
+                                </span>
+                            </label>
+                        </div>
+                        <div class="slds-visual-picker slds-visual-picker_vertical">
+                            <input type="radio" id="visual-picker-custom" value="Custom" name="visual-picker-copilot"
+                                checked={isCustomType} onchange={typeChanged} />
+                            <label for="visual-picker-custom">
+                                <span
+                                    class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
+                                    <span>
+                                        <span class="slds-text-heading_medium slds-m-bottom_x-small">Custom</span>
+                                        <span class="slds-text-title">
+                                            Use discretion when creating custom replies to represent Einstein Copilot
+                                            functionality correctly, based on the <a
+                                                href="https://docs.google.com/presentation/d/11g5VdITfFogvlE83M43xRsS_Lnyn9KO_kGKoClSTtXI/edit?usp=sharing">roadmap</a>.
+                                        </span>
+                                    </span>
+                                </span>
+                                <span class="slds-icon_container slds-visual-picker__text-check">
+                                    <lightning-icon icon-name="utility:check" size="xx-small"
+                                        variant="inverse"></lightning-icon>
+
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </fieldset>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small" size="4">
+                <div class="wizard-form">
+                    <!-- <lightning-input label="Id" disabled value={accountId}></lightning-input> -->
+                    <lightning-input label="Name" onchange={handleNameChange} value={name}
+                        class="slds-m-bottom_x-small"></lightning-input>
+                    <lightning-input label="Keyword" onchange={handleKeywordChange} value={keyword}
+                        class="slds-m-bottom_x-small"></lightning-input>
+                    <lightning-input-rich-text label="Einstein Response Title" value={title}
+                        onchange={handleTitleChange} label-visible="true" class="slds-m-bottom_x-small">
+                    </lightning-input-rich-text>
+                    <template if:true={notRecordType}>
+                        <lightning-input-rich-text label="Rich Text Message" value={message}
+                            onchange={handleMessageChange} label-visible="true" class="slds-m-bottom_x-small">
+                        </lightning-input-rich-text>
+                    </template>
+                    <template if:true={isEmailType}>
+                        <lightning-input label="Email To" onchange={handleToChange} value={emailTo}
+                            class="slds-m-bottom_x-small"></lightning-input>
+                        <lightning-input label="Email Subject" onchange={handleSubjectChange} value={emailSubject}
+                            class="slds-m-bottom_x-small"></lightning-input>
+                        <lightning-input-rich-text label="Email Body" value={emailBody} onchange={handleBodyChange}
+                            label-visible="true" class="slds-m-bottom_x-small">
+                        </lightning-input-rich-text>
+                    </template>
+                    <template if:true={isSingleRecordType}>
+                        <lightning-input label="Card Heading" onchange={handleCardNameChange} value={card1.name}
+                            class="slds-m-bottom_x-small"></lightning-input>
+                        <lightning-input label="Icon Name" onchange={handleCardIconChange} value={card1.iconName}
+                            class="slds-m-bottom_x-small"></lightning-input>
+                        <lightning-input-rich-text label="Card Rich Text Description" value={card1.description}
+                            onchange={handleCardDescChange} label-visible="true" class="slds-m-bottom_x-small">
+                        </lightning-input-rich-text>
+                        <template if:true={areSObjectsLoaded}>
+                            <div class="slds-m-bottom_x-small">
+                                <c-sdo-sales-gpt-combobox onselect={handleObjectChange} options={sObjects}
+                                    selected-value={selectedObject}
+                                    label="Select an Object to Link"></c-sdo-sales-gpt-combobox>
+                            </div>
+                        </template>
+                        <template if:true={isSObjectSelected}>
+                            <div class="slds-m-bottom_x-small">
+                                <c-sdo-sales-gpt-lookup sobject-name={selectedObject} title={objectNameField}
+                                    subtitle="Id" onselected={handleLookup}
+                                    icon-name="standard:sobject"></c-sdo-sales-gpt-lookup>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:true={isMultipleRecordsType}>
+                        <lightning-input label="Card Heading" onchange={handleListTitleChange} value={cardTitle}
+                            class="slds-m-bottom_x-small"></lightning-input>
+                        <lightning-input label="Icon Name" onchange={handleListIconChange} value={cardIcon}
+                            class="slds-m-bottom_x-small"></lightning-input>
+                        <lightning-input-rich-text label="Item 1 Rich Text Description" value={card1.description}
+                            onchange={handleCard1Change} label-visible="true" class="slds-m-bottom_x-small">
+                        </lightning-input-rich-text>
+                        <lightning-input-rich-text label="Item 2 Rich Text Description" value={card2.description}
+                            onchange={handleCard2Change} label-visible="true" class="slds-m-bottom_x-small">
+                        </lightning-input-rich-text>
+                        <lightning-input-rich-text label="Item 3 Rich Text Description" value={card3.description}
+                            onchange={handleCard3Change} label-visible="true" class="slds-m-bottom_x-small">
+                        </lightning-input-rich-text>
+                        <lightning-input label="List View Url" onchange={handleListUrlChange} value={actionUrl}
+                            class="slds-m-bottom_x-small"></lightning-input>
+                    </template>
+                    <template if:true={isCustomType}>
+                        <lightning-input type="toggle" label="Use Card Formatting" name="useCardFormatting"
+                            checked={isCardsActive} onchange={handleCardToggle}
+                            class="slds-m-bottom_x-small"></lightning-input>
+                        <template if:true={isCardsActive}>
+                            <lightning-input label="Card Heading" onchange={handleListTitleChange} value={cardTitle}
+                                class="slds-m-bottom_x-small"></lightning-input>
+                            <lightning-input label="Icon Name" onchange={handleListIconChange} value={cardIcon}
+                                class="slds-m-bottom_x-small"></lightning-input>
+                            <lightning-input-rich-text label="Item 1 Rich Text Description" value={card1.description}
+                                onchange={handleCard1Change} label-visible="true" class="slds-m-bottom_x-small">
+                            </lightning-input-rich-text>
+                            <lightning-input label="Item 1 Style" onchange={handleItem1StyleChange} value={card1.style}
+                                class="slds-m-bottom_x-small"></lightning-input>
+                            <lightning-input-rich-text label="Item 2 Rich Text Description" value={card2.description}
+                                onchange={handleCard2Change} label-visible="true" class="slds-m-bottom_x-small">
+                            </lightning-input-rich-text>
+                            <lightning-input label="Item 2 Style" onchange={handleItem2StyleChange} value={card2.style}
+                                class="slds-m-bottom_x-small"></lightning-input>
+                            <lightning-input-rich-text label="Item 3 Rich Text Description" value={card3.description}
+                                onchange={handleCard3Change} label-visible="true" class="slds-m-bottom_x-small">
+                            </lightning-input-rich-text>
+                            <lightning-input label="Item 3 Style" onchange={handleItem3StyleChange} value={card3.style}
+                                class="slds-m-bottom_x-small"></lightning-input>
+                        </template>
+                        <lightning-combobox name="actionTypeInput" label="Select a Custom Action Type"
+                            value={selectedActionType} placeholder="Select an Action" options={actionTypes}
+                            onchange={handleSelectCustomActionType} class="slds-m-bottom_x-small"></lightning-combobox>
+                        <template if:true={isActionTypeSelected}>
+                            <template if:false={ifCopyToClipboardType}>
+                                <div class="slds-text-heading_small slds-m-top_x-small">Select Values for Action
+                                </div>
+                                <lightning-input label="Action Label" onchange={handleActionLabelChange}
+                                    value={actionLabel} class="slds-m-bottom_x-small"></lightning-input>
+                            </template>
+                            <template if:true={ifEditRecordType}>
+                                <template if:true={areSObjectsLoaded}>
+                                    <div class="slds-m-bottom_x-small">
+                                        <c-sdo-sales-gpt-combobox onselect={handleObjectChangeForFields}
+                                            options={sObjects} selected-value={selectedObject}
+                                            label="Select an Object to Link"></c-sdo-sales-gpt-combobox>
+                                    </div>
+                                </template>
+                                <template if:true={isSObjectSelected}>
+                                    <div class="slds-m-bottom_x-small">
+                                        <c-sdo-sales-gpt-lookup sobject-name={selectedObject} title={objectNameField}
+                                            subtitle="Id" onselected={handleLookup}
+                                            icon-name="standard:sobject"></c-sdo-sales-gpt-lookup>
+                                    </div>
+                                </template>
+                            </template>
+                            <template if:true={ifFieldUpdateType}>
+                                <template if:true={areSObjectsLoaded}>
+                                    <div class="slds-m-bottom_x-small">
+                                        <c-sdo-sales-gpt-combobox onselect={handleObjectChangeForFields}
+                                            options={sObjects} selected-value={selectedObject}
+                                            label="Select an Object to Link"></c-sdo-sales-gpt-combobox>
+                                    </div>
+                                </template>
+                                <template if:true={isSObjectSelected}>
+                                    <div class="slds-m-bottom_x-small">
+                                        <c-sdo-sales-gpt-lookup sobject-name={selectedObject} title={objectNameField}
+                                            subtitle="Id" onselected={handleLookup}
+                                            icon-name="standard:sobject"></c-sdo-sales-gpt-lookup>
+                                    </div>
+                                </template>
+                                <template if:true={areSObjectFieldsLoaded}>
+                                    <div class="slds-m-bottom_x-small">
+                                        <c-sdo-sales-gpt-combobox onselect={handleFieldSelect} options={sObjectFields}
+                                            selected-value={selectedField}
+                                            label="Select an Field to Update"></c-sdo-sales-gpt-combobox>
+                                    </div>
+                                </template>
+                                <lightning-textarea label="Update field with the following text" value={updateWith}
+                                    onchange={handleUpdateWithChange}
+                                    field-level-help="Make sure the length of this isn't longer than the field you plan to update's limit."
+                                    class="slds-m-bottom_x-small">
+                                </lightning-textarea>
+                            </template>
+                            <template if:true={ifEmailComposerType}>
+                                <lightning-input label="Email To Input" onchange={handleToChangeStatic} value={emailTo}
+                                    class="slds-m-bottom_x-small"></lightning-input>
+                                <lightning-input label="Email Subject Input" onchange={handleSubjectChangeStatic}
+                                    value={emailSubject} class="slds-m-bottom_x-small"></lightning-input>
+                                <lightning-input-rich-text label="Email Body Input" value={emailBody}
+                                    onchange={handleBodyChangeStatic} label-visible="true"
+                                    class="slds-m-bottom_x-small">
+                                </lightning-input-rich-text>
+                            </template>
+                            <template if:true={ifToggleNextReplyType}>
+                                <div class="slds-m-bottom_x-small">
+                                    <c-sdo-sales-gpt-lookup sobject-name="SDO_Sales_GPT_Simulated_Reply__c" title="Name"
+                                        subtitle="Id" onselected={handleReplyLookup}
+                                        icon-name="standard:sobject"></c-sdo-sales-gpt-lookup>
+                                </div>
+                            </template>
+                            <template if:true={ifLaunchFlowType}>
+                                <lightning-input label="Flow API Name" onchange={handleFlowApiNameChange}
+                                    value={flowApiName} class="slds-m-bottom_x-small"></lightning-input>
+                            </template>
+                            <template if:true={ifOpenUrlType}>
+                                <lightning-input label="URL" onchange={handleActionUrlChange} value={actionUrl}
+                                    class="slds-m-bottom_x-small"
+                                    field-level-help="If Url is external make sure you have the correct Remote Site Settings in place."></lightning-input>
+                            </template>
+                        </template>
+                    </template>
+                </div>
+            </lightning-layout-item>
+
+            <lightning-layout-item padding="around-small" size="4">
+                <c-sdo-sales-gpt-wizard-preview message={messagePreview}></c-sdo-sales-gpt-wizard-preview>
+            </lightning-layout-item>
+        </lightning-layout>
+    </div>
+    <footer class="slds-card__footer">
+        <!-- <lightning-button variant="neutral" label="Cancel" onclick={closeAction}></lightning-button> -->
+        <lightning-button variant="base" label="Save" class="slds-card__footer-action" onclick={saveAction}
+            disabled={isButtonDisabled}
+            
+            data-tracking="true"
+            data-tracking-id={NANOID}
+            data-tracking-dom-event="click"
+            data-tracking-version={VERSION}
+            data-tracking-type="reporting"
+            data-tracking-event="conversion"
+            data-tracking-action="Reply Wizard Response"
+            data-tracking-delay="10"
+            data-tracking-minutes-saved="1"
+            data-tracking-value={replyType}></lightning-button>
+    </footer>
+    <!-- </lightning-quick-action-panel> -->
+    <!-- </template> -->
+</template>

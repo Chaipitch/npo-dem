@@ -1,0 +1,27 @@
+<template>
+    <lightning-card 
+        title="Resources"
+    >
+        <ul class="slack-resources__list">
+            <template for:each={resources} for:item="resource">
+                <li key={resource.key} class="slack-resources__item">
+                    <a
+                        class="slack-resources__tile"
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer">
+                        <span class="slack-resources__tile-body">
+                            <span class="slack-resources__tile-label">{resource.label}</span>
+                            <span class="slack-resources__tile-description">{resource.description}</span>
+                        </span>
+                        <span class="slack-resources__tile-chevron" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </span>
+                    </a>
+                </li>
+            </template>
+        </ul>
+    </lightning-card>
+</template>

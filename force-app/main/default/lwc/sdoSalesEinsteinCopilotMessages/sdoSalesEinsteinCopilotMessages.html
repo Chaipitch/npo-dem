@@ -1,0 +1,229 @@
+<template>
+    <template if:true={showQuestion}>
+        <div class="message-block slds-chat-listitem slds-chat-listitem_inbound outbound">
+            <div class="slds-chat-message message-block message-block_outbound">
+                <span class="slds-avatar slds-chat-avatar">
+                    <img class="avatar" src={_message.avatar} onerror={fallbackImage}>
+                    <!-- <runtime_copilot_base-user-avatar style="--runtime_copilot-base-user-avatar-background-color: #1B96FF">
+                    <div class="outbound-wrapper">
+                        <runtime_copilot_base-base-avatar variant="standard">
+                        </runtime_copilot_base-base-avatar>
+                    </div>
+                </runtime_copilot_base-user-avatar> -->
+                </span>
+                <div class="slds-chat-message__body">
+
+                    <div
+                        class="message-full-width slds-chat-message__text slds-chat-message__text_outbound sds-overrides">
+
+
+                        <div class="dynamic-message">
+                            <lightning-formatted-rich-text value={_message.question}
+                                class="slds-rich-text-editor__output">
+                            </lightning-formatted-rich-text>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template if:true={showAnswer}>
+        <div class="message-block slds-chat-listitem slds-chat-listitem_inbound">
+            <div class="slds-chat-message message-block message-block_inbound">
+                <span class="slds-avatar slds-chat-avatar">
+                    <img class="einstein-icon" src={einsteinAvatar} />
+                    <!-- <runtime_copilot_base-user-avatar style="--runtime_copilot-base-user-avatar-background-color: #1B96FF">
+                    <div class="outbound-wrapper">
+                        <runtime_copilot_base-base-avatar variant="standard">
+                        </runtime_copilot_base-base-avatar>
+                    </div>
+                </runtime_copilot_base-user-avatar> -->
+                </span>
+                <div class="slds-chat-message__body">
+
+                    <div
+                        class="message-full-width slds-chat-message__text slds-chat-message__text_inbound sds-overrides">
+
+
+                        
+                            <template if:false={unknown}>
+                                <div class="dynamic-message">
+                                <template if:true={_message.response.title}>
+
+                                    <div class="message-actionable_title">
+                                        <lightning-formatted-rich-text class="slds-rich-text-editor__output"
+                                            value={_message.response.title}></lightning-formatted-rich-text>
+                                    </div>
+                                </template>
+
+                                <template if:true={_message.response.message}>
+                                    <div class="message-actionable_body">
+                                        <div class="text-container">
+                                            <lightning-formatted-rich-text class="slds-rich-text-editor__output"
+                                                value={_message.response.message}></lightning-formatted-rich-text>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template if:true={isMultipleRecType}>
+                                    <div class="message-actionable_body">
+                                        <div class="slds-card slds-card_boundary">
+                                            <div class="slds-card__header slds-grid">
+                                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                                    <template if:true={_message.response.cardIcon}>
+                                                        <div class="slds-media__figure">
+                                                            <lightning-icon icon-name={_message.response.cardIcon}
+                                                                alternative-text={_message.response.cardIcon}
+                                                                title={_message.response.cardIcon}></lightning-icon>
+                                                        </div>
+                                                    </template>
+                                                    <div class="slds-media__body">
+                                                        <h2 class="slds-card__header-title">
+                                                            <a href="#" class="slds-card__header-link slds-truncate"
+                                                                title={_message.response.cardTitle}>
+                                                                <span>{_message.response.cardTitle}</span>
+                                                            </a>
+                                                        </h2>
+                                                    </div>
+                                                </header>
+                                            </div>
+                                            <div class="slds-card__body slds-card__body_inner">
+
+                                                <template for:each={_message.response.cards} for:item="card">
+                                                    <div key={card.Id} class="">
+                                                        <template if:true={card.description}>
+                                                            <div style={card.style}>
+                                                                <div
+                                                                    class="slds-size_1-of-1 slds-card slds-p-vertical_small slds-p-horizontal_medium">
+
+                                                                    <lightning-formatted-rich-text
+                                                                        value={card.description}></lightning-formatted-rich-text>
+
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template if:true={isCustomType}>
+                                    <div class="message-actionable_body">
+                                        <template if:true={_message.response.cardTitle}>
+                                            <div class="slds-card slds-card_boundary">
+                                                <div class="slds-card__header slds-grid">
+                                                    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                                        <template if:true={_message.response.cardIcon}>
+                                                            <div class="slds-media__figure">
+                                                                <lightning-icon icon-name={_message.response.cardIcon}
+                                                                    alternative-text={_message.response.cardIcon}
+                                                                    title={_message.response.cardIcon}></lightning-icon>
+                                                            </div>
+                                                        </template>
+                                                        <div class="slds-media__body">
+                                                            <h2 class="slds-card__header-title">
+                                                                <a href="#" class="slds-card__header-link slds-truncate"
+                                                                    title={_message.response.cardTitle}>
+                                                                    <span>{_message.response.cardTitle}</span>
+                                                                </a>
+                                                            </h2>
+                                                        </div>
+                                                    </header>
+                                                </div>
+                                                <div class="slds-card__body slds-card__body_inner">
+                                                    
+                                                    <template for:each={_message.response.cards} for:item="card">
+                                                        <div key={card.Id} class="">
+                                                            <template if:true={card.description}>
+                                                                <div style={card.style}>
+                                                                    <div
+                                                                        class="slds-size_1-of-1 slds-card slds-p-vertical_small slds-p-horizontal_medium">
+
+                                                                        <lightning-formatted-rich-text
+                                                                            value={card.description}></lightning-formatted-rich-text>
+
+                                                                    </div>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                <template if:true={isSingleRecType}>
+                                    <div class="message-actionable_body">
+                                        <template for:each={_message.response.cards} for:item="card" for:index="i">
+                                            <div key={card.i} class="" onclick={handleAction} data-type='view-action'
+                                                data-actionid={getFirstActionId}>
+                                                <div class="slds-size_1-of-1 slds-card slds-card_boundary">
+                                                    <div class="slds-card__header slds-grid">
+                                                        <header
+                                                            class="slds-media slds-media_center slds-has-flexi-truncate">
+                                                            <template if:true={card.iconName}>
+                                                                <div class="slds-media__figure">
+                                                                    <lightning-icon icon-name={card.iconName}
+                                                                        alternative-text={card.iconName}
+                                                                        title={card.iconName}></lightning-icon>
+                                                                </div>
+                                                            </template>
+                                                            <div class="slds-media__body">
+                                                                <h2 class="slds-card__header-title">
+                                                                    <a href="#"
+                                                                        class="slds-card__header-link slds-truncate"
+                                                                        title={card.name}>
+                                                                        <span>{card.name}</span>
+                                                                    </a>
+                                                                </h2>
+                                                            </div>
+                                                        </header>
+                                                    </div>
+                                                    <div class="slds-card__body slds-card__body_inner">
+                                                        <lightning-formatted-rich-text
+                                                            value={card.description}></lightning-formatted-rich-text>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                                <div class="message-actionable_footer slds-show">
+                                    <template if:true={_message.response.actions}>
+                                        <lightning-button-group>
+                                            <template for:each={_message.response.actions} for:item="action" for:index="i">
+                                                <lightning-button key={action.name} data-type='response-action'
+                                                    data-actionid={action.id} label={action.name} variant='neutral'
+                                                    data-action={action.name} onclick={handleAction}
+                                                    disabled={action.disabled}></lightning-button>
+                                            </template>
+                                        </lightning-button-group>
+                                    </template>
+                                </div>
+                                </div>
+                            </template>
+                            <template if:true={unknown}>
+                                <div class="dynamic-message">
+                                <div class="message-actionable_title">
+                                    <lightning-formatted-rich-text class="slds-rich-text-editor__output"
+                                        value="Alright, your question has been addressed."></lightning-formatted-rich-text>
+                                </div>
+                                <div class="message-actionable_body">
+                                    <div class="text-container">
+                                        <lightning-formatted-rich-text class="slds-rich-text-editor__output"
+                                            value={_message.responseText}></lightning-formatted-rich-text>
+                                    </div>
+                                </div>
+                                </div>
+                            </template>
+                            
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

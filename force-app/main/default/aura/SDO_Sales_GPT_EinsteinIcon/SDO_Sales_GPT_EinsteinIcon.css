@@ -1,0 +1,15 @@
+.THIS button.einstein-icon-container.slds-button.slds-button_icon.slds-button_icon-bare{
+    position: fixed;
+    z-index: 100;
+    top: 0.75rem;
+}
+.THIS.einstein-icon-container{
+    position: fixed;
+    z-index: 100;
+    top: 0.75rem;
+    box-shadow: none;
+}
+.THIS .einsteinMenuIconActive {
+    --slds-c-icon-color-foreground-default: #0176d3 !important;  
+    --slds-c-icon-color-foreground: #0176d3;
+}

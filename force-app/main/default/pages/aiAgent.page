@@ -1,0 +1,567 @@
+<!-- apex:page standardController="AI_Agent_Conversation__c" extensions="AgentListController" -->
+<apex:page controller="AgentListController" docType="html-5.0">    
+    <apex:slds />
+    <apex:includeLightning />
+    <apex:variable var="currentOrder" value="Flag" />
+    <style type="text/css">
+
+        :root {
+            --blue: #014486;
+            --gray: #939393;
+            --gray-bold: #646464;
+            --slds-g-color-accent-1: #066afe;
+            --lwc-colorBorderSelectionHover: rgb(27, 150, 255);
+            --slds-g-color-border-brand-2: #066afe;
+            --slds-g-color-brand-base-60: #066afe;
+            --slds-g-radius-border-circle: 100%;
+            --slds-g-radius-border-2: var(--slds-g-radius-border-circle);
+            --slds-g-font-lineheight-base: 18.75px;
+        }
+        html{
+          font-family:var(--slds-g-font-family-base);
+          font-size:100%;
+          line-height:var(--slds-g-font-lineheight-base);
+          background:var(--slds-g-color-surface-2);
+          color:var(--slds-g-color-on-surface-3);
+          -webkit-tap-highlight-color:transparent;
+        }
+        
+        .text-color-blue {
+            color: var(--blue);
+        }
+        .text-color-gray {
+            color: var(--gray);
+        }
+
+        .slds-scope a {
+            color: var(--blue);
+        }
+
+        .slds-scope p {
+            color: var(--blue);
+        }
+
+        .slds-scope .slds-table thead th {
+           color: rgb(92, 92, 92);
+           font-weight:600;
+           font-size: 12.5px; 
+           border-bottom: 0px;
+        }
+
+        .slds-scope .slds-card+.slds-card {
+            margin-top: 0;
+            cursor: pointer;
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.10);
+            border-radius:0.5rem;
+        }
+
+        .padding-x {
+            padding: 0 .5rem;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .custom-card-flex {
+            background: var(--slds-g-color-neutral-base-100, rgb(255, 255, 255));
+            border-width: 1px;
+            border-style: solid;
+            border-color: var(--slds-g-color-border-base-1, rgb(201, 201, 201));
+            border-radius: .25rem;
+            background-clip: padding-box;
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.10);
+        }
+        
+        /* Height of each picker */
+        .slds-scope .slds-visual-picker_small .slds-visual-picker__figure {
+            height: 81px;
+            border-radius:0.5rem;
+        }
+        
+        .slds-visual-picker input:checked ~ label .slds-visual-picker__text {
+            border: var(--slds-g-sizing-border-1) solid var(--slds-g-color-accent-1);
+            box-shadow: 0 0 0 1px var(--slds-g-color-accent-1) inset;
+        }
+
+        tbody tr {
+            height: 50.5px;
+        }
+        
+        td {
+           color: rgb(92, 92, 92);
+           font-weight: 500;
+           font-size: 12.5px;
+           font-family: var(--lwc-fontFamily, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol');
+           padding-bottom: 8px !important;
+           padding-top: 8px !important;
+        }
+
+        .slds-media__figure .slds-icon_container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px; /* Adjust size as needed */
+            height: 32px;
+            border-radius: var(--slds-g-radius-border-2);
+        }
+        
+        /* Adjust the size of the SVG inside */
+        .slds-media__figure .slds-icon {
+            width: 20px; /* Adjust size as needed */
+            height: 20px;
+        }
+
+        .icon-flag {
+            border: 1px solid var(--gray-bold);
+            width: auto;
+            padding: 2px 0;
+            cursor: pointer;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+        }
+        /* Used for Flag Button/icon */
+        .triangle {
+            width: 0; 
+            height: 0; 
+            border-left: 42px solid transparent;
+            border-top: 42px solid #0250D9;
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+
+        .triangle-down {
+            width: 0; 
+            height: 0; 
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 4px solid var(--gray-bold);
+            margin-left: 2px;
+        }
+        
+        .hidden {
+            display:none;
+        }
+        
+        tbody tr:hover>td {
+            background-color: #d6e6ff !important;
+        }
+        
+        .slds-is-sortable .slds-th__action:hover {
+            background-color: #e5e5e5 !important;
+            color: currentColor !important;
+        }
+        
+        .tabTitleText {
+            color: rgb(92, 92, 92);
+            font-size: 21.25px !important;
+            font-weight: 500 !important;
+            display: inline-block !important;
+            vertical-align: super;
+        }
+        
+    </style>
+    
+    
+    
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  >
+        <!-- Toast Message -->
+        <div class="demo-only slds-hidden"  id='ToastMessage'>
+            <div class="slds-notify_container">
+                <div class="slds-notify slds-notify_toast slds-theme_success" role="alert">
+                    <span class="slds-assistive-text">Success</span>
+                    <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top" title="Success">
+                        <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#success')}" />
+                        </svg>
+                    </span>
+                    <div class="slds-notify__content">
+                        <h2 class="slds-text-heading_small ">{!labels['Success_Message'].Long_Text_Message__c}</h2>
+                    </div>
+                    <button class="slds-button slds-button_icon slds-notify__close slds-button_icon-inverse" title="Close" onclick='toastLaunch()'>
+                        <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#close')}" />
+                        </svg>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="topDiv" class="slds-text-body_small">
+            <div class="slds-scrollable_none">
+                <div class="flex">
+                    <div class="slds-media__figure" style="margin-bottom:12px; align-self: center; padding-inline-start: 0.75rem">
+                        <span class="slds-icon_container slds-icon-standard-story" > 
+                            <svg aria-hidden="true" class="slds-icon">
+                                <use xmlns:xlink="http://www.w3.org/2000/xlink"
+                                     xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#agent_astro')}">
+                                </use>
+                            </svg>
+                        </span>
+                    </div>
+                    <h1 class="tabTitleText">{!labels['PageTitle'].Label}</h1>
+                </div>
+                
+                
+                <header class="slds-grid slds-wrap slds-p-bottom_small">
+                    <fieldset class="slds-form-element" role="radiogroup">
+                      <div class="slds-form-element__control ">
+                        <div class="slds-visual-picker slds-visual-picker_small">
+                          <input type="radio" id="All" value="All" name="ListFilter" checked="true" onclick="filterConversationList('All')" />
+                          <label for="All">
+                            <span class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
+                              <span>
+                                <span class="slds-text-heading_large">{!countOfConversations}</span>
+                                <span class="slds-text-title">{!labels['All_AI_Agents'].Label}</span>
+                              </span>
+                            </span>
+                            <span class="slds-icon_container slds-visual-picker__text-check">
+                              <svg class="slds-icon slds-icon-text-check slds-icon_x-small" aria-hidden="true">
+                                <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#check')}"></use>
+                              </svg>
+                            </span>
+                          </label>
+                        </div>
+                        <apex:repeat value="{!listOfAgents}" var="ag" >
+                            <div class="slds-visual-picker slds-visual-picker_small"  >
+                              <input type="radio" id="{!ag.Id}" value="{!ag.Id}" name="ListFilter" onclick="filterConversationList('{!ag.Id}')" />
+                              <label for="{!ag.Id}">
+                                <span class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
+                                  <span>
+                                    <span class="slds-text-heading_large">{!ag.Num_Conversations__c}</span>
+                                    <span class="slds-text-title">{!ag.Name}</span>
+                                  </span>
+                                </span>
+                                <span class="slds-icon_container slds-visual-picker__text-check">
+                                  <svg class="slds-icon slds-icon-text-check slds-icon_x-small" aria-hidden="true">
+                                    <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#check')}"></use>
+                                  </svg>
+                                </span>
+                              </label>
+                            </div>
+                        </apex:repeat>
+                        
+                      </div>
+                    </fieldset>
+                    
+                    <!-- <div class="slds-col slds-size_1-of-1 slds-large-size_7-of-12" style="display:none">
+                        <article class="slds-car custom-card-flex slds-p-left_medium slds-m-right_xx-small" style="display: flex; gap:2.5rem; align-items: center;">
+                            <div>
+                                <div class="slds-form-element">
+                                    <label class="slds-form-element__label" for="select-01">Select Interval</label>
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-select_container">
+                                            <select class="slds-select" id="select-01">
+                                            <option value="">Select…</option>
+                                                <option value="1h" selected="selected">Last 1 hour</option>
+                                                <option value="4h">Last 4 hours</option>
+                                                <option value="8h">Last 8 hours</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner slds-text-align_center">
+                                <p class="slds-text-heading_large">209</p>
+                                <span>Cases deflected</span>
+                            </div>
+                            <div>
+                                <span style="display: inline-flex;width:50px;font-size:14px;font-weight:500">Trending topics</span>
+                            </div>
+                            <div class="slds-text-align_center slds-p-left_medium">
+                                <p class="slds-text-heading_large">42</p>
+                                <span>Warrantly claim</span>
+                            </div>
+                            <div class="slds-text-align_center slds-p-left_medium">
+                                <p class="slds-text-heading_large">23</p>
+                                <span>Refund</span>
+                            </div>
+                            <div class="slds-text-align_center slds-p-left_medium">
+                                <p class="slds-text-heading_large">19</p>
+                                <span>Outage</span>
+                            </div>
+                        </article>
+                    </div> -->
+                </header>
+            </div>
+            <!-- Table with all the headings - separated so the scroll will include headers -->
+            <table aria-multiselectable="true" class="slds-table slds-table_resizable-cols" role="grid" aria-label="AI Agent Table">
+                    
+                    <thead> 
+                        <tr class="slds-line-height_reset" style="height: 2rem;">
+                            <th class="slds-truncate slds-is-sortable descending" scope="col" style="width:28%">
+                                <a class="slds-th__action slds-text-link_reset slds-is-sorted_desc " role="button" onclick="reorderList('Name');" href="javascript:void(0);" tabindex="-1" data-navigation="enable" data-action-triggers="enter">
+                                    <span title="Name" class="">{!labels['NameRowHeader'].Label}&nbsp;
+                                    </span>
+                                    <apex:outputText rendered="{!currentOrder == 'Name'}">
+                                        <svg class="slds-icon slds-icon_x-small slds-icon-text-default" aria-hidden="true">
+                                            <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#arrowdown')}"></use>
+                                        </svg>
+                                    </apex:outputText>
+                                </a>
+                                
+                            </th>
+                            <th class="slds-truncate slds-is-sortable descending" scope="col" style="width:8%">
+                                <a class="slds-th__action slds-text-link_reset slds-is-sorted_desc" role="button" onclick="reorderList('Flag');" href="javascript:void(0);" tabindex="-1" data-navigation="enable" data-action-triggers="enter">
+                                    <span title="Flag" class="slds-truncate">{!labels['FlagRowHeader'].Label}&nbsp;</span>
+                                    <apex:variable value="anything will go here" var="tempRenderingVar2"
+                                        rendered="{!currentOrder == 'Flag'}">
+                                        <svg class="slds-icon slds-icon_x-small slds-icon-text-default" aria-hidden="true">
+                                            <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#arrowdown')}"></use>
+                                        </svg>
+                                    </apex:variable>
+                                </a>
+                            </th>
+                            <th class="slds-truncate slds-is-sortable descending" scope="col" style="width:8%">
+                                <a class="slds-th__action slds-text-link_reset slds-is-sorted_desc " role="button" tabindex="-1" data-navigation="enable" data-action-triggers="enter">
+                                    <span title="Action" class="slds-truncate">{!labels['ActionRowHeader'].Label}</span>
+                                    
+                                </a>
+                            </th>
+                            <th class="slds-truncate slds-is-sortable descending" scope="col" style="width:28%">
+                                <a class="slds-th__action slds-text-link_reset slds-is-sorted_desc" role="button" onclick="reorderList('Summary');" href="javascript:void(0);" tabindex="-1" data-navigation="enable" data-action-triggers="enter">
+                                    <span title="Conversation Summary" class="slds-truncate">{!labels['Conversation_SummaryRowHeader'].Label}&nbsp;</span>
+                                </a>
+                            </th>
+                            <th class="slds-truncate slds-is-sortable descending" scope="col" style="width:28%">
+                                <a class="slds-th__action slds-text-link_reset slds-is-sorted_desc" role="button" onclick="reorderList('Length');" href="javascript:void(0);" tabindex="-1" data-navigation="enable" data-action-triggers="enter">
+                                    <span title="Conversation Length" class="slds-truncate">{!labels['Conversation_LengthRowHeader'].Label}&nbsp;</span>
+                                </a>
+                            </th>
+                        </tr> 
+                    </thead>
+                </table>
+                <div id="tableArea" class="slds-scrollable" >
+                    <apex:panelGrid columns="0" width="100%" id="myTable" rowClasses="hidden" html-aria-multiselectable="true" html-class="slds-table slds-table_bordered slds-table_fixed-layout slds-table_resizable-cols" html-role="grid" html-aria-label="AI Agent Table">
+                        <apex:repeat id="conversationList" value="{!conversationlist}" var="conv" >
+                            <apex:outputText rendered="{!IF(conv.isHidden__c, false, true)}">
+                                <tr class="slds-hint-parent slds-p-bottom_small" >
+                                    <!-- Checkbox column
+                                    <td class="slds-text-align_right slds-cell_action-mode" role="gridcell">
+                                        <div class="slds-checkbox">
+                                            <input type="checkbox" name="options" id="checkbox-01" value="checkbox-01" tabindex="0" aria-labelledby="check-button-label-01 column-group-header"
+                                            />
+                                            <label class="slds-checkbox__label" for="checkbox-01" id="check-button-label-01">
+                                                <span class="slds-checkbox_faux"></span>
+                                                <span class="slds-form-element__label slds-assistive-text">Select item 1</span>
+                                            </label>
+                                        </div>
+                                    </td> -->
+                                    <td data-label="Virtual Agent Name" scope="row" style="width:28%">
+                                        <span class="slds-grid slds-grid_align-spread">
+                                            <div class="slds-truncate"  title="{!conv.AI_Agent_Name__c}">
+                                                <lightning-base-formatted-text>{!conv.AI_Agent_Name__c}</lightning-base-formatted-text>
+                                            </div>
+                                        </span>
+                                    </td>
+                                    <td data-label="Flag" style="width:8%">
+                                        <apex:outputText rendered="{!IF(conv.Flag__c, true, false)}">
+                                            <div class="slds-truncate" title="Flag" onclick="toggleFlagInfo('{!conv.Id}Flag')">
+                                                <span class="slds-icon_container slds-icon-standard-priority icon-flag slds-p-horizontal_x-small" style="display:inline-flex; border-radius: 15rem; color:#0250d9" title="flag">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" class="slds-icon slds-icon_x-small slds-icon-text-default">
+                                                        <use xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#priority')}"></use>
+                                                    </svg>
+                                                    <div class="triangle-down"></div>
+                                                    <span class="slds-assistive-text">More flag information</span>
+                                                </span>
+                                            </div>
+                                        </apex:outputText>
+                                        <div id="{!conv.Id}Flag" class="slds-dropdown slds-dropdown_left hidden" data-aura-rendered-by="12592:0">
+                                            <ul role="menu" class="dropdown__list slds-dropdown__list slds-dropdown_length-with-icon-10" data-aura-rendered-by="12594:0">
+                                                <lightning-menu-subheader data-data-rendering-service-uid="2568" data-aura-rendered-by="12703:0" role="presentation" >
+                                                    <div class="slds-dropdown__header slds-truncate" part="menu-subheader" >
+                                                        <span>{!conv.Flag_Reason__c}</span>
+                                                    </div>
+                                                </lightning-menu-subheader>
+                                                <li role="presentation" title="Lower Flag" class="slds-dropdown__item" data-aura-rendered-by="12706:0">
+                                                    <a role="menuitem" tabindex="-1" data-aura-rendered-by="12707:0" onclick="lowerFlag('{!conv.Id}');" href="javascript:void(0);" >
+                                                        <span class="slds-truncate" data-aura-rendered-by="12708:0">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" class="slds-icon slds-icon_x-small slds-icon-text-default">
+                                                                <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#lower_flag')}"></use>
+                                                            </svg>
+                                                            {!labels['Lower_FlagDialog'].Label}
+                                                        </span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                            
+                                    </td>
+                                    <td data-label="Action" style="width:8%">
+                                        <div class="slds-truncate" title="{!labels['MonitorLink'].Label}">
+                                            <a href="#" tabindex="-1" style="color:#0250d9" onclick="showAgent('{!conv.Id}')">{!labels['MonitorLink'].Label}</a>
+                                        </div>
+                                    </td>
+                                    <td data-label="Conversation Summary" style="width:28%">
+                                        <p class="slds-truncate" style="color:#0250d9" title="Summary">{!conv.summary__c}</p>
+                                    </td>
+                                    <td data-label="Conversation Length" style="width:28%">
+                                        <span class="slds-grid slds-grid_align-spread">
+                                            <div class="slds-truncate"  title="Conversation Length">
+                                                <lightning-base-formatted-text>
+                                                    <apex:outputText value="{0, date, m ' min ' ss ' s '}" >
+                                                        <apex:param value="{!conv.Conversation_Start_Date__c}" />
+                                                    </apex:outputText>
+                                                </lightning-base-formatted-text>
+                                            </div>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </apex:outputText>
+                        </apex:repeat>
+                    </apex:panelGrid>
+                </div>
+            </div>
+        
+                
+        <apex:form > 
+            <apex:actionFunction action="{!updateAIAgentConversations}" name="updateConversationsListAF" reRender="myTable">
+                <apex:param name="aiAgentId" assignTo="{!selectedAgentId}" value="" />
+            </apex:actionFunction>
+            <apex:actionFunction action="{!lowerFlagForConversation}" name="lowerFlagAF" reRender="myTable">
+                <apex:param name="convId" assignTo="{!conversationActionedId}" value="" />
+            </apex:actionFunction>
+            <apex:actionFunction action="{!reorderList}" name="reorderListAF" reRender="myTable">
+                <apex:param name="order" assignTo="{!sortOrder}" value="" />
+            </apex:actionFunction>
+            <apex:actionFunction action="{!removeConversation}" name="removeConversationAF" reRender="myTable">
+                <apex:param name="convId" assignTo="{!conversationActionedId}" value="" />
+            </apex:actionFunction>
+        </apex:form>
+        
+        
+        
+    </html>
+    <div style="position: fixed; right: 0; bottom:20px; display: none;" id="agentChatbot">
+        <apex:includeLightning />
+        <div id="LwcId" />
+    </div>
+
+    <script>
+        // Set the table height so it scrolls - fill the space available. 200px is needed for the header area.
+        document.getElementById('tableArea').style = 'height: ' + (window.innerHeight - 200) + 'px';
+        console.log("window.innerHeight: " + window.innerHeight);
+        var agentChat = document.getElementById("agentChatbot");
+        //agentChat.style.top = (window.innerHeight - 480) + 'px';
+
+        var invokeLC = true;
+        
+        function showAgent(convId) {
+            $Lightning.use("c:AIAgentsMonitorApp", function() {
+                console.log('invokeLC = ' + invokeLC);
+                if (invokeLC) {
+                    $Lightning.createComponent("c:AIAgentMonitorWindow",
+                    {
+                        recordId : convId,
+                        convCatchUp : "{!labels['Conversation_Catch_UpTitle'].Label}",
+                        issueTitle : "{!labels['Issue'].Label}",
+                        wasThisHelpful : "{!labels['Was_this_helpful'].Label}",
+                        dismiss : "{!labels['Dismiss'].Label}",
+                        showLess : "{!labels['Show_Less'].Label}",
+                        transferButtonLabel : "{!labels['Transfer_to_RepButton'].Label}",
+                        lowerButtonLabel : "{!labels['LowerFlagButton'].Label}",
+                        joinedText : "{!labels['Joined_Conversation'].Label}",
+                        sessionStartedText : "{!labels['Session_Started'].Label}",
+                        raisedFlagText : "{!labels['Raised_Flag'].Label}",
+                        leftText : "{!labels['left_the_conversation'].Label}",
+                        lowerFlagText : "{!labels['Lowered_the_Flag'].Label}"
+                    },
+                    "LwcId", // the Id of div tag where your component will be rendered
+                    function(cmp) {
+                        console.log('Calling the LWC Component');
+                        $A.eventService.addHandler({
+                            "event" : "c:AIAgentMonitorEvent",
+                            handler : handleMonitorEvent
+                        });
+                    });
+                }
+                else {
+                     // Fire event to update
+                     fireUpdateEvent(convId);
+                }
+                invokeLC = false;
+                showWindow()
+            });
+            
+        }
+        
+        function fireUpdateEvent(convId) {
+            let objEvent = $A.get("e.c:AIAgentMonitorEvent");
+            objEvent.setParams({
+                conversationId : convId,
+                messageType : 'refresh'
+            });
+            objEvent.fire();
+        }
+        
+        function handleMonitorEvent (event) {
+            console.log("handleMonitorEvent with event : " + event);
+            var type = event.getParam("messageType");
+            var convId = event.getParam("conversationId");
+            console.log("handleMonitorEvent with event : " + type + '; ' + convId);
+            if (type == 'LowerFlag') {
+                lowerFlag(convId);
+            }
+            else if (type == 'Transfer') {
+                removeConversation(convId);
+            }
+            else if (type == 'hideWindow') {
+                hideWindow();
+            }
+        }
+        
+        function showWindow() {
+            var agentChat = document.getElementById("agentChatbot");
+            agentChat.style.display = "block";
+        }
+        
+        function hideWindow() {
+            var agentChat = document.getElementById("agentChatbot");
+            agentChat.style.display = "none";
+        }
+        
+        function toggleFlagInfo(divId) {
+           var flagBox = document.getElementById(divId);
+           flagBox.classList.toggle("hidden");
+        }
+        
+        function lowerFlag(convId) {
+            //alert("Lower flag clicked with Conv Id : " + convId);
+            console.log("Lower flag clicked with Conv Id : " + convId);
+            // Lowers flag in memory only - object remains untouched
+            lowerFlagAF(convId);
+        }
+        
+        function filterConversationList(agentId) {
+            //alert("Filter Conversation List with Id : " + agentId);
+            console.log("Filtering list with AgentID: " + agentId);
+            updateConversationsListAF(agentId);
+        }   
+        
+        function reorderList(order) {
+            //alert("reorderList with order : " + order);
+            console.log("reorderList with order : " + order);
+            reorderListAF(order);
+        }
+        
+        function removeConversation(convId) {
+            //alert("removeConversation with Conv Id : " + convId);
+            console.log("removeConversation with Conv Id : " + convId);
+            // Removes the conversation from the list - this is transferring the conversation
+            removeConversationAF(convId);
+            toastLaunch();
+        }
+        
+        function toastLaunch(){
+            var element = document.getElementById("ToastMessage");
+            element.classList.toggle("slds-hidden");
+            setTimeout(function () {
+                element.classList.add("slds-hidden");
+                },5000);
+        }
+    </script>
+
+
+</apex:page>

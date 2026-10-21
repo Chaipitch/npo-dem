@@ -1,0 +1,244 @@
+<aura:component implements="flexipage:availableForAllPageTypes,force:hasRecordId" access="global" controller="AIAgentMonitorController">
+	
+    <aura:handler name="init" action="{!c.doInit}" value="{!this}"/>    
+    <aura:registerEvent name="VFMsgEvent" type="c:AIAgentMonitorEvent" />
+    <aura:handler event="c:AIAgentMonitorEvent" action="{!c.refreshMonitor}" />
+    <aura:attribute name="labels" type="Map" />
+    
+    <!-- Local Variables -->
+    <aura:attribute name="conversationEntries" type="AI_Agent_Conversation_Entry__c[]"/>
+    <aura:attribute name="conversationObj" type="AI_Agent_Conversation__c"/>
+    <aura:attribute name="message_number" type="Integer" default="0"/>
+    <aura:attribute name="component_height" type="String" default="480px"/>
+    <aura:attribute name="lowerFlagButtonDisabled" type="Boolean" default="false" />
+    <aura:attribute name="showLoweredFlag" type="Boolean" default="false" />
+   	<aura:attribute name="lowerFlagTime" type="Date" />
+    <aura:attribute name="transferButtonDisabled" type="Boolean" default="false" />
+	<aura:attribute name="agentLeftTime" type="Date" />
+    <aura:attribute name="showAgentLeft" type="Boolean" default="false" />
+    
+    <aura:attribute name="languages" type="List" default="[
+                                                          {'label': 'English', 'value': 'en'},
+                                                          {'label': 'French', 'value': 'fr'},
+                                                          {'label': 'German', 'value': 'de'},
+                                                          {'label': 'Spanish', 'value': 'es'},
+                                                          {'label': 'Japanese', 'value': 'ja'},
+                                                          ]"/>
+    
+    <!-- Auto respond to outbound messages from a service rep as a customer -->
+    <aura:attribute name="isDemoMode" type="Boolean" default="true" />
+    <aura:attribute name="demoCustomerResponses" type="AI_Agent_Conversation_Entry__c[]" />
+    
+    <!-- Labels -->
+    <aura:attribute name="currentUserLocale" type="String"/>
+    <aura:attribute name="conversation" type="String" default="Conversation"/>
+    <aura:attribute name="convCatchUp" type="String" default="Conversation Catch-Up"/> <!-- Rappel de la conversation --> 
+    <aura:attribute name="issueTitle" type="String" default="Issue"/> <!-- Probléme -->
+    <aura:attribute name="wasThisHelpful" type="String" default="Was this summary helpful?"/> <!-- Ce résumé a-t-il été utile? -->
+    <aura:attribute name="dismiss" type="String" default="Dismiss"/> <!-- Ignorer --> 
+    <aura:attribute name="showLess" type="String" default="Show Less"/> <!-- Afficher moins -->
+    <aura:attribute name="headerText" type="String" default="Monitoring"/>
+    <aura:attribute name="transferButtonLabel" type="String" default="Transfer to Rep"/>
+    <aura:attribute name="lowerButtonLabel" type="String" default="Lower"/>
+    <aura:attribute name="joinedText" type="String" default="joined the conversation"/>
+    <aura:attribute name="sessionStartedText" type="String" default="Session started"/>
+    <aura:attribute name="raisedFlagText" type="String" default="raised a flag"/>
+    <aura:attribute name="leftText" type="String" default="left the conversation"/>
+    <aura:attribute name="lowerFlagText" type="String" default="lowered the Flag"/>
+
+    <!-- Parameters -->
+    
+    <aura:attribute name="einstein_translation" type="String" default="Yes"/>
+    <aura:attribute name="customer_language" type="String" default="en"/>
+    <aura:attribute name="agent_language" type="String" default="fr"/>
+    <aura:attribute name="translatedEvent" type="Object"/>
+
+    <aura:attribute name="contactName" type="String" />
+    <aura:attribute name="agentUserId" type="String" />
+    <aura:attribute name="agentName" type="String" />
+    <aura:attribute name="currentDateTime" type="Datetime" />
+    
+    <!-- Get Attribute for User Object-->
+    <aura:attribute name="userFields" type="String[]" access="global" default="Id,FirstName,LastName,LanguageLocaleKey"/>
+    <aura:attribute name="record" type="Object"/>
+    <aura:attribute name="fields" type="Object"/>
+    <aura:attribute name="recordError" type="String"/>
+    <aura:attribute name="currentUser" type="User"/>
+	<force:recordData aura:id="recordLoader" recordId="{!$SObjectType.CurrentUser.Id}"  fields="{!v.userFields}" targetFields="{!v.currentUser}"/>
+    
+    <!-- Events -->
+    <lightning:empApi aura:id="empApi" />
+    <aura:handler event="c:AutoSendMessage" action="{!c.autoSendAgentMessage}"/>
+    <aura:handler name="render" value="{!this}" action="{!c.onRender}"/>
+    
+    <!-- Code -->
+
+    <div role="dialog" data-target-ignore-children-elements="true" aria-labelledby="title_23586:0" tabindex="-1" class="roundborder panel scrollable slds-docked-composer slds-grid slds-grid--vertical slds-is-open" data-aura-rendered-by="23591:0" data-scoped-scroll="true" >
+        <div tabindex="-1" class="headerLink" data-aura-rendered-by="23592:0">
+            <div class="roundborder panel-header slds-docked-composer__header slds-grid slds-shrink-none" data-aura-rendered-by="23593:0">
+                <div class="slds-media slds-media--center slds-has-flexi-truncate" >
+                    <div >
+                        <img src="{!$Resource.SupervisorMonitoringIcon}"/>
+                    </div>
+                    <div class="slds-media__body slds-grid" data-aura-rendered-by="23597:0">
+                        <h2 tabindex="-1" id="title_23586:0" title="Craig Plain" class="panelTitle slds-truncate" data-aura-rendered-by="23598:0">{!v.headerText}</h2>
+                    </div>
+                </div>
+                <div class="slds-col--bump-left" data-aura-rendered-by="23601:0">
+                    <span data-aura-rendered-by="23602:0">
+                        <lightning:buttonIcon iconName="utility:dash" variant="bare" title="Minimize" alternativeText="Minimize" class="slds-button slds-button_icon minButton slds-p-around_xx-small slds-button_icon-bare" />
+                    </span>
+                    <span data-aura-rendered-by="23611:0">
+                        <lightning:buttonIcon iconName="utility:expand_alt" variant="bare" title="Maximize" alternativeText="Maximize" class="slds-button slds-button_icon maxButton slds-m-left_xx-small slds-p-around_xx-small slds-button_icon-bare" />
+                    </span>
+                    <span data-aura-rendered-by="23620:0">
+                        <lightning:buttonIcon iconName="utility:close" variant="bare" title="Close" alternativeText="Close" onclick="{!c.hideWindow}" class="slds-button slds-button_icon closeButton slds-m-left_xx-small slds-p-around_xx-small slds-button_icon-bare" />
+                    </span>
+                </div>
+            </div>
+        </div>
+        <span class="assistiveText" data-aura-rendered-by="23629:0">Start of Dialog</span>
+        <div class="slds-docked-composer__body" data-aura-rendered-by="23631:0">
+            <div class="" data-aura-rendered-by="23632:0">
+                <div class="spinnerWrapper hideSpinner hideEl forceComponentSpinner" data-aura-rendered-by="23635:0" data-aura-class="forceComponentSpinner">
+                    <div role="alert" aria-hidden="true" class="indicator  hideEl forceInlineSpinner" data-aura-rendered-by="23638:0" data-aura-class="forceInlineSpinner"></div>
+                </div>
+                <div class="loadingSpinner omniChatMonitor" data-aura-rendered-by="23672:0" data-aura-class="omniChatMonitor">
+                    <lightning:spinner class="slds-spinner_container slds-hide" data-aura-rendered-by="23673:0" >
+                        <div part="backdrop" ></div>
+                        <div  class="slds-spinner slds-spinner_medium" role="status" part="spinner">
+                            <span class="slds-assistive-text">Loading</span>
+                            <div part="dot-a" class="slds-spinner__dot-a" ></div>
+                            <div part="dot-b" class="slds-spinner__dot-b" ></div>
+                        </div>
+                    </lightning:spinner>
+                </div>
+                <div data-aura-rendered-by="23674:0" class="omniChatMonitor" data-aura-class="omniChatMonitor">
+                    <div data-aura-rendered-by="23676:0" >
+                        <lightning:layout class="actionBarArea slds-grid slds-grid_align-spread" >
+                            <lightning:layoutItem  class="" >
+                                <lightning:buttonGroup class="slds-button-group" >
+                                    <lightning:button class="conversationTransferButton firstButton slds-button slds-button_neutral slds-button_first" variant="neutral" iconName="utility:change_owner" label="{!v.transferButtonLabel}" onclick="{!c.transfer}" disabled="{!v.transferButtonDisabled}" ></lightning:button>
+                                    <lightning:button class="lowerFlagButton lastButton slds-button slds-button_neutral slds-button_last" variant="neutral" iconName="utility:lower_flag" label="{!v.lowerButtonLabel}" onclick="{!c.lowerFlag}" disabled="{!v.lowerFlagButtonDisabled}" ></lightning:button>
+                                </lightning:buttonGroup>
+                            </lightning:layoutItem>
+                            <lightning:layoutItem >
+                                <!-- If/When to add listen or barge button -->
+                                <div class="supervisorCallMonitor slds-float_right"></div>
+                            </lightning:layoutItem>
+                        </lightning:layout>
+                    </div><!--render facet: 23677:0-->
+                    <div class="slds-scrollable chatArea" data-aura-rendered-by="23689:0">
+                        <article class="conversation-card fill-parent-container" aria-label="Conversation" part="card">
+                            <!-- Conversation Summary -->
+                            <div aura:id="convCatchUp" class="conversation-scope-notifications-section einstein-conversation-summary slds-scoped-notification slds-media slds-media_center slds-scoped-notification_light" >
+                                <div class="slds-media__figure">
+                                    <lightning:icon iconName="utility:agent_astro" size="small"></lightning:icon>
+                                </div>
+                                <div class="slds-media__body summary-body">
+                                    <div class="summary-header">
+                                        <h3 class="summary-title" >{!v.convCatchUp}</h3> 
+                                        <lightning:button class="dismiss-button" variant="base" label="{!v.dismiss}" onclick="{! c.hideSummary }" ></lightning:button>
+                                    </div>
+                                    <div class="summary-container">
+                                        <p class="summary-text conversationSummaryColor">{!v.conversationObj.Conversation_Summary__c}</p>
+                                        <div class="issue-section">
+                                            <h4 class="issue-title" >{!v.issueTitle}</h4>
+                                            <p class="conversationSummaryColor">{!v.conversationObj.Conversation_Summary_Issue__c}</p>
+                                        </div>
+                                    </div>
+                                    <!-- div class="summary-expanded-footer">
+                                                            <p class="feedback-question conversationSummaryColor">{!v.wasThisHelpful}</p>
+                                                            <div class="feedback-button-group">
+                                                                <lightning:buttonGroup>
+                                                                    <button class="slds-button slds-button_icon  slds-button_icon-border-filled vote-button" type="button" title="Like">	
+                                                                        <lightning:icon iconName="utility:like" size="xx-small"></lightning:icon>
+                                                                    </button>
+                                                                    <button class="slds-button slds-button_icon  slds-button_icon-border-filled vote-button" type="button" title="Dislike">
+                                                                        <lightning:icon iconName="utility:dislike" size="xx-small"></lightning:icon>	
+                                                                    </button>
+                                                                </lightning:buttonGroup>
+                                                            </div>
+                                                            <div class="show-less-container">
+                                                                <lightning:button class="show-less-button slds-float_right" variant="base" label="{!v.showLess}"></lightning:button>
+                                                            </div>
+                                                        </div -->
+                                </div>
+                            </div>
+                            <!-- Conversation Catch-up End -->
+                            <ui:scrollerWrapper aura:id="chatScrollerId">                                               
+                                <section role="log" class="slds-chat conversation-log-section">
+                                    <ul class="slds-chat-list">
+                                        <div class="slds-chat-bookend">
+                                            <span class="slds-icon_container slds-icon-utility-chat slds-chat-icon">
+                                                <lightning:icon iconName="utility:chat" size="x-small"></lightning:icon>
+                                            </span>
+                                            <p style="color: #2e2e2e; font-size: 0.8125rem">{!v.sessionStartedText} • <lightning:formattedDateTime value="{!v.conversationObj.Conversation_Start__c}" year="numeric" month="numeric" day="numeric" hour="2-digit" minute="2-digit" timeZoneName="short" hour12="true" />
+                                            </p>
+                                        </div>
+                                        <li class="slds-chat-listitem slds-chat-listitem_event">
+                                            <div class="slds-chat-event">
+                                                <div class="slds-chat-event__body">
+                                                    <span class="slds-icon_container slds-icon-utility-change_owner slds-chat-icon">
+                                                        <lightning:icon iconName="utility:change_owner" size="x-small"></lightning:icon>
+                                                    </span>
+                                                    <span style="font-size:0.8125rem" class="slds-rich-text-editor__output">{!v.conversationObj.AI_Agent_Name__c + ' '} {!v.joinedText} • <lightning:formattedDateTime value="{!v.conversationObj.Conversation_Start__c}" year="numeric" month="numeric" day="numeric" hour="2-digit" minute="2-digit" timeZoneName="short" hour12="true" /></span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <aura:iteration items="{!v.conversationEntries}" var="convEntry">
+                                            <c:AIAgentMonitorEntry conversationEntry="{!convEntry}" contactName="{!v.conversationObj.Contact_Name__c}" userAgentName="{!v.conversationObj.AI_Agent_Name__c}"/>
+                                        </aura:iteration>
+                                        <aura:if isTrue="{!v.conversationObj.Flag__c}">
+                                            <li class="slds-chat-listitem slds-chat-listitem_event">
+                                                <div class="slds-chat-event">
+                                                    <div class="slds-chat-event__body">
+                                                        <span class="slds-icon_container slds-icon-utility-change_owner slds-chat-icon">
+                                                            <lightning:icon iconName="utility:priority" size="x-small"></lightning:icon>
+                                                        </span>
+                                                        <span style="font-size:0.8125rem" class="slds-rich-text-editor__output">{!v.conversationObj.AI_Agent_Name__c + ' '} {!v.raisedFlagText} • <lightning:formattedDateTime value="{!v.conversationObj.Newest_Message_Date__c}" year="numeric" month="numeric" day="numeric" hour="2-digit" minute="2-digit" timeZoneName="short" hour12="true" /></span>
+                                                    </div>
+                                                    <aura:if isTrue="{!not(empty(v.conversationObj.Flag_Reason__c))}" >
+                                                        <div style="font-size:0.8125rem" class="slds-chat-event__agent-message">
+                                                            <lightning:formattedRichText class="slds-rich-text-editor__output" >
+                                                                <span part="formatted-rich-text">{!v.conversationObj.Flag_Reason__c}</span>
+                                                            </lightning:formattedRichText>
+                                                        </div>
+                                                    </aura:if>
+                                                </div>
+                                            </li>
+                                        </aura:if>
+                                        <aura:if isTrue="{!v.showLoweredFlag}">
+                                            <li class="slds-chat-listitem slds-chat-listitem_event">
+                                                <div class="slds-chat-event">
+                                                    <div class="slds-chat-event__body">
+                                                        <span class="slds-icon_container slds-icon-utility-change_owner slds-chat-icon">
+                                                            <lightning:icon iconName="utility:lower_flag" size="x-small"></lightning:icon>
+                                                        </span>
+                                                        <span style="font-size:0.8125rem" class="slds-rich-text-editor__output">{!v.currentUser.FirstName + ' ' + v.currentUser.LastName + ' '} {!v.lowerFlagText} • <lightning:formattedDateTime value="{!v.lowerFlagTime}" year="numeric" month="numeric" day="numeric" hour="2-digit" minute="2-digit" timeZoneName="short" hour12="true" /></span>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </aura:if>
+                                        <aura:if isTrue="{!v.showAgentLeft}">
+                                            <li class="slds-chat-listitem slds-chat-listitem_event">
+                                                <div class="slds-chat-event">
+                                                    <div class="slds-chat-event__body">
+                                                        <span class="slds-icon_container slds-icon-utility-change_owner slds-chat-icon">
+                                                            <lightning:icon iconName="utility:change_owner" size="x-small"></lightning:icon>
+                                                        </span>
+                                                        <span style="font-size:0.8125rem" class="slds-rich-text-editor__output">{!v.conversationObj.AI_Agent_Name__c  + ' '} {!v.leftText} • <lightning:formattedDateTime value="{!v.agentLeftTime}" year="numeric" month="numeric" day="numeric" hour="2-digit" minute="2-digit" timeZoneName="short" hour12="true" /></span>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </aura:if>
+                                    </ul>
+                                </section>
+                            </ui:scrollerWrapper>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</aura:component>

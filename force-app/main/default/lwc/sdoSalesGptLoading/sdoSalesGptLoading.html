@@ -1,0 +1,67 @@
+<template>
+    <div class="slds-grid slds-wrap">
+        <div class="slds-size_1-of-1 slds-p-around_small card-answer">
+            <div class="slds-grid slds-wrap">
+                <div class="einstein-column">
+                    <img class="einstein-icon" src={einsteinAvatar} />
+                </div>
+                <div class="response-column slds-p-around_medium">
+                    <div if:true={step1} class="typewriter-content step1">
+                        <span class="typewriter-text">Analyzing your request</span>
+                        <div class="star-container">
+                            <lightning-icon variant="success" icon-name="utility:check" alternative-text="Success"
+                                title="Success" size="x-small">
+                            </lightning-icon>
+                        </div>
+                    </div>
+                    <div if:true={step2} class="typewriter-content step2">
+                        <span class="typewriter-text">Figuring out next steps</span>
+                        <div class="star-container">
+                            <lightning-icon variant="success" icon-name="utility:check" alternative-text="Success"
+                                title="Success" size="x-small">
+                            </lightning-icon>
+                        </div>
+                    </div>
+                    <div if:true={step3} class="typewriter-content step3">
+                        <span class="typewriter-text">Working</span>
+                        <div class="star-container">
+                            <lightning-icon variant="success" icon-name="utility:check" alternative-text="Success"
+                                title="Success" size="x-small">
+                            </lightning-icon>
+                        </div>
+                    </div>
+                    <div class="typewriter-content step4">
+                        <span class="typewriter-text">{typedText}</span>
+                        <div if:true={step4} class="star-container">
+                            <lightning-icon variant="success" icon-name="utility:check" alternative-text="Success"
+                                title="Success" size="x-small">
+                            </lightning-icon>
+                        </div>
+                        <div if:false={step4} class="star-container">
+                            <svg class="stars starfade star1" opacity="0" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 152 152">
+                                <path fill="#0176D3"
+                                    d="m148.719 81.32-30.734 15.348c-9.231 4.597-16.683 12.086-21.317 21.317L81.32 148.719c-2.187 4.375-8.453 4.375-10.64 0l-15.348-30.734c-4.597-9.231-12.086-16.683-21.317-21.317L3.28 81.32c-4.375-2.187-4.375-8.453 0-10.64l30.734-15.348c9.23-4.597 16.683-12.086 21.317-21.317L70.68 3.28c2.187-4.375 8.453-4.375 10.64 0l15.348 30.734c4.597 9.23 12.086 16.683 21.317 21.317l30.734 15.348c4.375 2.187 4.375 8.453 0 10.64Z" />
+                            </svg>
+                            <svg class="stars starfade star2" opacity="0" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 152 152">
+                                <path fill="#0176D3"
+                                    d="m148.719 81.32-30.734 15.348c-9.231 4.597-16.683 12.086-21.317 21.317L81.32 148.719c-2.187 4.375-8.453 4.375-10.64 0l-15.348-30.734c-4.597-9.231-12.086-16.683-21.317-21.317L3.28 81.32c-4.375-2.187-4.375-8.453 0-10.64l30.734-15.348c9.23-4.597 16.683-12.086 21.317-21.317L70.68 3.28c2.187-4.375 8.453-4.375 10.64 0l15.348 30.734c4.597 9.23 12.086 16.683 21.317 21.317l30.734 15.348c4.375 2.187 4.375 8.453 0 10.64Z" />
+                            </svg>
+                            <svg class="stars starfade star3" opacity="0" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 152 152">
+                                <path fill="#0176D3"
+                                    d="m148.719 81.32-30.734 15.348c-9.231 4.597-16.683 12.086-21.317 21.317L81.32 148.719c-2.187 4.375-8.453 4.375-10.64 0l-15.348-30.734c-4.597-9.231-12.086-16.683-21.317-21.317L3.28 81.32c-4.375-2.187-4.375-8.453 0-10.64l30.734-15.348c9.23-4.597 16.683-12.086 21.317-21.317L70.68 3.28c2.187-4.375 8.453-4.375 10.64 0l15.348 30.734c4.597 9.23 12.086 16.683 21.317 21.317l30.734 15.348c4.375 2.187 4.375 8.453 0 10.64Z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <!-- <span class="scroll-stopper"></span> -->
+                    <!-- <p>Drafting in progress <img src={einsteinLoading} class="einstein-loading" /></p> -->
+                    <!-- <div class="slds-p-vertical_x-small">
+                        <lightning-button label="Stop" variant='neutral'></lightning-button>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

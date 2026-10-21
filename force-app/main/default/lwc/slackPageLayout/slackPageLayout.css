@@ -1,0 +1,18 @@
+.slack-page-container {
+    width: 80%;
+    height: 100%;
+    margin: 0% 10%;
+}
+
+.slack-page-layout {
+    display: flex;
+    flex-direction: row;
+}
+
+.slack-side-panel {
+    width: 30%;
+}
+
+.slack-main-panel {
+    width: 70%;
+}

@@ -1,0 +1,1129 @@
+<apex:page lightningStyleSheets="true" showHeader="false" standardStylesheets="false" sidebar="false" applyHtmlTag="false"
+           applyBodyTag="false" docType="html-5.0">
+    
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <apex:slds />
+        <apex:includeLightning />
+        
+        <head>
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+            <script src="https://code.highcharts.com/highcharts.js"> </script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.5/angular.min.js"></script>
+
+        <style>
+            body {
+            width: 100%;
+            margin: 0
+            }
+            
+            .uiMenuList_default {
+            background: rgb(255, 255, 255);
+            box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.16);
+            border: 1px solid rgb(221, 219, 218);
+            border-radius: .25rem;
+            padding: .5rem 0;
+            float: left;
+            position: absolute;
+            min-width: 100px;
+            max-width: 400px;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: .125rem;
+            }
+            
+            .slds-tabs_default__content {
+            overflow-x: scroll;
+            }
+            
+            svg .slds-icon . {
+            fill: #16325c;
+            }
+            
+            .slds-tabs_scoped__link {
+            background: white;
+            }
+            
+            .demo-agent_user {
+            min-width: 155px;
+            }
+            
+            td {
+            min-height: 100px;
+            max-height: 100px;
+            }
+            
+            tr {
+            min-height: 100px;
+            max-height: 100px;
+            }
+            
+            .slds-scope .slds-table th, .slds-scope .slds-table td {
+            white-space: inherit;
+            }
+            
+            
+            .slds-scope .slds-text-heading_label,
+            .slds-scope .slds-text-heading_label {
+            color: black;
+            }
+            
+            .slds-scope .slds-show {
+            border: none;
+            }
+            
+            .slds-tabs_scoped__content.slds-show {
+            padding-left: 0px;
+            padding-right: 0px;
+            }
+            
+            .slds-scope.slds-tabs_scoped__nav.slds-scope.slds-tabs_scoped__nav {
+            background: white;
+            }
+            
+            .slds-scope .slds-tabs_scoped__nav,
+            .slds-scope .slds-tabs_scoped__nav {
+            background: white;
+            }
+            
+            .slds-tabs_scoped__item.slds-text-heading_label.slds-active {
+            background: white;
+            }
+            
+            .demo-agent_status-indicator {
+            width: 12px;
+            height: 12px;
+            display: inline-block;
+            border-radius: 50%;
+            }
+            
+            .slds-tabs_scoped__content.slds-show {
+            background: white;
+            }
+            
+            .slds-scope .slds-table td,
+            .slds-scope .slds-table th {
+            padding: 12px 15px;
+            padding-right: 0 !important;
+            }
+            
+            .demo-agent_time-in-state{
+            min-width: 85px
+            }
+            
+            .demo-agent_status{
+            min-width: 165px;
+            }
+            
+            .demo-agent_capacity{
+            min-width: 110px;
+            }
+            
+            .demo-agent_channels{
+            min-width: 110px;
+            }
+            
+            .demo-agent_status-indicator.demo-agent_status-indicator-available {
+            background: #51A87A;
+            }
+            
+            .demo-agent_status-indicator.demo-agent_status-indicator-busy {
+            background: #E36028;
+            }
+            
+            .demo-agent_status-indicator.demo-agent_status-indicator-away {
+            background: #FFB128;
+            }
+            
+            
+            .slds-tabs_default__item.slds-active a {
+            border-color: #0070d2;
+            }
+            
+            aside {
+            border: 1px solid #ececec;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 10px;
+            height: 300px;
+            padding-top: 15px !important;
+            }
+            
+            .slds .slds-card {
+            background: white !important;
+            position: relative;
+            }
+            
+            .graph1label {
+            font-size: 33px;
+            font-family: Salesforce Sans;
+            text-align: center;
+            position: absolute;
+            top: 118px;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            }
+            
+            .graph1label .subtitle {
+            font-size: 12px
+            }
+            
+            #Queue {
+            display: none;
+            }
+            
+            #Agents {}
+        </style>
+        
+        </head>
+        
+        <apex:remoteObjects >
+            <apex:remoteObjectModel name="User" fields="Id,FirstName,LastName,Name,ProfileId,IsActive,Omni_Supervisor__c,FullPhotoUrl"
+                                    />
+        </apex:remoteObjects>
+        
+        <body>
+            
+            <!-- REQUIRED SLDS WRAPPER -->
+            <div class="slds-scope slds-grid slds-wrap">
+                
+                <div id="Agents" class="tabcontent slds-size_1-of-1 slds-grid slds-wrap">
+                    <div id="tab-scoped-1" class="slds-tabs_scoped__content slds-show slds-size_1-of-1 slds-grid slds-wrap" role="tabpanel" aria-labelledby="tab-scoped-1__item">
+                        <div class="slds-text-heading_medium slds-size_1-of-1 slds-grid slds-wrap" style="padding-left:10px">
+                            <img src="/presence/img/supervisortabicons/agents.png" style="margin-bottom: .5rem;"/>
+                            <span class="slds-m-left_medium">
+                                <b style=" font-size: 105%; font-weight: 500;">Agent Summary</b>
+                            </span>
+                        </div>
+                        
+                        <!-- INNER TABS -->
+                        <div class="slds-tabs_default slds-size_1-of-1 slds-grid slds-wrap">
+                            <ul class="slds-tabs_default__nav slds-size_1-of-1 slds-grid slds-wrap" role="tablist">
+                                <li class="slds-tabs_default__item slds-text-heading_label slds-active" title="Item One" role="presentation">
+                                    <a class="slds-tabs_default__link" href="#void" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1"
+                                       id="tab-default-1__item" style="padding-left: 25px; padding-right: 25px;">All Agents</a>
+                                </li>
+                                <li class="slds-tabs_default__item slds-text-heading_label" title="Item Two" role="presentation">
+                                    <a class="slds-tabs_default__link" href="#void" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2"
+                                       id="tab-default-2__item" style="padding-left: 25px; padding-right: 25px;">Agents by Queue</a>
+                                </li>
+                                <li style="display: flex;margin-left: auto;gap: 8px;padding-right: 20px;">
+                                    <div class="slds-button-group" role="group">
+                                        <button class="slds-button slds-button_neutral" title="Item One">Change Queue</button>
+                                        <button class="slds-button slds-button_neutral" title="Item Two">Change Skills</button>
+                                        <button class="slds-button slds-button_neutral" title="Item Two">Reset Password</button>
+                                    </div>
+                                    
+                                    <button class="slds-button slds-button_neutral" disabled='true'>Clear Filters</button>
+                                    
+                                </li>                                  
+                                
+                            </ul>
+                            <div id="tab-default-1" class="slds-tabs_default__content slds-show slds-size_1-of-1 slds-grid slds-wrap" role="tabpanel"
+                                 aria-labelledby="tab-default-1__item">
+                                <table class="slds-table slds-table_striped slds-table_cell-buffer slds-max-medium-table_stacked" id="agent-table">
+                                    <thead class="omniListHeader">
+                                        <tr>
+                                            <th>
+                                                <span class="slds-truncate">
+                                                    <b>&nbsp;</b>
+                                                </span>
+                                                
+                                            </th>
+                                            <th>
+                                                <span class="slds-truncate">
+                                                    <b>AGENT</b>
+                                                </span>
+                                                <button class="slds-button slds-button_icon-x-small">
+                                                    <svg aria-hidden="true" class="slds-button__icon slds-button__icon_hint slds-button__icon_small">
+                                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#sort')}"></use>
+                                                    </svg>
+                                                </button>
+                                                <button class="slds-button slds-button_icon-x-small">
+                                                    <svg aria-hidden="true" class="slds-button__icon slds-button__icon_hint slds-button__icon_small">
+                                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#down')}"></use>
+                                                    </svg>
+                                                </button>
+                                            </th>
+                                            <th>
+                                                <span class="slds-truncate">
+                                                    <b>STATUS</b>
+                                                </span>
+                                                <button class="slds-button slds-button_icon-x-small">
+                                                    <svg aria-hidden="true" class="slds-button__icon slds-button__icon_hint slds-button__icon_small">
+                                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#sort')}"></use>
+                                                    </svg>
+                                                </button>
+                                                <button class="slds-button slds-button_icon-x-small">
+                                                    <svg aria-hidden="true" class="slds-button__icon slds-button__icon_hint slds-button__icon_small">
+                                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#down')}"></use>
+                                                    </svg>
+                                                </button>
+                                                
+                                            </th>
+                                            
+                                            <th>
+                                                <span class="slds-truncate">
+                                                    <b>FLAG</b>
+                                                </span>
+                                                <button class="slds-button slds-button_icon-x-small">
+                                                    <svg aria-hidden="true" class="slds-button__icon slds-button__icon_hint slds-button__icon_small">
+                                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#down')}"></use>
+                                                    </svg>
+                                                </button>
+                                            </th>
+                                            
+                                            <th>
+                                                <span class="slds-truncate">
+                                                    <b>ACTION</b>
+                                                </span>
+                                            </th>
+                                            
+                                            <th>
+                                                <span class="slds-truncate">
+                                                    <b>WORK SUMMARY</b>
+                                                </span>
+                                            </th>
+                                            
+                                            <th>
+                                                <span class="slds-truncate">
+                                                    <b>STATE</b>
+                                                </span>
+                                                <button class="slds-button slds-button_icon-x-small">
+                                                    <svg aria-hidden="true" class="slds-button__icon slds-button__icon_hint slds-button__icon_small">
+                                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#sort')}"></use>
+                                                    </svg>
+                                                </button>
+                                                
+                                            </th>
+                                            
+                                            <th>
+                                                <span class="slds-truncate">
+                                                    <b>LOGIN</b>
+                                                </span>
+                                                <button class="slds-button slds-button_icon-x-small">
+                                                    <svg aria-hidden="true" class="slds-button__icon slds-button__icon_hint slds-button__icon_small">
+                                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#sort')}"></use>
+                                                    </svg>
+                                                </button>
+                                            </th>
+                                            
+                                            <th>
+                                                <span class="slds-truncate">
+                                                    <b>ACCEPT</b>
+                                                </span>
+                                                <button class="slds-button slds-button_icon-x-small">
+                                                    <svg aria-hidden="true" class="slds-button__icon slds-button__icon_hint slds-button__icon_small">
+                                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#sort')}"></use>
+                                                    </svg>
+                                                </button>
+                                            </th>
+                                            
+                                            <th>
+                                                <span class="slds-truncate">
+                                                    <b>CAPACITY</b>
+                                                </span>
+                                                <button class="slds-button slds-button_icon-x-small">
+                                                    <svg aria-hidden="true" class="slds-button__icon slds-button__icon_hint slds-button__icon_small">
+                                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#sort')}"></use>
+                                                    </svg>
+                                                </button>
+                                            </th>
+                                            
+                                            
+                                            <th>
+                                                <span class="slds-truncate">
+                                                    <b>WORKLOAD</b>
+                                                </span>
+                                                <button class="slds-button slds-button_icon-x-small">
+                                                    <svg aria-hidden="true" class="slds-button__icon slds-button__icon_hint slds-button__icon_small">
+                                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#sort')}"></use>
+                                                    </svg>
+                                                </button>
+                                            </th>
+                                            
+                                            <th>
+                                                <span class="slds-truncate">
+                                                    <b>CHANNELS</b>
+                                                </span>
+                                                <button class="slds-button slds-button_icon-x-small">
+                                                    <svg aria-hidden="true" class="slds-button__icon slds-button__icon_hint slds-button__icon_small">
+                                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#down')}"></use>
+                                                    </svg>
+                                                </button>
+                                            </th>
+                                            <th>
+                                                <span class="slds-truncate">
+                                                    <b>ASSIGNED QUEUES</b>
+                                                </span>
+                                            </th>
+                                            <th>
+                                                <span class="slds-truncate">
+                                                    <b>SKILLS</b>
+                                                </span>
+                                                <button class="slds-button slds-button_icon-x-small">
+                                                    <svg aria-hidden="true" class="slds-button__icon slds-button__icon_hint slds-button__icon_small">
+                                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#down')}"></use>
+                                                    </svg>
+                                                </button>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    
+                                    <tbody>
+                                        <!-- INJECTED TABLES GO HERE -->
+                                    </tbody>
+                                </table>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- JAVASCRIPT -->
+            <script>
+            
+            var totalQueues;
+            var queueTable = $('#Queue');
+            var agentTable = $('#Agents');
+            var workTable = $('#Work');
+            var skillTable = $('#Skills');
+            
+            var tabAgent = $('#Agent-Tab');
+            var tabQueue = $('#Queue-Tab');
+            var tabWork = $('#Work-Tab')
+            var tabSkills = $('#Skills-Tab');
+            
+            
+            agentTable.show();
+            queueTable.hide();
+            workTable.hide();
+            skillTable.hide();
+            
+            /* __________________________________ TAB FOR AGENT js ________________________________________- */
+            
+            var queueTab = function () {
+                tabAgent.removeClass("slds-active")
+                tabWork.removeClass("slds-active")
+                tabQueue.addClass("slds-active")
+                tabSkills.removeClass("slds-active")
+                
+                skillTable.hide();
+                queueTable.show();
+                workTable.hide();
+                agentTable.hide();
+            };
+            
+            var agentTab = function () {
+                tabQueue.removeClass("slds-active")
+                tabWork.removeClass("slds-active")
+                tabAgent.addClass("slds-active")
+                tabSkills.removeClass("slds-active")
+                
+                skillTable.hide();
+                queueTable.hide();
+                workTable.hide();
+                agentTable.show();
+            };
+            
+            var workTab = function () {
+                tabQueue.removeClass("slds-active")
+                tabWork.addClass("slds-active")
+                tabAgent.removeClass("slds-active")
+                tabSkills.removeClass("slds-active")
+                
+                
+                queueTable.hide();
+                agentTable.hide();
+                workTable.show();
+                skillTable.hide();
+                
+            };
+            
+            var skillsTab = function () {
+                tabQueue.removeClass("slds-active")
+                tabWork.removeClass("slds-active")
+                tabAgent.removeClass("slds-active")
+                tabSkills.addClass("slds-active")
+                
+                
+                queueTable.hide();
+                agentTable.hide();
+                workTable.hide();
+                skillTable.show();
+            };
+            
+            
+            // TODO: Use jQuery instead of document.querySelector since we added it anyway
+            var nUsers = 14;
+            var maxTimeSinceLogin = 120;
+            var maxLoad = 2;
+            var skillsArray = ['Billing and Accounts',
+                               'English',
+                               'Generalist Agents',
+                               'Customer Service'];
+            var skillNumber;
+            
+            
+            console.log('skillsArray ' + skillsArray);
+            
+            
+            
+            
+            // var $onlineLink = $('.onlineStatusItem a', window.parent.document).first();
+            // var $offlineLink = $('.offlineStatusItem a', window.parent.document);
+            
+            // $onlineLink.on('click', function () {
+            //   var $firstRow = $('.demo-agent_row').first();
+            //   var $stateTimer = $firstRow.find('.demo-agent_time-in-state').find('.demo-timer');
+            //   var $acceptTimer = $firstRow.find('.demo-agent_time-since-last-accept').find('.demo-timer');
+            //   // reset timer
+            //   $stateTimer.attr('data-start-seconds', 0);
+            //   $acceptTimer.removeAttr('data-start-seconds').removeClass('demo-timer').html('_');
+            
+            //   setTimeout(function () {
+            //     $firstRow.removeClass('demo-agent_row-hidden');
+            //   }, 1000);
+            // });
+            
+            // $offlineLink.on('click', function () {
+            //   var $firstRow = $('.demo-agent_row').first();
+            //   $firstRow.addClass('demo-agent_row-hidden');
+            // });
+            
+            // helpers for creating new users
+            var maleFirstNames = ['Noah', 'Liam', 'Mason', 'Jacob', 'William', 'Ethan', 'Michael', 'Alexander', 'James', 'Daniel', 'Elijah', 'Benjamin', 'Logan', 'Aiden', 'Jayden'];
+            var femaleFirstNames = ['Emma', 'Olivia', 'Sophia', 'Isabella', 'Ava', 'Mia', 'Emily', 'Abigail', 'Madison', 'Charlotte', 'Harper', 'Sofia', 'Avery', 'Elizabeth', 'Amelia'];
+            var lastNames = ['Smith', 'Brown', 'Johnson', 'Jones', 'Williams', 'Davis', 'Miller', 'Wilson', 'Taylor', 'Clark', 'White', 'Moore', 'Thompson', 'Allen', 'Martin'];
+            var assignedQueue = ['Chat, Tier1Queue','SMS, Social_Queue,','Tier1Queue, Social_Queue','Chat, Tier1Queue, Social_Queue','Chat, Social_Queue','Tier1Queue, Social_Queue,Chat','Tier1Queue, Social_Queue','Tier1Queue, Chat','Tier1Queue, SMS','Chat, Tier1Queue','Social_Queue','Tier1Queue','Tier1Queue, Social_Queue','Tier1Queue','Tier1Queue, Social_Queue,SMS'];
+            //for case number & capacity
+            var caseNum = [4];
+            var caseString=['4 Cases'];
+            var capacity = ['40%'];
+            var workload = ['4/10'];
+            var workStatus = ['All-Available'];
+            var tableString = '<td colspan="13" id="demoCases" style="display:none;"><table class="slds-table slds-size_1-of-1 slds-grid slds-wrap">'+
+                '<tbody class="slds-grid slds-wrap slds-size_1-of-1">'+
+                '<tr class="demo-agent_row slds-grid slds-wrap slds-size_12-of-12">'+
+                '<td scope="col" class="slds-size_3-of-12">'+
+                '</td>'+
+                '<td scope="col" class="slds-size_4-of-12">'+
+                '<a>'+
+                'Inspiron 1750 Adaptor not charging<br/> 00002373 | Jun 10, 2020, 10:11 AM | Phone | Low | New | Lauren Bailey'+
+                '</a>'+
+                '</td>'+
+                '<td class="slds-size_1-of-12 ">'+
+                '1'+
+                '</td>'+
+                '<td class="demo-agent_channels slds-size_1-of-12 ">'+
+                '<svg aria-hidden="true" class="slds-icon slds-icon_x-small slds-icon-text-default">'+
+                '<use xlink:href="{!URLFOR($Asset.SLDS, "/assets/icons/action-sprite/svg/symbols.svg#new_case")}"></use>'+
+                '</svg>'+
+                '<svg aria-hidden="true" class="slds-icon slds-icon_x-small slds-icon-text-default">'+
+                '<use xlink:href="{!URLFOR($Asset.SLDS, "/assets/icons/standard-sprite/svg/symbols.svg#call")}"></use>'+
+                '</svg>'+
+                '</td>'+
+                '<td class="slds-size_2-of-12 ">'+
+                'Tier1Queue'+
+                '</td>'+
+                '<td class="slds-size_1-of-12 ">'+
+                '</td>'+
+                '</tr>'+
+                '<tr class="demo-agent_row slds-grid slds-wrap slds-size_12-of-12">'+
+                '<td scope="col" class="slds-size_3-of-12">'+
+                '</td>'+
+                '<td scope="col" class="slds-size_4-of-12">'+
+                '<a>'+
+                'Return for order: O-0000000126<br/>00002387 | Jun 10, 2020, 10:11 AM | Web | Medium | New | Lauren Bailey'+
+                '</a>'+
+                '</td>'+
+                '<td class="slds-size_1-of-12 ">'+
+                '1'+
+                '</td>'+
+                '<td class="demo-agent_channels slds-size_1-of-12 ">'+
+                '<svg aria-hidden="true" class="slds-icon slds-icon_x-small slds-icon-text-default">'+
+                '<use xlink:href="{!URLFOR($Asset.SLDS, "/assets/icons/standard-sprite/svg/symbols.svg#call")}"></use>'+
+                '</svg>'+
+                '</td>'+
+                '<td class="slds-size_2-of-12 ">'+
+                'Tier1Queue'+
+                '</td>'+
+                '<td class="slds-size_1-of-12 ">'+
+                '</td>'+
+                '</tr>'+
+                '<tr class="demo-agent_row slds-grid slds-wrap slds-size_12-of-12">'+
+                '<td scope="col" class="slds-size_3-of-12">'+
+                '</td>'+
+                '<td scope="col" class="slds-size_4-of-12">'+
+                '<a>'+
+                'TWEET FROM: MarkKingston<br/> Twitter |1'+
+                '</a>'+
+                '</td>'+
+                '<td class="slds-size_1-of-12 ">'+
+                '1'+
+                '</td>'+
+                '<td class="demo-agent_channels slds-size_1-of-12 ">'+
+                '<svg aria-hidden="true" class="slds-icon slds-icon_x-small slds-icon-text-default">'+
+                '<use xlink:href="{!URLFOR($Asset.SLDS, "/assets/icons/action-sprite/svg/symbols.svg#new_case")}"></use>'+
+                '</svg>'+
+                '</td>'+  
+                '<td class="slds-size_2-of-12 ">'+
+                'Tier1Queue'+
+                '</td>'+
+                '<td class="slds-size_1-of-12 ">'+
+                '</td>'+
+                '</tr>'+
+                '<tr class="demo-agent_row slds-grid slds-wrap slds-size_12-of-12">'+
+                '<td scope="col" class="slds-size_3-of-12">'+
+                '</td>'+
+                '<td scope="col" class="slds-size_4-of-12">'+
+                '<a>'+
+                'How do I extend my product warranty?<br/>'+
+                '00001929 | Jun 10, 2020, 10:11 AM | Community | Low | New | Larry Baxter'+
+                '</a>'+
+                '</td>'+
+                '<td class="slds-size_1-of-12 ">'+
+                '1'+
+                '</td>'+
+                '<td class="demo-agent_channels slds-size_1-of-12 ">'+
+                '<svg aria-hidden="true" class="slds-icon slds-icon_x-small slds-icon-text-default">'+
+                '<use xlink:href="{!URLFOR($Asset.SLDS, "/assets/icons/action-sprite/svg/symbols.svg#new_case")}"></use>'+
+                '</svg>'+
+                '</td>'+        
+                '<td class="slds-size_2-of-12 ">'+
+                'Tier1Queue'+
+                '</td>'+
+                '<td class="slds-size_1-of-12 ">'+
+                '</td>'+
+                '</tr>'+
+                '</tbody>'+
+                '</table></td>';
+            
+            var getRandomName = function (namesList) {
+                return namesList[~~(Math.random() * namesList.length)];
+            };
+            
+            var getRandomSkillLevel = function () {
+                skillNumber = Math.floor(Math.random() * 10);
+                console.log('getRandomSkillLevel ' + skillNumber)
+                return skillNumber;
+            };
+            
+            var getRandomSkill = function (skillList) {
+                var testing = Math.random() > 0.5 ? 'Billing and Accounts' : 'English';
+                var testing2 = Math.random() > 0.5 ? 'English' : 'Generalist Agents'
+                
+                console.log('testing ' + testing)
+                console.log('testing2 ' + testing2)
+            };
+            
+            // return case number 
+            
+            var getRandomCaseNumber = function () {
+                var num, i;
+                for (i = 0; i < nUsers; i++) {
+                    num = Math.floor(Math.random() * 10);
+                    caseNum.push(num);
+                    caseString.push(num.toString() + ' Cases');
+                    capacity.push(num.toString() + '0%');
+                    workload.push(num.toString() + '/10');
+                    if(num<5){
+                        workStatus.push('Available');
+                    }else{
+                        workStatus.push('Away');
+                    }   
+                }
+                console.log(workload);
+                return num;
+            }
+            
+            var getSummeryString = function () {
+                var caseStr = getRandomCaseNumber + ' Cases';
+            }
+            
+            
+            var assignSkillTest = function () {
+                var returnArray = [];
+                var returnedArray = [];
+                var testSkillNumber = Math.floor(Math.random(1) * 4);
+                console.log(testSkillNumber)
+                console.log('skillsArray')
+                
+                switch (testSkillNumber) {
+                    case 0:
+                        return ' _ ';
+                        break;
+                    case 1:
+                        returnArray = skillsArray.slice(0, testSkillNumber);
+                        console.log(returnArray)
+                        for (var i = 0; i < returnArray.length; i++) {
+                            returnArray[i] = returnArray[i] + ' (' + getRandomSkillLevel() + ')';
+                        }
+                        return returnArray
+                        break;
+                    case 2:
+                        returnArray = skillsArray.slice(0, testSkillNumber);
+                        console.log(returnArray)
+                        for (var i = 0; i < returnArray.length; i++) {
+                            returnArray[i] = returnArray[i] + ' (' + getRandomSkillLevel() + ')';
+                        }
+                        return returnArray
+                        break;
+                    case 3:
+                        returnArray = skillsArray.slice(0, testSkillNumber);
+                        console.log(returnArray)
+                        for (var i = 0; i < returnArray.length; i++) {
+                            returnArray[i] = returnArray[i] + ' (' + getRandomSkillLevel() + ')';
+                        }
+                        return returnArray
+                        break;
+                    case 4:
+                        returnArray = skillsArray.slice(0, testSkillNumber);
+                        console.log(returnArray)
+                        for (var i = 0; i < returnArray.length; i++) {
+                            returnArray[i] = returnArray[i] + ' (' + getRandomSkillLevel() + ')';
+                        }
+                        return returnArray
+                        break;
+                }
+                
+                return returnArray;
+                
+                
+            }
+            
+            var getDefaultTimes = function () {
+                var timeSinceLogin = ~~(Math.random() * maxTimeSinceLogin);
+                var timeInState = timeSinceLogin - ~~(Math.random() * timeSinceLogin);
+                
+                return {
+                    timeSinceLogin: timeSinceLogin,
+                    timeInState: timeInState,
+                    timeSinceLastAccept: ~~(Math.random() * timeInState)
+                }
+            };
+            
+            // if assigned queues / cases are to match update this fn
+            var getChannels = function () {
+                var availableChannels = ['call', 'web', 'phone_portrait', 'email'];
+                // var usersChannelLength = 1 + ~~(Math.random() * availableChannels.length);
+                var usersChannel = availableChannels[~~(Math.random() * availableChannels.length)];
+                return [usersChannel]
+            };
+            
+            var getQueues = function (channels) {
+                return channels.map(function (channel) {
+                    switch (channel) {
+                        case 'call': return 'Phone';
+                        case 'web': return 'Web';
+                        case 'phone_portrait': return 'IoT';
+                        case 'email': return 'Email';
+                        default: return '_';
+                    }
+                });
+            };
+            
+            var getItems = function () {
+                return ~~(Math.random() * (maxItems + 1));
+            };
+            
+            var getLoad = function () {
+                var randLoad = Math.random();
+                if (randLoad < 0.9) return maxLoad; // 90% chance for "High"
+                else if (randLoad < 0.95) return maxLoad / 2; // 10% chance for Medium
+                    else return 0; // 5% chance for Low
+            };
+            
+            // iterator that gets the next avatar
+            var nextAvatar = (function () {
+                var currentMaleId = 0, currentFemaleId = 0;
+                return function (gender) {
+                    if (currentFemaleId > 35) currentFemaleId = 0;
+                    if (currentMaleId > 50) currentMaleId = 0;
+                    return gender === 'male' ? ++currentMaleId : ++currentFemaleId;
+                };
+            }());
+            
+            var getAvatar = function (avatarGender) {
+                var avatarNumber = nextAvatar(avatarGender);
+                var jpgStr = 'avatars_' + avatarGender + '/00' + (avatarNumber >= 10 ? avatarNumber : '0' + avatarNumber) + '.jpg';
+                var urlStr = avatarGender === 'male' ? "{!URLFOR($Resource.SDO_Service_avatars_male, '/')}" : "{!URLFOR($Resource.SDO_Service_avatars_female, '/')}";
+                return "<img src='" + urlStr + jpgStr + "' />";
+            };
+            
+            var getStatus = function () {
+                var statuses = ['All-Available', 'Chat-Available', 'Messaging-Available', 'Cases-Available', 'Busy', 'Busy-Break', 'Busy-Training', 'Phone-Availiable'];
+                
+                var randStat = Math.random();
+                // 20% chance of being Busy
+                if (randStat < 0.2) return 'All-Available';
+                // 20% chance of being Away
+                else if (randStat < 0.3) return 'Chat-Available';
+                
+                    else if (randStat < 0.4) return 'Messaging-Available';
+                
+                        else if (randStat < 0.5) return 'Cases-Available';
+                
+                            else if (randStat < 0.6) return 'Busy';
+                
+                                else if (randStat < 0.7) return 'Busy-Break';
+                
+                                    else if (randStat < 0.8) return 'Busy-Training';
+                
+                // 60% chance Available
+                return 'Phone-Availiable';
+            };
+            
+            var getGender = function () {
+                return Math.random() > 0.5 ? 'female' : 'male';
+            };
+            
+            var changeStatus = function (ele) {
+                ele.parentElement.classList.toggle('slds-is-open');
+            }
+            
+            var showCases = function(i){
+                console.log('clicked', i);
+                if(i==0){
+                    $("#demoCases").toggle("fast", function () {
+                        // Animation complete.
+                    });
+                }
+            }
+            
+            let closeStatusPopover = (ele) => {
+            }
+            
+            var generateAdditionalUsers = function (originalList) {          
+                var usersList = originalList;
+                var user;
+                while (usersList.length <= nUsers) {
+                    user = {};
+                    user.gender = getGender();
+                    user.firstName = user.gender === 'female' ? getRandomName(femaleFirstNames) : getRandomName(maleFirstNames);
+                    user.lastName = getRandomName(lastNames);
+                    user.status = getStatus();
+                    user.channels = getChannels();
+                    user.queues = getQueues(user.channels);
+                    user.defaultTimes = getDefaultTimes();
+                    user.load = getLoad();
+                    user.items = user.load;
+                    
+                    usersList.push(user);
+                }
+                // make the logged in user the first one in the list
+                var orderedUsersList = [];
+                usersList.forEach(function (user) {
+                    user.id === "{!$User.Id}" ? orderedUsersList.unshift(user) : orderedUsersList.push(user);
+                });
+                
+                orderedUsersList[0].status = 'All-Available';
+                orderedUsersList[0].channels = ['phone_portrait'];
+                orderedUsersList[0].queues = getQueues(orderedUsersList[0].channels);
+                orderedUsersList[0].load = 1;
+                orderedUsersList[0].items = orderedUsersList[0].load;
+                
+                return orderedUsersList;
+            };
+            
+            var fetchUsers = function (callback) {
+                var usersModel = new SObjectModel.User();
+                var users = [], user;
+                
+                var query = { where: { IsActive: { eq: true }, Omni_Supervisor__c: { eq: true } } };
+                
+                usersModel.retrieve(query, function (err, records) {
+                    if (err) alert(err.message);
+                    else {
+                        // if there are no users that match the query, generate the users now
+                        if (!records.length && callback) return callback(generateAdditionalUsers(users));
+                        
+                        records.forEach(function (record, idx) {
+                            user = {};
+                            // props from force
+                            user.firstName = record.get('FirstName');
+                            user.lastName = record.get('LastName');
+                            user.name = record.get('Name');
+                            user.id = record.get('Id');
+                            user.profileId = record.get('ProfileId');
+                            user.avatar = record.get('FullPhotoUrl');
+                            
+                            // added props to user object (fake stuff)
+                            user.status = getStatus();
+                            user.gender = getGender();
+                            user.channels = getChannels();
+                            user.queues = getQueues(user.channels);
+                            user.defaultTimes = getDefaultTimes();
+                            user.load = getLoad();
+                            user.items = user.load;
+                            
+                            users.push(user);
+                            if (idx === records.length - 1 && callback) {
+                                if (records.length >= nUsers) {
+                                    return callback(users);
+                                } else {
+                                    return callback(generateAdditionalUsers(users))
+                                }
+                            }
+                        });
+                    }
+                });
+            };
+            
+            // formatting for table helpers
+            // status == 'Available' returns demo-agent_status-indicator-available
+            // make sure there's a matching class for indicator background color
+            var statusClass = function (input) {
+                if (input == 'All-Available' || input == 'Chat-Available' || input == 'Messaging-Available' || input == 'Cases-Available' || input == 'Available' ||input == 'Phone-Availiable') {
+                    return 'demo-agent_status-indicator-available';
+                }
+                else {
+                    return 'demo-agent_status-indicator-away';
+                }
+            };
+            
+            var channelIcons = function (channels) {
+                return channels.map(function (channel) {
+                    switch (channel) {
+                        case 'email':
+                            return [
+                                '<svg aria-hidden="true" class="slds-icon slds-icon_small slds-icon-text-default">',
+                                '<use xlink:href="{!URLFOR($Asset.SLDS, "/assets/icons/standard-sprite/svg/symbols.svg#call")}"></use>',
+                                '</svg>'
+                            ].join('');
+                        case 'phone_portrait':
+                            return [
+                                '<svg aria-hidden="true" class="slds-icon slds-icon_x-small slds-icon-text-default">',
+                                '<use xlink:href="{!URLFOR($Asset.SLDS, "/assets/icons/utility-sprite/svg/symbols.svg#share_post")}"></use>',
+                                '</svg>',
+                                '<svg aria-hidden="true" class="slds-icon slds-icon_small slds-icon-text-default">',
+                                '<use xlink:href="{!URLFOR($Asset.SLDS, "/assets/icons/standard-sprite/svg/symbols.svg#call")}"></use>',
+                                '</svg>',
+                                '<svg aria-hidden="true" class="slds-icon slds-icon_x-small slds-icon-text-default">',
+                                '<use xlink:href="{!URLFOR($Asset.SLDS, "/assets/icons/action-sprite/svg/symbols.svg#new_case")}"></use>',
+                                '</svg>'
+                            ].join('');
+                        case 'call':
+                            return [
+                                '<svg aria-hidden="true" class="slds-icon slds-icon_x-small slds-icon-text-default">',
+                                '<use xlink:href="{!URLFOR($Asset.SLDS, "/assets/icons/utility-sprite/svg/symbols.svg#sms")}"></use>',
+                                '</svg>',
+                                '<svg aria-hidden="true" class="slds-icon slds-icon_x-small slds-icon-text-default">',
+                                '<use xlink:href="{!URLFOR($Asset.SLDS, "/assets/icons/action-sprite/svg/symbols.svg#new_case")}"></use>',
+                                '</svg>'
+                            ].join('');
+                        case 'web':
+                            return [
+                                '<svg aria-hidden="true" class="slds-icon slds-icon_x-small slds-icon-text-default">',
+                                '<use xlink:href="{!URLFOR($Asset.SLDS, "/assets/icons/action-sprite/svg/symbols.svg#new_case")}"></use>',
+                                '</svg>'
+                            ].join('');
+                        default:
+                            return [
+                                '<svg aria-hidden="true" class="slds-icon slds-icon_x-small slds-icon-text-default">',
+                                '<use xlink:href="{!URLFOR($Asset.SLDS, "/assets/icons/standard-sprite/svg/symbols.svg#' + channel + '")}"></use>',
+                                '</svg>'
+                            ].join('');
+                    }
+                }).join('');
+            };
+            
+           
+            var addTableRows = function (users, callback) {
+                var $tableElement = $('#agent-table');
+                var $tBodyElement = $tableElement.find('tbody');
+                var $tRowElement, tRowContent, rowData, tCellElement;
+                
+                users.forEach(function (user, idx) {
+                    $tRowElement = $('<tr></tr>');
+                    // if(idx === 0) $tRowElement.addClass('demo-agent_row-hidden');
+                    tRowContent = [
+                        '<td class="demo-agent_status-check">',
+                        '<input type="checkbox" id="vehicle1" name="vehicle1" value="">'+
+                        '</td>',
+                        
+                        '<td class="demo-agent_user slds-truncate">',
+                        //'<img style="width: 20px;cursor: pointer;" src="https://www.materialui.co/materialIcons/navigation/chevron_right_grey_192x192.png" onClick="showCases('+idx+')">',
+                        '<span class="slds-avatar slds-avatar_circle slds-avatar_small">',
+                        user.avatar && user.avatar !== 'undefined' ? '<img id="here" style="background: green" src="' + user.avatar + '" />' : getAvatar(user.gender),
+                        '</span>',
+                        '<span class="slds-m-left_x-small slds-text-body_small"><a href="#">',
+                        (user.firstName && user.firstName !== 'undefined' ? user.firstName : ''),
+                        (user.lastName && user.lastName !== 'undefined' ? ' ' + user.lastName : ''),
+                        '</a></span>',
+                        '</td>',
+                        
+                        '<td class="demo-agent_status">',
+                        '<span class="slds-m-right_small demo-agent_status-indicator ' + statusClass(user.status) + '"></span>',
+                        user.status,
+                        '</td>',
+                        
+                        '<td class="demo-agent_time-in-state">' +
+                        
+                        '<div class="slds-wrap slds-truncate">' +
+                        '<p> -- </p>' +
+                        '</div>' +
+                        '</td>',
+                        
+                        '<td class="demo-agent_time-since-last-accept">' +
+                        '<div class="slds-dropdown-trigger slds-dropdown-trigger_click slds-is-closed">' +
+                        '<span class="" onClick="changeStatus(this)"><a> Change Status</a></span>' +
+                        '<div class="slds-dropdown slds-dropdown_left slds-dropdown_small">' +
+                        '<ul class="slds-dropdown__list" role="menu" aria-label="Show More">' +
+                        
+                        '<li class="slds-dropdown__item" role="presentation">' +
+                        '<a href="javascript:void(0);" role="menuitem" aria-disabled="false" tabindex="0">' +
+                        '<span class="slds-truncate" title="Cases - Available"> <img src="{!$Resource.SDO_Service_onlineDot}" class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small"/> Cases - Available </span>' +
+                        '</a>' +
+                        '</li>' +
+                        '<li class="slds-dropdown__item" role="presentation">' +
+                        '<a href="javascript:void(0);" role="menuitem" aria-disabled="false" tabindex="-1">' +
+                        '<span class="slds-truncate" title="Phone - Available "> <img src="{!$Resource.SDO_Service_onlineDot}" class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small"/> Phone - Available </span>' +
+                        '</a>' +
+                        '</li>' +
+                        '<li class="slds-dropdown__item" role="presentation">' +
+                        '<a href="javascript:void(0);" role="menuitem" aria-disabled="false" tabindex="-2">' +
+                        '<span class="slds-truncate" title="Chat - Available"> <img src="{!$Resource.SDO_Service_onlineDot}" class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small"/> Chat - Available </span>' +
+                        '</a>' +
+                        '</li>' +
+                        '<li class="slds-dropdown__item" role="presentation">' +
+                        '<a href="javascript:void(0);" role="menuitem" aria-disabled="false" tabindex="-3">' +
+                        '<span class="slds-truncate" title="Messaging - Available"> <img src="{!$Resource.SDO_Service_onlineDot}" class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small"/> Messaging - Available </span>' +
+                        '</a>' +
+                        '</li>' +
+                        '<li class="slds-dropdown__item" role="presentation">' +
+                        '<a href="javascript:void(0);" role="menuitem" aria-disabled="false" tabindex="-4">' +
+                        '<span class="slds-truncate" title="Busy"> <img src="{!$Resource.SDO_Service_awayDot}" class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small"/> Busy </span>' +
+                        '</a>' +
+                        '</li>' +
+                        '<li class="slds-dropdown__item" role="presentation">' +
+                        '<a href="javascript:void(0);" role="menuitem" aria-disabled="false" tabindex="-5">' +
+                        '<span class="slds-truncate" title="Busy - Break "> <img src="{!$Resource.SDO_Service_awayDot}" class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small"/> Busy - Break </span>' +
+                        '</a>' +
+                        '</li>' +
+                        '<li class="slds-dropdown__item" role="presentation">' +
+                        '<a href="javascript:void(0);" role="menuitem" aria-disabled="false" tabindex="-6">' +
+                        '<span class="slds-truncate" title="Busy - Lunch"> <img src="{!$Resource.SDO_Service_awayDot}" class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small"/> Busy - Lunch </span>' +
+                        '</a>' +
+                        '</li>' +
+                        '<li class="slds-dropdown__item" role="presentation">' +
+                        '<a href="javascript:void(0);" role="menuitem" aria-disabled="false" tabindex="-7">' +
+                        '<span class="slds-truncate" title="Busy - Training "> <img src="{!$Resource.SDO_Service_awayDot}" class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small"/> Busy - Training </span>' +
+                        '</a>' +
+                        '</li>' +
+                        '<li class="slds-dropdown__item" role="presentation">' +
+                        '<a href="javascript:void(0);" role="menuitem" aria-disabled="false" tabindex="-8">' +
+                        '<span class="slds-truncate" title="Offline"> <img src="{!$Resource.SDO_Service_offlineDot}" class="slds-icon slds-icon_x-small slds-icon-text-default slds-m-right_x-small"/> Offline </span>' +
+                        '</a>' +
+                        '</li>' +
+                        
+                        '</ul>' +
+                        '</div>' +
+                        '</div>' +
+                        '</td>',
+                        
+                        '<td class="demo-agent_time-in-state">' +
+                        
+                        '<div class="slds-wrap slds-truncate">' +
+                        '<p>' + caseString[idx] + '</p>' +
+                        '</div>' +
+                        '</td>',
+                        
+                        '<td class="demo-agent_time-in-state">' +
+                        
+                        '<div class="slds-wrap slds-truncate">' +
+                        '<span class="demo-timer" data-start-seconds="' + user.defaultTimes.timeInState + '"></span>' +
+                        '</div>' +
+                        '</td>',
+                        
+                        '<td class="demo-agent_time-in-state">' +
+                        '<div class="slds-wrap slds-truncate">' +
+                        '<span class="demo-timer" data-start-seconds="' + user.defaultTimes.timeSinceLogin + '"></span>' +
+                        '</div>' +
+                        '</td>',
+                        
+                        '<td class="demo-agent_time-in-state">' +
+                        '<div class="slds-wrap slds-truncate">' +
+                        '<span class="demo-timer" data-start-seconds="' + user.defaultTimes.timeSinceLastAccept + '"></span>' +
+                        '</div>' +
+                        '</td>',
+                        
+                        
+                        '<td class="demo-agent_status">',
+                        '<span class="slds-m-right_small demo-agent_status-indicator ' + statusClass(workStatus[idx]) + '"></span>',
+                        capacity[idx],
+                        '</td>',
+                        
+                        '<td class="demo-agent_capacity">' + workload[idx] + '</td>',
+                        
+                        
+                        '<td class="demo-agent_channels">',
+                        channelIcons(user.channels),
+                        '</td>',
+                        
+                        '<td class="demo-agent_work-items">',
+                        assignedQueue[idx],
+                        '</td>',
+                        
+                        '<td class="demo-agent_time-since-last-accept"><span class="slds-grid slds-wrap slds-size_1-of-1"><a class="slds-grid slds-wrap slds-size_1-of-1">' + assignSkillTest() + ' </a></span></td>'
+                        
+                        
+                        
+                    ].join('');
+                    
+                    $tRowElement.append(tRowContent);
+                    $tRowElement2 = $('<tr></tr>');
+                    
+                    $tBodyElement.append($tRowElement);
+                    if(idx==0){
+                        $tRowElement2.append(tableString);
+                        console.log(tableString);
+                        $tBodyElement.append($tRowElement2);
+                    }
+                });
+                
+                if (callback) callback();
+            };
+            
+            var formatTime = function (timeInSeconds) {
+                var mins = ~~(timeInSeconds / 60);
+                var secs = timeInSeconds - (mins * 60);
+                return mins + 'm ' + secs + 's';
+            };
+            
+            var updateTimers = function (timeout) {
+                if (timeout) clearTimeout(timeout);
+                var timers = [].slice.call(document.querySelectorAll('.demo-timer'));
+                var nextTime;
+                timers.forEach(function (timer) {
+                    nextTime = +timer.getAttribute('data-start-seconds') + 1;
+                    timer.setAttribute('data-start-seconds', nextTime);
+                    timer.innerHTML = formatTime(nextTime);
+                });
+                
+                var timeout = setTimeout(function () {
+                    if (timeout) clearTimeout(timeout);
+                    updateTimers(timeout);
+                }, 1000);
+            };
+            
+            
+            getRandomCaseNumber();
+            
+            fetchUsers(function (usersList) {
+                addTableRows(usersList, updateTimers);
+                addCharts(usersList);
+            });
+            
+            getRandomSkillLevel();
+            getRandomSkill();            
+            
+            </script>
+            <!-- / JAVASCRIPT -->
+        </body>
+        
+        
+        
+    </html>
+</apex:page>

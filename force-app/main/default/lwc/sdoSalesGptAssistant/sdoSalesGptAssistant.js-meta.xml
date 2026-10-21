@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+	<apiVersion>60.0</apiVersion>
+	<isExposed>true</isExposed>
+	<masterLabel>Simulated Einstein Copilot - Legacy Overlay Version</masterLabel>
+	<description>Fast and Easy version, just drop in any Lightning Record Page but it will cover your existing page a little.</description>
+	<targets>
+		<target>lightning__HomePage</target>
+		<target>lightning__RecordPage</target>
+		<target>lightning__AppPage</target>
+		<target>lightning__UtilityBar</target>
+		<target>lightning__Tab</target>
+	</targets>
+	<targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <property name="headerTitle" label="Header Title" type="String" default="Agentforce"/>
+            <property name="einsteinGreeting" label="Greeting" type="String" default="Hi! Agentforce can do things like search for information, summarize records, and draft and revise emails. What do you want to do today?"/>
+            <property name="gptConfiguration" label="Einstein GPT Configuration" type="String" datasource="apex://SDO_Sales_GPTConfigurationPicklist"/>
+			<property name="overlayMode" label="Display as Sidepanel (Recommended)" type="Boolean" default="true" description="Display the component in a collapseable right panel, if unchecked embedding in a pinned sidebar layout is recommended."></property>
+			<property name="height" label="Height in Pixels (Only used if not a Sidepanel)" type="Integer" default="850" description="Set the component height when not rendered as a Sidepanel"></property>
+			<property name="widthPercent" label="Width in Percent (Max recommended is 33%)" type="Integer" default="25" description="Set the component width to optimize for your screen size"></property>
+            <property name="hiddenDefault" label="Sidepanel hidden" type="Boolean" description="Check if you want the Einstein Panel collapsed by default." />
+			<property name="mobileMode" label="Mobile Mode" type="Boolean" description="Is this component viewed on Mobile?" default="false" />
+        </targetConfig>
+		<targetConfig targets="lightning__HomePage">
+            <property name="headerTitle" label="Header Title" type="String" default="Agentforce"/>
+            <property name="einsteinGreeting" label="Greeting" type="String" default="Hi! Agentforce can do things like search for information, summarize records, and draft and revise emails. What do you want to do today?"/>
+            <property name="gptConfiguration" label="Einstein GPT Configuration" type="String" datasource="apex://SDO_Sales_GPTConfigurationPicklist"/>
+			<property name="overlayMode" label="Display as Sidepanel (Recommended)" type="Boolean" default="true" description="Display the component in a collapseable right panel, if unchecked embedding in a pinned sidebar layout is recommended."></property>
+			<property name="height" label="Height in Pixels (Only used if not a Sidepanel)" type="Integer" default="850" description="Set the component height when not rendered as a Sidepanel"></property>
+			<property name="widthPercent" label="Width in Percent (Max recommended is 33%)" type="Integer" default="25" description="Set the component width to optimize for your screen size"></property>
+            <property name="hiddenDefault" label="Sidepanel hidden" type="Boolean" description="Check if you want the Einstein Panel collapsed by default." />
+			<property name="mobileMode" label="Mobile Mode" type="Boolean" description="Is this component viewed on Mobile?" default="false" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

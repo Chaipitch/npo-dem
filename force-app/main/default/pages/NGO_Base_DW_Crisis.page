@@ -1,0 +1,5 @@
+<apex:page controller="NGO_Base_RecentRecordCTRL" action="{!runCrisisSupport}">
+  <script>
+        window.close();
+    </script>
+</apex:page>

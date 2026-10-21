@@ -1,0 +1,11 @@
+<aura:component >
+    <ltng:require styles="{!$Resource.HideCopilotCss}"/>
+    <aura:attribute name="offsetStyle" type="String" />
+    <aura:attribute name="isSidebarCollapsed" type="Boolean" default="false" />
+    <button id="einstein-button-icon" class="einstein-icon-container slds-button slds-button_icon slds-button_icon-bare slds-button_icon-inverse" onclick ="{!c.toggleSection}" style="{!v.offsetStyle}">
+        <lightning:icon src="{!$Resource.SDO_Agentforce_SVG + '#agentforce'}" size="small"
+                        alternativeText="{! v.isSidebarCollapsed ? 'Expand Copilot' : 'Collapse Copilot' }" 
+                        class="{! v.isSidebarCollapsed ? 'einstein-icon einsteinMenuIcon' : 'einstein-icon einsteinMenuIconActive' }" 
+                        title="Einstein Copilot" />
+    </button>
+</aura:component>

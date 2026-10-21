@@ -1,0 +1,92 @@
+<template>
+    <lightning-card 
+        title={titleLabel}
+    >
+        <lightning-input
+            slot="actions"
+            type="search"
+            label="Find a user"
+            variant="label-hidden"
+            placeholder="Find a user..."
+            value={searchTerm}
+            disabled={isSearchDisabled}
+            onchange={handleSearchChange}>
+        </lightning-input>
+
+        <div class="slack-users__body">
+            <template lwc:if={isLoading}>
+                <div class="slds-p-around_large slds-align_absolute-center">
+                    <lightning-spinner alternative-text="Loading Slack users" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template lwc:if={hasError}>
+                <div class="slds-p-around_medium">
+                    <div class="slds-notify slds-notify_alert slds-theme_error" role="alert">
+                        Couldn't load Slack users: {errorMessage}
+                    </div>
+                </div>
+            </template>
+
+            <template lwc:if={showBrixMissing}>
+                <div class="slds-p-around_large slds-align_absolute-center slack-users__empty">
+                    <p class="slack-users__empty-title">No Slack workspace connected</p>
+                    <p>Use the <strong>Connect</strong> button above to link this org to a Slack workspace.</p>
+                </div>
+            </template>
+
+            <template lwc:if={showEmpty}>
+                <div class="slds-p-around_large slds-align_absolute-center slack-users__empty">
+                    No Slack users found.
+                </div>
+            </template>
+
+            <template lwc:if={showNoMatches}>
+                <div class="slds-p-around_large slds-align_absolute-center slack-users__empty">
+                    No users match &ldquo;{searchTerm}&rdquo;.
+                </div>
+            </template>
+
+            <template lwc:if={hasVisibleUsers}>
+                <ul class="slack-users__list">
+                    <template for:each={visibleUsers} for:item="user">
+                        <li key={user.slackUserId} class="slack-users__row">
+                            <div class="slack-users__avatar">
+                                <lightning-avatar
+                                    src={user.photoUrl}
+                                    alternative-text={user.displayName}
+                                    fallback-icon-name="standard:user"
+                                    size="medium">
+                                </lightning-avatar>
+                            </div>
+
+                            <div class="slack-users__body-col">
+                                <div class="slack-users__title">
+                                    <span class="slack-users__name">{user.displayName}</span>
+                                    <span class="slack-users__handle">@{user.slackUserName}</span>
+                                    <template lwc:if={user.isPrimaryUser}>
+                                        <span class="slack-users__primary-badge">Primary</span>
+                                    </template>
+                                </div>
+                                <div class="slack-users__email">{user.email}</div>
+                            </div>
+
+                            <div class="slack-users__actions">
+                                <lightning-button
+                                    class="slack-users__login-btn"
+                                    variant="brand"
+                                    label="Login As"
+                                    icon-name="utility:forward"
+                                    icon-position="right"
+                                    title="Open Slack signed in as this user"
+                                    data-slack-user-name={user.slackUserName}
+                                    onclick={handleLoginAs}>
+                                </lightning-button>
+                            </div>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+        </div>
+    </lightning-card>
+</template>

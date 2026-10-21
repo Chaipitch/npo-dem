@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>SE Demo Coaching Card</masterLabel>
+    <description>Internal SE enablement card. Hidden when the running user's Demo Mode is enabled.</description>
+    <targets>
+        <target>lightning__RecordPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__AppPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage,lightning__HomePage,lightning__AppPage">
+            <property name="pageTitle" type="String" label="Page Title" />
+            <property name="soundbite" type="String" label="Soundbite" />
+            <property name="platformTieIn" type="String" label="Platform Tie-in" />
+            <property name="orientation" type="String" label="Where You Are" />
+            <property name="persona" type="String" label="Persona" />
+            <property name="valueStory" type="String" label="Value Story" />
+            <property name="componentsJson" type="String" label="Components (JSON array)" />
+            <property name="customItemsJson" type="String" label="Custom Items (JSON grouped by type)" />
+            <property name="cardVariant" type="String" label="Card Variant (ido | template)" default="ido" />
+            <property name="brixJson" type="String" label="Contributing Brix (JSON array, template variant)" />
+            <property name="refreshDelaySeconds" type="Integer" label="Refresh Delay (seconds)" default="5" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

@@ -1,0 +1,235 @@
+<template>
+    <template if:false={hidden}>
+    <section class="slds-docked-composer slds-grid slds-grid_vertical slds-is-open email-composer" role="dialog"
+        aria-labelledby="dialog-heading-id-1" aria-describedby="dialog-content-id-1">
+        <header class="slds-docked-composer__header slds-grid slds-shrink-none" aria-live="assertive">
+            <div class="slds-media slds-media_center slds-no-space">
+                <div class="slds-media__figure slds-m-right_x-small">
+                    <span class="slds-icon_container">
+                        <lightning-icon icon-name="utility:email" size="x-small"></lightning-icon>
+                    </span>
+                </div>
+                <div class="slds-media__body">
+                    <h2 class="slds-truncate slds-text-heading_small" id="dialog-heading-id-1" title="Email">Email</h2>
+                </div>
+            </div>
+            <div class="slds-col_bump-left slds-shrink-none">
+                <button class="slds-button slds-button_icon slds-button_icon" title="Minimize window">
+                    <lightning-icon icon-name="utility:minimize_window" size="x-small"></lightning-icon>
+                    <span class="slds-assistive-text">Minimize Composer Panel</span>
+                </button>
+                <button class="slds-button slds-button_icon slds-button_icon" title="Expand Composer">
+                    <lightning-icon icon-name="utility:expand_alt" size="x-small"></lightning-icon>
+                    <span class="slds-assistive-text">Expand Composer Panel</span>
+                </button>
+                <button class="slds-button slds-button_icon slds-button_icon" title="Close" onclick={closeUtilityBar}>
+                    <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                    <span class="slds-assistive-text">Close Composer Panel</span>
+                </button>
+            </div>
+        </header>
+        <div class="slds-docked-composer__body" id="dialog-content-id-1">
+            <template if:true={sending}>
+                <div class="spinner-container">
+                    <lightning-spinner size="medium"></lightning-spinner>
+                </div>
+            </template>
+            <template if:false={sending}>
+                <div class="slds-email-composer">
+                    <div class="slds-form-element slds-email-composer__combobox">
+                        <label class="slds-form-element__label" for="recipients-to">To</label>
+                        <div class="slds-form-element__control">
+                            <div class="slds-combobox_container slds-has-inline-listbox">
+                                <ul class="slds-listbox slds-listbox_horizontal" role="listbox"
+                                    aria-label="Selected Options:" aria-orientation="horizontal">
+                                    <li class="slds-listbox-item" role="presentation">
+                                        <span class="slds-pill" role="option" tabindex="0" aria-selected="true">
+                                            <span class="slds-avatar slds-avatar_x-small slds-pill__icon_container">
+                                                <lightning-icon icon-name="standard:contact"
+                                                    size="small"></lightning-icon>
+                                            </span>
+                                            <span class="slds-pill__label" title="Lauren Bailey">{_email.to}</span>
+                                            <span class="slds-icon_container slds-pill__remove" title="Remove">
+                                                <lightning-icon
+                                                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                                                    icon-name="utility:close" size="x-small"></lightning-icon>
+                                            </span>
+                                        </span>
+                                    </li>
+                                </ul>
+                                <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click">
+                                    <div class="slds-combobox__form-element" role="none">
+                                        <input type="text" class="slds-input slds-combobox__input" id="recipients-to"
+                                            aria-autocomplete="list" aria-controls="listbox-unique-id-03"
+                                            autocomplete="off" role="combobox" aria-expanded="false"
+                                            aria-haspopup="listbox" placeholder=" " />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-form-element slds-email-composer__combobox">
+                        <label class="slds-form-element__label" for="recipients-to">Subject</label>
+                        <div class="slds-form-element__control">
+                            <input type="text" id="input-subject-01"
+                                class="slds-input slds-input_bare slds-m-left_medium" placeholder='Enter Subject...' value={_email.subject}/>
+                        </div>
+                    </div>
+                    <div class="slds-form-element">
+                        <div class="slds-form-element__control">
+                            <template if:true={loading}>
+                                <div class="slds-grid slds-wrap">
+                                    <div class="slds-size_1-of-1 generation-card slds-p-around_small">
+
+                                        <!-- <div class="slds-grid slds-wrap" style="width:100%">
+                                        <div class="slds-size_1-of-12 slds-align_absolute-center">
+                                            <div class="slds-icon-eq slds-is-animated"
+                                                title="Description of the icon when needed">
+                                                <div class="slds-icon-eq__bar"></div>
+                                                <div class="slds-icon-eq__bar"></div>
+                                                <div class="slds-icon-eq__bar"></div>
+                                                <span class="slds-assistive-text">Text alternative when
+                                                    needed</span>
+                                            </div>
+                                        </div>
+                                        <div class="slds-size_9-of-12 slds-align-middle">
+                                            <p class="slds-text-weak">{loadingMessage}</p>
+                                        </div>
+                                        <div class="slds-size_2-of-12 slds-align-middle">
+                                            <p
+                                                class="slds-text-align_right slds-text-weak slds-p-right_small generation-cancel">
+                                                Stop ESC</p>
+                                        </div>
+                                    </div> -->
+                                    </div>
+                                </div>
+                            </template>
+                            <template if:false={loading}>
+                                <lightning-input-rich-text class="email-body" value={_email.body} formats={formats}>
+                                </lightning-input-rich-text>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <footer class="slds-docked-composer__footer slds-shrink-none">
+            <div class="slds-grid slds-wrap" style="width:100%">
+                <div class="slds-size_1-of-1">
+                    <div class="slds-grid slds-wrap">
+                        <div class="slds-size_1-of-1">
+                            <div class="slds-grid slds-wrap">
+                                <div class="slds-size_1-of-1 slds-p-bottom_x-small">
+                                    <div class="slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open">
+                                        <!-- <button class="slds-button slds-button_neutral" aria-haspopup="true"
+                                            aria-expanded="true" title="Show More" onclick={toggleMenu}> Einstein GPT
+                                        </button> -->
+                                        <lightning-button class="slds-m-right_small" label="Draft with Einstein" title="Draft with Einstein" icon-name="utility:sparkles" aria-haspopup="true"
+                                        aria-expanded="true" onclick={toggleMenu}></lightning-button>
+                                        <template if:true={showMenu}>
+                                            <div class="slds-dropdown slds-dropdown_bottom">
+                                                <ul class="slds-dropdown__list" role="menu" aria-label="Show More">
+                                                    <li class="slds-dropdown__item" role="presentation">
+                                                        <a href="#" role="menuitem" tabindex="0">
+                                                            <span class="slds-truncate"
+                                                                title="Menu Item One"><strong>Draft with Einstein</strong></span>
+                                                        </a>
+                                                    </li>
+                                                    <li class="slds-has-divider_top-space" role="separator"></li>
+                                                    <template for:each={items} for:item="item" for:index="i">
+                                                        <li key={item.i} class="slds-dropdown__item" role="presentation"
+                                                            data-id={item.id} onclick={selectItem}>
+                                                            <a href="#" role="menuitem" tabindex={item.id}>
+                                                                <span class="slds-truncate"
+                                                                    title={item.label}>{item.label}</span>
+                                                            </a>
+                                                        </li>
+                                                    </template>
+                                                </ul>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <lightning-button-group class="slds-m-right_small">
+                                        <lightning-button-icon icon-name="utility:attach" variant="border-filled"
+                                            alternative-text="Settings" title="Settings"></lightning-button-icon>
+                                        <lightning-button-icon icon-name="utility:merge_field" variant="border-filled"
+                                            alternative-text="Settings" title="Settings"></lightning-button-icon>
+                                        <lightning-button-icon icon-name="utility:insert_template"
+                                            variant="border-filled" alternative-text="Settings"
+                                            title="Settings"></lightning-button-icon>
+                                    </lightning-button-group>
+                                    <lightning-button-group >
+                                        <lightning-button-icon icon-name="utility:date_input" variant="border-filled"
+                                            alternative-text="Settings" title="Settings"></lightning-button-icon>
+                                        <lightning-button-icon icon-name="utility:preview" variant="border-filled"
+                                            alternative-text="Settings" title="Settings"></lightning-button-icon>
+                                    </lightning-button-group>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-size_1-of-1 slds-align-middle">
+                            <div class="slds-grid slds-wrap slds-align-middle">
+                                <div class="slds-size_1-of-5 slds-align-middle">
+                                    <p class="slds-text-body-regular">Related To</p>
+                                </div>
+                                <div
+                                    class="slds-size_3-of-5 slds-text-align_center slds-align-middle slds-p-right_large">
+                                    <div class="slds-grid slds-wrap">
+                                        <div class="slds-size_1-of-1">
+                                            <div class="slds-grid slds-wrap slds-button-group-list"
+                                                style="border: 1px solid #C9C9C9; border-radius: 4px 4px 4px 4px; height: 32px;">
+                                                <div class="slds-size_1-of-8 slds-align_absolute-center"
+                                                    style="height:100% !important">
+                                                    <lightning-icon icon-name="standard:account"
+                                                        size="small"></lightning-icon>
+                                                </div>
+                                                <div class="slds-size_1-of-8 slds-align_absolute-center slds-border_right"
+                                                    style="height:100% !important">
+                                                    <lightning-icon icon-name="utility:chevrondown"
+                                                        size="xx-small"></lightning-icon>
+                                                </div>
+                                                <div class="slds-size_6-of-8 slds-align-middle">
+                                                    <div class="slds-align-middle slds-text-align_left">
+                                                        <div role="combobox" tabindex="0" class="slds-input_faux slds-combobox__input" aria-labelledby="combobox-label-id-133 combobox-id-59-selected-value" id="combobox-id-59-selected-value" aria-controls="listbox-id-29" aria-expanded="false" aria-haspopup="listbox">
+                                                            <span class="slds-truncate" id="combobox-value-id-96">Search Accounts...</span>
+                                                          </div>
+                                                        <!-- <span class="slds-pill slds-pill_link slds-m-left_x-small">
+                                                        <a href="#" class="slds-pill__action"
+                                                            title="Full pill label verbiage mirrored here">
+                                                            <span
+                                                                class="slds-pill__label slds-p-right_xx-small slds-p-left_x-small">Jason
+                                                                Luna</span>
+                                                        </a>
+                                                        <button
+                                                            class="slds-button slds-button_icon slds-button_icon slds-pill__remove"
+                                                            title="Remove">
+                                                            <lightning-icon icon-name="utility:close"
+                                                                size="xx-small"></lightning-icon>
+                                                            <span class="slds-assistive-text">Remove</span>
+                                                        </button>
+                                                    </span> -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="slds-size_1-of-5 slds-align-middle slds-text-align_right">
+                                    <lightning-button-group>
+                                        <lightning-button label="Send" variant="brand"
+                                            onclick={sendEmail}></lightning-button>
+                                        <lightning-button-menu alternative-text="Show menu" variant="border-filled">
+                                            <lightning-menu-item label="Save As Draft"
+                                                value="item1"></lightning-menu-item>
+                                        </lightning-button-menu>
+                                    </lightning-button-group>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </section>
+</template>
+</template>

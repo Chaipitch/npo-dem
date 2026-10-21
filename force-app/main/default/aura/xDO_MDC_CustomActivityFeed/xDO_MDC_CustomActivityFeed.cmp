@@ -1,0 +1,52 @@
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName"
+    controller="XDO_MDC_CustomActivityController" access="global">
+    <aura:attribute name="heightPixels" type="Integer" />
+    <aura:attribute name="activities" type="xDO_MDC_Custom_Activity__c[]" />
+    <aura:attribute name="activity" type="xDO_MDC_Custom_Activity__c" />
+    <aura:attribute name="contactId" type="String" />
+
+    <!-- Streaming and Notification -->
+    <aura:attribute name="sub" type="map" />
+    <lightning:empApi aura:id="empApi" />
+    <lightning:notificationsLibrary aura:id="notifLib" />
+
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+    <lightning:quickActionAPI aura:id="quickActionAPI" />
+
+    <lightning:card>
+
+        <aura:set attribute="title">
+            <lightning:icon iconName="standard:feed" size="small" class="activity-icon"></lightning:icon>
+            <span class="slds-text-heading_small slds-m-left_small"
+                style="font-weight:700;padding-top:1.5px;">Engagement Feed</span>
+        </aura:set>
+
+        <aura:set attribute="actions">
+            <lightning:buttonGroup>
+                <lightning:buttonIcon onclick="{!c.createActivity}" title="Create new activity"
+                    iconName="utility:add" />
+                <lightning:buttonIcon onclick="{!c.doInit}" iconName="utility:refresh" />
+            </lightning:buttonGroup>
+        </aura:set>
+
+        <div class="feed " style="{! 'height: ' + v.heightPixels + 'px ;'}">
+            <ul>
+
+                <aura:iteration items="{!v.activities}" var="a">
+                    <c:xDO_MDC_ActivityFeedItem icon="{!a.xDO_MDC_icon__c}" color="{!a.xDO_MDC_Icon_Color__c}"
+                        title="{!a.Name}" message="{!a.xDO_MDC_message__c}" numDaysAgo="{!a.xDO_MDC_days_ago__c}"
+                        time="{!a.xDO_MDC_time__c}" id="{!a.Id}" />
+                </aura:iteration>
+
+
+            </ul>
+        </div>
+
+        <aura:set attribute="footer">
+            <lightning:button label="View All" variant="bare" onclick="{!c.gotoActivityList}"></lightning:button>
+        </aura:set>
+
+    </lightning:card>
+</aura:component>

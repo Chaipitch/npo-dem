@@ -1,0 +1,82 @@
+<design:component label="Genie Highlight Card">
+    
+    <design:attribute name="backgroundColor" label="Card Background Color" datasource="Blue, Red, Teal, White" default="Blue"/>    
+    <design:attribute name="overrideBackground" label="Override Background Image" description="Upload your own background image as a Static Resource and insert the name here. Image size should be 314 x 507px"/> 
+    <design:attribute name="inverseIconColors" label="Inverse Icon &amp; Text Color" default="true" description="Use this for dark background colors"/>
+    
+    <design:attribute name="metric1Icon"
+                      label="Icon for 1st Metric"
+                      datasource="None, Commerce, Einstein, Segment, Service"
+                      default="Service"/>
+    
+    <design:attribute name="metric1Label"
+                      label="Label for 1st Metric"
+                      default="Loyalty Tier"
+                      description="Value driven by the SDO_Cust360_Metric1__c field"/>
+    
+    <design:attribute name="metric2Icon"
+                      label="Icon for 2nd Metric"
+                      datasource="None, Commerce, Einstein, Segment, Service"
+                      default="Segment"/>
+    
+    <design:attribute name="metric2Label"
+                      label="Label for 2nd Metric"
+                      default="Segment"
+                      description="Value driven by the SDO_Cust360_Metric2__c field"/>
+    
+    <design:attribute name="metric3Icon"
+                      label="Icon for 3rd Metric"
+                      datasource="None, Commerce, Einstein, Segment, Service"
+                      default="Commerce"/>
+    
+    <design:attribute name="metric3Label"
+                      label="Label for 3rd Metric"
+                      default="Lifetime Value"
+                      description="Value driven by the SDO_Cust360_Metric3 field"/>
+    
+    <!-- Progress Bars -->
+    
+    <design:attribute name="dynamicProgressBar" label="Red/Yellow/Green Progress Bar" default="true" 
+                      description="Check for dynamic progress bar colors based on thresholds, uncheck for solid color"/>
+    <design:attribute name="threshold1" label="Lower Threshold" default="30"/>
+    <design:attribute name="threshold2" label="Upper Threshold" default="80"/>
+    
+    <design:attribute name="metric4Icon"
+                      label="Icon for 4th Metric"
+					  datasource="None, Commerce, Einstein, Segment, Service"
+                      default="Einstein"/>
+    
+    <design:attribute name="metric4Label"
+                      label="Label for 4th Metric"
+                      default="Propensity to Purchase"
+                      description="Value driven by the SDO_Cust360_Metric4__c field"/>
+    
+    <design:attribute name="metric5Icon"
+                      label="Icon for 5th Metric"
+                      datasource="None, Commerce, Einstein, Segment, Service"
+                      default="Einstein"/>
+    
+    <design:attribute name="metric5Label"
+                      label="Label for 5th Metric"
+                      default="Engagement Score"
+                      description="Value driven by the SDO_Cust360_Engagement_Score__c field"/>
+    
+    
+    <!-- Which solutions power this data? -->
+    
+    <design:attribute name="Analytics" label="Analytics" default="true"/>    
+    <design:attribute name="Commerce" label="Commerce" default="true"/>       
+    <design:attribute name="Marketing" label="Marketing" default="true"/>    
+    <design:attribute name="Mulesoft" label="Mulesoft" default="true"/>  
+    <design:attribute name="Sales" label="Sales" default="true"/>
+    <design:attribute name="Service" label="Service" default="true"/>
+    <design:attribute name="SageMaker" label="SageMaker" default="true"/>
+    <design:attribute name="Snowflake" label="Snowflake" default="true"/>
+    
+    <sfdc:objects>
+        <sfdc:object>Account</sfdc:object>
+        <sfdc:object>Contact</sfdc:object>
+        <sfdc:object>Case</sfdc:object>
+    </sfdc:objects>
+    
+</design:component>

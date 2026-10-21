@@ -1,0 +1,103 @@
+<template>
+    <div class="slds-docked_container">
+        <c-sdo-sales-gpt-docked-email email={emailBody}></c-sdo-sales-gpt-docked-email>
+        <section class="slds-docked-composer slds-grid slds-grid_vertical einstein-assistant" role="dialog"
+            aria-labelledby="dialog-heading-id-1" aria-describedby="dialog-content-id-1">
+
+
+            <header class="slds-docked-composer__header slds-grid slds-shrink-none" aria-live="assertive">
+                <div class="slds-media slds-media_center slds-no-space">
+                    <div class="slds-media__figure slds-m-right_x-small">
+                        <lightning-icon class="einstein-icon" icon-name="utility:einstein" size="small"></lightning-icon>
+                    </div>
+                    <div class="slds-media__body">
+                        <h2 class="slds-truncate slds-text-heading_small" id="dialog-heading-id-1" title="Einstein Assistant">Einstein Assistant
+                        </h2>
+                    </div>
+                </div>
+                <div class="slds-col_bump-left slds-shrink-none">
+                    <template if:true={isComposerOpen}>
+                        <lightning-button-icon icon-name="utility:minimize_window" variant="bare"
+                        alternative-text="Minimize Composer Panel" title="Minimize Window" onclick={minimizeComposer}></lightning-button-icon>
+                    </template>
+                    <template if:false={isComposerOpen}>
+                    <lightning-button-icon icon-name="utility:erect_window" variant="bare"
+                        alternative-text="Open Composer Panel" title="Open Window" onclick={openComposer}></lightning-button-icon>
+                        </template>
+                    <!-- <lightning-button-icon icon-name="utility:expand_alt" variant="bare"
+                        alternative-text="Expand Composer Panel" title="Expand Composer"></lightning-button-icon>
+                    <lightning-button-icon icon-name="utility:close" variant="bare"
+                        alternative-text="Close Composer Panel" title="Close"></lightning-button-icon> -->
+
+                </div>
+            </header>
+            <div class="slds-docked-composer__body" id="dialog-content-id-1">
+                    <div class="scroller">
+                        <!-- <template if:true={showEmptyPannelState}>
+                            <div class="stretch">
+                                <template if:true={user}>
+                                    <div class="slds-grid slds-wrap stretch">
+                                        <div class="slds-size_1-of-1 stretch">
+                                            <div
+                                                class="slds-grid slds-wrap slds-p-around_medium slds-align_absolute-center stretch">
+                                                <div class="slds-size_1-of-1 slds-align_absolute-center">
+                                                    <img style="max-width:60%"
+                                                        src="https://res.cloudinary.com/btahub/image/upload/v1676350809/l4sodx4l2pkorexhbw17.png" />
+                                                </div>
+                                                <div class="slds-size_1-of-1">
+                                                    <h1
+                                                        class="slds-text-heading_medium slds-p-top_medium slds-text-align_center">
+                                                        Welcome {user.FirstName}</h1>
+                                                </div>
+                                                <div
+                                                    class="slds-size_1-of-1 slds-p-left_xx-large slds-p-right_xx-large">
+                                                    <p
+                                                        class="slds-text-body_regular slds-p-top_small slds-text-align_center">
+                                                        Einstein is here to help. Ask a question or make a request to
+                                                        generate a response.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template> -->
+
+                        <template if:false={showEmptyPannelState}>
+                            <div class="slds-grid slds-wrap message-container">
+                                <template for:each={messages} for:item="message" for:index="i">
+                                    <div class="slds-size_1-of-1" key={message.i}>
+
+                                        <c-sdo-sales-gpt-bot-message message={message}></c-sdo-sales-gpt-bot-message>
+                                    </div>
+                                </template>
+                                <template if:true={loading}>
+                                    <div class="spinner-container slds-size_1-of-1">
+                                        <lightning-spinner size="small"></lightning-spinner>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+            </div>
+            <footer class="slds-docked-composer__footer slds-shrink-none">
+                <div class="input-box slds-p-around_medium">
+                    <div class="slds-grid slds-wrap">
+                        <div class="slds-size_1-of-1">
+                            <div class="slds-grid slds-wrap slds-grid_align-spread">
+                                <div class="slds-size_11-of-12">
+                                    <lightning-input class="slds-p-right_x-small" variant="label-hidden" type="text"
+                                        placeholder="Type something..." oncommit={handleInputCommit}></lightning-input>
+                                </div>
+                                <div class="slds-size_1-of-12 slds-align-bottom slds-text-align_right">
+                                    <lightning-button-icon icon-name="utility:send"></lightning-button-icon>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+
+        </section>
+    </div>
+</template>

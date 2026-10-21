@@ -1,0 +1,172 @@
+img.einstein-loading {
+    display:inline-block;
+    margin-left: 3px;
+}
+.message-card {
+    background: #ffffff;
+    border: 1px solid #c9c9c9;
+    border-radius: 4px;
+  }
+  
+  .card-answer {
+    background: #ffffff;
+  }
+  
+  .card-question {
+    background: #ffffff;
+  }
+    
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 2.5px;
+  }
+  
+  .avatar-column {
+    width: 45px;
+}
+.einstein-column {
+  width: 45px;
+}
+
+
+  .typewriter-content {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    flex: 0 0 100%; /* Let it fill the entire space horizontally */
+    height: 25px;   
+    /* font-family: "Segoe UI"; */
+    /* font-size: 13px; */
+  }
+  
+  .typewriter-text {
+    white-space: nowrap;
+    overflow: hidden;
+    margin-right: 5px;
+  }
+  
+  .star-container {
+    display: flex;
+    align-items: center;
+    margin-top: 3px;
+    justify-content: center; /* Center the SVGs horizontally */
+  /*    visibility: hidden; Initially hide the star container */ 
+  }
+  
+  
+  .stars {
+    height: 12px;
+    padding: .2px;
+    animation: twinkling .4s infinite alternate;
+    animation-timing-function: ease-out;
+  }
+  
+  .star2 {
+    height: 14px;
+    animation-delay: .15s;
+  }
+  
+  .star3 {
+    animation-delay: .3s;
+  }
+  
+  @keyframes twinkling {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(.6);
+    }
+  }
+  /* .scroll-stopper {
+    margin-top:10px;
+  } */
+
+.message-block{
+    width: 100%;
+    margin-top: 0.75rem;
+}
+.message-block {
+    position: relative;
+    border-radius: 0.25rem;
+    padding: 0.25rem;
+    transition: background-color 0.2s ease-in-out;
+    font-size: 1rem;
+    flex-grow: 1;
+}
+/* .message-block_inbound:hover, .message-block_inbound:focus-within {
+    background-color: var(--sds-g-color-neutral-base-95, #f3f3f3);
+    --slds-g-color-palette-neutral-95: rgb(229, 229, 229);
+    flex-grow: 1;
+} */
+.slds-chat-listitem_inbound+.slds-chat-listitem_inbound, .slds-chat-listitem_outbound+.slds-chat-listitem_outbound {
+    margin-top: 0.25rem;
+}
+.slds-chat-listitem_inbound.outbound {
+    margin-top: 0.25rem;
+}
+.outbound-wrapper{
+    background: var(--runtime_copilot-base-user-avatar-background-color, var(--slds-g-color-palette-cloud-blue-90, #cfe9fe));
+}
+/* .slds-chat-message {
+    display: flex;
+}
+.slds-chat-message__body {
+    display: flex;
+    flex-direction: column;
+} */
+.slds-chat-message__body{
+    width: -webkit-fill-available;
+}
+/* .slds-chat-message__text_outbound {
+    margin-left: auto;
+    background-color:  rgb(1, 68, 134);
+}
+.slds-chat-message__text_inbound {
+    margin-right: auto;
+    background-color: rgb(243, 243, 243);
+    border-radius: var(--lwc-borderRadiusLarge, 0.5rem) var(--lwc-borderRadiusLarge, 0.5rem) var(--lwc-borderRadiusLarge, 0.5rem) 0;
+    color: var(--slds-g-color-neutral-base-10, var(--lwc-colorTextDefault, rgb(24, 24, 24)));
+} */
+.sds-overrides {
+    background-color: inherit;
+    padding: 0 var(--lwc-spacingXxSmall, 4px);
+    color: var(--slds-g-color-neutral-base-10, #181818);
+    width: 100%;
+}
+.message-full-width {
+    max-width: 100%;
+}
+.dynamic-message {
+    width: 100%;
+}
+.message-actionable_body{
+    padding-top: 8px;
+}
+/* .message-actionable_body.rich-text-grey {
+    background: #f3f3f3;
+    padding: 5px 15px;
+    border-radius: 5px;
+} */
+.text-container{
+    background-color: var(--slds-g-color-palette-neutral-95, rgb(229, 229, 229));
+    border-radius: var(--lwc-borderRadiusLarge, 8px);
+    padding: var(--lwc-spacingXSmall, 8px);
+    border: 1.5px solid transparent;
+}
+.message-actionable_footer {
+    padding-top: var(--lwc-spacingXSmall, 8px);
+}
+.text-container {
+    background-color: var(--slds-g-color-palette-neutral-95, rgb(229, 229, 229));
+    border-radius: var(--lwc-borderRadiusLarge, 8px);
+    padding: var(--lwc-spacingXSmall, 8px);
+    border: 1.5px solid transparent;
+}
+img.einstein-icon {
+  height: 32px;
+  width: 32px;
+  background-color: #CFE9FE;
+  border-radius: 2.5px;
+}

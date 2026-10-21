@@ -1,0 +1,284 @@
+.container-fixed {
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    height: 87vh;
+    position: fixed;
+    top: 92px;
+    right: 0px;
+    z-index: 99;
+}
+
+.container-fixed::-webkit-scrollbar {
+    display: none;
+}
+
+.content {
+    background-color: var(--lwc-colorBackgroundAlt);
+    border: 1px solid var(--lwc-colorBorder);
+    width: var(--lwc-sizeLarge);
+    height: 100%;
+    word-break: break-word;
+    z-index: 98;
+    display: flex;
+    overflow-y: visible;
+}
+
+.content-height_min {
+    max-height: calc(100% - 155px);
+}
+
+.content-height_max {
+    max-height: calc(100% - 235px);
+}
+
+.header {
+    background-color: #ffffff;
+    padding: 0.85rem 1rem;
+    border-bottom: solid 1px #e5e5e5;
+    display: flex;
+    height: 50px;
+}
+
+.header h2 {
+    /* margin-left: .5rem; */
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.icons-right {
+    margin-left: auto;
+}
+
+.pinned-button-right {
+    --sds-c-icon-color-foreground-default: #07618b;
+}
+
+.welcome-container {
+    background-position: center;
+    text-align: center;
+    height: 100%;
+    background-size: cover;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.welcome-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+img.copilot-welcome-image {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 250px;
+    width: 250px;
+    margin: 22.5% auto 0 auto;
+}
+
+.copilot-welcome-heading {
+    text-align: center;
+    font-size: 1.25rem;
+    margin-top: 1rem;
+    display: flex;
+    align-self: center;
+}
+
+.copilot-loading {
+    width: 100%;
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    justify-content: flex-end;
+    margin-top: 10%;
+}
+
+.copilot-welcome-text {
+    text-align: start;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    max-width: 334px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.welcome-message-text {
+    white-space: pre-line;
+}
+
+.view-component-container {
+    padding: 0rem 1rem 0rem 1rem;
+}
+
+.recommendations-wrapper {
+    padding-bottom: 2em;
+}
+
+.recommendation-card {
+    border-radius: var(--lwc-borderRadiusMedium, 0.25rem);
+    border: var(--sds-g-sizing-border-1, 1px) solid var(--sds-g-color-border-1, var(--lwc-colorBorder, rgb(229, 229, 229)));
+    padding: 0px;
+    background-color: var(--sds-g-color-surface-container-1);
+    box-shadow: var(--sds-g-shadow-1);
+}
+
+.recommendation-card:hover {
+    background-color: var(--Foundation-Gray-Neutral-95, #f3f3f3);
+    --sds-c-icon-color-foreground: #0b5cab;
+
+    cursor: pointer;
+}
+
+.recommendation-card:hover .recommendation-send-icon {
+    --sds-c-icon-color-foreground: #0b5cab;
+    --sds-c-icon-color-foreground-default: #0b5cab;
+}
+
+.recommendation-card-body {
+    display: flex;
+    padding: 0 12px;
+    height: 65px;
+    align-items: center;
+    border: 1px rgb(201, 201, 201);
+    justify-content: space-between;
+}
+
+.recommendation-text {
+    width: -webkit-fill-available;
+    text-align: left;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.recommendation-send-icon {
+    align-items: center;
+    padding-left: 0.5rem;
+}
+
+.slds-row-gap {
+    row-gap: 5px;
+}
+
+
+.footer-prompt {
+    padding: 0.6rem;
+    background-color: #ffffff;
+    border-top: solid 1px #e5e5e5;
+    max-width: 400px;
+    display: flex;
+    flex-shrink: 0;
+    flex-direction: column;
+}
+
+.message {
+    display: flex;
+}
+
+.message>div {
+    flex: 2;
+}
+
+.input-box {
+    background-color: white;
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.card-header {
+    background-color: white;
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+lightning-icon.send-icon.slds-icon-utility-send.slds-icon_container {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+}
+
+
+.einstein-text-area {
+    resize: none;
+    min-height: 80px;
+    width: 100%;
+    padding: var(--slds-c-textarea-spacing-block-start, var(--sds-c-textarea-spacing-block-start, .5rem)) var(--slds-c-textarea-spacing-inline-end, var(--sds-c-textarea-spacing-inline-end, .75rem)) var(--slds-c-textarea-spacing-block-end, var(--sds-c-textarea-spacing-block-end, .5rem)) var(--slds-c-textarea-spacing-inline-start, var(--sds-c-textarea-spacing-inline-start, .75rem));
+    background-color: var(--slds-c-textarea-color-background, var(--sds-c-textarea-color-background, var(--slds-g-color-neutral-base-100, #fff)));
+    color: var(--slds-c-textarea-text-color, var(--sds-c-textarea-text-color));
+    border: 1px solid #c9c9c9;
+    border-radius: 0.25rem;
+    box-shadow: var(--slds-c-textarea-shadow, var(--sds-c-textarea-shadow));
+    transition: border .1s linear, background-color .1s linear;
+    /* margin-top: 10px; */
+}
+
+textarea.einstein-text-area:focus-visible {
+    outline: none;
+}
+
+.slds-message {
+    display: flex;
+    flex-grow: 1;
+    overflow-y: auto;
+    flex-direction: column;
+}
+
+.chat-message-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: auto;
+    justify-content: space-between;
+    padding-left: var(--lwc-spacingXxSmall);
+}
+
+.chat-history {
+    display: flex;
+    flex-direction: column;
+    margin-block-start: auto;
+    margin-block-end: 0;
+    width: 100%;
+}
+
+.einstein-assistant-container {
+    height: 100%;
+    padding-block-end: var(--lwc-spacingSmall, 0.75rem);
+    outline: none;
+}
+
+.assistant-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.assistant-panel-header {
+    align-self: flex-start;
+    width: 100%;
+}
+
+.assistant-panel-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.slds-docked_container {
+    z-index: 1005;
+    margin-right: 380px;
+}
+
+/* .suggested-action-bar {
+    padding-bottom: 12.5px;
+} */
+.agentforce-icon {
+    --slds-c-icon-color-foreground: #0176d3;
+}

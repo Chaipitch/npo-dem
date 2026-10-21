@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata" fqn="configurableChat">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__RecordPage</target>
+        <target>lightning__HomePage</target>
+    </targets>
+   <targetConfigs>
+        <targetConfig targets="lightning__AppPage, lightning__RecordPage, lightning__HomePage">
+            <property name="title" type="String" label="Select Chat Title" 
+                description="Choose a title for the Einstein window" 
+                datasource="Einstein Program and Benefits Summary (Beta), Einstein Notes Summary (Beta), Einstein Funding Award Summary (Beta), Einstein Board Version of Grant Application (Beta)" />
+            <property name="summary" type="String" label="Summary Output" description="Type the summary you would like in the mock component" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

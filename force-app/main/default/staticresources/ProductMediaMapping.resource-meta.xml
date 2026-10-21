@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">
+    <cacheControl>Public</cacheControl>
+    <contentType>application/json</contentType>
+    <description>Product-to-CMS-media mapping consumed by scripts/assign_product_media.apex. Mirrors cms_data/product_images.json -- update both together.</description>
+</StaticResource>

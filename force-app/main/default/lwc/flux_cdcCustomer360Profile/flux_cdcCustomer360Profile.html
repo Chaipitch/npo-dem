@@ -1,0 +1,205 @@
+<template>
+    <article class="slds-card slds-var-p-around_x-small containerclass" style={customContainerStyle}>
+
+        <div class="bgAbsolute" style={customBackgroundImage}></div>
+
+        <div class="customheight">
+
+            <div>
+
+                <!-- persona informations -->
+
+                <div class="slds-card__body slds-card__body_inner slds-card-sticky" style={customStickyBackground}>
+
+                    <div class="slds-grid slds-var-p-around_small">
+
+                        <!-- avater / image -->
+                        <div class="slds-col slds-size_1-of-6">
+                            <span style="margin-left: -1rem;" class="slds-avatar slds-avatar_circle slds-avatar_large">
+                                <template if:true={validAvatar}>
+                                    <img alt="Person name" src={avatarImage} title="Person name" />
+                                </template>
+                            </span>                    
+                        </div>
+
+                        <!-- personal informations-->
+
+                        <div class="slds-col slds-size_5-of-6">
+                            <div class="slds-text-heading_large">{dataName}</div>
+                            <div class="slds-text-heading_x-small my-title-color">{dataLocation}</div>                    
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- customer 360 attributes -->
+
+                <div class="slds-card__body slds-card__body_inner">
+
+                    <div class="slds-grid slds-var-p-around_small">
+
+                        <div class="slds-col slds-size_1-of-6">
+                            <lightning-icon class="white-icons" variant="inverse" size="small" icon-name={attribute1Icon} alternative-text="ID" title="ID"></lightning-icon>
+                        </div>
+                        <div class="slds-col slds-size_5-of-6">
+                            <div class="slds-text-tile opacityLabel">{attribute1Label}</div>
+                            <div class="slds-text-title_bold">{attribute1}</div>
+                        </div>
+                    
+                    </div>
+
+                    <div onclick={handleMailClick} class="slds-grid slds-var-p-around_small slds-col-action">
+
+                        <div class="slds-col slds-size_1-of-6">
+                            <lightning-icon class="white-icons" variant="inverse" size="small" icon-name={attribute2Icon} alternative-text="ID" title="ID"></lightning-icon>
+                        </div>
+                        <div class="slds-col slds-size_5-of-6">
+                            <div class="slds-text-tile opacityLabel">{attribute2Label}</div>
+                            <div class="slds-text-title_bold">{attribute2}</div>
+                        </div>
+                    </div>
+
+                    <div class="slds-grid slds-var-p-around_small">
+
+                        <div class="slds-col slds-size_1-of-6">
+                            <lightning-icon class="white-icons" variant="inverse" size="small" icon-name={attribute3Icon} alternative-text="ID" title="ID"></lightning-icon>
+                        </div>
+                        <div class="slds-col slds-size_5-of-6">
+                            <div class="slds-text-tile opacityLabel">{attribute3Label}</div>
+                            <div class="slds-text-title_bold">{attribute3}</div>
+                        </div>
+                    </div>
+
+                </div>                
+
+                <!-- attributes 4 -->
+
+                <div>
+                    <hr class="opacityHorLine" />
+                </div>
+                
+                <div class="slds-card__body slds-card__body_inner">
+
+                    <div class="slds-grid slds-gutters slds-var-p-around_xx-small">
+                        <div class="slds-col slds-size_1-of-6">
+                            <lightning-icon class="white-icons" variant="inverse" size="x-small" icon-name={attribute4Icon} alternative-text="ID" title="ID"></lightning-icon>
+                        </div>
+                        <div class="slds-col slds-size_5-of-6">
+                            <span class="slds-text-tile opacityLabel">{attribute4Label}</span>
+                            <span class="slds-text-title_bold">{attribute4}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- attribute 5-->
+
+                <div>
+                    <hr class="opacityHorLine" />
+                </div>
+                
+                <div class="slds-card__body slds-card__body_inner">
+
+                    <div class="slds-grid slds-gutters slds-var-p-around_xx-small">
+                        <div class="slds-col slds-size_1-of-6">
+                            <lightning-icon class="white-icons" variant="inverse" size="x-small" icon-name={attribute5Icon} alternative-text="ID" title="ID"></lightning-icon>
+                        </div>
+                        <div class="slds-col slds-size_5-of-6">
+                            <span class="slds-text-tile opacityLabel">{attribute5Label}</span>
+
+                            <span class="slds-text-title_bold">{attribute5}</span>
+
+                            <template if:true={showSlider5}>
+                                <div class="customSlider">
+                                    <div class="sliderProgress" style={slider5Progress}></div>
+                                </div>
+                            </template> 
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- attribute 6-->
+
+                <div>
+                    <hr class="opacityHorLine" />
+                </div>
+                
+                <div class="slds-card__body slds-card__body_inner">
+
+                    <div class="slds-grid slds-gutters slds-var-p-around_xx-small">
+                        <div class="slds-col slds-size_1-of-6">
+                            <lightning-icon class="white-icons" variant="inverse" size="x-small" icon-name={attribute6Icon} alternative-text="ID" title="ID"></lightning-icon>
+                        </div>
+                        <div class="slds-col slds-size_5-of-6">
+                            <span class="slds-text-tile opacityLabel">{attribute6Label}</span>
+                            <span class="slds-text-title_bold">{attribute6}</span>
+                        </div>
+                    </div>
+                </div>                
+
+                <!-- attribute 7-->
+
+                <div>
+                    <hr class="opacityHorLine" />
+                </div>
+                
+                <div class="slds-card__body slds-card__body_inner">
+
+                    <div class="slds-grid slds-gutters slds-var-p-around_xx-small">
+                        <div class="slds-col slds-size_1-of-6">
+                            <lightning-icon class="white-icons" variant="inverse" size="x-small" icon-name={attribute7Icon} alternative-text="ID" title="ID"></lightning-icon>
+                        </div>
+                        <div class="slds-col slds-size_5-of-6">
+                            <span class="slds-text-tile opacityLabel">{attribute7Label}</span>
+                            <span class="slds-text-title_bold">
+                                <lightning-formatted-number value={attribute7} format-style="currency" currency-code={attribute7Currency} currency-display-as={attribute7CurrencyFormat}></lightning-formatted-number>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- attribute 8-->
+
+                <div>
+                    <hr class="opacityHorLine" />
+                </div>
+                
+                <div class="slds-card__body slds-card__body_inner">
+
+                    <div class="slds-grid slds-gutters slds-var-p-around_xx-small">
+                        <div class="slds-col slds-size_1-of-6">
+                            <lightning-icon class="white-icons" variant="inverse" size="x-small" icon-name={attribute8Icon} alternative-text="ID" title="ID"></lightning-icon>
+                        </div>
+                        <div class="slds-col slds-size_5-of-6">
+                            <span class="slds-text-tile opacityLabel">{attribute8Label}</span>
+                            <span class="slds-text-title_bold">
+
+                                <template if:true={showProgress8}>
+                                    
+                                    <!-- gauge diagram -->
+
+                                    <div class="gauge">
+                                        <div class="percentage" style={gaugeStyle}></div>
+                                        <div class="mask" style={customMaskBackground}></div>
+                                        <span class="value">
+                                            <lightning-formatted-number value={attribute8} format-style="percent"></lightning-formatted-number>
+                                        </span>
+                                    </div>
+
+                                </template>
+                                <template if:false={showProgress8}>
+                                    <lightning-formatted-number value={attribute8} format-style="percent"></lightning-formatted-number>
+                                </template>
+
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- end-->
+
+            </div>
+        </div>
+
+    </article>
+</template>

@@ -1,0 +1,103 @@
+img.einstein-loading {
+  display: inline-block;
+  margin-left: 3px;
+}
+
+.message-card {
+  background: #ffffff;
+  border: 1px solid #c9c9c9;
+  border-radius: 4px;
+}
+
+.card-answer {
+  background: #ffffff;
+}
+
+.card-question {
+  background: #ffffff;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 2.5px;
+}
+
+.avatar-column {
+  width: 45px;
+}
+
+.einstein-column {
+  width: 45px;
+  margin-left: 4px;
+}
+
+.response-column {
+  padding: 0px 5px;
+  max-width: 85%;
+  /* margin-left: 5px; */
+}
+
+.typewriter-content {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  flex: 0 0 100%;
+  /* Let it fill the entire space horizontally */
+  height: 25px;
+  /* font-family: "Segoe UI"; */
+  /* font-size: 13px; */
+}
+
+.typewriter-text {
+  white-space: nowrap;
+  overflow: hidden;
+  margin-right: 5px;
+}
+
+.star-container {
+  display: flex;
+  align-items: center;
+  margin-top: 3px;
+  justify-content: center;
+  /* Center the SVGs horizontally */
+  /*    visibility: hidden; Initially hide the star container */
+}
+
+
+.stars {
+  height: 12px;
+  padding: .2px;
+  animation: twinkling .4s infinite alternate;
+  animation-timing-function: ease-out;
+}
+
+.star2 {
+  height: 14px;
+  animation-delay: .15s;
+}
+
+.star3 {
+  animation-delay: .3s;
+}
+
+@keyframes twinkling {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(.6);
+  }
+}
+
+/* .scroll-stopper {
+    margin-top:10px;
+  } */
+
+  img.einstein-icon {
+    height: 32px;
+    width: 32px;
+    background-color: #CFE9FE;
+    border-radius: 2.5px;
+}

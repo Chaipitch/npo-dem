@@ -1,0 +1,4 @@
+<apex:page controller="NGO_CaseMan_ProgramDashboard_CTRL" action="{!redirectToDashboard}">
+    <apex:param name="programRecordId" value="{!$CurrentPage.parameters.Id}" assignTo="{!programRecordId}"/>
+    <apex:param name="filterValue" value="{!$CurrentPage.parameters.filterValue}" assignTo="{!filterValue}" />
+</apex:page>

@@ -1,0 +1,300 @@
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId"
+    controller="XDO_MDC_GenieHighlightCardCT" access="global">
+    <aura:attribute name="contact" type="Contact" access="global" />
+
+    <aura:attribute name="backgroundColor" type="String" />
+    <aura:attribute name="overrideBackground" type="String" />
+    <aura:attribute name="inverseIconColors" type="Boolean" />
+    <aura:attribute name="dynamicProgressBar" type="Boolean" />
+
+    <aura:attribute name="metric1Icon" type="String" />
+    <aura:attribute name="metric1Label" type="String" />
+    <aura:attribute name="metric2Icon" type="String" />
+    <aura:attribute name="metric2Label" type="String" />
+    <aura:attribute name="metric3Icon" type="String" />
+    <aura:attribute name="metric3Label" type="String" />
+    <aura:attribute name="metric4Icon" type="String" />
+    <aura:attribute name="metric4Label" type="String" />
+    <aura:attribute name="metric5Icon" type="String" />
+    <aura:attribute name="metric5Label" type="String" />
+
+    <aura:attribute name="reverseColor" type="Boolean" />
+    <aura:attribute name="threshold1" type="Integer" />
+    <aura:attribute name="threshold2" type="Integer" />
+
+    <aura:attribute name="Analytics" type="Boolean" />
+    <aura:attribute name="Commerce" type="Boolean" />
+    <aura:attribute name="Marketing" type="Boolean" />
+    <aura:attribute name="Mulesoft" type="Boolean" />
+    <aura:attribute name="Sales" type="Boolean" />
+    <aura:attribute name="Service" type="Boolean" />
+    <aura:attribute name="SageMaker" type="Boolean" />
+    <aura:attribute name="Snowflake" type="Boolean" />
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+    <div class="slds-card card" aura:id="card"
+        style="{! v.overrideBackground!=null ? 'background-size: cover !important; background: url(/resource/' + v.overrideBackground + ')' : 'background-size: cover !important; background: url(/resource/xDO_MDC_Resources/Backgrounds/' + (v.backgroundColor) + '.png)' }">
+        <div class="slds-media slds-m-left_x-large slds-m-top_large slds-m-bottom_large">
+            <div class="slds-media_figure">
+                <div class="customer-image-container">
+                    <aura:if isTrue="{!empty(v.contact.xDO_MDC_Cust360_Contact_Picture_URL__c)}">
+                        <img src="/_slds/images/themes/lightning_lite/lightning_lite_profile_avatar_160.png"
+                            class="customer-avatar" />
+                        <aura:set attribute="else">
+                            <img src="{!v.contact.xDO_MDC_Cust360_Contact_Picture_URL__c }" class="customer-avatar" />
+                        </aura:set>
+                    </aura:if>
+                </div>
+            </div>
+            <div class="slds-media_body slds-m-left_medium slds-m-top_large">
+                <div
+                    class="{!v.inverseIconColors ? 'slds-text-heading_medium_inverse title-weight' : 'slds-text-heading_medium title-weight'}">
+                    {!v.contact.Name}</div>
+                <aura:if isTrue="{!not(empty(v.contact.MailingCity))}">
+                    <div class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">
+                        {!v.contact.MailingCity + ', ' + v.contact.MailingState}</div>
+                </aura:if>
+            </div>
+        </div>
+
+        <div
+            class="{!v.inverseIconColors ? 'slds-media slds-m-left_x-large slds-m-right_x-large slds-m-bottom_large slds-border_bottom_inverse slds-p-bottom_medium' : 'slds-media slds-m-left_x-large slds-m-right_x-large slds-m-bottom_large slds-border_bottom slds-p-bottom_medium'}">
+            <div class="slds-media_body">
+                <div>
+                    <img class="metricIcon"
+                        src="{! '/resource/xDO_MDC_Resources/Icons/type=Contact_' + v.inverseIconColors + '.png'}"></img>
+                    <span class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">Customer
+                        ID</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.contact.xDO_MDC_Cust360_Id__c}</span>
+                </div>
+                <div>
+                    <img class="metricIcon"
+                        src="{! '/resource/xDO_MDC_Resources/Icons/type=Mail_' + v.inverseIconColors + '.png'}" />
+                    <span class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">Email
+                        Address</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.contact.Email}</span>
+                </div>
+                <div>
+                    <img class="metricIcon"
+                        src="{! '/resource/xDO_MDC_Resources/Icons/type=Phone_' + v.inverseIconColors + '.png'}" />
+                    <span class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">Phone
+                        Number</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.contact.Phone}</span>
+                </div>
+                <div>
+                    <img class="metricIcon"
+                        src="{! '/resource/xDO_MDC_Resources/Icons/type=Geotag_' + v.inverseIconColors + '.png'}" />
+                    <span class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">Address</span>
+                    <div class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}"
+                        style="display:inline-block;">{!v.contact.MailingStreet}</div>
+                    <aura:if isTrue="{!not(empty(v.contact.MailingCity))}">
+                        <div class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}"
+                            style="margin-left: 112px;margin-top: -10px;">{!v.contact.MailingCity},
+                            {!v.contact.MailingState}&nbsp;{!v.contact.MailingPostalCode}</div>
+                    </aura:if>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="{!v.inverseIconColors ? 'slds-media slds-m-left_x-large slds-m-right_x-large slds-m-bottom_large slds-border_bottom_inverse slds-p-bottom_medium' : 'slds-media slds-m-left_x-large slds-m-right_x-large slds-m-bottom_large slds-border_bottom slds-p-bottom_medium'}">
+            <div class="slds-media_body">
+                <div class="CustomerMetric" style="{! v.metric1Icon=='None' ? 'display: none;' : 'display: block;' }">
+                    <img class="metricIcon"
+                        src="{!'/resource/xDO_MDC_Resources/Icons/type=' + v.metric1Icon + '_' + v.inverseIconColors + '.png'}"></img>
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.metric1Label}</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.contact.xDO_MDC_Cust360_Metric1__c}</span>
+                </div>
+                <div class="CustomerMetric" style="{! v.metric2Icon=='None' ? 'display: none;' : 'display: block;' }">
+                    <img class="metricIcon"
+                        src="{!'/resource/xDO_MDC_Resources/Icons/type=' + v.metric2Icon + '_' + v.inverseIconColors + '.png'}"></img>
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.metric2Label}</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.contact.xDO_MDC_Cust360_Metric2__c}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Propensity to Purchase -->
+        <div class="{!v.inverseIconColors ? 'slds-media slds-m-left_x-large slds-m-right_x-large slds-m-bottom_large slds-border_bottom_inverse slds-p-bottom_medium' : 'slds-media slds-m-left_x-large slds-m-right_x-large slds-m-bottom_large slds-border_bottom slds-p-bottom_medium'}"
+            style="{! v.metric3Icon=='None' &amp;&amp; v.metric4Icon=='None' ? 'display: none;' : 'display: block;' }">
+            <div class="slds-media_body">
+                <div class="CustomerMetric" style="{! v.metric3Icon=='None' ? 'display: none;' : 'display: block;' }">
+                    <img class="metricIcon"
+                        src="{!'/resource/xDO_MDC_Resources/Icons/type=' + v.metric3Icon + '_' + v.inverseIconColors + '.png'}"></img>
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.metric3Label}</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.contact.xDO_MDC_Cust360_Metric3__c}</span>
+                </div>
+                <div class="CustomerMetric"
+                    style="{! v.metric4Icon=='None' ? 'display: none;' : 'display: block; margin-bottom:10px;' }">
+                    <img class="metricIcon"
+                        src="{!'/resource/xDO_MDC_Resources/Icons/type=' + v.metric4Icon + '_' + v.inverseIconColors + '.png'}"></img>
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.metric4Label}</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.contact.xDO_MDC_Cust360_Metric4__c}</span>
+                </div>
+                <div class="CustomerMetric"
+                    style="{! v.metric4Icon=='None' ? 'display: none;' : 'display: block; margin-bottom:10px;' }">
+                    <!-- solid progress bar -->
+                    <aura:if isTrue="{! not(v.dynamicProgressBar)}">
+                        <lightning:progressBar class="{!v.inverseIconColors ? 'progress-bar_inverse' : 'progress-bar'}"
+                            value="{!v.contact.xDO_MDC_Cust360_Purchase_Score__c}" variant="circular" size="large" />
+
+                        <!-- dynamic red, yellow, green progress bar -->
+                        <aura:set attribute="else">
+                            <aura:if
+                                isTrue="{!lessthanorequal(v.contact.xDO_MDC_Cust360_Purchase_Score__c, v.threshold1)}">
+                                <div>
+                                    <aura:if isTrue="{! not(v.reverseColor)}">
+                                        <lightning:progressBar value="{!v.contact.xDO_MDC_Cust360_Purchase_Score__c}"
+                                            size="large" variant="circular" class="progress-bar-red" />
+                                        <aura:set attribute="else">
+                                            <lightning:progressBar
+                                                value="{!v.contact.xDO_MDC_Cust360_Purchase_Score__c}" size="large"
+                                                variant="circular" class="progress-bar-green" />
+                                        </aura:set>
+                                    </aura:if>
+                                </div>
+
+                                <aura:set attribute="else">
+                                    <aura:if
+                                        isTrue="{!lessthanorequal(v.contact.xDO_MDC_Cust360_Purchase_Score__c, v.threshold2)}">
+                                        <div>
+                                            <lightning:progressBar
+                                                value="{!v.contact.xDO_MDC_Cust360_Purchase_Score__c}" size="large"
+                                                variant="circular" class="progress-bar-yellow" />
+                                        </div>
+                                        <aura:set attribute="else">
+                                            <div>
+                                                <aura:if isTrue="{! not(v.reverseColor)}">
+                                                    <lightning:progressBar
+                                                        value="{!v.contact.xDO_MDC_Cust360_Purchase_Score__c}"
+                                                        size="large" variant="circular" class="progress-bar-green" />
+                                                    <aura:set attribute="else">
+                                                        <lightning:progressBar
+                                                            value="{!v.contact.xDO_MDC_Cust360_Purchase_Score__c}"
+                                                            size="large" variant="circular" class="progress-bar-red" />
+                                                    </aura:set>
+                                                </aura:if>
+                                            </div>
+                                        </aura:set>
+                                    </aura:if>
+                                </aura:set>
+                            </aura:if>
+                        </aura:set>
+                    </aura:if>
+                </div>
+            </div>
+        </div>
+
+        <!-- Engagement Score -->
+        <div class="{!v.inverseIconColors ? 'slds-media slds-m-left_x-large slds-m-right_x-large slds-m-bottom_large slds-border_bottom_inverse slds-p-bottom_medium' : 'slds-media slds-m-left_x-large slds-m-right_x-large slds-m-bottom_large slds-border_bottom slds-p-bottom_medium'}"
+            style="{! v.metric5Icon=='None' ? 'display: none;' : 'display: block;' }">
+            <div class="slds-media_body">
+                <div class="CustomerMetric"
+                    style="{! v.metric5Icon=='None' ? 'display: none;' : 'display: block; margin-bottom:10px;' }">
+                    <img class="metricIcon"
+                        src="{!'/resource/xDO_MDC_Resources/Icons/type=' + v.metric5Icon + '_' + v.inverseIconColors + '.png'}"></img>
+                    <span
+                        class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">{!v.metric5Label}</span>
+                    <span
+                        class="{!v.inverseIconColors ? 'contact-info_inverse' : 'contact-info'}">{!v.contact.xDO_MDC_Cust360_Engagement_Score__c}%</span>
+                </div>
+
+                <div class="CustomerMetric"
+                    style="{! v.metric5Icon=='None' ? 'display: none;' : 'display: block; margin-bottom:10px;' }">
+                    <!-- solid progress bar -->
+                    <aura:if isTrue="{! not(v.dynamicProgressBar)}">
+                        <lightning:progressBar class="{!v.inverseIconColors ? 'progress-bar_inverse' : 'progress-bar'}"
+                            value="{!v.contact.xDO_MDC_Cust360_Engagement_Score__c}" variant="circular" size="large" />
+
+                        <!-- dynamic red, yellow, green progress bar -->
+                        <aura:set attribute="else">
+                            <aura:if
+                                isTrue="{!lessthanorequal(v.contact.xDO_MDC_Cust360_Engagement_Score__c, v.threshold1)}">
+                                <div>
+                                    <aura:if isTrue="{! not(v.reverseColor)}">
+                                        <lightning:progressBar value="{!v.contact.xDO_MDC_Cust360_Engagement_Score__c}"
+                                            size="large" variant="circular" class="progress-bar-red" />
+                                        <aura:set attribute="else">
+                                            <lightning:progressBar
+                                                value="{!v.contact.xDO_MDC_Cust360_Engagement_Score__c}" size="large"
+                                                variant="circular" class="progress-bar-green" />
+                                        </aura:set>
+                                    </aura:if>
+                                </div>
+
+                                <aura:set attribute="else">
+                                    <aura:if
+                                        isTrue="{!lessthanorequal(v.contact.xDO_MDC_Cust360_Engagement_Score__c, v.threshold2)}">
+                                        <div>
+                                            <lightning:progressBar
+                                                value="{!v.contact.xDO_MDC_Cust360_Engagement_Score__c}" size="large"
+                                                variant="circular" class="progress-bar-yellow" />
+                                        </div>
+                                        <aura:set attribute="else">
+                                            <div>
+                                                <aura:if isTrue="{! not(v.reverseColor)}">
+                                                    <lightning:progressBar
+                                                        value="{!v.contact.xDO_MDC_Cust360_Engagement_Score__c}"
+                                                        size="large" variant="circular" class="progress-bar-green" />
+                                                    <aura:set attribute="else">
+                                                        <lightning:progressBar
+                                                            value="{!v.contact.xDO_MDC_Cust360_Engagement_Score__c}"
+                                                            size="large" variant="circular" class="progress-bar-red" />
+                                                    </aura:set>
+                                                </aura:if>
+                                            </div>
+                                        </aura:set>
+                                    </aura:if>
+                                </aura:set>
+                            </aura:if>
+                        </aura:set>
+                    </aura:if>
+                </div>
+            </div>
+        </div>
+
+        <!-- Powered By Section -->
+        <div class="slds-media slds-m-left_x-large slds-m-right_x-large slds-m-bottom_x-large">
+            <div class="slds-media_body">
+                <div class="{!v.inverseIconColors ? 'slds-text-color_inverse' : 'slds-text-color'}">Powered By </div>
+                <aura:if isTrue="{!(v.Analytics)}"><img class="productIcon"
+                        src="{! '/resource/xDO_MDC_Resources/Icons/icon=Analytics_' + v.inverseIconColors + '.png'}"></img>
+                </aura:if>
+                <aura:if isTrue="{!(v.Commerce)}"><img class="productIcon"
+                        src="{! '/resource/xDO_MDC_Resources/Icons/icon=Commerce_' + v.inverseIconColors + '.png'}"></img>
+                </aura:if>
+                <aura:if isTrue="{!(v.Marketing)}"><img class="productIcon"
+                        src="{! '/resource/xDO_MDC_Resources/Icons/icon=Marketing_' + v.inverseIconColors + '.png'}"></img>
+                </aura:if>
+                <aura:if isTrue="{!(v.Mulesoft)}"><img class="productIcon"
+                        src="{! '/resource/xDO_MDC_Resources/Icons/icon=Mulesoft_' + v.inverseIconColors + '.png'}"></img>
+                </aura:if>
+                <aura:if isTrue="{!(v.Sales)}"><img class="productIcon"
+                        src="{! '/resource/xDO_MDC_Resources/Icons/icon=Sales_' + v.inverseIconColors + '.png'}"></img>
+                </aura:if>
+                <aura:if isTrue="{!(v.Service)}"><img class="productIcon"
+                        src="{! '/resource/xDO_MDC_Resources/Icons/icon=Service_' + v.inverseIconColors + '.png'}"></img>
+                </aura:if>
+                <aura:if isTrue="{!(v.SageMaker)}"><img class="productIcon"
+                        src="{! '/resource/xDO_MDC_Resources/Icons/icon=SageMaker_' + v.inverseIconColors + '.png'}"></img>
+                </aura:if>
+                <aura:if isTrue="{!(v.Snowflake)}"><img class="productIcon"
+                        src="{! '/resource/xDO_MDC_Resources/Icons/icon=Snowflake_' + v.inverseIconColors + '.png'}"></img>
+                </aura:if>
+            </div>
+        </div>
+    </div>
+
+</aura:component>
