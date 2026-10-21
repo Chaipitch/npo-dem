@@ -1,6 +1,7 @@
 import { LightningElement, api, wire } from "lwc";
 import basePath from "@salesforce/community/basePath";
 import getDashboard from "@salesforce/apex/DonorPortalController.getDashboard";
+import getCampaigns from "@salesforce/apex/DonationIntakeController.getCampaigns";
 
 const IMPACT_STYLE = [
   { icon: "users", tone: "tone-blue" },
@@ -33,8 +34,20 @@ export default class DonorDashboard extends LightningElement {
   @api agentSuggestions =
     "Explore my causes;View giving history;Show next milestones";
 
+  /** "Campaign name|image URL" pairs separated by ";" — campaigns without one get an illustration */
+  @api campaignImages =
+    "Christmas Giving 2026|https://images.unsplash.com/photo-1606916693216-69bd7e1cf2fa?auto=format&fit=crop&w=900&q=75";
+
   data;
   error;
+  campaigns = [];
+
+  @wire(getCampaigns)
+  wiredCampaigns({ data }) {
+    if (data) {
+      this.campaigns = data;
+    }
+  }
   _scrolledTo;
 
   @wire(getDashboard)
@@ -183,6 +196,65 @@ export default class DonorDashboard extends LightningElement {
   }
   get hasGifts() {
     return this.gifts.length > 0;
+  }
+
+  // ------------------------------------------------------------ campaigns
+  get hasCampaigns() {
+    return this.campaigns.length > 0;
+  }
+  get campaignCards() {
+    const images = new Map(
+      splitList(this.campaignImages).map((pair) => {
+        const [name, url] = pair.split("|").map((x) => (x || "").trim());
+        return [name, url];
+      })
+    );
+    const base = basePath || "";
+    return this.campaigns.map((c, i) => {
+      const goal = Number(c.goal) || 0;
+      const raised = Number(c.raised) || 0;
+      const pct =
+        goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+      const name = (c.name || "").toLowerCase();
+      const art = /water/.test(name)
+        ? "water"
+        : /school|educat|scholar|girl/.test(name)
+          ? "school"
+          : /tree|green|environment|plant/.test(name)
+            ? "sprout"
+            : "gift";
+      let timing = "";
+      if (c.daysLeft !== null && c.daysLeft !== undefined) {
+        timing =
+          c.daysLeft === 0
+            ? "Ends today"
+            : `${c.daysLeft} day${c.daysLeft === 1 ? "" : "s"} left`;
+      }
+      return {
+        key: c.id || `c${i}`,
+        name: c.name,
+        description: c.description,
+        href: `${base}/donate?campaign=${encodeURIComponent(c.name)}`,
+        imageUrl: images.get(c.name),
+        isWater: art === "water",
+        isSchool: art === "school",
+        isSprout: art === "sprout",
+        isGift: art === "gift",
+        raisedDisplay: this.money(raised),
+        goalDisplay: goal > 0 ? this.money(goal) : "",
+        hasGoal: goal > 0,
+        barStyle: `width: ${pct}%`,
+        pctDisplay: `${pct}%`,
+        giftsDisplay: c.giftCount
+          ? `${c.giftCount} gift${c.giftCount === 1 ? "" : "s"}`
+          : "Be the first to give",
+        timing,
+        chips: (c.designations || []).map((d, j) => ({
+          key: `d${j}`,
+          label: d
+        }))
+      };
+    });
   }
 
   // ------------------------------------------------------------ agent panel

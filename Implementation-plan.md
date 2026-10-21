@@ -1,119 +1,98 @@
 # Implementation Plan — ABC Hope · Christmas Giving 2026
 
 Platform: Salesforce Nonprofit Cloud · Experience Cloud **LWR** site "ABC Hope" · org `npo-demo`.
-Constraints: see `decisions.md` (esp. D-02 no flows/VRs/custom objects/fields; D-04 simulated payment).
+Constraints: `decisions.md` — D-02 (no flows/VRs/custom objects/fields; one approved flow, D-16) and
+D-04 (simulated payment).
 
-Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked/deferred
+Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ deferred
 
 ---
+
+## Task sheet (image #4) → where it landed
+
+| #   | Task                      | Status | Where                                                                                      |
+| --- | ------------------------- | ------ | ------------------------------------------------------------------------------------------ |
+| 1   | Wireframe (steps 1–5)     | ✅     | Mockup #3 used as the wireframe; built as `abcHopeHero` + `donationJourney`                |
+| 2   | Intake "screen flow"      | ✅     | Built as LWC + Apex instead (D-03, user decision) with dynamic visibility + validation     |
+| 3   | Donor matching            | ✅     | `DonationIntakeService.matchOrCreateDonor` (D-06)                                          |
+| 4   | Gift creation             | ✅     | One-time → `GiftTransaction`; monthly → `GiftCommitment` + schedule                        |
+| 5   | Allocation mapping        | ✅     | Campaign + designation + outreach source code (D-07)                                       |
+| 6   | Experience Cloud setup    | ✅     | Public LWR pages, theme layouts, publish                                                   |
+| 7   | Guest user security       | ✅     | Guest profile → one Apex class; server-side validation (D-08)                              |
+| 8   | Technical mapping doc     | ✅     | Table at the bottom of this file                                                           |
+| 9   | Demo recording (optional) | ⬜     | Script in `testing-steps.md` → Demo script                                                 |
+| 10  | Agent chat box            | 🟨     | Agent, routing, channel, deployment done; Embedded Messaging component placement is manual |
 
 ## Phase 0 — Setup ✅
 
-- ✅ Inspect org (site, guest profile, NPC objects, agents, currency).
-- ✅ Retrieve site baseline metadata into `force-app`.
-- ✅ Project docs (this file, CLAUDE.md, Handover.md, decisions.md, testing-steps.md).
-- ✅ Pushed to GitHub (`Chaipitch/npo-dem`).
+- Org inspection, site baseline retrieved, project docs, GitHub (`Chaipitch/npo-dem`).
 
 ## Phase 1 — Demo data (records only) ✅
 
-Script: `scripts/apex/seedChristmasGiving.apex` (idempotent, upsert by Name).
+| Script                     | Creates                                                                                                                                                                                       |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `seedChristmasGiving.apex` | Campaign _Christmas Giving 2026_; designations School Supplies, Learning Kits, Where Most Needed; campaign default designation; outreach source code `XMAS26-EMAIL`                           |
+| `seedCampaigns.apex`       | Goals (`ExpectedRevenue`), dates and descriptions for 4 campaigns; adds Clean Water for Rural Schools, Girls' Education Scholarships, Green Communities Tree Planting with their designations |
+| `seedMayaHistory.apex`     | Maya Grande's 2023–2025 paid gifts (General Fund, Food Insecurity Fund, Job Training Fund)                                                                                                    |
 
-| Record                                          | Object                                       | Values                                                                   |
-| ----------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------ |
-| Christmas Giving 2026                           | `Campaign`                                   | Type Email, Status In Progress, Active, Start 2026‑11‑15, End 2026‑12‑31 |
-| School Supplies                                 | `GiftDesignation`                            | Active                                                                   |
-| (also offered) Learning Kits, Where Most Needed | `GiftDesignation`                            | Active — dropdown options                                                |
-| Campaign default                                | `GiftDefaultDesignation`                     | Parent = Campaign, School Supplies, 100%                                 |
-| Email – Christmas Appeal                        | `OutreachSourceCode`                         | SourceCode `XMAS26-EMAIL`, Campaign link                                 |
-| Maya Grande                                     | existing Person Account `001g70000175AtRAAU` | reuse; add customer user in Phase 4                                      |
+## Phase 2 — Donation journey ✅
 
-## Phase 2 — Guest donation journey (task sheet #1–#5) ✅
+- `donationJourney` LWC: Choose (one-time/monthly, THB 300/500/1,000/Other, designation) → Details
+  (Individual/Organization; skipped for signed-in donors) → Review ("Payment simulation only") → Thank you.
+- `?campaign=<name>` selects the campaign (its own designations + Where Most Needed); `?src=` sets the
+  outreach source code.
+- Apex `DonationIntakeController` / `DonationIntakeService`: `getOptions`, `getCampaigns`, `submitDonation`;
+  donor matching, gift creation, allocation, double-submit guard.
 
-**Wireframe (#1)**: mockup #3 is the approved wireframe; desktop + mobile.
+## Phase 3 — Site setup & guest security ✅
 
-**LWC** (`force-app/main/default/lwc`)
+- Public access on, Network Live; Home + Donate public; portal pages require login.
+- Theme layouts: `abcPublicLayout` (header/footer) and `abcPortalLayout` (sidebar/top bar) — D-10.
+- Guest profile → `DonationIntakeController` only. CSP Trusted Site for Unsplash images (D-17).
 
-| Component          | Purpose                                                                                                                                                                                                               |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| _As built_         | One `donationJourney` component holds all four steps (stepper inline); `abcHopeHero` is the Discover step on `/`. The child components below were folded in.                                                          |
-| `donationJourney`  | Container: step state, nav, calls Apex. Exposed to LWR (`lightningCommunity__Page`, `lightningCommunity__Default`). Props: `campaignName`, `amountOptions` ("300,500,1000"), `currencyLabel` ("THB"), `heroImageUrl`. |
-| `donationStepper`  | 4-dot progress (Choose / Details / Review / Thank you)                                                                                                                                                                |
-| `donationHero`     | Step 1 "Make Christmas Brighter" hero + Donate Now CTA                                                                                                                                                                |
-| `donationAmount`   | One-time/Monthly toggle, amount tiles + Other, designation combobox                                                                                                                                                   |
-| `donationDetails`  | Individual/Organization toggle; First/Last name (or Org name + contact), email; client validation                                                                                                                     |
-| `donationReview`   | Summary card + "Submit Donation Details" + "Payment simulation only"                                                                                                                                                  |
-| `donationThankYou` | Success state, amount + designation, "No payment collected"                                                                                                                                                           |
+## Phase 4 — Signed-in donor experience ✅
 
-Dynamic visibility & validation (task #2, implemented in LWC since flows are deferred):
+- Maya Grande portal user (Customer Community Login) + permission set `ABC_Hope_Donor_Portal`.
+- Journey recognises the signed-in donor ("Welcome back"); `donorProfile` edits contact details.
+- Login sends donors to `/dashboard`.
 
-- Monthly shows "charged monthly from <date>" helper; Other shows numeric input (min 100, max 1,000,000).
-- Organization shows Org name; Individual shows First/Last name.
-- Email regex + required checks; Next disabled until valid; server re-validates.
+## Phase 5 — Donor portal home ✅
 
-**Apex** (`force-app/main/default/classes`)
+- `donorDashboard` (view=home): banner, KPI cards, **Campaigns You Can Support** (card → donate for that
+  campaign), shared impact, stories, causes, impact journey, agent panel. View=giving on `/my-giving`.
 
-| Class                                                       | Purpose                                                                                                                              |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `DonationIntakeController`                                  | `@AuraEnabled(cacheable=true) getOptions()` → active designations + campaign info; `@AuraEnabled submitDonation(String requestJson)` |
-| `DonationIntakeService`                                     | Validation, donor matching (#3), gift creation (#4), allocation (#5). `without sharing` (guest needs to match existing donors).      |
-| `DonationIntakeRequest` / `DonationIntakeResult`            | DTOs                                                                                                                                 |
-| `DonationIntakeServiceTest`, `DonationIntakeControllerTest` | ≥ 85% coverage, positive/negative/bulk/guest (`System.runAs` guest user)                                                             |
+## Phase 6 — Agentforce ✅ / 🟨
 
-Logic:
+- ✅ Agent Script agent _ABC Hope Donor Assistant_ (D-15): campaign FAQ, my giving, monthly gifts
+  (pause/resume/change/cancel via NPC standard actions), contact details.
+- ✅ Routing flow `ABC_Hope_Chat_Routing` (D-16), channel + deployment `ABC_Hope_Chat`.
+- 🟨 Place the Embedded Messaging component in Builder (Handover → Manual step).
 
-1. **Donor matching (#3)** — D-06.
-2. **Gift creation (#4)** — one-time: `GiftTransaction` (Name `XMAS26-<donor>-<date>`, OriginalAmount, TransactionDate today, Status Unpaid, PaymentMethod Unknown, GiftType, DonorId, CampaignId, OutreachSourceCodeId). Monthly: `GiftCommitment` (DonorId, CampaignId, Status Active, ScheduleType Recurring, RecurrenceType OpenEnded, EffectiveStartDate) + `GiftCommitmentSchedule` (TransactionAmount, TransactionPeriod Monthly, TransactionInterval 1, StartDate, PaymentMethod Unknown, CampaignId, OutreachSourceCodeId). Existing org automation (`NGO_Coordinate_Gift_Commitment_Processing`) generates transactions.
-3. **Allocation (#5)** — one-time: `GiftTransactionDesignation` 100% → chosen `GiftDesignation`. Monthly: `GiftDefaultDesignation` with ParentRecordId = GiftCommitment, 100%.
+## Phase 7 — Demo ⬜
 
-## Phase 3 — Site setup & guest security (task sheet #6–#7) ✅
+- Optional 3–5 minute recording following `testing-steps.md` → Demo script.
 
-- New route/view `donate` (`/donate`) in `site/ABC_Hope1` with `c:donationJourney`; Home hero CTA → `/donate`.
-- `sfdc_cms__site` `authenticationType`: `AUTHENTICATED` → `AUTHENTICATED_WITH_PUBLIC_ACCESS_ENABLED`; mark `donate` + `home` views public.
-- Network status `UnderConstruction` → `Live`.
-- Guest profile `ABC Hope Profile`: Apex class access `DonationIntakeController` only; review & strip any other perms; keep "Run Flows" off.
-- Publish site.
+## Deferred
 
-## Phase 4 — Signed-in donor experience (mockup #2, steps 2–4) ✅
-
-- Login page branding; enable login for existing donors (Customer Community license profile + Network member profile). Create user for Maya Grande (`maya@email.com`) — **ask user** (creates a user/licence).
-- `donationJourney` detects logged-in user → prefill, skip Details ("Welcome back, Maya Grande").
-- `donorProfile` LWC: My Profile / Communication / Giving History tabs, edit name/email/phone/address (standard Person Account fields), Save Changes.
-- `givingHistory` LWC: user's GiftTransactions (campaign, designation, amount, status).
-
-## Phase 5 — Donor portal home (mockup #1) ✅ (`/dashboard`, portal theme layout)
-
-- `donorHome` LWC: KPI cards (Total Contributions, Causes Supported, Supporter Since — from GiftTransaction aggregates), Shared Impact tiles (configurable props), Stories cards (CMS/Builder props), Impact Journey timeline (first gift date + designations by year).
-- Left nav via LWR theme layout navigation menu.
-
-## Phase 6 — Agent chat box (task sheet #10) 🟨 deployment `ABC_Hope_Chat` created; component placement manual (decisions D-09)
-
-- Verify `Donor_Support_Agent` Embedded Service deployment (Messaging for Web) and its agent; add site to deployment, add site domain to CORS + Trusted URLs, add Embedded Messaging component / head markup to LWR site.
-- Signed-in variant passes verified user context (hidden pre-chat fields) for "Ask About Your Journey".
-
-## Phase 7 — Docs & demo (task sheet #8–#9) ⬜
-
-- Technical mapping doc (#8): `docs/technical-mapping.md` — UI field → Apex DTO → Salesforce object.field (draft below).
-- Demo recording (#9, optional): 3–5 min walkthrough following `testing-steps.md` §Demo script.
-
-## Deferred (blocked by D-02 until user approves)
-
-- ⛔ `Donor_Intake_Gift_Commitment_ScreenFlow` (task #2 as named) — superseded by D-03 (LWC + Apex, user decision).
-- ⛔ Validation rules on GiftTransaction/GiftCommitment (e.g. amount > 0).
-- ⛔ Any custom fields (e.g. `Is_Simulated_Payment__c`, `Donation_Channel__c`).
+- ⛔ `Donor_Intake_Gift_Commitment_ScreenFlow` — superseded by D-03.
+- ⛔ Validation rules and custom fields (e.g. `Is_Simulated_Payment__c`) — D-02.
+- ⬜ Real images for non-Christmas campaign cards and story cards.
 
 ---
 
-## Draft technical mapping (task #8)
+## Technical mapping (task #8)
 
-| UI (step)          | Field                     | Salesforce target                                                                                               |
-| ------------------ | ------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Choose · Frequency | One-time / Monthly        | one-time → `GiftTransaction`; monthly → `GiftCommitment` + `GiftCommitmentSchedule.TransactionPeriod = Monthly` |
-| Choose · Amount    | 300/500/1,000/Other       | `GiftTransaction.OriginalAmount` / `GiftCommitmentSchedule.TransactionAmount`                                   |
-| Choose · Support   | designation               | `GiftTransactionDesignation.GiftDesignationId` / `GiftDefaultDesignation.GiftDesignationId` (100%)              |
-| Details · Type     | Individual / Organization | `GiftTransaction.GiftType`; Person Account vs Business Account                                                  |
-| Details · Name     | First / Last              | `Account.FirstName` / `Account.LastName` (Person Account)                                                       |
-| Details · Org name | Organization              | `Account.Name` (Business)                                                                                       |
-| Details · Email    | email                     | `Account.PersonEmail` (match key)                                                                               |
-| URL `?src=`        | source code               | `OutreachSourceCode.SourceCode` → `GiftTransaction.OutreachSourceCodeId`                                        |
-| (implicit)         | campaign                  | `Campaign` "Christmas Giving 2026" → `CampaignId`                                                               |
-| (implicit)         | payment                   | `PaymentMethod = Unknown`, `Status = Unpaid` (simulated)                                                        |
+| UI (step)                  | Field                     | Salesforce target                                                                                               |
+| -------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Dashboard · campaign card  | campaign                  | `Campaign` (active, not ended, has `GiftDefaultDesignation`) → `/donate?campaign=<Name>`                        |
+| Choose · Frequency         | One-time / Monthly        | one-time → `GiftTransaction`; monthly → `GiftCommitment` + `GiftCommitmentSchedule.TransactionPeriod = Monthly` |
+| Choose · Amount            | 300/500/1,000/Other       | `GiftTransaction.OriginalAmount` / `GiftCommitmentSchedule.TransactionAmount`                                   |
+| Choose · Support           | designation               | `GiftTransactionDesignation.GiftDesignationId` / `GiftDefaultDesignation.GiftDesignationId` (100%)              |
+| Details · Type             | Individual / Organization | `GiftTransaction.GiftType`; Person Account vs Business Account                                                  |
+| Details · Name             | First / Last              | `Account.FirstName` / `Account.LastName` (Person Account)                                                       |
+| Details · Org name         | Organization              | `Account.Name` (Business)                                                                                       |
+| Details · Email            | email                     | `Account.PersonEmail` (match key)                                                                               |
+| URL `?src=`                | source code               | `OutreachSourceCode.SourceCode` → `GiftTransaction.OutreachSourceCodeId`                                        |
+| URL `?campaign=` / default | campaign                  | `Campaign.Name` → `CampaignId`                                                                                  |
+| (implicit)                 | payment                   | `PaymentMethod = Unknown`, `Status = Unpaid` (simulated)                                                        |
+| Card progress              | raised / goal             | `SUM(GiftTransaction.OriginalAmount)` per campaign / `Campaign.ExpectedRevenue`                                 |

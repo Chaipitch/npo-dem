@@ -12,6 +12,8 @@ record `ABC_Hope` shares the guest user — normal for LWR sites.)
 
 ### D-02 · No Flows / Validation Rules / Custom Objects / Custom Fields for now — Accepted
 
+_Exception: one Omni-Channel routing flow, `ABC_Hope_Chat_Routing` (D-16), approved by the user._
+
 User instruction (2026‑10‑21). Everything in this phase uses **standard NPC objects and
 fields only**. Task-sheet items that name a flow (#2 `Donor_Intake_Gift_Commitment_ScreenFlow`)
 are documented and deferred — see D-03.
@@ -146,3 +148,19 @@ Omni-Channel routing flow, copied from `NGO_Donor_Support_MIAW`, with `routingTy
 Hero (Christian Bowen), dashboard banner (Ben Kupke), sidebar sprout (Artem Makarov) are served from
 `images.unsplash.com` (CSP Trusted Site `Unsplash_Images`, img-src, Communities) — not downloaded. Credits
 shown on hero and banner. SVG illustrations remain as fallbacks when the URL properties are cleared.
+
+### D-18 · Multiple campaigns on the dashboard — Accepted (user, 2026‑10‑21)
+
+The donor dashboard shows **Campaigns You Can Support**. A campaign is listed when it is **active, not
+ended, and has at least one `GiftDefaultDesignation`** — that marks it as a fundraising campaign without
+needing a custom field. Cards show raised (sum of non-cancelled `GiftTransaction` amounts) vs goal
+(`Campaign.ExpectedRevenue`), days left and designations. Clicking a card opens
+`/donate?campaign=<Campaign.Name>`; the journey then offers that campaign's default designations plus
+"Where Most Needed" (the Christmas campaign keeps its admin-configured list). Seeded by
+`scripts/apex/seedCampaigns.apex`. Pre-existing org campaigns that meet the rule (Non Profit Event,
+Capital Campaign) also appear; deactivate them to hide them.
+
+### D-19 · Portal passwords — Accepted (user, 2026‑10‑21)
+
+Passwords are never set, stored or committed by tooling. Maya's user email was changed to the user's
+inbox and Salesforce's standard reset email was sent; the user chooses the password.

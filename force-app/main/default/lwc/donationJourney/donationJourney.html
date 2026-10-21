@@ -28,8 +28,9 @@
       <div class="card">
         <!-- Step 1: Choose donation -->
         <template lwc:if={isChoose}>
+          <p class="eyebrow">{campaignLabel}</p>
           <h2 class="title">{heading}</h2>
-          <p class="subtitle">{subheading}</p>
+          <p class="subtitle">{subtitleText}</p>
 
           <div class="toggle" role="group" aria-label="Donation frequency">
             <button
@@ -325,7 +326,7 @@
                 </span>
               </template>
               <div>
-                <p class="review-campaign">{campaignName}</p>
+                <p class="review-campaign">{campaignLabel}</p>
                 <p class="review-label">Designation</p>
                 <p class="review-value">{designationName}</p>
               </div>
@@ -400,7 +401,7 @@
             ><span class="sparkle sparkle_c" aria-hidden="true">✦</span>
             <h2 class="title title_center">Your details have been received</h2>
             <p class="subtitle subtitle_center">
-              Thank you for supporting {campaignName}!
+              Thank you for supporting {campaignLabel}!
             </p>
             <div class="thanks-card">
               <span class="thanks-icon"

@@ -191,6 +191,46 @@ describe("c-donation-journey", () => {
     expect($(el, ".welcome-name").textContent).toBe("Maya Grande");
     expect($(el, '[data-field="email"]')).toBeNull();
   });
+  it("donates to the campaign chosen in the URL", async () => {
+    submitDonation.mockResolvedValue({
+      reference: "CW-1",
+      amount: 500,
+      frequency: "One-time",
+      designationName: "Clean Water"
+    });
+    const el = mount();
+    CurrentPageReference.emit({
+      state: { campaign: "Clean Water for Rural Schools" }
+    });
+    getOptions.emit({
+      ...OPTIONS,
+      campaignName: "Clean Water for Rural Schools",
+      campaignDescription: "Water filters for rural schools.",
+      designations: [{ label: "Clean Water", value: "cw1" }],
+      defaultDesignationId: "cw1"
+    });
+    await flush();
+    expect($(el, ".eyebrow").textContent).toBe("Clean Water for Rural Schools");
+    expect($(el, ".subtitle").textContent).toBe(
+      "Water filters for rural schools."
+    );
+    click($(el, '[data-id="next"]'));
+    await flush();
+    type($(el, '[data-field="firstName"]'), "Ann");
+    type($(el, '[data-field="lastName"]'), "Demo");
+    type($(el, '[data-field="email"]'), "ann@example.com");
+    click($(el, '[data-id="next"]'));
+    await flush();
+    expect($(el, ".review-campaign").textContent).toBe(
+      "Clean Water for Rural Schools"
+    );
+    click($(el, '[data-id="submit"]'));
+    await flush();
+    await flush();
+    const sent = JSON.parse(submitDonation.mock.calls[0][0].requestJson);
+    expect(sent.campaignName).toBe("Clean Water for Rural Schools");
+    expect(sent.designationId).toBe("cw1");
+  });
 });
 
 describe("helpers", () => {

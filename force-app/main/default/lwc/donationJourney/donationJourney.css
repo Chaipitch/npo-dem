@@ -559,3 +559,14 @@ p {
 .btn_primary {
   box-shadow: 0 8px 18px rgba(11, 79, 196, 0.28);
 }
+
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--dj-purple-soft);
+  color: var(--dj-purple);
+  font-size: 13px;
+  font-weight: 700;
+}

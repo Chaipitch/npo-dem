@@ -1,88 +1,95 @@
 # Testing Steps — ABC Hope · Christmas Giving 2026
 
-Org alias `npo-demo`. Site: **https://te1791557923677.my.site.com/** (LWR, root path).
-Donate page: `/donate` · Portal: `/my-giving`, `/my-profile` (login required).
+Org alias `npo-demo`. Site: **https://te1791557923677.my.site.com/** (LWR at the domain root).
+Public: `/`, `/donate`. Portal (login required): `/dashboard`, `/my-giving`, `/my-profile`.
 
 ## 0. Pre-checks
 
 ```bash
-sf data query -o npo-demo -q "SELECT Id, Name FROM Campaign WHERE Name = 'Christmas Giving 2026'"
-sf data query -o npo-demo -q "SELECT Id, Name, IsActive FROM GiftDesignation WHERE Name = 'School Supplies'"
+sf data query -o npo-demo -q "SELECT Name, ExpectedRevenue, EndDate FROM Campaign WHERE Name IN ('Christmas Giving 2026','Clean Water for Rural Schools','Girls'' Education Scholarships','Green Communities Tree Planting')"
 sf data query -o npo-demo -q "SELECT Id, SourceCode FROM OutreachSourceCode WHERE SourceCode = 'XMAS26-EMAIL'"
 ```
 
-All three return exactly one row. Site is published and **Live**; `/donate` opens in an
-incognito window without login.
+All four campaigns and the source code exist (re-run the `scripts/apex/seed*.apex` scripts if not).
+`/donate` opens in a private window without login.
 
 ## 1. Automated tests
 
 ```bash
-sf apex run test -o npo-demo -n DonationIntakeServiceTest,DonationIntakeControllerTest -c -r human -w 10
+sf apex run test -o npo-demo -n DonationIntakeServiceTest,DonationIntakeControllerTest,DonorPortalControllerTest,AbcHopeAgentActionsTest -c -r human -w 15
 npm run test:unit
 ```
 
-Pass criteria: 100% pass, each class ≥ 85% coverage, Jest green.
+Pass criteria: 33 Apex test methods and 11 Jest tests pass.
 
-Apex cases to cover: new individual → Person Account created; existing email (any case) →
-matched, no duplicate; organization new/existing; one-time → GiftTransaction + 100%
-designation; monthly → GiftCommitment + Monthly schedule + default designation;
-source code resolved/absent; invalid amount (0, negative, > max) rejected; bad email rejected;
-inactive/unknown designation rejected; run as guest user succeeds.
+## 2. Public journey (private window, desktop then 375 px)
 
-## 2. Manual UI tests (incognito, desktop then mobile 375px)
+| #   | Scenario         | Steps                                                         | Expected                                                                                                |
+| --- | ---------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| T1  | Discover         | Open `/?src=XMAS26-EMAIL`                                     | Header (logo, nav, Donate), photo hero "Make Christmas Brighter", benefits strip                        |
+| T2  | Defaults         | Click Donate Now                                              | `/donate?src=XMAS26-EMAIL`; step 1; One-time; THB 1,000; School Supplies; eyebrow Christmas Giving 2026 |
+| T3  | Other amount     | Other → 50, then 2500                                         | 50 → inline error, cannot continue; 2500 → OK                                                           |
+| T4  | Monthly          | Select Monthly                                                | Monthly hint; Review shows Monthly                                                                      |
+| T5  | Validation       | Next with empty name / `ann@`                                 | Field errors                                                                                            |
+| T6  | Organization     | Switch to Organization                                        | Org name shown, first/last hidden                                                                       |
+| T7  | Back             | Review → Back twice                                           | Values kept                                                                                             |
+| T8  | Submit           | Ann Demo / ann@example.com / 1,000 → Submit                   | "Your details have been received", THB 1,000 School Supplies, "No payment collected in this demo"       |
+| T9  | Other campaign   | Open `/donate?campaign=Clean%20Water%20for%20Rural%20Schools` | Eyebrow + description for Clean Water; Support = Clean Water (+ Where Most Needed)                      |
+| T10 | Unknown campaign | `/donate?campaign=Nope`                                       | "This campaign is not accepting donations right now."                                                   |
 
-| #   | Scenario                | Steps                                                         | Expected                                                                                                     |
-| --- | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| T1  | Discover                | Open `/`                                                      | Hero "Make Christmas Brighter", Donate Now → `/donate`                                                       |
-| T2  | Defaults                | Open `/donate`                                                | Step 1 active, One-time selected, THB 1,000 preselected, School Supplies                                     |
-| T3  | Other amount            | Click Other, enter 50 / 2500                                  | 50 → inline error, Next disabled; 2500 → OK                                                                  |
-| T4  | Monthly toggle          | Select Monthly                                                | Monthly helper text shown; review shows "Monthly"                                                            |
-| T5  | Individual validation   | Next with empty name / `ann@`                                 | Field errors, cannot proceed                                                                                 |
-| T6  | Organization            | Switch to Organization                                        | Org name field shown, First/Last hidden                                                                      |
-| T7  | Back nav                | Go to Review, click Back twice                                | Earlier values retained                                                                                      |
-| T8  | Submit one-time         | Ann Demo / ann@example.com / 1,000 / School Supplies → Submit | Thank-you: "Your details have been received", THB 1,000 School Supplies, "No payment collected in this demo" |
-| T9  | Double submit           | Double-click Submit                                           | Only one gift created (button disabled while pending)                                                        |
-| T10 | Source code             | Open `/donate?src=XMAS26-EMAIL`, complete                     | Gift has Outreach Source Code set                                                                            |
-| T11 | Returning donor (guest) | Submit again with `ANN@example.com`                           | Same Account reused                                                                                          |
-| T12 | Monthly submit          | Monthly / 500                                                 | GiftCommitment + schedule created                                                                            |
-
-## 3. Back-office verification (after T8/T10/T12)
+## 3. Back-office verification
 
 ```bash
-sf data query -o npo-demo -q "SELECT Name, Donor.Name, OriginalAmount, Status, PaymentMethod, GiftType, Campaign.Name, OutreachSourceCode.SourceCode, CreatedDate FROM GiftTransaction WHERE Campaign.Name = 'Christmas Giving 2026' ORDER BY CreatedDate DESC LIMIT 5"
-sf data query -o npo-demo -q "SELECT GiftTransaction.Name, GiftDesignation.Name, Percent FROM GiftTransactionDesignation WHERE GiftTransaction.Campaign.Name = 'Christmas Giving 2026'"
-sf data query -o npo-demo -q "SELECT Name, Donor.Name, Status, (SELECT TransactionAmount, TransactionPeriod FROM GiftCommitmentSchedules) FROM GiftCommitment WHERE Campaign.Name = 'Christmas Giving 2026'"
-sf data query -o npo-demo -q "SELECT Name, PersonEmail, RecordType.DeveloperName FROM Account WHERE PersonEmail = 'ann@example.com'"
+sf data query -o npo-demo -q "SELECT Name, Donor.Name, OriginalAmount, Status, PaymentMethod, GiftType, Campaign.Name, OutreachSourceCode.SourceCode FROM GiftTransaction WHERE CreatedDate = TODAY ORDER BY CreatedDate DESC LIMIT 5"
+sf data query -o npo-demo -q "SELECT GiftTransaction.Name, GiftDesignation.Name, Percent FROM GiftTransactionDesignation WHERE CreatedDate = TODAY"
+sf data query -o npo-demo -q "SELECT Name, Donor.Name, Status, Campaign.Name FROM GiftCommitment WHERE CreatedDate = TODAY"
 ```
 
-Expected: Status `Unpaid`, PaymentMethod `Unknown`, Campaign attributed, designation 100%,
-exactly one Ann Demo account.
+Expected: Status `Unpaid`, PaymentMethod `Unknown`, correct campaign and source code, designation 100%,
+one Ann Demo account only.
 
-## 4. Guest security checks
+## 4. Guest security
 
-- Incognito: `/donate` works; any other internal page redirects to login.
-- Guest profile: only `DonationIntakeController` Apex access; "Run Flows" off; no object
-  edit/delete permissions (Setup → Profiles → ABC Hope Profile).
-- Tamper: call `submitDonation` with a designation Id not in the allowed list → rejected.
-- Response payload contains no record Ids other than the confirmation reference.
+- Private window: `/dashboard` redirects to login; `/donate` works.
+- Guest profile has Apex access to `DonationIntakeController` only; Run Flows off.
+- Tampered `designationId` or campaign name is rejected server-side.
 
-## 5. Signed-in donor (Phase 4)
+## 5. Signed-in donor (Maya)
 
-How to sign in as Maya without a password: Setup → Contacts → **Maya Grande** → (dropdown)
-**Log in to Experience as User** → ABC Hope. Then open `/my-giving`, `/my-profile`, `/donate`.
-Expect dashboard KPIs: THB 2,250 total (seeded history), 3 causes, Since 2023 — plus any new gifts.
+Sign in (Handover → How to sign in as Maya) → lands on `/dashboard`.
 
-Log in as Maya Grande → "Welcome back, Maya Grande", details prefilled → gift → Manage
-Profile edit phone → Save → verify Account updated; Giving History lists the new gift.
+| #   | Check          | Expected                                                                                                                                                  |
+| --- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P1  | Layout         | Sidebar (Home, My Giving, Campaigns, Causes I Support, My Journey, Stories, Ask Our AI, My Profile), sprout photo, top bar with avatar                    |
+| P2  | KPIs           | THB 2,250+ total, 3+ causes, "Since 2023"                                                                                                                 |
+| P3  | Campaign cards | Christmas Giving 2026, Clean Water, Girls' Education, Green Communities (+ any other active campaign with a default designation); progress bar, days left |
+| P4  | Card → donate  | Click Clean Water card → `/donate?campaign=…`; "Welcome back, Maya Grande" on step 2; submit → gift on Maya's account with Clean Water campaign           |
+| P5  | My Giving      | `/my-giving` table shows the new gift                                                                                                                     |
+| P6  | Profile        | `/my-profile` → change phone → Save → "Your changes have been saved"                                                                                      |
+| P7  | Log out        | Avatar menu → Log out → back to the public site                                                                                                           |
 
-## 6. Agent chat (Phase 6)
+## 6. Agent (CLI preview — no chat widget needed)
 
-Chat bubble loads on the site (no console CORS errors); ask "How can I donate?" → agent replies.
+```bash
+sf agent preview start -o npo-demo --authoring-bundle ABC_Hope_Donor_Assistant --use-live-actions
+sf agent preview send -o npo-demo --authoring-bundle ABC_Hope_Donor_Assistant --session-id <id> -u "What does the Christmas campaign fund?"
+```
 
-## Demo script (task #9, 3–5 min)
+- Campaign questions → answer from org data + donate link + "no payment collected".
+- "How much have I given?" / "Pause my monthly gift" → politely asks to sign in (preview has no verified user).
 
-1. Marketing email (screenshot) → click link with `?src=XMAS26-EMAIL`.
-2. Guest journey T2 → T8 on screen.
-3. Switch to Salesforce: Gift Transaction record — Campaign, Designation, Source Code, Status.
-4. (Phase 4) Maya signs in, gives, updates profile.
-5. Campaign record → rollups / attribution report.
+## 7. Agent on the site (after the Embedded Messaging component is placed)
+
+- Guest: chat opens; campaign FAQ works; personal requests → "please sign in".
+- Maya signed in: "How much have I given?" → her totals and causes; "Pause my monthly gift for 2 months"
+  → agent restates and asks to confirm → after "yes", the schedule shows a pause; "Change my email to …" →
+  confirm → Account updated. No console CORS/CSP errors.
+
+## Demo script (3–5 min)
+
+1. Marketing email (screenshot) → link `/?src=XMAS26-EMAIL`.
+2. Guest journey T2 → T8.
+3. Salesforce: the new Gift Transaction — campaign, designation, source code, status.
+4. Maya signs in → dashboard → Clean Water card → donates → My Giving shows it.
+5. Ask the agent about her giving; pause her monthly gift.
+6. Campaign record → raised vs goal.

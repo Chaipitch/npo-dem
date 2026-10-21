@@ -49,6 +49,12 @@ export default class DonationJourney extends LightningElement {
   submitError;
   errors = {};
   result;
+  // Campaign chosen via ?campaign= (e.g. from a dashboard card); falls back to the configured campaign.
+  urlCampaign;
+  optionsCampaign;
+  optionsDesignationNames;
+  activeCampaign;
+  campaignDescription;
 
   connectedCallback() {
     this.selectedAmount = Number(this.defaultAmount) || null;
@@ -56,18 +62,31 @@ export default class DonationJourney extends LightningElement {
 
   @wire(CurrentPageReference)
   setPageRef(pageRef) {
-    const src = pageRef?.state?.src;
-    if (src) {
-      this.sourceCode = String(src).slice(0, 80);
+    const state = pageRef?.state || {};
+    if (state.src) {
+      this.sourceCode = String(state.src).slice(0, 80);
+    }
+    this.urlCampaign = state.campaign
+      ? String(state.campaign).slice(0, 80)
+      : undefined;
+    const useUrl = this.urlCampaign && this.urlCampaign !== this.campaignName;
+    // A different campaign uses its own designations (server picks them); the configured
+    // campaign keeps the admin's designation list.
+    this.optionsCampaign = useUrl ? this.urlCampaign : this.campaignName;
+    this.optionsDesignationNames = useUrl ? "" : this.designationNames;
+    if (useUrl) {
+      this.designationId = undefined;
     }
   }
 
   @wire(getOptions, {
-    campaignName: "$campaignName",
-    designationNames: "$designationNames"
+    campaignName: "$optionsCampaign",
+    designationNames: "$optionsDesignationNames"
   })
   wiredOptions({ data, error }) {
     if (data) {
+      this.activeCampaign = data.campaignName;
+      this.campaignDescription = data.campaignDescription;
       this.designations = data.designations || [];
       this.designationId = this.designationId || data.defaultDesignationId;
       this.currentDonor = data.currentDonor;
@@ -110,6 +129,14 @@ export default class DonationJourney extends LightningElement {
   }
   get showBack() {
     return this.stepIndex > 0 && this.stepIndex < 3;
+  }
+  get campaignLabel() {
+    return this.activeCampaign || this.campaignName;
+  }
+  get subtitleText() {
+    return this.urlCampaign && this.campaignDescription
+      ? this.campaignDescription
+      : this.subheading;
   }
   get showNext() {
     return this.stepIndex < 2;
@@ -340,7 +367,7 @@ export default class DonationJourney extends LightningElement {
     this.isSubmitting = true;
     this.submitError = undefined;
     const request = {
-      campaignName: this.campaignName,
+      campaignName: this.activeCampaign || this.campaignName,
       frequency: this.frequency,
       amount: this.amount,
       designationId: this.designationId,

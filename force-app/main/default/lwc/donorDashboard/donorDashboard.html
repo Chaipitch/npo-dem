@@ -135,6 +135,190 @@
           </template>
 
           <template lwc:if={isHome}>
+            <!-- Campaigns -->
+            <template lwc:if={hasCampaigns}>
+              <div class="section-head" data-section="campaigns">
+                <h2 class="section-title">Campaigns You Can Support</h2>
+              </div>
+              <div class="campaigns">
+                <template for:each={campaignCards} for:item="c">
+                  <a
+                    key={c.key}
+                    class="campaign"
+                    href={c.href}
+                    aria-label={c.name}
+                  >
+                    <div class="campaign-art" aria-hidden="true">
+                      <template lwc:if={c.imageUrl}>
+                        <img src={c.imageUrl} alt="" />
+                      </template>
+                      <template lwc:elseif={c.isWater}>
+                        <svg
+                          viewBox="0 0 120 80"
+                          preserveAspectRatio="xMidYMid slice"
+                        >
+                          <rect width="120" height="80" fill="#dcecf9" />
+                          <rect y="58" width="120" height="22" fill="#9fc6e6" />
+                          <rect
+                            x="34"
+                            y="20"
+                            width="40"
+                            height="10"
+                            rx="4"
+                            fill="#8a96a8"
+                          />
+                          <rect
+                            x="66"
+                            y="20"
+                            width="9"
+                            height="22"
+                            rx="4"
+                            fill="#8a96a8"
+                          />
+                          <rect
+                            x="26"
+                            y="14"
+                            width="11"
+                            height="22"
+                            rx="4"
+                            fill="#6f7b8d"
+                          />
+                          <path
+                            d="M70 46c0 0-5 6-5 9a5 5 0 0 0 10 0c0-3-5-9-5-9Z"
+                            fill="#3b8fd9"
+                          />
+                        </svg>
+                      </template>
+                      <template lwc:elseif={c.isSchool}>
+                        <svg
+                          viewBox="0 0 120 80"
+                          preserveAspectRatio="xMidYMid slice"
+                        >
+                          <rect width="120" height="80" fill="#fbecd3" />
+                          <path
+                            d="M24 50c12-6 24-6 36 0v24c-12-6-24-6-36 0Z"
+                            fill="#fff"
+                          />
+                          <path
+                            d="M60 50c12-6 24-6 36 0v24c-12-6-24-6-36 0Z"
+                            fill="#f4f1ea"
+                          />
+                          <path
+                            d="M60 50v24"
+                            stroke="#c9b9a0"
+                            stroke-width="2"
+                          />
+                          <path d="M52 10 60 6l8 4-8 4Z" fill="#14185b" />
+                          <rect
+                            x="46"
+                            y="16"
+                            width="28"
+                            height="26"
+                            rx="5"
+                            fill="#2f6fd6"
+                          />
+                          <circle cx="60" cy="30" r="5" fill="#f5b83d" />
+                        </svg>
+                      </template>
+                      <template lwc:elseif={c.isSprout}>
+                        <svg
+                          viewBox="0 0 120 80"
+                          preserveAspectRatio="xMidYMid slice"
+                        >
+                          <rect width="120" height="80" fill="#e4f2dc" />
+                          <circle cx="96" cy="18" r="10" fill="#fff4cf" />
+                          <path
+                            d="M0 60c30-6 70-8 120-2v22H0Z"
+                            fill="#5b3a22"
+                          />
+                          <path
+                            d="M60 60V36"
+                            stroke="#4f9a3c"
+                            stroke-width="4"
+                            stroke-linecap="round"
+                          />
+                          <path
+                            d="M60 44c-12-3-20 1-24 9 11 3 19-1 24-9Z"
+                            fill="#6cc04a"
+                          />
+                          <path
+                            d="M61 40c8-10 18-13 28-9-6 9-16 12-28 9Z"
+                            fill="#7ed05a"
+                          />
+                        </svg>
+                      </template>
+                      <template lwc:else>
+                        <svg
+                          viewBox="0 0 120 80"
+                          preserveAspectRatio="xMidYMid slice"
+                        >
+                          <rect width="120" height="80" fill="#fde8ea" />
+                          <rect
+                            x="40"
+                            y="30"
+                            width="40"
+                            height="34"
+                            rx="3"
+                            fill="#d63131"
+                          />
+                          <rect
+                            x="56"
+                            y="30"
+                            width="8"
+                            height="34"
+                            fill="#f5c84d"
+                          />
+                          <rect
+                            x="40"
+                            y="42"
+                            width="40"
+                            height="7"
+                            fill="#f5c84d"
+                          />
+                        </svg>
+                      </template>
+                    </div>
+                    <div class="campaign-body">
+                      <h3 class="campaign-name">{c.name}</h3>
+                      <p class="campaign-desc">{c.description}</p>
+                      <div class="progress" aria-hidden="true">
+                        <span class="progress-bar" style={c.barStyle}></span>
+                      </div>
+                      <p class="campaign-stats">
+                        <span class="strong">{c.raisedDisplay}</span>
+                        <template lwc:if={c.hasGoal}
+                          ><span class="muted">
+                            raised of {c.goalDisplay}</span
+                          ></template
+                        >
+                      </p>
+                      <p class="campaign-meta">
+                        <span>{c.giftsDisplay}</span
+                        ><template lwc:if={c.timing}
+                          ><span>· {c.timing}</span></template
+                        >
+                      </p>
+                      <div class="campaign-chips">
+                        <template for:each={c.chips} for:item="d">
+                          <span key={d.key} class="campaign-chip"
+                            >{d.label}</span
+                          >
+                        </template>
+                      </div>
+                      <span class="campaign-cta"
+                        >Give now
+                        <c-abc-hope-icon
+                          name="arrow"
+                          size="16"
+                          stroke-width="2.4"
+                        ></c-abc-hope-icon
+                      ></span>
+                    </div>
+                  </a>
+                </template>
+              </div>
+            </template>
+
             <!-- Shared impact -->
             <div class="section-head">
               <h2 class="section-title">

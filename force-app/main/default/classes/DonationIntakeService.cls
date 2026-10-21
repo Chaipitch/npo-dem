@@ -80,6 +80,8 @@ public without sharing class DonationIntakeService {
     @AuraEnabled
     public String campaignName;
     @AuraEnabled
+    public String campaignDescription;
+    @AuraEnabled
     public List<Option> designations = new List<Option>();
     @AuraEnabled
     public String defaultDesignationId;
@@ -96,8 +98,24 @@ public without sharing class DonationIntakeService {
     Campaign camp = findCampaign(campaignName);
     Options opts = new Options();
     opts.campaignName = camp.Name;
+    opts.campaignDescription = camp.Description;
 
+    // Designations: the admin-configured list if given; otherwise the campaign's own
+    // default designations plus "Where Most Needed"; otherwise every active designation.
     List<String> wanted = splitNames(designationNames);
+    if (wanted.isEmpty()) {
+      for (GiftDefaultDesignation gdd : [
+        SELECT GiftDesignation.Name
+        FROM GiftDefaultDesignation
+        WHERE ParentRecordId = :camp.Id AND GiftDesignation.IsActive = TRUE
+        ORDER BY AllocatedPercentage DESC
+      ]) {
+        wanted.add(gdd.GiftDesignation.Name);
+      }
+      if (!wanted.isEmpty()) {
+        wanted.add(GENERAL_DESIGNATION);
+      }
+    }
     List<GiftDesignation> gds = wanted.isEmpty()
       ? [
           SELECT Id, Name
@@ -115,7 +133,7 @@ public without sharing class DonationIntakeService {
     for (GiftDesignation gd : gds) {
       byName.put(gd.Name, gd);
     }
-    // Keep the order the site admin configured.
+    // Keep the configured order.
     for (
       String n : wanted.isEmpty() ? new List<String>(byName.keySet()) : wanted
     ) {
@@ -261,9 +279,100 @@ public without sharing class DonationIntakeService {
     }
   }
 
+  public static final String GENERAL_DESIGNATION = 'Where Most Needed';
+
+  public class CampaignCard {
+    @AuraEnabled
+    public String id;
+    @AuraEnabled
+    public String name;
+    @AuraEnabled
+    public String description;
+    @AuraEnabled
+    public Date endDate;
+    @AuraEnabled
+    public Integer daysLeft;
+    @AuraEnabled
+    public Decimal goal;
+    @AuraEnabled
+    public Decimal raised = 0;
+    @AuraEnabled
+    public Integer giftCount = 0;
+    @AuraEnabled
+    public List<String> designations = new List<String>();
+  }
+
+  /**
+   * Campaigns open for donations: active, not ended, and set up with at least one
+   * default designation (that is what marks a campaign as a fundraising campaign here).
+   * Raised = sum of non-cancelled gift transactions attributed to the campaign.
+   */
+  public static List<CampaignCard> getCampaigns() {
+    Date today = Date.today();
+    Map<Id, CampaignCard> cards = new Map<Id, CampaignCard>();
+    Set<Id> withDefaults = new Set<Id>();
+    Map<Id, List<String>> designationsByCampaign = new Map<Id, List<String>>();
+    for (GiftDefaultDesignation gdd : [
+      SELECT ParentRecordId, GiftDesignation.Name
+      FROM GiftDefaultDesignation
+      WHERE
+        ParentRecordId IN (
+          SELECT Id
+          FROM Campaign
+          WHERE IsActive = TRUE AND (EndDate = NULL OR EndDate >= :today)
+        )
+        AND GiftDesignation.IsActive = TRUE
+      ORDER BY AllocatedPercentage DESC
+    ]) {
+      withDefaults.add(gdd.ParentRecordId);
+      if (!designationsByCampaign.containsKey(gdd.ParentRecordId)) {
+        designationsByCampaign.put(gdd.ParentRecordId, new List<String>());
+      }
+      designationsByCampaign.get(gdd.ParentRecordId)
+        .add(gdd.GiftDesignation.Name);
+    }
+    for (Campaign c : [
+      SELECT Id, Name, Description, EndDate, ExpectedRevenue
+      FROM Campaign
+      WHERE Id IN :withDefaults
+      ORDER BY EndDate ASC NULLS LAST, Name
+      LIMIT 12
+    ]) {
+      CampaignCard card = new CampaignCard();
+      card.id = c.Id;
+      card.name = c.Name;
+      card.description = c.Description;
+      card.endDate = c.EndDate;
+      card.daysLeft = c.EndDate == null ? null : today.daysBetween(c.EndDate);
+      card.goal = c.ExpectedRevenue;
+      card.designations = designationsByCampaign.get(c.Id);
+      cards.put(c.Id, card);
+    }
+    for (AggregateResult ar : [
+      SELECT CampaignId cid, SUM(OriginalAmount) total, COUNT(Id) n
+      FROM GiftTransaction
+      WHERE
+        CampaignId IN :cards.keySet()
+        AND Status NOT IN (
+          'Canceled',
+          'Failed',
+          'Fully Refunded',
+          'Written-Off'
+        )
+      GROUP BY CampaignId
+    ]) {
+      CampaignCard card = cards.get((Id) ar.get('cid'));
+      card.raised = (Decimal) ar.get('total') == null
+        ? 0
+        : (Decimal) ar.get('total');
+      card.giftCount = (Integer) ar.get('n');
+    }
+    return cards.values();
+  }
+
   static Campaign findCampaign(String campaignName) {
     List<Campaign> camps = [
-      SELECT Id, Name
+      SELECT Id, Name, Description
       FROM Campaign
       WHERE Name = :clean(campaignName, 80) AND IsActive = TRUE
       LIMIT 1

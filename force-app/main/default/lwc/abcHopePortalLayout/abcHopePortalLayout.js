@@ -9,6 +9,7 @@ import NAME from "@salesforce/schema/User.Name";
 const NAV = [
   { label: "Home", path: "/dashboard", icon: "home" },
   { label: "My Giving", path: "/my-giving", icon: "heart" },
+  { label: "Campaigns", path: "/dashboard#campaigns", icon: "gift" },
   { label: "Causes I Support", path: "/dashboard#causes", icon: "heart" },
   { label: "My Journey", path: "/dashboard#journey", icon: "map" },
   { label: "Stories", path: "/dashboard#stories", icon: "list" },
