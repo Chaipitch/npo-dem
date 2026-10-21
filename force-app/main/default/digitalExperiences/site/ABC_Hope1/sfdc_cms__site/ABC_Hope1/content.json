@@ -1,9 +1,9 @@
 {
-  "type" : "sfdc_cms__site",
-  "title" : "ABC Hope",
-  "contentBody" : {
-    "authenticationType" : "AUTHENTICATED",
-    "geoBotsAllowed" : false
+  "type": "sfdc_cms__site",
+  "title": "ABC Hope",
+  "contentBody": {
+    "authenticationType": "AUTHENTICATED_WITH_PUBLIC_ACCESS_ENABLED",
+    "geoBotsAllowed": false
   },
-  "urlName" : "abc-hope"
+  "urlName": "abc-hope"
 }

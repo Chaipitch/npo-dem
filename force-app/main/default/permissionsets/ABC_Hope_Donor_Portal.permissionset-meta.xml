@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>ABC Hope Donor Portal</label>
+    <description
+  >Signed-in donors on the ABC Hope site: donate, view giving dashboard, edit own profile. Apex enforces own-record scoping.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <license>Customer Community Login</license>
+    <classAccesses>
+        <apexClass>DonationIntakeController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>DonorPortalController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+</PermissionSet>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>ABC Hope Hero</masterLabel>
+    <description
+  >Campaign hero with Donate CTA; keeps the ?src= source code on the link.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+        name="headlineStart"
+        type="String"
+        label="Headline"
+        default="Make Christmas"
+      />
+            <property
+        name="headlineHighlight"
+        type="String"
+        label="Headline highlight"
+        default="Brighter"
+      />
+            <property
+        name="body"
+        type="String"
+        label="Body"
+        default="Help give children the tools to learn, grow and build a brighter tomorrow."
+      />
+            <property
+        name="ctaLabel"
+        type="String"
+        label="Button label"
+        default="Donate Now"
+      />
+            <property
+        name="ctaPath"
+        type="String"
+        label="Button path"
+        default="/donate"
+      />
+            <property
+        name="backgroundImageUrl"
+        type="String"
+        label="Background image URL"
+      />
+            <property
+        name="benefits"
+        type="String"
+        label="Benefits (comma-separated)"
+        default="More Learning Opportunities,Stronger Communities,Brighter Futures"
+      />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

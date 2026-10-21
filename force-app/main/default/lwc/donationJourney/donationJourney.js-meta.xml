@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Donation Journey</masterLabel>
+    <description
+  >ABC Hope donation journey: choose, details, review, thank you. Payment simulated.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+        name="campaignName"
+        type="String"
+        label="Campaign name"
+        default="Christmas Giving 2026"
+      />
+            <property
+        name="designationNames"
+        type="String"
+        label="Designations (comma-separated, in order)"
+        default="School Supplies,Learning Kits,Where Most Needed"
+      />
+            <property
+        name="amountOptions"
+        type="String"
+        label="Amount options (comma-separated)"
+        default="300,500,1000"
+      />
+            <property
+        name="defaultAmount"
+        type="Integer"
+        label="Default amount"
+        default="1000"
+      />
+            <property
+        name="currencyLabel"
+        type="String"
+        label="Currency label"
+        default="THB"
+      />
+            <property
+        name="heading"
+        type="String"
+        label="Heading"
+        default="Choose your donation"
+      />
+            <property
+        name="subheading"
+        type="String"
+        label="Subheading"
+        default="Your support helps provide education opportunities for children in need."
+      />
+            <property
+        name="reviewImageUrl"
+        type="String"
+        label="Review card image URL"
+      />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

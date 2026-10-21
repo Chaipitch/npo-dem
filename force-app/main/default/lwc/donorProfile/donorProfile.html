@@ -1,0 +1,179 @@
+<template>
+  <section class="wrap">
+    <template lwc:if={isLoading}>
+      <p class="muted" role="status">Loading your profile…</p>
+    </template>
+    <template lwc:elseif={error}>
+      <p class="alert" role="alert">{error}</p>
+    </template>
+    <template lwc:else>
+      <div class="card">
+        <div class="head">
+          <span class="avatar" aria-hidden="true">{initials}</span>
+          <div>
+            <h1 class="name">{fullName}</h1>
+            <p class="muted">Donor since {profile.donorSince}</p>
+          </div>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <template for:each={tabs} for:item="t">
+            <button
+              key={t.key}
+              type="button"
+              role="tab"
+              class={t.className}
+              aria-selected={t.selected}
+              data-key={t.key}
+              onclick={handleTab}
+            >
+              {t.label}
+            </button>
+          </template>
+        </div>
+
+        <template lwc:if={isProfileTab}>
+          <div class="row">
+            <label class="field">
+              <span class="label">First name</span>
+              <input
+                class="input"
+                data-field="firstName"
+                value={draft.firstName}
+                maxlength="40"
+                autocomplete="given-name"
+                oninput={handleInput}
+              />
+              <template lwc:if={firstNameError}
+                ><span class="err" role="alert"
+                  >{firstNameError}</span
+                ></template
+              >
+            </label>
+            <label class="field">
+              <span class="label">Last name</span>
+              <input
+                class="input"
+                data-field="lastName"
+                value={draft.lastName}
+                maxlength="80"
+                autocomplete="family-name"
+                oninput={handleInput}
+              />
+              <template lwc:if={lastNameError}
+                ><span class="err" role="alert">{lastNameError}</span></template
+              >
+            </label>
+          </div>
+          <label class="field">
+            <span class="label">Email</span>
+            <input
+              class="input"
+              type="email"
+              data-field="email"
+              value={draft.email}
+              maxlength="80"
+              autocomplete="email"
+              oninput={handleInput}
+            />
+            <template lwc:if={emailError}
+              ><span class="err" role="alert">{emailError}</span></template
+            >
+          </label>
+          <label class="field">
+            <span class="label">Phone</span>
+            <input
+              class="input"
+              type="tel"
+              data-field="phone"
+              value={draft.phone}
+              maxlength="40"
+              autocomplete="tel"
+              placeholder="+66 81 234 5678"
+              oninput={handleInput}
+            />
+          </label>
+          <label class="field">
+            <span class="label">Street</span>
+            <input
+              class="input"
+              data-field="street"
+              value={draft.street}
+              maxlength="255"
+              autocomplete="street-address"
+              oninput={handleInput}
+            />
+          </label>
+          <div class="row">
+            <label class="field">
+              <span class="label">City</span>
+              <input
+                class="input"
+                data-field="city"
+                value={draft.city}
+                maxlength="40"
+                autocomplete="address-level2"
+                oninput={handleInput}
+              />
+            </label>
+            <label class="field">
+              <span class="label">Country</span>
+              <input
+                class="input"
+                data-field="country"
+                value={draft.country}
+                maxlength="80"
+                autocomplete="country-name"
+                oninput={handleInput}
+              />
+            </label>
+          </div>
+        </template>
+
+        <template lwc:if={isCommunicationTab}>
+          <label class="check">
+            <input
+              type="checkbox"
+              checked={emailOptIn}
+              onchange={handleOptIn}
+            />
+            <span>
+              <span class="strong">Email updates</span>
+              <span class="muted block"
+                >Stories and impact updates from ABC Hope, including the
+                Christmas appeal.</span
+              >
+            </span>
+          </label>
+        </template>
+
+        <template lwc:if={isHistoryTab}>
+          <p class="muted">
+            See every gift, its designation and status on your giving page.
+          </p>
+          <a class="history-link" href={givingHref}>Open My Giving →</a>
+        </template>
+
+        <template lwc:if={saveError}
+          ><p class="alert" role="alert">{saveError}</p></template
+        >
+        <template lwc:if={saved}
+          ><p class="ok" role="status">
+            ✓ Your changes have been saved.
+          </p></template
+        >
+
+        <template lwc:if={showSave}>
+          <button
+            type="button"
+            class="btn"
+            disabled={isSaving}
+            onclick={handleSave}
+          >
+            {saveLabel}
+          </button>
+        </template>
+      </div>
+    </template>
+  </section>
+</template>

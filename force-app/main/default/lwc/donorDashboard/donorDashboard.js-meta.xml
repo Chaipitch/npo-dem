@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Donor Dashboard</masterLabel>
+    <description
+  >Signed-in donor home: KPIs, shared impact, stories, impact journey, giving history, agent panel.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+        name="currencyLabel"
+        type="String"
+        label="Currency label"
+        default="THB"
+      />
+            <property
+        name="bannerTitle"
+        type="String"
+        label="Banner title"
+        default="See What We’ve Achieved Together"
+      />
+            <property
+        name="bannerSubtitle"
+        type="String"
+        label="Banner subtitle"
+        default="Your support is part of something bigger."
+      />
+            <property
+        name="sharedImpact"
+        type="String"
+        label="Shared impact (value|label;...)"
+        default="8,400|People Reached;12|Communities;6|Programs;125|Volunteers Engaged"
+      />
+            <property
+        name="donatePath"
+        type="String"
+        label="Donate page path"
+        default="/donate"
+      />
+            <property
+        name="agentSuggestions"
+        type="String"
+        label="Agent suggestions (;-separated)"
+        default="How are the programs I supported doing this year?;Show my giving history;What is the next milestone?"
+      />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

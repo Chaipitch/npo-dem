@@ -1,0 +1,22 @@
+<template>
+  <section class="hero" style={heroStyle}>
+    <div class="lights" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <h1 class="headline">
+        {headlineStart}
+        <span class="highlight">{headlineHighlight}</span>
+      </h1>
+      <p class="body">{body}</p>
+      <a class="cta" href={ctaHref}
+        >{ctaLabel} <span aria-hidden="true">→</span></a
+      >
+    </div>
+  </section>
+  <ul class="benefits">
+    <template for:each={benefitItems} for:item="b">
+      <li key={b.key} class="benefit">
+        <span class="benefit-icon" aria-hidden="true">{b.icon}</span>{b.label}
+      </li>
+    </template>
+  </ul>
+</template>

@@ -1,0 +1,116 @@
+:host {
+  display: block;
+}
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 440px;
+  display: flex;
+  align-items: center;
+  padding: 56px 24px;
+  border-radius: 18px;
+  color: #fff;
+  background-color: #5b1414;
+  background-image:
+    radial-gradient(
+      circle at 78% 30%,
+      rgba(255, 196, 92, 0.55) 0,
+      rgba(255, 196, 92, 0) 28%
+    ),
+    radial-gradient(
+      circle at 92% 70%,
+      rgba(255, 120, 80, 0.4) 0,
+      rgba(255, 120, 80, 0) 24%
+    ),
+    linear-gradient(120deg, #3d0b0b 0%, #7a1c1c 45%, #1f4d2b 100%);
+  background-size: cover;
+  background-position: center right;
+}
+.lights {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(255, 230, 160, 0.9) 0 2px, transparent 3px),
+    radial-gradient(circle, rgba(255, 210, 120, 0.7) 0 1.5px, transparent 2.5px);
+  background-size:
+    90px 70px,
+    55px 45px;
+  background-position:
+    10px 10px,
+    30px 25px;
+  mask-image: linear-gradient(90deg, transparent 35%, #000 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 35%, #000 100%);
+  opacity: 0.8;
+}
+.hero-inner {
+  position: relative;
+  max-width: 520px;
+}
+.headline {
+  margin: 0 0 16px;
+  font-size: clamp(36px, 6vw, 60px);
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.highlight {
+  display: block;
+  color: #ffc145;
+}
+.body {
+  margin: 0 0 28px;
+  font-size: 18px;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+/* Extra specificity: LWR theme styles `a:link:not(...)` globally (synthetic shadow). */
+.hero .cta,
+.hero .cta:link,
+.hero .cta:visited {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 28px;
+  border-radius: 10px;
+  background: #d63131;
+  color: #fff;
+  font-weight: 700;
+  font-size: 17px;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(214, 49, 49, 0.45);
+}
+.hero .cta:hover,
+.hero .cta:focus {
+  background: #b72424;
+  color: #fff;
+  text-decoration: none;
+}
+.benefits {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 32px;
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+.benefit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #14185b;
+}
+.benefit-icon {
+  color: #d63131;
+}
+@media (max-width: 600px) {
+  .hero {
+    min-height: 360px;
+    padding: 40px 20px;
+  }
+  .body {
+    font-size: 16px;
+  }
+}

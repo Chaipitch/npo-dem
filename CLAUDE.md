@@ -23,16 +23,16 @@ Source designs (UI concept images provided by the user, 2026‑10‑21):
 
 ## Org
 
-| Item | Value |
-|---|---|
-| CLI alias | `npo-demo` (default org in `.sf/config.json`) |
-| Org Id | `00Dg700000KmYYXEA3` |
-| Instance | `https://te1791557923677.my.salesforce.com` |
-| API version | 68.0 |
-| Person Accounts | Enabled (`PersonAccount`, `NGO_Fundraising_Supporter` RTs) |
-| Currency | **USD only** (single-currency org) — see decisions.md D-05 |
-| Site | Network `ABC Hope` (`0DBg7000002PpKjGAK`), CustomSite `ABC_Hope`, LWR bundle `site/ABC_Hope1`, URL prefix `vforcesite` |
-| Guest user / profile | `ABC Hope Site Guest User` (`005g700000Ed1KLAAZ`) / `ABC Hope Profile` |
+| Item                 | Value                                                                                                                                                                                                                              |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CLI alias            | `npo-demo` (default org in `.sf/config.json`)                                                                                                                                                                                      |
+| Org Id               | `00Dg700000KmYYXEA3`                                                                                                                                                                                                               |
+| Instance             | `https://te1791557923677.my.salesforce.com`                                                                                                                                                                                        |
+| API version          | 68.0                                                                                                                                                                                                                               |
+| Person Accounts      | Enabled (`PersonAccount`, `NGO_Fundraising_Supporter` RTs)                                                                                                                                                                         |
+| Currency             | **USD only** (single-currency org) — see decisions.md D-05                                                                                                                                                                         |
+| Site                 | Network `ABC Hope` (`0DBg7000002PpKjGAK`), LWR bundle `site/ABC_Hope1`. **LWR URL: `https://te1791557923677.my.site.com/`** (pages `/`, `/donate`, `/my-giving`, `/my-profile`). `/vforcesite` is only the Visualforce/login side. |
+| Guest user / profile | `ABC Hope Site Guest User` (`005g700000Ed1KLAAZ`) / `ABC Hope Profile`                                                                                                                                                             |
 
 ## Hard guardrails (from the user)
 
@@ -51,8 +51,14 @@ force-app/main/default/
   networks/ABC Hope.network-meta.xml   Network settings (status, self-reg, members)
   sites/ABC_Hope.site-meta.xml         CustomSite (guest user, URL prefix)
   profiles/ABC Hope Profile...         Guest profile
-  lwc/                                 donationJourney + child components (planned)
-  classes/                             Apex services + tests (planned)
+  lwc/donationJourney                  Guest/signed-in donation journey (4 steps) + Jest tests
+  lwc/abcHopeHero                      Home "Discover" hero, keeps ?src= on the Donate link
+  lwc/donorDashboard, lwc/donorProfile Signed-in portal (mockup #1, mockup #2 step 4)
+  classes/DonationIntake*              Donation Apex (controller, service, tests)
+  classes/DonorPortalController*       Portal Apex (dashboard, profile)
+  permissionsets/ABC_Hope_Donor_Portal Apex access for signed-in donors
+scripts/sitePages.py                   Regenerates LWR route/view JSON for the custom pages
+scripts/apex/seed*.apex                Idempotent demo data (campaign, designations, source code, Maya history)
 ```
 
 ## Commands
@@ -65,13 +71,13 @@ npm run test:unit            # LWC Jest
 npm run lint && npm run prettier
 ```
 
-After deploying site content, **publish** the site (Builder → Publish, or
+After deploying site content **or any LWC used on the site**, **publish** the site (Builder → Publish, or
 `sf community publish -n "ABC Hope" -o npo-demo`).
 
 ## Conventions
 
-- LWC: `c-donation-*` prefix, SLDS-first, mobile-first (LWR has no Aura; use `lightning/*`
-  base components that are LWR-compatible). Light DOM not required.
+- LWC: SLDS-free custom CSS with `:host` tokens, mobile-first, native inputs (full styling control).
+  The site uses **synthetic shadow** — global theme `a` styles leak in; see decisions.md D-11.
 - Apex: `DonationIntake*` prefix. Guest-facing classes are `without sharing` **only** where
   record matching requires it; validate & sanitize every input server-side; no SOQL in loops;
   every class ≥ 85% coverage with assertion-based tests.
