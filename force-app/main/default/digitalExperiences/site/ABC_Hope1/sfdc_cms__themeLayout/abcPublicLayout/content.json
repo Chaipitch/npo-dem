@@ -1,0 +1,27 @@
+{
+  "type": "sfdc_cms__themeLayout",
+  "title": "ABC Hope Public",
+  "contentBody": {
+    "component": {
+      "attributes": {},
+      "children": [
+        {
+          "id": "ee9bb64c-619b-49aa-9c9d-7411b3d63bdb",
+          "name": "header",
+          "title": "Header",
+          "type": "region"
+        },
+        {
+          "id": "87cdd5f8-aa1e-4d00-bf9c-630835e22ea5",
+          "name": "footer",
+          "title": "Footer",
+          "type": "region"
+        }
+      ],
+      "definition": "c:abcHopePublicLayout",
+      "id": "6e4121d8-5506-4ec2-90be-5ac0ca9f5c0a",
+      "type": "component"
+    }
+  },
+  "urlName": "abc-hope-public"
+}

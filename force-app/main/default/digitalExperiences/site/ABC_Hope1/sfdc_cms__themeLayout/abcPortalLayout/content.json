@@ -1,0 +1,27 @@
+{
+  "type": "sfdc_cms__themeLayout",
+  "title": "ABC Hope Portal",
+  "contentBody": {
+    "component": {
+      "attributes": {},
+      "children": [
+        {
+          "id": "576882bd-48c8-4c82-bd72-9a4385f90808",
+          "name": "header",
+          "title": "Header",
+          "type": "region"
+        },
+        {
+          "id": "3dc7a7eb-4460-4244-ae78-4b6b8e5ae527",
+          "name": "footer",
+          "title": "Footer",
+          "type": "region"
+        }
+      ],
+      "definition": "c:abcHopePortalLayout",
+      "id": "5a6ec18f-a4d9-476e-8607-6e11193b1793",
+      "type": "component"
+    }
+  },
+  "urlName": "abc-hope-portal"
+}

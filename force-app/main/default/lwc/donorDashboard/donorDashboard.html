@@ -1,12 +1,48 @@
 <template>
   <div class="dash">
+    <!-- Banner -->
     <section class="banner">
-      <div>
-        <h1 class="banner-title">{bannerTitle}</h1>
-        <p class="banner-sub">{bannerSubtitle}</p>
+      <svg
+        class="banner-art"
+        viewBox="0 0 1200 260"
+        preserveAspectRatio="xMidYMid slice"
+        aria-hidden="true"
+      >
+        <path
+          d="M0 120 120 70 230 110 360 50 500 100 640 40 780 95 900 55 1040 100 1200 60V260H0Z"
+          fill="#7d9fb8"
+          opacity=".55"
+        />
+        <path
+          d="M0 150 140 100 260 140 420 85 560 130 700 80 840 125 980 90 1200 130V260H0Z"
+          fill="#5f8a6a"
+        />
+        <path
+          d="M0 185 160 140 320 175 480 130 640 170 820 135 1000 165 1200 140V260H0Z"
+          fill="#3f6f45"
+        />
+        <path
+          d="M560 260c40-40 120-50 180-70 70-22 130-20 200-40 60-17 110-12 160-30v30c-50 16-100 16-160 32-70 18-130 20-200 42-60 18-120 26-150 36Z"
+          fill="#b7d8ee"
+          opacity=".9"
+        />
+        <g fill="#24492b">
+          <path d="M40 260 62 196 84 260Z" />
+          <path d="M80 260 106 180 132 260Z" />
+          <path d="M128 260 148 206 168 260Z" />
+          <path d="M980 260 1004 190 1028 260Z" />
+          <path d="M1030 260 1060 170 1090 260Z" />
+          <path d="M1090 260 1112 200 1134 260Z" />
+          <path d="M1140 260 1166 184 1192 260Z" />
+        </g>
+      </svg>
+      <div class="banner-shade" aria-hidden="true"></div>
+      <div class="banner-text">
+        <h1 class="banner-title">{title}</h1>
+        <p class="banner-sub">{subtitle}</p>
       </div>
       <p class="banner-script" aria-hidden="true">
-        Stronger Communities.<br />Brighter Futures.
+        People<br />Communities<br />Brighter Futures.
       </p>
     </section>
 
@@ -19,160 +55,355 @@
     <template lwc:else>
       <div class="layout">
         <div class="main">
-          <p class="greeting">{greeting}</p>
-
           <!-- KPI cards -->
           <div class="kpis">
             <div class="kpi">
-              <span class="kpi-icon kpi-red" aria-hidden="true">♥</span>
+              <span class="kpi-icon kpi-red"
+                ><c-abc-hope-icon
+                  name="heart"
+                  size="30"
+                  stroke-width="2"
+                ></c-abc-hope-icon
+              ></span>
               <div>
                 <p class="kpi-value">{totalDisplay}</p>
                 <p class="kpi-label">Total Contributions</p>
-                <button
-                  type="button"
-                  class="kpi-link"
-                  data-target="history"
-                  onclick={handleScroll}
-                >
-                  View Giving History →
-                </button>
+                <a class="kpi-link" href={givingHref}
+                  >View Giving History
+                  <c-abc-hope-icon
+                    name="arrow"
+                    size="16"
+                    stroke-width="2.2"
+                  ></c-abc-hope-icon
+                ></a>
               </div>
             </div>
             <div class="kpi">
-              <span class="kpi-icon kpi-green" aria-hidden="true">👥</span>
+              <span class="kpi-icon kpi-green"
+                ><c-abc-hope-icon
+                  name="community"
+                  size="30"
+                  stroke-width="2"
+                ></c-abc-hope-icon
+              ></span>
               <div>
                 <p class="kpi-value">{causesDisplay}</p>
                 <p class="kpi-label">Causes Supported</p>
-                <button
-                  type="button"
-                  class="kpi-link"
-                  data-target="causes"
-                  onclick={handleScroll}
-                >
-                  See My Causes →
-                </button>
+                <a class="kpi-link" href={causesHref}
+                  >See My Causes
+                  <c-abc-hope-icon
+                    name="arrow"
+                    size="16"
+                    stroke-width="2.2"
+                  ></c-abc-hope-icon
+                ></a>
               </div>
             </div>
             <div class="kpi">
-              <span class="kpi-icon kpi-purple" aria-hidden="true">📅</span>
+              <span class="kpi-icon kpi-purple"
+                ><c-abc-hope-icon
+                  name="calendar"
+                  size="30"
+                  stroke-width="2"
+                ></c-abc-hope-icon
+              ></span>
               <div>
                 <p class="kpi-value">{sinceDisplay}</p>
                 <p class="kpi-label">Supporter Since</p>
-                <button
-                  type="button"
-                  class="kpi-link"
-                  data-target="journey"
-                  onclick={handleScroll}
-                >
-                  View My Journey →
-                </button>
+                <a class="kpi-link" href={journeyHref}
+                  >View My Journey
+                  <c-abc-hope-icon
+                    name="arrow"
+                    size="16"
+                    stroke-width="2.2"
+                  ></c-abc-hope-icon
+                ></a>
               </div>
             </div>
           </div>
           <template lwc:if={monthlyNote}>
-            <p class="monthly">🔁 {monthlyNote}</p>
+            <p class="monthly">
+              <c-abc-hope-icon name="repeat" size="16"></c-abc-hope-icon>
+              {monthlyNote}
+            </p>
           </template>
 
-          <!-- Shared impact -->
-          <h2 class="section-title">Our Shared Impact</h2>
-          <div class="impact">
-            <template for:each={impactTiles} for:item="t">
-              <div key={t.key} class={t.className}>
-                <span class="impact-icon" aria-hidden="true">{t.icon}</span>
-                <div>
-                  <p class="impact-value">{t.value}</p>
-                  <p class="impact-label">{t.label}</p>
+          <template lwc:if={isHome}>
+            <!-- Shared impact -->
+            <div class="section-head">
+              <h2 class="section-title">
+                Our Shared Impact
+                <span class="info"
+                  ><c-abc-hope-icon name="info" size="18"></c-abc-hope-icon
+                ></span>
+              </h2>
+            </div>
+            <div class="impact">
+              <template for:each={impactTiles} for:item="t">
+                <div key={t.key} class={t.className}>
+                  <span class="impact-icon"
+                    ><c-abc-hope-icon
+                      name={t.icon}
+                      size="34"
+                      stroke-width="2"
+                    ></c-abc-hope-icon
+                  ></span>
+                  <div>
+                    <p class="impact-value">{t.value}</p>
+                    <p class="impact-label">{t.label}</p>
+                  </div>
                 </div>
+              </template>
+            </div>
+
+            <!-- Stories -->
+            <div class="section-head" data-section="stories">
+              <h2 class="section-title">
+                Stories From the Programs You Support
+              </h2>
+            </div>
+            <div class="stories">
+              <template for:each={storyCards} for:item="s">
+                <article key={s.key} class="story">
+                  <div class="story-art" aria-hidden="true">
+                    <template lwc:if={s.isWater}>
+                      <svg viewBox="0 0 120 150">
+                        <rect width="120" height="150" fill="#dcecf9" />
+                        <rect
+                          x="0"
+                          y="110"
+                          width="120"
+                          height="40"
+                          fill="#9fc6e6"
+                        />
+                        <rect
+                          x="22"
+                          y="40"
+                          width="54"
+                          height="16"
+                          rx="6"
+                          fill="#8a96a8"
+                        />
+                        <rect
+                          x="66"
+                          y="40"
+                          width="12"
+                          height="34"
+                          rx="5"
+                          fill="#8a96a8"
+                        />
+                        <rect
+                          x="14"
+                          y="30"
+                          width="16"
+                          height="36"
+                          rx="5"
+                          fill="#6f7b8d"
+                        />
+                        <path
+                          d="M72 82c0 0-7 9-7 14a7 7 0 0 0 14 0c0-5-7-14-7-14Z"
+                          fill="#3b8fd9"
+                        />
+                        <path
+                          d="M72 104c0 0-5 7-5 10a5 5 0 0 0 10 0c0-3-5-10-5-10Z"
+                          fill="#3b8fd9"
+                          opacity=".7"
+                        />
+                        <circle
+                          cx="40"
+                          cy="128"
+                          r="10"
+                          fill="#fff"
+                          opacity=".35"
+                        />
+                      </svg>
+                    </template>
+                    <template lwc:if={s.isSchool}>
+                      <svg viewBox="0 0 120 150">
+                        <rect width="120" height="150" fill="#fbecd3" />
+                        <path
+                          d="M14 92c16-8 30-8 46 0v40c-16-8-30-8-46 0Z"
+                          fill="#fff"
+                        />
+                        <path
+                          d="M60 92c16-8 30-8 46 0v40c-16-8-30-8-46 0Z"
+                          fill="#f4f1ea"
+                        />
+                        <path d="M60 92v40" stroke="#c9b9a0" stroke-width="2" />
+                        <path
+                          d="M22 102h28M22 110h28M68 102h28M68 110h22"
+                          stroke="#d4c6ae"
+                          stroke-width="3"
+                        />
+                        <rect
+                          x="40"
+                          y="26"
+                          width="40"
+                          height="44"
+                          rx="6"
+                          fill="#2f6fd6"
+                        />
+                        <rect
+                          x="40"
+                          y="26"
+                          width="40"
+                          height="10"
+                          rx="5"
+                          fill="#5a8fe6"
+                        />
+                        <circle cx="60" cy="52" r="7" fill="#f5b83d" />
+                        <path
+                          d="M92 30 104 74"
+                          stroke="#e5484d"
+                          stroke-width="7"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+                    </template>
+                    <template lwc:if={s.isSprout}>
+                      <svg viewBox="0 0 120 150">
+                        <rect width="120" height="150" fill="#e4f2dc" />
+                        <circle cx="92" cy="30" r="16" fill="#fff4cf" />
+                        <path
+                          d="M0 112c30-10 70-12 120-2v40H0Z"
+                          fill="#5b3a22"
+                        />
+                        <path
+                          d="M60 112V70"
+                          stroke="#4f9a3c"
+                          stroke-width="5"
+                          stroke-linecap="round"
+                        />
+                        <path
+                          d="M60 84c-18-4-30 2-36 14 16 4 28-2 36-14Z"
+                          fill="#6cc04a"
+                        />
+                        <path
+                          d="M61 76c12-16 28-20 42-14-8 14-24 18-42 14Z"
+                          fill="#7ed05a"
+                        />
+                      </svg>
+                    </template>
+                  </div>
+                  <div class="story-body">
+                    <span class={s.tagClass}>{s.tag}</span>
+                    <h3 class="story-title">{s.title}</h3>
+                    <p class="story-text">{s.summary}</p>
+                  </div>
+                </article>
+              </template>
+            </div>
+
+            <!-- Causes -->
+            <div class="section-head" data-section="causes">
+              <h2 class="section-title">Causes I Support</h2>
+            </div>
+            <template lwc:if={hasCauses}>
+              <div class="chips">
+                <template for:each={causes} for:item="c">
+                  <span key={c.key} class="chip"
+                    ><c-abc-hope-icon
+                      name="heart"
+                      size="16"
+                      stroke-width="2.2"
+                    ></c-abc-hope-icon
+                    >{c.label}</span
+                  >
+                </template>
               </div>
             </template>
-          </div>
-
-          <!-- Stories -->
-          <h2 class="section-title">Stories From the Programs You Support</h2>
-          <div class="stories">
-            <template for:each={storyCards} for:item="s">
-              <article key={s.key} class="story">
-                <div class="story-img" aria-hidden="true">{s.icon}</div>
-                <div class="story-body">
-                  <span class={s.tagClass}>{s.tag}</span>
-                  <h3 class="story-title">{s.title}</h3>
-                  <p class="story-text">{s.summary}</p>
-                </div>
-              </article>
+            <template lwc:else>
+              <p class="muted">
+                Your causes will appear here after your first gift.
+              </p>
             </template>
-          </div>
 
-          <!-- Causes -->
-          <h2 class="section-title" data-section="causes">Causes I Support</h2>
-          <div class="chips">
-            <template for:each={causes} for:item="c">
-              <span key={c} class="chip">{c}</span>
-            </template>
-          </div>
-
-          <!-- Journey -->
-          <h2 class="section-title" data-section="journey">
-            Your Impact Journey
-          </h2>
-          <ol class="journey">
-            <template for:each={journey} for:item="m">
-              <li key={m.key} class="journey-item">
-                <span class={m.dotClass} aria-hidden="true">{m.icon}</span>
-                <div>
-                  <p class="journey-year">{m.year}</p>
-                  <p class="journey-label">{m.label}</p>
-                </div>
-                <template lwc:if={m.showLine}
-                  ><span class="journey-line" aria-hidden="true"></span
-                ></template>
-              </li>
-            </template>
-          </ol>
-
-          <!-- History -->
-          <div class="history-head" data-section="history">
-            <h2 class="section-title">My Giving</h2>
-            <a class="give-again" href={donateHref}>Give again →</a>
-          </div>
-          <template lwc:if={hasGifts}>
-            <div class="table-wrap">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th scope="col">Date</th>
-                    <th scope="col">Campaign</th>
-                    <th scope="col">Designation</th>
-                    <th scope="col" class="num">Amount</th>
-                    <th scope="col">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <template for:each={gifts} for:item="g">
-                    <tr key={g.id}>
-                      <td data-label="Date">{g.dateDisplay}</td>
-                      <td data-label="Campaign">{g.campaignName}</td>
-                      <td data-label="Designation">{g.designations}</td>
-                      <td data-label="Amount" class="num strong">
-                        {g.amountDisplay}
-                      </td>
-                      <td data-label="Status">
-                        <span class={g.statusClass}>{g.status}</span>
-                      </td>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
+            <!-- Journey -->
+            <div class="section-head" data-section="journey">
+              <h2 class="section-title">Your Impact Journey</h2>
             </div>
+            <ol class="journey">
+              <template for:each={journey} for:item="m">
+                <li key={m.key} class="journey-item">
+                  <span class={m.dotClass}
+                    ><c-abc-hope-icon
+                      name={m.icon}
+                      size="26"
+                      stroke-width="2"
+                    ></c-abc-hope-icon
+                  ></span>
+                  <div class="journey-text">
+                    <p class="journey-year">{m.year}</p>
+                    <p class="journey-label">{m.label}</p>
+                  </div>
+                  <template lwc:if={m.showLine}
+                    ><span class="journey-line" aria-hidden="true"></span
+                  ></template>
+                </li>
+              </template>
+            </ol>
           </template>
-          <template lwc:else>
-            <p class="muted">No gifts yet — your first one will appear here.</p>
+
+          <template lwc:if={isGiving}>
+            <div class="section-head" data-section="history">
+              <h2 class="section-title">Giving History</h2>
+              <a class="give-again" href={donateHref}
+                >Give again
+                <c-abc-hope-icon
+                  name="arrow"
+                  size="16"
+                  stroke-width="2.4"
+                ></c-abc-hope-icon
+              ></a>
+            </div>
+            <template lwc:if={hasGifts}>
+              <div class="table-wrap">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Date</th>
+                      <th scope="col">Campaign</th>
+                      <th scope="col">Designation</th>
+                      <th scope="col" class="num">Amount</th>
+                      <th scope="col">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template for:each={gifts} for:item="g">
+                      <tr key={g.id}>
+                        <td data-label="Date">{g.dateDisplay}</td>
+                        <td data-label="Campaign">{g.campaignName}</td>
+                        <td data-label="Designation">{g.designations}</td>
+                        <td data-label="Amount" class="num strong">
+                          {g.amountDisplay}
+                        </td>
+                        <td data-label="Status">
+                          <span class={g.statusClass}>{g.status}</span>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+            <template lwc:else>
+              <p class="muted">
+                No gifts yet — your first one will appear here.
+              </p>
+            </template>
           </template>
         </div>
 
         <!-- Agent panel -->
         <aside class="agent">
           <div class="agent-head">
-            <span class="agent-icon" aria-hidden="true">✦</span>
+            <span class="agent-icon"
+              ><c-abc-hope-icon
+                name="sparkle"
+                size="26"
+                stroke-width="2"
+              ></c-abc-hope-icon
+            ></span>
             <div>
               <h2 class="agent-title">Ask About Your Journey</h2>
               <p class="agent-sub">
@@ -180,8 +411,56 @@
                 available to you.
               </p>
             </div>
+            <span class="agent-powered"
+              >Powered<br />by <strong>Agentforce</strong></span
+            >
           </div>
-          <p class="agent-powered">Powered by Agentforce</p>
+
+          <div class="msg msg_user">
+            <span class="msg-avatar">{initial}</span>
+            <p class="bubble">How are the programs I supported doing?</p>
+          </div>
+          <div class="msg msg_agent">
+            <span class="msg-avatar msg-avatar_agent"
+              ><c-abc-hope-icon
+                name="sparkle"
+                size="20"
+                stroke-width="2"
+              ></c-abc-hope-icon
+            ></span>
+            <div class="bubble bubble_agent">
+              <p class="agent-intro">{agentIntro}</p>
+              <ul class="agent-list">
+                <template for:each={agentCauses} for:item="a">
+                  <li key={a.key} class="agent-row">
+                    <span class={a.artClass}
+                      ><c-abc-hope-icon
+                        name="heart"
+                        size="22"
+                        stroke-width="2"
+                      ></c-abc-hope-icon
+                    ></span>
+                    <span class="agent-row-text">
+                      <span class="agent-row-title">{a.label}</span>
+                      <span class="agent-row-sub">You gave {a.amount}</span>
+                    </span>
+                    <span class="agent-trend"
+                      ><c-abc-hope-icon
+                        name="trend"
+                        size="16"
+                        stroke-width="2.2"
+                      ></c-abc-hope-icon
+                    ></span>
+                  </li>
+                </template>
+              </ul>
+              <p class="agent-outro">
+                Your next chance to help: Christmas Giving 2026 — school
+                supplies for children.
+              </p>
+            </div>
+          </div>
+
           <div class="agent-chips">
             <template for:each={suggestions} for:item="q">
               <button
@@ -196,7 +475,13 @@
           </div>
           <button type="button" class="agent-input" onclick={handleAsk}>
             <span>Ask another question about your impact…</span>
-            <span class="agent-send" aria-hidden="true">→</span>
+            <span class="agent-send"
+              ><c-abc-hope-icon
+                name="send"
+                size="18"
+                stroke-width="2.4"
+              ></c-abc-hope-icon
+            ></span>
           </button>
           <template lwc:if={agentUnavailable}>
             <p class="muted small">

@@ -3,49 +3,49 @@
 _Last updated: 2026‑10‑21_
 
 ## TL;DR
-Phase 0 (setup + discovery + docs) done. No Salesforce metadata or data has been changed
-in the org yet — only retrieved. Next: Phase 1 data seed and Phase 2 LWC + Apex
-(see `Implementation-plan.md`).
+
+Public donation journey and signed-in donor portal are built, deployed and published on the ABC Hope LWR site.
+Guest donations create real NPC records (payment simulated). One manual step left for the chat widget, and the
+GitHub repo still needs to be created before pushing.
+
+**Site:** https://te1791557923677.my.site.com/ — `/` campaign home · `/donate` · `/dashboard` · `/my-giving` · `/my-profile`
 
 ## Status
-| Area | State |
-|---|---|
-| Git | Local repo on `main`, commits made. **Not pushed** — `git@github.com:Chaipitch/npo-dem.git` and `.../npo-demo.git` both return "Repository not found" (SSH auth works as `Chaipitch`). Create the repo on GitHub, then `git push -u origin main`. Remote currently set to `npo-demo.git`. |
-| Site metadata | Retrieved baseline of `site/ABC_Hope1`, `ABC_Hope1` config, Network `ABC Hope`, CustomSite `ABC_Hope`, `ABC Hope Profile`. |
-| Org changes | None. |
-| Flows / VRs / custom objects / fields | **Do not create** (user instruction). |
 
-## Org findings (2026‑10‑21)
-- Nonprofit Cloud Fundraising objects present: `GiftTransaction`, `GiftCommitment`,
-  `GiftCommitmentSchedule`, `GiftTransactionDesignation`, `GiftDesignation`,
-  `GiftDefaultDesignation`, `OutreachSourceCode`. 13,590 existing GiftTransactions (demo data).
-- Required on create: GiftTransaction `Name`, `OriginalAmount`, `PaymentMethod`;
-  GiftCommitment `Name`, `DonorId`; Schedule `GiftCommitmentId`, `TransactionAmount`, `StartDate`.
-- Person Accounts on. Maya Grande exists as Person Account `001g70000175AtRAAU`
-  (`maya@email.com`), **no portal user**.
-- Currency: USD only (mockups say THB → decisions D-05).
-- **Missing data**: Campaign "Christmas Giving 2026", designation "School Supplies",
-  source code for the Christmas email.
-- Existing designations: General Fund, Unrestricted, Food Insecurity Fund, etc. (9).
-- Site "ABC Hope": LWR (Build Your Own), only template pages; `authenticationType =
-  AUTHENTICATED`; Network status `UnderConstruction`; self-registration off; only member
-  profile is System Administrator.
-- Guest user `ABC Hope Site Guest User` / profile `ABC Hope Profile`; Run Flows = false.
-- Agents: `Donor_Support_Agent` (BotDefinition, InternalCopilot), `SDO_Service_Agentforce_Service_Agent`
-  (ExternalCopilot), `NGO_Fundraising_Agent`, …; Embedded Service deployments incl.
-  `Donor_Support_Agent` and `SDO_Messaging_for_Web`.
-- Existing flow `NGO_Coordinate_Gift_Commitment_Processing` (active) handles commitment
-  processing — relied on for monthly gifts, not modified.
+| Area                                  | State                                                                                                                                                                                                                                  |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Demo data                             | ✅ Campaign _Christmas Giving 2026_, designations (School Supplies, Learning Kits, Where Most Needed), campaign default designation, source code `XMAS26-EMAIL`, Maya's 2023–2025 gift history (`scripts/apex/seed*.apex`, idempotent) |
+| Apex                                  | ✅ `DonationIntakeController/Service`, `DonorPortalController` — 22 tests pass, 91–98% coverage                                                                                                                                        |
+| LWC                                   | ✅ `donationJourney` (10 Jest tests pass), `abcHopeHero`, `donorDashboard` (view=home/giving), `donorProfile`, `abcHopeIcon`, theme layouts `abcHopePublicLayout`, `abcHopePortalLayout`                                               |
+| Site                                  | ✅ Live, public access on; Home + Donate public, portal pages require login; guest profile → `DonationIntakeController` only                                                                                                           |
+| Signed-in donor                       | ✅ Maya Grande portal user `005g700000EemAjAAJ` (Customer Community Login, permset `ABC_Hope_Donor_Portal`), no password set                                                                                                           |
+| Chat                                  | 🟨 Deployment `ABC_Hope_Chat` + channel created (unauth, guests allowed). **Needs Embedded Messaging component placed in Builder** (D-09)                                                                                              |
+| Git                                   | 🟨 Committed locally on `main`; remote `git@github.com:Chaipitch/npo-demo.git` does not exist yet — create it, then `git push -u origin main`                                                                                          |
+| Flows / VRs / custom objects / fields | None created (user instruction)                                                                                                                                                                                                        |
 
-## Open questions for the user
-1. GitHub repo name — create `npo-demo` (or `npo-dem`?) and confirm.
-2. D-03 — OK to implement the journey as LWC + Apex now, Screen Flow later (or never)?
-3. D-05 — currency: label "THB" on USD fields for the demo, or enable multi-currency?
-4. Phase 3 — OK to make the site public (guest access) and set it Live?
-5. Phase 4 — OK to create a Customer Community user for Maya Grande?
-6. D-09 — which agent backs the site chat (`Donor_Support_Agent` vs Agentforce Service Agent)?
+## How to see the signed-in portal
+
+Setup → Contacts → **Maya Grande** → **Log in to Experience as User** → ABC Hope → opens `/dashboard`.
+
+## Manual step: chat widget
+
+1. Experience Builder → ABC Hope → open any page using the _ABC Hope Public_ layout.
+2. Components → **Embedded Messaging** → drag into the theme **Footer** region; select deployment **ABC Hope Chat**.
+3. Repeat on a page using the _ABC Hope Portal_ layout. Publish.
+4. Then: `sf project retrieve start -o npo-demo -m "DigitalExperienceBundle:site/ABC_Hope1"` and commit.
 
 ## Gotchas
-- Two `Site` rows (`ABC_Hope`, `ABC_Hope1`) share one guest user — that's how LWR sites are stored.
-- Retrieving the full `ABC Hope Profile` pulls a large file; deploy only the diffs you need.
-- After any site deploy you must **publish** the site for changes to appear.
+
+- LWR freezes component code at publish: after deploying any LWC used on the site, run `sf community publish -n "ABC Hope" -o npo-demo`.
+- `scripts/sitePages.py` regenerates routes/views/theme layouts — re-run it rather than hand-editing JSON.
+- Synthetic shadow: theme `a:link` styles leak into components (D-11). SVG `url(#id)` refs break (D-14).
+- On Paid gifts NPC auto-creates a 100% designation (D-13).
+- Org is USD-only; UI labels amounts "THB" (D-05).
+- The LWR site is at the domain root; `/vforcesite` is only the Visualforce side.
+
+## Open items
+
+1. Create the GitHub repo and push.
+2. Place the Embedded Messaging component (above).
+3. Real photos for hero / stories / review card (send images → upload to CMS → set the URL properties).
+4. Header nav "Our Work" and "About" point to `/` until those pages exist.

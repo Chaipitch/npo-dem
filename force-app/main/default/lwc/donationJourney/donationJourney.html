@@ -103,7 +103,9 @@
           <label class="field">
             <span class="field-label">Support</span>
             <span class="select-wrap">
-              <span class="select-icon" aria-hidden="true">🎒</span>
+              <span class="select-icon"
+                ><c-abc-hope-icon name="backpack" size="22"></c-abc-hope-icon
+              ></span>
               <select
                 class="input select"
                 data-id="designation"
@@ -254,11 +256,73 @@
                 <img class="review-img" src={reviewImageUrl} alt="" />
               </template>
               <template lwc:else>
-                <span
-                  class="review-img review-img_placeholder"
-                  aria-hidden="true"
-                  >📚</span
-                >
+                <span class="review-img review-img_placeholder">
+                  <svg class="books" viewBox="0 0 120 90" aria-hidden="true">
+                    <rect
+                      x="8"
+                      y="66"
+                      width="100"
+                      height="16"
+                      rx="3"
+                      fill="#2f6fd6"
+                    />
+                    <rect
+                      x="8"
+                      y="66"
+                      width="100"
+                      height="4"
+                      fill="#fff"
+                      opacity=".3"
+                    />
+                    <rect
+                      x="14"
+                      y="51"
+                      width="90"
+                      height="15"
+                      rx="3"
+                      fill="#f5b83d"
+                    />
+                    <rect
+                      x="20"
+                      y="51"
+                      width="4"
+                      height="15"
+                      fill="#fff"
+                      opacity=".5"
+                    />
+                    <rect
+                      x="4"
+                      y="36"
+                      width="96"
+                      height="15"
+                      rx="3"
+                      fill="#e5484d"
+                    />
+                    <rect
+                      x="10"
+                      y="36"
+                      width="4"
+                      height="15"
+                      fill="#fff"
+                      opacity=".5"
+                    />
+                    <rect
+                      x="74"
+                      y="10"
+                      width="26"
+                      height="26"
+                      rx="4"
+                      fill="#e9e2d6"
+                    />
+                    <path
+                      d="M80 10 77 -4M87 10V-6M94 10l3-13"
+                      stroke-width="5"
+                      stroke-linecap="round"
+                      fill="none"
+                      stroke="#2f8a4a"
+                    />
+                  </svg>
+                </span>
               </template>
               <div>
                 <p class="review-campaign">{campaignName}</p>
@@ -311,21 +375,104 @@
             {submitLabel}
           </button>
           <p class="notice notice_purple">
-            <span class="notice-icon" aria-hidden="true">i</span>Payment
-            simulation only
+            <span class="notice-icon"
+              ><c-abc-hope-icon
+                name="info"
+                size="14"
+                stroke-width="2.6"
+              ></c-abc-hope-icon></span
+            >Payment simulation only
           </p>
         </template>
 
         <!-- Step 4: Thank you -->
         <template lwc:if={isThanks}>
           <div class="thanks">
-            <span class="check" aria-hidden="true">✓</span>
+            <span class="check"
+              ><c-abc-hope-icon
+                name="check"
+                size="40"
+                stroke-width="3"
+              ></c-abc-hope-icon
+            ></span>
+            <span class="sparkle sparkle_a" aria-hidden="true">✦</span
+            ><span class="sparkle sparkle_b" aria-hidden="true">✦</span
+            ><span class="sparkle sparkle_c" aria-hidden="true">✦</span>
             <h2 class="title title_center">Your details have been received</h2>
             <p class="subtitle subtitle_center">
               Thank you for supporting {campaignName}!
             </p>
             <div class="thanks-card">
-              <span class="thanks-icon" aria-hidden="true">📚</span>
+              <span class="thanks-icon"
+                ><svg
+                  class="books books_small"
+                  viewBox="0 0 120 90"
+                  aria-hidden="true"
+                >
+                  <rect
+                    x="8"
+                    y="66"
+                    width="100"
+                    height="16"
+                    rx="3"
+                    fill="#2f6fd6"
+                  />
+                  <rect
+                    x="8"
+                    y="66"
+                    width="100"
+                    height="4"
+                    fill="#fff"
+                    opacity=".3"
+                  />
+                  <rect
+                    x="14"
+                    y="51"
+                    width="90"
+                    height="15"
+                    rx="3"
+                    fill="#f5b83d"
+                  />
+                  <rect
+                    x="20"
+                    y="51"
+                    width="4"
+                    height="15"
+                    fill="#fff"
+                    opacity=".5"
+                  />
+                  <rect
+                    x="4"
+                    y="36"
+                    width="96"
+                    height="15"
+                    rx="3"
+                    fill="#e5484d"
+                  />
+                  <rect
+                    x="10"
+                    y="36"
+                    width="4"
+                    height="15"
+                    fill="#fff"
+                    opacity=".5"
+                  />
+                  <rect
+                    x="74"
+                    y="10"
+                    width="26"
+                    height="26"
+                    rx="4"
+                    fill="#e9e2d6"
+                  />
+                  <path
+                    d="M80 10 77 -4M87 10V-6M94 10l3-13"
+                    stroke-width="5"
+                    stroke-linecap="round"
+                    fill="none"
+                    stroke="#2f8a4a"
+                  /></svg
+              ></span>
               <div>
                 <p class="thanks-amount">
                   {resultAmountDisplay}
@@ -336,8 +483,12 @@
             </div>
             <p class="ref">Reference: {result.reference}</p>
             <p class="notice notice_green">
-              <span class="notice-icon notice-icon_green" aria-hidden="true"
-                >i</span
+              <span class="notice-icon notice-icon_green"
+                ><c-abc-hope-icon
+                  name="info"
+                  size="14"
+                  stroke-width="2.6"
+                ></c-abc-hope-icon></span
               >No payment collected in this demo.
             </p>
             <button
@@ -357,7 +508,12 @@
             data-id="next"
             onclick={handleNext}
           >
-            Next <span aria-hidden="true">→</span>
+            Next
+            <c-abc-hope-icon
+              name="arrow"
+              size="20"
+              stroke-width="2.4"
+            ></c-abc-hope-icon>
           </button>
         </template>
         <template lwc:if={showBack}>
@@ -367,7 +523,12 @@
             data-id="back"
             onclick={handleBack}
           >
-            <span aria-hidden="true">←</span> Back
+            <c-abc-hope-icon
+              name="arrow-left"
+              size="18"
+              stroke-width="2.2"
+            ></c-abc-hope-icon>
+            Back
           </button>
         </template>
       </div>

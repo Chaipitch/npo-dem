@@ -2,12 +2,19 @@ import { LightningElement, api, wire } from "lwc";
 import basePath from "@salesforce/community/basePath";
 import getDashboard from "@salesforce/apex/DonorPortalController.getDashboard";
 
-const IMPACT_ICONS = ["👥", "🏠", "🌱", "❤️"];
-const IMPACT_TONES = ["tone-blue", "tone-indigo", "tone-green", "tone-red"];
-const STORY_ICONS = { "Clean Water": "💧", Education: "📚", Environment: "🌳" };
-const JOURNEY_ICONS = ["❤", "💧", "📚", "🌳", "🎁", "⭐"];
+const IMPACT_STYLE = [
+  { icon: "users", tone: "tone-blue" },
+  { icon: "home", tone: "tone-indigo" },
+  { icon: "sprout", tone: "tone-green" },
+  { icon: "heart-fill", tone: "tone-red" }
+];
+const STORY_ART = ["water", "school", "sprout"];
+const JOURNEY_TONES = ["jt-red", "jt-green", "jt-amber", "jt-purple"];
+const JOURNEY_ICONS = ["heart", "sprout", "book", "gift"];
 
 export default class DonorDashboard extends LightningElement {
+  /** "home" = donor home (mockup #1); "giving" = KPIs + full giving history */
+  @api view = "home";
   @api currencyLabel = "THB";
   @api bannerTitle = "See What We’ve Achieved Together";
   @api bannerSubtitle = "Your support is part of something bigger.";
@@ -21,10 +28,11 @@ export default class DonorDashboard extends LightningElement {
     "Environment|Greener Communities for Generations|Tree planting and conservation efforts are creating healthier communities.";
   @api donatePath = "/donate";
   @api agentSuggestions =
-    "How are the programs I supported doing this year?;Show my giving history;What is the next milestone?";
+    "Explore my causes;View giving history;Show next milestones";
 
   data;
   error;
+  _scrolledTo;
 
   @wire(getDashboard)
   wiredDashboard({ data, error }) {
@@ -38,14 +46,51 @@ export default class DonorDashboard extends LightningElement {
     }
   }
 
+  connectedCallback() {
+    this._onHash = () => {
+      this._scrolledTo = undefined;
+      this.scrollToHash();
+    };
+    window.addEventListener("hashchange", this._onHash);
+  }
+  disconnectedCallback() {
+    window.removeEventListener("hashchange", this._onHash);
+  }
+  renderedCallback() {
+    this.scrollToHash();
+  }
+  scrollToHash() {
+    const hash = (window.location.hash || "").replace("#", "");
+    if (!hash || !this.data || this._scrolledTo === hash) return;
+    const target = this.template.querySelector(`[data-section="${hash}"]`);
+    if (target) {
+      this._scrolledTo = hash;
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  // ------------------------------------------------------------ view state
+  get isHome() {
+    return this.view !== "giving";
+  }
+  get isGiving() {
+    return this.view === "giving";
+  }
   get isLoading() {
     return !this.data && !this.error;
   }
-  get greeting() {
-    return this.data ? `Welcome back, ${this.data.firstName}` : "";
+  get title() {
+    return this.isGiving ? "My Giving" : this.bannerTitle;
   }
+  get subtitle() {
+    return this.isGiving
+      ? "Every gift you’ve made, where it went, and its status."
+      : this.bannerSubtitle;
+  }
+
+  // ------------------------------------------------------------ KPIs
   get totalDisplay() {
-    return `${this.currencyLabel} ${formatNumber(this.data?.totalContributions || 0)}`;
+    return this.money(this.data?.totalContributions || 0);
   }
   get causesDisplay() {
     return this.data?.causesSupported ?? 0;
@@ -57,15 +102,30 @@ export default class DonorDashboard extends LightningElement {
     const n = this.data?.activeMonthlyGifts || 0;
     return n > 0 ? `${n} active monthly gift${n === 1 ? "" : "s"}` : "";
   }
+  get givingHref() {
+    return `${basePath || ""}/my-giving`;
+  }
+  get causesHref() {
+    return `${basePath || ""}/dashboard#causes`;
+  }
+  get journeyHref() {
+    return `${basePath || ""}/dashboard#journey`;
+  }
+  get donateHref() {
+    return `${basePath || ""}${this.donatePath}`;
+  }
+
+  // ------------------------------------------------------------ content
   get impactTiles() {
     return splitList(this.sharedImpact).map((item, i) => {
-      const [value, label] = item.split("|");
+      const [value, label] = item.split("|").map((x) => (x || "").trim());
+      const style = IMPACT_STYLE[i % IMPACT_STYLE.length];
       return {
         key: `i${i}`,
-        value: (value || "").trim(),
-        label: (label || "").trim(),
-        icon: IMPACT_ICONS[i % IMPACT_ICONS.length],
-        className: `impact-tile ${IMPACT_TONES[i % IMPACT_TONES.length]}`
+        value,
+        label,
+        icon: style.icon,
+        className: `impact-tile ${style.tone}`
       };
     });
   }
@@ -74,29 +134,42 @@ export default class DonorDashboard extends LightningElement {
       const [tag, title, summary] = item
         .split("|")
         .map((x) => (x || "").trim());
+      const art = STORY_ART[i % STORY_ART.length];
       return {
         key: `s${i}`,
         tag,
         title,
         summary,
-        icon: STORY_ICONS[tag] || "✨",
-        tagClass: `tag tag-${i % 3}`
+        tagClass: `tag tag-${i % 3}`,
+        isWater: art === "water",
+        isSchool: art === "school",
+        isSprout: art === "sprout"
       };
     });
   }
   get journey() {
-    return (this.data?.journey || []).map((m, i, arr) => ({
+    const items = this.data?.journey || [];
+    return items.map((m, i) => ({
       ...m,
       key: `j${i}`,
       icon: JOURNEY_ICONS[i % JOURNEY_ICONS.length],
-      dotClass: `journey-dot journey-dot-${i % 4}`,
-      showLine: i < arr.length - 1
+      dotClass: `journey-dot ${JOURNEY_TONES[i % JOURNEY_TONES.length]}`,
+      showLine: i < items.length - 1
     }));
+  }
+  get causes() {
+    return (this.data?.causes || []).map((c, i) => ({
+      key: `c${i}`,
+      label: c
+    }));
+  }
+  get hasCauses() {
+    return this.causes.length > 0;
   }
   get gifts() {
     return (this.data?.gifts || []).map((g) => ({
       ...g,
-      amountDisplay: `${this.currencyLabel} ${formatNumber(g.amount)}`,
+      amountDisplay: this.money(g.amount),
       dateDisplay: g.giftDate
         ? new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(
             new Date(g.giftDate)
@@ -108,11 +181,36 @@ export default class DonorDashboard extends LightningElement {
   get hasGifts() {
     return this.gifts.length > 0;
   }
-  get causes() {
-    return this.data?.causes || [];
+
+  // ------------------------------------------------------------ agent panel
+  get initial() {
+    return (this.data?.firstName || "D").charAt(0).toUpperCase();
   }
-  get donateHref() {
-    return `${basePath || ""}${this.donatePath}`;
+  get agentIntro() {
+    const n = this.data?.causesSupported || 0;
+    return n
+      ? `You’ve supported ${n} cause${n === 1 ? "" : "s"}. Here’s where your giving went:`
+      : "You haven’t made a gift yet — here’s how you can start:";
+  }
+  get agentCauses() {
+    const totals = new Map();
+    for (const g of this.data?.gifts || []) {
+      const names = (g.designations || "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const share = names.length ? (g.amount || 0) / names.length : 0;
+      for (const n of names) totals.set(n, (totals.get(n) || 0) + share);
+    }
+    return [...totals.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([label, amount], i) => ({
+        key: `a${i}`,
+        label,
+        amount: this.money(amount),
+        artClass: `agent-art art-${i % 3}`
+      }));
   }
   get suggestions() {
     return splitList(this.agentSuggestions).map((label, i) => ({
@@ -120,18 +218,9 @@ export default class DonorDashboard extends LightningElement {
       label
     }));
   }
-
-  handleScroll(event) {
-    const target = this.template.querySelector(
-      `[data-section="${event.currentTarget.dataset.target}"]`
-    );
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }
+  agentUnavailable = false;
 
   handleAsk() {
-    // Opens the site's Embedded Messaging (Agentforce) window when it is deployed on the page.
     const bootstrap = window.embeddedservice_bootstrap;
     if (bootstrap?.utilAPI?.launchChat) {
       bootstrap.utilAPI.launchChat();
@@ -139,7 +228,11 @@ export default class DonorDashboard extends LightningElement {
       this.agentUnavailable = true;
     }
   }
-  agentUnavailable = false;
+
+  money(value) {
+    const n = Number(value);
+    return `${this.currencyLabel} ${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Number.isFinite(n) ? n : 0)}`;
+  }
 }
 
 function splitList(value) {
@@ -147,11 +240,4 @@ function splitList(value) {
     .split(";")
     .map((s) => s.trim())
     .filter(Boolean);
-}
-
-function formatNumber(value) {
-  const n = Number(value);
-  return Number.isFinite(n)
-    ? new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(n)
-    : "0";
 }

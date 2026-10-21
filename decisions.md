@@ -68,25 +68,33 @@ These are **records** (data), not metadata, so D-02 doesn't block them.
 - Site `authenticationType` changed to `AUTHENTICATED_WITH_PUBLIC_ACCESS_ENABLED`, Network status
   `Live` (user approved 2026‑10‑21). Home + `/donate` are `Public`; `/my-giving`, `/my-profile` are `RequiresLogin`.
 
-### D-09 · Agent chat — Accepted: use `Donor_Support_Agent` deployment; wiring pending
+### D-09 · Agent chat — Accepted: option C, separate ABC Hope deployment (user, 2026‑10‑21)
 
-User chose the existing Embedded Service deployment `Donor_Support_Agent` (Messaging for Web).
-Findings blocking a straight embed:
+The existing `Donor_Support_Agent` deployment is Auth-only (verified-user JWT, no guests), so a separate
+deployment was created for the site instead of changing a shared one:
 
-- Messaging channel `authMode = Auth` and deployment `areGuestUsersAllowed = false` → every
-  visitor must present a verified-user JWT (`userVerificationAPI.setIdentityToken`).
-- LWR site has `isRelaxedCSPLevel = false`; the bootstrap snippet in head markup needs Relaxed CSP
-  (+ CORS allowlist + trusted URLs for the site domain).
-- ESW endpoint site: `ESWDonorSupportAgent1791563118800`.
-  Options: (A) switch the channel to unauthenticated + allow guests, (B) keep Auth and build JWT user
-  verification (certificate + Apex token endpoint), (C) create a separate unauthenticated deployment
-  just for ABC Hope. Awaiting user choice. The dashboard's "Ask About Your Journey" panel already calls
-  `embeddedservice_bootstrap.utilAPI.launchChat()` when the chat is present.
+- MessagingChannel `ABC_Hope_Chat` — copy of Donor_Support_Agent with `authMode = UnAuth`; same routing
+  (flow `NGO_Donor_Support_MIAW`, queue `Donor_Support`) — no new flow.
+- EmbeddedServiceConfig `ABC_Hope_Chat` — `areGuestUsersAllowed = true`, `site = ABC_Hope1` (must be the
+  LWR/"Picasso" site record).
+- Site domain already on the CORS allowlist (`https://te1791557923677.my.site.com`, `*.my.site.com`).
+- **Remaining manual step:** drop the _Embedded Messaging_ component (`experience_messaging:embeddedMessaging`)
+  into the ABC Hope theme layout footers in Experience Builder and publish, then retrieve the bundle so the
+  JSON lives in source. Its attribute names aren't documented and no other site in the org uses it.
+- Portal layout's "Ask Our AI" / search box and the dashboard's agent panel call
+  `embeddedservice_bootstrap.utilAPI.launchChat()` once the component is on the page.
 
-### D-10 · Branding — Accepted
+### D-10 · Branding & site structure — Accepted
 
 Image #1 shows "GoodHands Foundation"; the site is **ABC Hope**. Use ABC Hope name/logo,
 the purple/navy palette from images #2–#3, red "Donate" CTA.
+
+- Public pages (`/`, `/donate`, login) use theme layout `abcPublicLayout` (`c:abcHopePublicLayout`, layout type `Inner`).
+- Signed-in pages (`/dashboard`, `/my-giving`, `/my-profile`) use `abcPortalLayout` (`c:abcHopePortalLayout`,
+  layout type `Portal`) — sidebar + top bar from mockup #1.
+- `/dashboard` is the post-login home (Sign in link sets `startURL=/dashboard`); `/` stays the public campaign page.
+- No corner decorations on the donate card (user, 2026‑10‑21). Imagery is flat SVG until real photos are supplied;
+  every image slot has a URL property (`backgroundImageUrl`, `reviewImageUrl`).
 
 ### D-11 · CSS specificity under LWR synthetic shadow — Accepted
 
@@ -107,3 +115,8 @@ On `Paid` GiftTransactions the org's automation inserts a 100% designation autom
 second one fails ("sum … is 100%"). Code and seed scripts re-point the existing designation if one
 exists, otherwise insert. Also: the `*ASL Trigger v2` flow fails for Paid gifts inside Apex tests, so
 tests use Unpaid/Pending.
+
+### D-14 · No SVG `url(#id)` references in LWC templates — Accepted
+
+LWC rewrites `id` attributes in templates, so `fill="url(#gradient)"` silently renders nothing. Use CSS
+gradients on the container or solid fills instead.

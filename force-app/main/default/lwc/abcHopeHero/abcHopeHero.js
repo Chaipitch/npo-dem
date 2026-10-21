@@ -1,6 +1,9 @@
 import { LightningElement, api, wire } from "lwc";
 import { CurrentPageReference } from "lightning/navigation";
 import basePath from "@salesforce/community/basePath";
+import isGuest from "@salesforce/user/isGuest";
+
+const BENEFIT_ICONS = ["cap", "community", "heart"];
 
 export default class AbcHopeHero extends LightningElement {
   @api headlineStart = "Make Christmas";
@@ -12,6 +15,7 @@ export default class AbcHopeHero extends LightningElement {
   @api backgroundImageUrl;
   @api benefits =
     "More Learning Opportunities,Stronger Communities,Brighter Futures";
+  @api dashboardPath = "/dashboard";
 
   sourceCode;
 
@@ -30,14 +34,15 @@ export default class AbcHopeHero extends LightningElement {
     return `${basePath || ""}${path}${query}`;
   }
 
-  get heroStyle() {
-    return this.backgroundImageUrl
-      ? `background-image: linear-gradient(90deg, rgba(20,10,10,.82) 0%, rgba(20,10,10,.45) 55%, rgba(20,10,10,.1) 100%), url("${encodeURI(this.backgroundImageUrl)}");`
-      : "";
+  get isSignedIn() {
+    return !isGuest;
+  }
+
+  get dashboardHref() {
+    return `${basePath || ""}${this.dashboardPath}`;
   }
 
   get benefitItems() {
-    const icons = ["🎓", "🤝", "❤"];
     return String(this.benefits || "")
       .split(",")
       .map((b) => b.trim())
@@ -45,7 +50,7 @@ export default class AbcHopeHero extends LightningElement {
       .map((label, i) => ({
         key: `b${i}`,
         label,
-        icon: icons[i % icons.length]
+        icon: BENEFIT_ICONS[i % BENEFIT_ICONS.length]
       }));
   }
 }

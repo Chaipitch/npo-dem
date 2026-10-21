@@ -1,6 +1,6 @@
 """Generate LWR route/view JSON for ABC Hope custom pages.
 
-Usage: python3 scripts/sitePages.py [--portal]
+Usage: python3 scripts/sitePages.py
 Each page = one section, one column, one custom LWC (plus the SEO component).
 """
 import json, os, uuid
@@ -27,7 +27,7 @@ def section(components):
         "definition": "community_layout:section", "id": sec_id, "type": "component"
     }
 
-def view(api_name, title, view_type, sections):
+def view(api_name, title, view_type, sections, layout_type='Inner'):
     return {
         "type": "sfdc_cms__view",
         "title": title,
@@ -41,7 +41,7 @@ def view(api_name, title, view_type, sections):
                 ],
                 "definition": "community_layout:sldsFlexibleLayout", "id": uid(), "type": "component"
             },
-            "dataProviders": [], "themeLayoutType": "Inner", "viewType": view_type
+            "dataProviders": [], "themeLayoutType": layout_type, "viewType": view_type
         },
         "urlName": api_name.lower()
     }
@@ -54,22 +54,21 @@ def write(kind, api_name, content, keep_meta=True):
     json.dump(meta, open(meta_path, 'w'), indent=2)
     json.dump(content, open(os.path.join(d, 'content.json'), 'w'), indent=2)
 
-def custom_page(route_api, view_api, title, url, access, components):
+def custom_page(route_api, view_api, title, url, access, components, layout_type='Inner'):
     write('sfdc_cms__route', route_api, {
         "type": "sfdc_cms__route", "title": title,
         "contentBody": {"activeViewId": view_api, "configurationTags": [], "pageAccess": access,
                         "routeType": f"custom-{url}", "urlPrefix": url},
         "urlName": url})
-    write('sfdc_cms__view', view_api, view(view_api, title, f"custom-{url}", [section(components)]))
+    write('sfdc_cms__view', view_api, view(view_api, title, f"custom-{url}", [section(components)], layout_type))
 
 # Home = Discover step
 write('sfdc_cms__view', 'home', view('home', 'Home', 'home', [section([("c:abcHopeHero", {})])]))
 
 custom_page('Donate__c', 'donate', 'Donate', 'donate', 'Public', [("c:donationJourney", {})])
-import sys
-if '--portal' in sys.argv:
-  custom_page('My_Giving__c', 'myGiving', 'My Giving', 'my-giving', 'RequiresLogin', [("c:donorDashboard", {})])
-  custom_page('My_Profile__c', 'myProfile', 'My Profile', 'my-profile', 'RequiresLogin', [("c:donorProfile", {})])
+custom_page('Dashboard__c', 'dashboard', 'Dashboard', 'dashboard', 'RequiresLogin', [("c:donorDashboard", {"view": "home"})], 'Portal')
+custom_page('My_Giving__c', 'myGiving', 'My Giving', 'my-giving', 'RequiresLogin', [("c:donorDashboard", {"view": "giving"})], 'Portal')
+custom_page('My_Profile__c', 'myProfile', 'My Profile', 'my-profile', 'RequiresLogin', [("c:donorProfile", {})], 'Portal')
 
 # Home must be public too.
 home_route = os.path.join(SITE, 'sfdc_cms__route', 'Home', 'content.json')
@@ -83,3 +82,28 @@ for name in os.listdir(site_dir):
     s = json.load(open(p)); s['contentBody']['authenticationType'] = 'AUTHENTICATED_WITH_PUBLIC_ACCESS_ENABLED'
     json.dump(s, open(p, 'w'), indent=2)
 print('pages written')
+
+def theme_layout(api, title, definition, url):
+    d = os.path.join(SITE, 'sfdc_cms__themeLayout', api)
+    os.makedirs(d, exist_ok=True)
+    meta_path = os.path.join(d, '_meta.json')
+    if not os.path.exists(meta_path):
+        json.dump({"apiName": api, "type": "sfdc_cms__themeLayout", "path": "themeLayouts"}, open(meta_path, 'w'), indent=2)
+    json.dump({"type": "sfdc_cms__themeLayout", "title": title, "contentBody": {"component": {
+        "attributes": {},
+        "children": [{"id": uid(), "name": "header", "title": "Header", "type": "region"},
+                     {"id": uid(), "name": "footer", "title": "Footer", "type": "region"}],
+        "definition": definition, "id": uid(), "type": "component"}}, "urlName": url},
+        open(os.path.join(d, 'content.json'), 'w'), indent=2)
+
+theme_layout('abcPublicLayout', 'ABC Hope Public', 'c:abcHopePublicLayout', 'abc-hope-public')
+theme_layout('abcPortalLayout', 'ABC Hope Portal', 'c:abcHopePortalLayout', 'abc-hope-portal')
+theme_dir = os.path.join(SITE, 'sfdc_cms__theme')
+for name in os.listdir(theme_dir):
+    p = os.path.join(theme_dir, name, 'content.json')
+    t = json.load(open(p))
+    keep = [l for l in t['contentBody']['layouts'] if l['layoutType'] not in ('Inner', 'Portal')]
+    t['contentBody']['layouts'] = keep + [{"layoutId": "abcPublicLayout", "layoutType": "Inner"},
+                                          {"layoutId": "abcPortalLayout", "layoutType": "Portal"}]
+    json.dump(t, open(p, 'w'), indent=2)
+print('theme layouts written')

@@ -16,7 +16,7 @@
                 "layoutDirectionTablet": "column",
                 "maxContentWidth": "",
                 "sectionColumnGutterWidth": "",
-                "sectionConfig": "{\"UUID\":\"b5edca69-f0a5-496a-81fc-4fa766c9fa8b\",\"columns\":[{\"UUID\":\"771dff8b-3b53-4dad-a224-8185cc40a9a4\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":null}]}",
+                "sectionConfig": "{\"UUID\":\"7f890035-a288-4d75-8286-06acaaa97f40\",\"columns\":[{\"UUID\":\"c81d7a50-821c-43e3-b2fc-fe520e34b3a8\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":null}]}",
                 "sectionMinHeight": "",
                 "sectionVerticalAlign": "flex-start"
               },
@@ -24,24 +24,26 @@
                 {
                   "children": [
                     {
-                      "attributes": {},
+                      "attributes": {
+                        "view": "giving"
+                      },
                       "definition": "c:donorDashboard",
-                      "id": "930ef449-2eb6-4d34-82da-bfe1889f57a3",
+                      "id": "fd70ca31-edb2-43ed-bd1b-a63fd2543e11",
                       "type": "component"
                     }
                   ],
-                  "id": "771dff8b-3b53-4dad-a224-8185cc40a9a4",
+                  "id": "c81d7a50-821c-43e3-b2fc-fe520e34b3a8",
                   "name": "col1",
                   "title": "Column 1",
                   "type": "region"
                 }
               ],
               "definition": "community_layout:section",
-              "id": "b5edca69-f0a5-496a-81fc-4fa766c9fa8b",
+              "id": "7f890035-a288-4d75-8286-06acaaa97f40",
               "type": "component"
             }
           ],
-          "id": "1a04ce6c-3366-475f-8a50-c9b3f0bc16ca",
+          "id": "161b3509-0f08-4ab2-9f63-96ddda24a779",
           "name": "content",
           "title": "Content",
           "type": "region"
@@ -56,22 +58,22 @@
                 "recordId": "{!recordId}"
               },
               "definition": "community_builder:seoAssistant",
-              "id": "f29b8b24-ab04-4724-8ac9-6cdf5aa7265e",
+              "id": "342d4030-0e35-4b81-bbd5-b94fd265fabb",
               "type": "component"
             }
           ],
-          "id": "72c3be08-2b94-4286-9db9-c2c626626127",
+          "id": "e2481f73-187c-4428-a71b-eba03a0534dc",
           "name": "sfdcHiddenRegion",
           "title": "sfdcHiddenRegion",
           "type": "region"
         }
       ],
       "definition": "community_layout:sldsFlexibleLayout",
-      "id": "aa7fb75b-6132-4f94-97e8-79c6a4bbab8a",
+      "id": "f4b6e069-0bf8-4ac9-9478-fc590c324f81",
       "type": "component"
     },
     "dataProviders": [],
-    "themeLayoutType": "Inner",
+    "themeLayoutType": "Portal",
     "viewType": "custom-my-giving"
   },
   "urlName": "mygiving"

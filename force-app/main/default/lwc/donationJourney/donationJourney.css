@@ -502,3 +502,60 @@ p {
     font-size: 21px;
   }
 }
+
+/* ---- Illustrations ---- */
+.journey {
+  padding-bottom: 72px;
+}
+.review-img_placeholder {
+  background: linear-gradient(135deg, #fde3e3 0%, #fff3d6 100%);
+}
+.books {
+  width: 78px;
+  height: 58px;
+}
+.books_small {
+  width: 64px;
+  height: 48px;
+}
+.thanks-icon {
+  display: grid;
+  place-items: center;
+}
+.select-icon {
+  color: var(--dj-blue);
+  line-height: 0;
+}
+.notice-icon {
+  font-style: normal;
+  width: 22px;
+  height: 22px;
+}
+.check {
+  position: relative;
+}
+.thanks {
+  position: relative;
+}
+.sparkle {
+  position: absolute;
+  color: #f5b83d;
+  font-size: 22px;
+}
+.sparkle_a {
+  top: 4px;
+  left: calc(50% - 82px);
+}
+.sparkle_b {
+  top: -6px;
+  left: calc(50% + 56px);
+  font-size: 16px;
+}
+.sparkle_c {
+  top: 34px;
+  left: calc(50% + 74px);
+  font-size: 12px;
+}
+.btn_primary {
+  box-shadow: 0 8px 18px rgba(11, 79, 196, 0.28);
+}
