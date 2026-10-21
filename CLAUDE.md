@@ -82,4 +82,4 @@ After deploying site content **or any LWC used on the site**, **publish** the si
   record matching requires it; validate & sanitize every input server-side; no SOQL in loops;
   every class ≥ 85% coverage with assertion-based tests.
 - Docs: decisions go to `decisions.md` (ADR-lite, numbered D-xx); status goes to `Handover.md`.
-- Commits end with the `Co-Authored-By` line; remote is `git@github.com:Chaipitch/npo-demo.git`.
+- Commits end with the `Co-Authored-By` line; remote is `git@github.com:Chaipitch/npo-dem.git`.

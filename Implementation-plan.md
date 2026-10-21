@@ -12,7 +12,7 @@ Legend: ⬜ todo · 🟨 in progress · ✅ done · ⛔ blocked/deferred
 - ✅ Inspect org (site, guest profile, NPC objects, agents, currency).
 - ✅ Retrieve site baseline metadata into `force-app`.
 - ✅ Project docs (this file, CLAUDE.md, Handover.md, decisions.md, testing-steps.md).
-- 🟨 Push to GitHub — remote repo `Chaipitch/npo-demo` does not exist yet (see Handover).
+- ✅ Pushed to GitHub (`Chaipitch/npo-dem`).
 
 ## Phase 1 — Demo data (records only) ✅
 

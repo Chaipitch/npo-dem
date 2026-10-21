@@ -5,8 +5,7 @@ _Last updated: 2026‑10‑21_
 ## TL;DR
 
 Public donation journey and signed-in donor portal are built, deployed and published on the ABC Hope LWR site.
-Guest donations create real NPC records (payment simulated). One manual step left for the chat widget, and the
-GitHub repo still needs to be created before pushing.
+Guest donations create real NPC records (payment simulated). One manual step left for the chat widget.
 
 **Site:** https://te1791557923677.my.site.com/ — `/` campaign home · `/donate` · `/dashboard` · `/my-giving` · `/my-profile`
 
@@ -20,7 +19,7 @@ GitHub repo still needs to be created before pushing.
 | Site                                  | ✅ Live, public access on; Home + Donate public, portal pages require login; guest profile → `DonationIntakeController` only                                                                                                           |
 | Signed-in donor                       | ✅ Maya Grande portal user `005g700000EemAjAAJ` (Customer Community Login, permset `ABC_Hope_Donor_Portal`), no password set                                                                                                           |
 | Chat                                  | 🟨 Deployment `ABC_Hope_Chat` + channel created (unauth, guests allowed). **Needs Embedded Messaging component placed in Builder** (D-09)                                                                                              |
-| Git                                   | 🟨 Committed locally on `main`; remote `git@github.com:Chaipitch/npo-demo.git` does not exist yet — create it, then `git push -u origin main`                                                                                          |
+| Git                                   | ✅ Pushed to `git@github.com:Chaipitch/npo-dem.git` (`main`)                                                                                                                                                                           |
 | Flows / VRs / custom objects / fields | None created (user instruction)                                                                                                                                                                                                        |
 
 ## How to see the signed-in portal
@@ -45,7 +44,6 @@ Setup → Contacts → **Maya Grande** → **Log in to Experience as User** → 
 
 ## Open items
 
-1. Create the GitHub repo and push.
-2. Place the Embedded Messaging component (above).
-3. Real photos for hero / stories / review card (send images → upload to CMS → set the URL properties).
-4. Header nav "Our Work" and "About" point to `/` until those pages exist.
+1. Place the Embedded Messaging component (above).
+2. Real photos for hero / stories / review card (send images → upload to CMS → set the URL properties).
+3. Header nav "Our Work" and "About" point to `/` until those pages exist.
