@@ -164,3 +164,14 @@ Capital Campaign) also appear; deactivate them to hide them.
 
 Passwords are never set, stored or committed by tooling. Maya's user email was changed to the user's
 inbox and Salesforce's standard reset email was sent; the user chooses the password.
+
+### D-20 · Agent knows every open campaign — Accepted (user, 2026‑10‑22)
+
+The agent answered "there is one campaign" because `AbcHopeAgentCampaignInfo` only looked up one campaign
+by exact name (default Christmas Giving 2026) and the agent script named that campaign everywhere.
+The action now uses the D-18 rule via `DonationIntakeService.getCampaigns()`: with no name it lists every
+open campaign (purpose, raised vs goal, end date, `/donate?campaign=…` link); with a name it matches
+exactly, then partially, and returns that campaign's own causes (default designations + "Where Most
+Needed"; the Christmas campaign keeps its configured list). Only campaigns with a `GiftDefaultDesignation`
+are ever described, so internal campaigns stay hidden from guests. Agent instructions no longer imply a
+single campaign and tell it to call the action with an empty name for "which/how many campaigns" questions.

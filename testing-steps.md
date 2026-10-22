@@ -76,6 +76,9 @@ sf agent preview send -o npo-demo --authoring-bundle ABC_Hope_Donor_Assistant --
 ```
 
 - Campaign questions → answer from org data + donate link + "no payment collected".
+- "How many campaigns are there?" / "Are there any other campaigns?" → lists every open campaign (same set as
+  the dashboard cards, P3) with progress and a `/donate?campaign=…` link each (D-20).
+- "Tell me about clean water" → describes Clean Water for Rural Schools (partial name match) with its own causes.
 - "How much have I given?" / "Pause my monthly gift" → politely asks to sign in (preview has no verified user).
 
 ## 7. Agent on the site (after the Embedded Messaging component is placed)
