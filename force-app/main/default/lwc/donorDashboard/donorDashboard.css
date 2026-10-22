@@ -638,12 +638,25 @@ ol {
   color: var(--dd-muted);
   cursor: text;
 }
+.agent-input-field {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  color: #2b2f45;
+  outline: none;
+}
 .agent-send {
   width: 38px;
   height: 38px;
+  border: 0;
   border-radius: 50%;
   display: grid;
   place-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
   background: linear-gradient(135deg, #7b5cf0, #5a35c9);
   color: #fff;
 }
@@ -816,4 +829,33 @@ ol {
   .journey-item {
     flex-wrap: wrap;
   }
+}
+.agent-send:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.agent-input:focus-within {
+  border-color: var(--dd-purple);
+}
+.chat-log {
+  margin-top: 6px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+.chat-log .bubble {
+  margin: 0;
+  white-space: pre-line;
+}
+.chat-log .msg_user .bubble {
+  background: var(--dd-purple-soft);
+}
+.bubble_error {
+  border-color: #f3c7c7;
+  color: #b42318;
+}
+.chat-typing {
+  margin: 10px 0 0 50px;
+}
+.chat-diagnostic {
+  word-break: break-word;
 }

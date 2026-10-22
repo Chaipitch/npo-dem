@@ -3,6 +3,7 @@ import { refreshApex } from "@salesforce/apex";
 import basePath from "@salesforce/community/basePath";
 import getDashboard from "@salesforce/apex/DonorPortalController.getDashboard";
 import getCampaigns from "@salesforce/apex/DonationIntakeController.getCampaigns";
+import askAgent from "@salesforce/apex/DonorAgentController.ask";
 
 const IMPACT_STYLE = [
   { icon: "users", tone: "tone-blue" },
@@ -348,15 +349,72 @@ export default class DonorDashboard extends LightningElement {
       label
     }));
   }
-  agentUnavailable = false;
+  // ------------------------------------------------------------ inline agent chat (spike)
+  chatMessages = [];
+  chatDraft = "";
+  chatBusy = false;
+  chatSessionId;
+  chatDiagnostic;
+  _chatSeq = 0;
 
-  handleAsk() {
-    const bootstrap = window.embeddedservice_bootstrap;
-    if (bootstrap?.utilAPI?.launchChat) {
-      bootstrap.utilAPI.launchChat();
-    } else {
-      this.agentUnavailable = true;
+  get chatHasMessages() {
+    return this.chatMessages.length > 0;
+  }
+  get chatSendDisabled() {
+    return this.chatBusy || !this.chatDraft.trim();
+  }
+  handleChatInput(event) {
+    this.chatDraft = event.target.value;
+  }
+  handleChatKeydown(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      this.sendChat(this.chatDraft);
     }
+  }
+  handleChatSend() {
+    this.sendChat(this.chatDraft);
+  }
+  handleSuggestion(event) {
+    this.sendChat(event.currentTarget.dataset.text);
+  }
+  addChat(role, text) {
+    this._chatSeq += 1;
+    this.chatMessages = [
+      ...this.chatMessages,
+      {
+        key: `m${this._chatSeq}`,
+        text,
+        isUser: role === "user",
+        rowClass: role === "user" ? "msg msg_user" : "msg msg_agent",
+        bubbleClass:
+          role === "user"
+            ? "bubble"
+            : role === "error"
+              ? "bubble bubble_agent bubble_error"
+              : "bubble bubble_agent"
+      }
+    ];
+  }
+  async sendChat(raw) {
+    const text = (raw || "").trim();
+    if (!text || this.chatBusy) return;
+    this.addChat("user", text);
+    this.chatDraft = "";
+    this.chatBusy = true;
+    try {
+      const reply = await askAgent({
+        message: text,
+        sessionId: this.chatSessionId || null
+      });
+      this.chatDiagnostic = reply.diagnostic;
+      if (reply.sessionId) this.chatSessionId = reply.sessionId;
+      this.addChat(reply.error ? "error" : "agent", reply.error || reply.text);
+    } catch (e) {
+      this.chatDiagnostic = e?.body?.message;
+      this.addChat("error", "The assistant could not answer right now.");
+    }
+    this.chatBusy = false;
   }
 
   money(value) {

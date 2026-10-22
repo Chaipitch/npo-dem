@@ -443,25 +443,71 @@
                 key={q.key}
                 type="button"
                 class="agent-chip"
-                onclick={handleAsk}
+                data-text={q.label}
+                disabled={chatBusy}
+                onclick={handleSuggestion}
               >
                 {q.label}
               </button>
             </template>
           </div>
-          <button type="button" class="agent-input" onclick={handleAsk}>
-            <span>Ask another question about your impact…</span>
-            <span class="agent-send"
-              ><c-abc-hope-icon
+          <template lwc:if={chatHasMessages}>
+            <div class="chat-log" aria-live="polite">
+              <template for:each={chatMessages} for:item="m">
+                <div key={m.key} class={m.rowClass}>
+                  <template lwc:if={m.isUser}>
+                    <span class="msg-avatar">{initial}</span>
+                  </template>
+                  <template lwc:else>
+                    <span class="msg-avatar msg-avatar_agent"
+                      ><c-abc-hope-icon
+                        name="sparkle"
+                        size="20"
+                        stroke-width="2"
+                      ></c-abc-hope-icon
+                    ></span>
+                  </template>
+                  <p class={m.bubbleClass}>{m.text}</p>
+                </div>
+              </template>
+              <template lwc:if={chatBusy}>
+                <p class="chat-typing muted small" data-id="typing">
+                  Assistant is typing…
+                </p>
+              </template>
+            </div>
+          </template>
+          <div class="agent-input">
+            <input
+              class="agent-input-field"
+              type="text"
+              maxlength="1000"
+              placeholder="Ask another question about your impact…"
+              aria-label="Ask the ABC Hope assistant"
+              value={chatDraft}
+              disabled={chatBusy}
+              oninput={handleChatInput}
+              onkeydown={handleChatKeydown}
+              data-id="chat-input"
+            />
+            <button
+              type="button"
+              class="agent-send"
+              aria-label="Send"
+              disabled={chatSendDisabled}
+              onclick={handleChatSend}
+              data-id="chat-send"
+            >
+              <c-abc-hope-icon
                 name="send"
                 size="18"
                 stroke-width="2.4"
-              ></c-abc-hope-icon
-            ></span>
-          </button>
-          <template lwc:if={agentUnavailable}>
-            <p class="muted small">
-              Chat is not available on this page right now.
+              ></c-abc-hope-icon>
+            </button>
+          </div>
+          <template lwc:if={chatDiagnostic}>
+            <p class="muted small chat-diagnostic" data-id="chat-diagnostic">
+              Spike diagnostic: {chatDiagnostic}
             </p>
           </template>
         </aside>
