@@ -145,12 +145,7 @@
               </div>
               <div class="campaigns">
                 <template for:each={campaignCards} for:item="c">
-                  <a
-                    key={c.key}
-                    class="campaign"
-                    href={c.href}
-                    aria-label={c.name}
-                  >
+                  <article key={c.key} class="campaign" data-id="campaign-card">
                     <div class="campaign-art" aria-hidden="true">
                       <img
                         src={c.imageUrl}
@@ -192,16 +187,29 @@
                           >
                         </template>
                       </div>
-                      <span class="campaign-cta"
-                        >Give now
-                        <c-abc-hope-icon
-                          name="arrow"
-                          size="16"
-                          stroke-width="2.4"
-                        ></c-abc-hope-icon
-                      ></span>
+                      <div class="campaign-actions">
+                        <a
+                          class="campaign-cta"
+                          href={c.href}
+                          aria-label={c.donateLabel}
+                          data-id="campaign-donate"
+                          >Donate now
+                          <c-abc-hope-icon
+                            name="arrow"
+                            size="16"
+                            stroke-width="2.4"
+                          ></c-abc-hope-icon
+                        ></a>
+                        <a
+                          class="campaign-more"
+                          href={c.detailHref}
+                          aria-label={c.detailLabel}
+                          data-id="campaign-more"
+                          >View more</a
+                        >
+                      </div>
                     </div>
-                  </a>
+                  </article>
                 </template>
               </div>
             </template>

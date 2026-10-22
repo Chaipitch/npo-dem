@@ -20,7 +20,7 @@ sf apex run test -o npo-demo -n DonationIntakeServiceTest,DonationIntakeControll
 npm run test:unit
 ```
 
-Pass criteria: 53 Apex test methods (add `DonorAgentControllerTest` to the run) and 29 Jest tests pass.
+Pass criteria: 55 Apex test methods (add `DonorAgentControllerTest` to the run) and 33 Jest tests pass.
 
 ## 2. Public journey (private window, desktop then 375 px)
 
@@ -58,15 +58,16 @@ one Ann Demo account only.
 
 Sign in (Handover → How to sign in as Maya) → lands on `/dashboard`.
 
-| #   | Check          | Expected                                                                                                                                                  |
-| --- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| P1  | Layout         | Sidebar (Home, My Giving, Campaigns, Causes I Support, My Journey, Stories, Ask Our AI, My Profile), sprout photo, top bar with avatar                    |
-| P2  | KPIs           | THB 2,250+ total, 3+ causes, "Since 2023"                                                                                                                 |
-| P3  | Campaign cards | Christmas Giving 2026, Clean Water, Girls' Education, Green Communities (+ any other active campaign with a default designation); progress bar, days left |
-| P4  | Card → donate  | Click Clean Water card → `/donate?campaign=…`; "Welcome back, Maya Grande" on step 2; submit → gift on Maya's account with Clean Water campaign           |
-| P5  | My Giving      | `/my-giving` table shows the new gift                                                                                                                     |
-| P6  | Profile        | `/my-profile` → change phone → Save → "Your changes have been saved"                                                                                      |
-| P7  | Log out        | Avatar menu → Log out → back to the public site                                                                                                           |
+| #   | Check          | Expected                                                                                                                                                                                                                                                                  |
+| --- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P1  | Layout         | Sidebar (Home, My Giving, Campaigns, Causes I Support, My Journey, Stories, Ask Our AI, My Profile), sprout photo, top bar with avatar                                                                                                                                    |
+| P2  | KPIs           | THB 2,250+ total, 3+ causes, "Since 2023"                                                                                                                                                                                                                                 |
+| P3  | Campaign cards | Christmas Giving 2026, Clean Water, Girls' Education, Green Communities (+ any other active campaign with a default designation); progress bar, days left                                                                                                                 |
+| P4  | Card → donate  | Click Clean Water card → `/donate?campaign=…`; "Welcome back, Maya Grande" on step 2; submit → gift on Maya's account with Clean Water campaign                                                                                                                           |
+| P4b | Card links     | Each card shows **Donate now** and **View more**; View more → `/campaign?name=…` with photo, progress, dates, "What your gift funds", "Causes you can choose" and Donate now; `/campaign?name=Nope` → "Campaign not found"; signed out → login, then back to the campaign |
+| P5  | My Giving      | `/my-giving` table shows the new gift                                                                                                                                                                                                                                     |
+| P6  | Profile        | `/my-profile` → change phone → Save → "Your changes have been saved"                                                                                                                                                                                                      |
+| P7  | Log out        | Avatar menu → Log out → back to the public site                                                                                                                                                                                                                           |
 
 ## 6. Agent (CLI preview — no chat widget needed)
 

@@ -455,4 +455,41 @@ private class DonationIntakeServiceTest {
     Assert.areEqual('Test Education Access', opts.designations[0].program);
     Assert.isNull(opts.designations[1].program);
   }
+
+  @IsTest
+  static void campaignDetailListsCausesAndProgramsForOpenCampaignsOnly() {
+    Program edu = new Program(
+      Name = 'Test Education Access',
+      Status = 'Active',
+      Summary = 'Keeps children learning.'
+    );
+    insert edu;
+    update new GiftDesignation(
+      Id = designationId('Test School Supplies'),
+      Description = 'Notebooks and pencils.',
+      NGOTV_Program__c = edu.Id
+    );
+
+    Test.startTest();
+    DonationIntakeService.CampaignDetail d = DonationIntakeService.getCampaignDetail(
+      CAMPAIGN
+    );
+    DonationIntakeService.CampaignDetail unknown = DonationIntakeService.getCampaignDetail(
+      'No Such Campaign'
+    );
+    DonationIntakeService.CampaignDetail blank = DonationIntakeService.getCampaignDetail(
+      ' '
+    );
+    Test.stopTest();
+
+    Assert.areEqual(CAMPAIGN, d.card.name);
+    Assert.areEqual(1, d.causes.size());
+    Assert.areEqual('Test School Supplies', d.causes[0].name);
+    Assert.areEqual('Notebooks and pencils.', d.causes[0].description);
+    Assert.areEqual('Test Education Access', d.causes[0].program);
+    Assert.areEqual(1, d.programs.size());
+    Assert.areEqual('Keeps children learning.', d.programs[0].summary);
+    Assert.isNull(unknown);
+    Assert.isNull(blank);
+  }
 }

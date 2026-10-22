@@ -20,6 +20,13 @@ public without sharing class DonationIntakeController {
     return DonationIntakeService.getCampaigns();
   }
 
+  @AuraEnabled(cacheable=true)
+  public static DonationIntakeService.CampaignDetail getCampaignDetail(
+    String campaignName
+  ) {
+    return DonationIntakeService.getCampaignDetail(campaignName);
+  }
+
   @AuraEnabled
   public static DonationIntakeService.Result submitDonation(
     String requestJson

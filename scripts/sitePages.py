@@ -69,6 +69,7 @@ custom_page('Donate__c', 'donate', 'Donate', 'donate', 'Public', [("c:donationJo
 custom_page('Dashboard__c', 'dashboard', 'Dashboard', 'dashboard', 'RequiresLogin', [("c:donorDashboard", {"view": "home"})], 'Portal')
 custom_page('My_Giving__c', 'myGiving', 'My Giving', 'my-giving', 'RequiresLogin', [("c:donorDashboard", {"view": "giving"})], 'Portal')
 custom_page('My_Profile__c', 'myProfile', 'My Profile', 'my-profile', 'RequiresLogin', [("c:donorProfile", {})], 'Portal')
+custom_page('Campaign__c', 'campaign', 'Campaign', 'campaign', 'RequiresLogin', [("c:campaignDetail", {})], 'Portal')
 
 # Home must be public too.
 home_route = os.path.join(SITE, 'sfdc_cms__route', 'Home', 'content.json')

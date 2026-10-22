@@ -105,6 +105,14 @@ To finish (about 15 minutes):
    (or keep them as an offline fallback), deploy, publish the site.
 5. Maya test: "How much have I given?" and "Show my monthly gifts" in the panel → her own data.
 
+## Campaign detail page (2026‑10‑22)
+
+Dashboard campaign cards have **Donate now** (`/donate?campaign=…`) and **View more** (`/campaign?name=…`). The new
+portal page `Campaign` (sign-in required, Portal layout, `c:campaignDetail`) shows the photo, description, raised vs
+goal, gifts, time left, dates, the programs the campaign funds and the causes donors can choose, with Donate now.
+Data: `DonationIntakeController.getCampaignDetail` — open fundraising campaigns only (D-18), else "Campaign not found".
+Photos come from the shared `abcHopeCampaignPhotos` module. Route added in `scripts/sitePages.py`.
+
 ## Open items
 
 1. Place the Embedded Messaging component (above), then test signed-in agent conversations end to end.

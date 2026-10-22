@@ -6,20 +6,20 @@
       "attributes": {},
       "children": [
         {
-          "id": "ee9bb64c-619b-49aa-9c9d-7411b3d63bdb",
+          "id": "de9b3bdc-59bb-462a-a319-35d0e406676d",
           "name": "header",
           "title": "Header",
           "type": "region"
         },
         {
-          "id": "87cdd5f8-aa1e-4d00-bf9c-630835e22ea5",
+          "id": "4413a3dd-f665-4423-ba6b-13ea7caf3934",
           "name": "footer",
           "title": "Footer",
           "type": "region"
         }
       ],
       "definition": "c:abcHopePublicLayout",
-      "id": "6e4121d8-5506-4ec2-90be-5ac0ca9f5c0a",
+      "id": "cd722591-43c9-42f0-a473-2f8e777ad36a",
       "type": "component"
     }
   },

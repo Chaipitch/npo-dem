@@ -4,6 +4,7 @@ import basePath from "@salesforce/community/basePath";
 import getDashboard from "@salesforce/apex/DonorPortalController.getDashboard";
 import getCampaigns from "@salesforce/apex/DonationIntakeController.getCampaigns";
 import askAgent from "@salesforce/apex/DonorAgentController.ask";
+import { campaignPhoto } from "c/abcHopeCampaignPhotos";
 
 const IMPACT_STYLE = [
   { icon: "users", tone: "tone-blue" },
@@ -18,24 +19,6 @@ const ASK_EVENT = "abchope:ask";
 // Free Unsplash photos (Unsplash License) used when no image is configured for a campaign or story.
 const unsplash = (id, w) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=75`;
-const CAMPAIGN_PHOTOS = {
-  water: {
-    url: unsplash("photo-1740741705746-74e6f9b93b4f", 900),
-    credit: "Photo: Lisa Marie Theck / Unsplash"
-  },
-  school: {
-    url: unsplash("photo-1573894998033-c0cef4ed722b", 900),
-    credit: "Photo: Yogendra Singh / Unsplash"
-  },
-  sprout: {
-    url: unsplash("photo-1777150895644-2ca253ee1c93", 900),
-    credit: "Photo: Hammilton Ojijo / Unsplash"
-  },
-  gift: {
-    url: unsplash("photo-1488521787991-ed7bbaae773c", 900),
-    credit: "Photo: Larm Rmah / Unsplash"
-  }
-};
 const STORY_PHOTOS = {
   water: {
     url: unsplash("photo-1760873059715-7c7cfbe2a2c6", 600),
@@ -336,14 +319,6 @@ export default class DonorDashboard extends LightningElement {
       const raised = Number(c.raised) || 0;
       const pct =
         goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
-      const name = (c.name || "").toLowerCase();
-      const art = /water/.test(name)
-        ? "water"
-        : /school|educat|scholar|girl/.test(name)
-          ? "school"
-          : /tree|green|environment|plant/.test(name)
-            ? "sprout"
-            : "gift";
       let timing = "";
       if (c.daysLeft !== null && c.daysLeft !== undefined) {
         timing =
@@ -356,8 +331,11 @@ export default class DonorDashboard extends LightningElement {
         name: c.name,
         description: c.description,
         href: `${base}/donate?campaign=${encodeURIComponent(c.name)}`,
-        imageUrl: (images.get(c.name) || CAMPAIGN_PHOTOS[art]).url,
-        imageCredit: (images.get(c.name) || CAMPAIGN_PHOTOS[art]).credit,
+        detailHref: `${base}/campaign?name=${encodeURIComponent(c.name)}`,
+        donateLabel: `Donate now to ${c.name}`,
+        detailLabel: `View more about ${c.name}`,
+        imageUrl: (images.get(c.name) || campaignPhoto(c.name)).url,
+        imageCredit: (images.get(c.name) || campaignPhoto(c.name)).credit,
         raisedDisplay: this.money(raised),
         goalDisplay: goal > 0 ? this.money(goal) : "",
         hasGoal: goal > 0,

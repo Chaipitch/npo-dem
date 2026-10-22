@@ -389,6 +389,82 @@ public without sharing class DonationIntakeService {
     return cards.values();
   }
 
+  public class CampaignCause {
+    @AuraEnabled
+    public String name;
+    @AuraEnabled
+    public String description;
+    @AuraEnabled
+    public String program;
+  }
+
+  public class CampaignProgram {
+    @AuraEnabled
+    public String name;
+    @AuraEnabled
+    public String summary;
+  }
+
+  public class CampaignDetail {
+    @AuraEnabled
+    public CampaignCard card;
+    @AuraEnabled
+    public Date startDate;
+    @AuraEnabled
+    public List<CampaignCause> causes = new List<CampaignCause>();
+    @AuraEnabled
+    public List<CampaignProgram> programs = new List<CampaignProgram>();
+  }
+
+  /**
+   * Detail page for one campaign that is open for donations (same rule as the cards, D-18):
+   * its card facts plus the causes donors can choose and the programs they fund (D-21).
+   * Returns null for unknown or closed campaigns.
+   */
+  public static CampaignDetail getCampaignDetail(String campaignName) {
+    String name = clean(campaignName, 80);
+    if (String.isBlank(name)) {
+      return null;
+    }
+    CampaignCard card;
+    for (CampaignCard c : getCampaigns()) {
+      if (c.name == name) {
+        card = c;
+      }
+    }
+    if (card == null) {
+      return null;
+    }
+    CampaignDetail d = new CampaignDetail();
+    d.card = card;
+    d.startDate = [SELECT StartDate FROM Campaign WHERE Id = :card.id]
+    .StartDate;
+    Set<String> seenPrograms = new Set<String>();
+    for (GiftDefaultDesignation gdd : [
+      SELECT
+        GiftDesignation.Name,
+        GiftDesignation.Description,
+        GiftDesignation.NGOTV_Program__r.Name,
+        GiftDesignation.NGOTV_Program__r.Summary
+      FROM GiftDefaultDesignation
+      WHERE ParentRecordId = :card.id AND GiftDesignation.IsActive = TRUE
+      ORDER BY AllocatedPercentage DESC
+    ]) {
+      CampaignCause cause = new CampaignCause();
+      cause.name = gdd.GiftDesignation.Name;
+      cause.description = gdd.GiftDesignation.Description;
+      cause.program = gdd.GiftDesignation.NGOTV_Program__r?.Name;
+      d.causes.add(cause);
+      if (cause.program != null && seenPrograms.add(cause.program)) {
+        CampaignProgram p = new CampaignProgram();
+        p.name = cause.program;
+        p.summary = gdd.GiftDesignation.NGOTV_Program__r.Summary;
+        d.programs.add(p);
+      }
+    }
+    return d;
+  }
+
   /** Adds a program name to the record's list once; designations without a program are skipped. */
   public static void addProgram(
     Map<Id, List<String>> programsById,

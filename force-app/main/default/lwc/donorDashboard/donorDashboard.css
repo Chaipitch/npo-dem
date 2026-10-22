@@ -705,7 +705,7 @@ ol {
     border-color 0.15s;
 }
 .dash .campaign:hover,
-.dash .campaign:focus-visible {
+.dash .campaign:focus-within {
   transform: translateY(-3px);
   border-color: #c9d6f5;
   box-shadow: 0 14px 30px rgba(20, 24, 91, 0.12);
@@ -787,15 +787,39 @@ ol {
   font-size: 12px;
   font-weight: 600;
 }
-.campaign-cta {
+.campaign-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: auto;
+  padding-top: 14px;
+}
+.campaign-actions a.campaign-cta,
+.campaign-actions a.campaign-cta:visited {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: auto;
-  padding-top: 14px;
   color: #d63131;
   font-weight: 700;
   font-size: 14px;
+  text-decoration: none;
+}
+.campaign-actions a.campaign-more,
+.campaign-actions a.campaign-more:visited {
+  color: var(--dd-blue);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: underline;
+}
+.campaign-actions a:hover {
+  text-decoration: underline;
+}
+.campaign-actions a:focus-visible {
+  outline: 3px solid rgba(11, 79, 196, 0.35);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 @media (max-width: 1280px) {

@@ -51,6 +51,9 @@ force-app/main/default/
   lwc/abcHopeHero                Home "Discover" hero (Unsplash photo, SVG fallback)
   lwc/donorDashboard             view=home: campaign cards, KPIs, impact, stories, causes, journey, agent panel
                                  view=giving: KPIs + giving history table
+  lwc/donorMonthlyGifts          My Giving → Monthly Gifts: pause / resume / change / cancel (D-22)
+  lwc/campaignDetail             /campaign?name=… detail page: story, progress, programs, causes, Donate now
+  lwc/abcHopeCampaignPhotos      Shared campaign photo choice (cards, detail page, donation journey)
   lwc/donorProfile               My Profile / Communication / Giving History tabs
   lwc/abcHopePublicLayout        Theme layout for public pages (header nav, Donate, footer)
   lwc/abcHopePortalLayout        Theme layout for portal pages (sidebar, top bar, user menu)

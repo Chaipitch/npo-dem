@@ -186,4 +186,30 @@ describe("c-donor-dashboard agent panel", () => {
     expect(window.location.hash).toBe("#agent");
     window.history.replaceState(null, "", "/");
   });
+
+  it("campaign cards link to Donate now and View more", async () => {
+    const el = await mount();
+    getCampaigns.emit([
+      {
+        id: "701a",
+        name: "Clean Water for Rural Schools",
+        goal: 300000,
+        raised: 0,
+        giftCount: 0,
+        designations: ["Clean Water"],
+        programs: ["Clean Water"]
+      }
+    ]);
+    await flush();
+    const donate = $(el, '[data-id="campaign-donate"]');
+    const more = $(el, '[data-id="campaign-more"]');
+    expect(donate.textContent.trim()).toBe("Donate now");
+    expect(donate.getAttribute("href")).toBe(
+      "/donate?campaign=Clean%20Water%20for%20Rural%20Schools"
+    );
+    expect(more.textContent.trim()).toBe("View more");
+    expect(more.getAttribute("href")).toBe(
+      "/campaign?name=Clean%20Water%20for%20Rural%20Schools"
+    );
+  });
 });

@@ -1,0 +1,12 @@
+{
+  "type": "sfdc_cms__route",
+  "title": "Campaign",
+  "contentBody": {
+    "activeViewId": "campaign",
+    "configurationTags": [],
+    "pageAccess": "RequiresLogin",
+    "routeType": "custom-campaign",
+    "urlPrefix": "campaign"
+  },
+  "urlName": "campaign"
+}
