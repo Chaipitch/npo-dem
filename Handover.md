@@ -53,6 +53,28 @@ Embedded Messaging component in Experience Builder so the chat appears on the si
   are active and have default designations (D-18). Deactivate them to hide them.
 - The org is USD-only; the UI labels amounts THB (D-05).
 
+## Target object schema (user, 2026‑10‑22) — in progress
+
+User's diagram: Account – Contact; Account ─< Campaign; Campaign ─< Program; Campaign ─< Gift Commitment
+Schedule (recurring) and ─< Gift Transaction (one-time); Schedule ─< Gift Transaction.
+**Program = what a campaign spends the donated money on.**
+
+How the build compares:
+
+- ✅ Person Accounts (1 Account : 1 Contact); `CampaignId` on GiftCommitmentSchedule (monthly) and
+  GiftTransaction (one-time); schedules generate the monthly transactions.
+- Diagram omits **GiftCommitment**: the real chain is Account ─< GiftCommitment (DonorId, CampaignId) ─<
+  GiftCommitmentSchedule ─< GiftTransaction. One-time gifts link to the donor directly (`GiftTransaction.DonorId`).
+- No direct Account → Campaign field; the link is derived from gifts (no CampaignMembers are created).
+- **Campaign → Program is not built.** Plan: designations are NPC's "what the money is for"
+  (Campaign ─< GiftDefaultDesignation >─ GiftDesignation; gifts ─< GiftTransactionDesignation). Next step:
+  `sf sobject describe` GiftDesignation, Program and Campaign and look for a standard lookup to Program.
+  If one exists, use it. If not: (A) recommended, no schema change — one GiftDesignation per Program, same
+  name; (B) a custom lookup GiftDesignation → Program, which needs the user's approval (guardrail).
+  Avoid a Campaign lookup on Program (a program could then belong to only one campaign).
+  Don't create Program records or seed data without asking.
+- Data gap: Maya's seeded 2023–2025 gifts (`seedMayaHistory.apex`) have no `CampaignId`.
+
 ## Open items
 
 1. Place the Embedded Messaging component (above), then test signed-in agent conversations end to end.
