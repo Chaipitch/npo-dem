@@ -3,5 +3,5 @@
     <apiVersion>65.0</apiVersion>
     <isExposed>false</isExposed>
     <description
-  >My Giving: the signed-in donor pauses, resumes, changes or cancels their own monthly gifts. Used inside donorDashboard.</description>
+  >My Giving: the signed-in donor pauses, resumes, changes or cancels their own recurring (weekly, monthly or yearly) gifts. Used inside donorDashboard.</description>
 </LightningComponentBundle>

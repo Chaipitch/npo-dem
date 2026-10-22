@@ -117,13 +117,14 @@ Photos come from the shared `abcHopeCampaignPhotos` module. Route added in `scri
 
 Step 1 of `/donate` offers **One-time | Recurring**; Recurring adds **Weekly · Monthly · Yearly** (Monthly
 preselected). The period is stored on the gift's schedule (`TransactionPeriod`), and My Giving shows it after the
-amount ("THB 300 / week"). Steps 1–2 show the campaign photo as a banner across the top of the card.
+amount ("THB 300 / week") under a "Recurring (Weekly)" label; the dashboard says "N active recurring gifts (types)"
+and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a banner across the top of the card.
 
 ## Open items
 
 1. Place the Embedded Messaging component (above), then test signed-in agent conversations end to end.
 2. Done 2026‑10‑22: campaign cards, story cards and the journey's review/thank-you image use Unsplash photos.
 3. Header nav "Our Work" and "About" point to `/` until those pages exist.
-4. Wording: the dashboard line, My Giving heading and the agent still say "monthly gifts" though gifts can now be
-   weekly or yearly (D-24).
+4. Publish the agent (`sf agent publish authoring-bundle …`, then activate) to make the D-23 variable and the D-24
+   "recurring gifts" wording live in the assistant's own instructions; its Apex action replies are already live.
 5. Optional: raise `AbcHopeAgentSupport` coverage (the real MessagingSession path can't be built in tests).

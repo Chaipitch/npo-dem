@@ -1,5 +1,5 @@
 /**
- * Agent action: list and manage the verified donor's monthly gifts (gift commitments).
+ * Agent action: list and manage the verified donor's recurring gifts (gift commitments: weekly, monthly or yearly).
  * Mutations go through NPC's standard invocable actions after confirming the commitment
  * belongs to the verified donor. The agent must get explicit confirmation before calling
  * pause / resume / change_amount / cancel.
@@ -32,7 +32,7 @@ public without sharing class AbcHopeAgentMonthlyGifts {
     public String operation;
     @InvocableVariable(
       label='Gift number'
-      description='Number of the monthly gift from the list (1, 2, ...). Not needed when the donor has only one.'
+      description='Number of the recurring gift from the list (1, 2, ...). Not needed when the donor has only one.'
     )
     public Decimal giftNumber;
     @InvocableVariable(
@@ -41,8 +41,8 @@ public without sharing class AbcHopeAgentMonthlyGifts {
     )
     public Decimal pauseMonths;
     @InvocableVariable(
-      label='New monthly amount'
-      description='For change_amount: the new monthly amount in THB, 100 to 1,000,000.'
+      label='New amount'
+      description='For change_amount: the new amount per gift in THB, 100 to 1,000,000. The schedule (weekly, monthly or yearly) stays the same.'
     )
     public Decimal newAmount;
   }
@@ -56,8 +56,8 @@ public without sharing class AbcHopeAgentMonthlyGifts {
     )
     public String message;
     @InvocableVariable(
-      label='Monthly gifts'
-      description='Numbered list of the donor\'s monthly gifts after the operation.'
+      label='Recurring gifts'
+      description='Numbered list of the donor\'s recurring gifts after the operation, each with its type (Weekly, Monthly or Yearly).'
     )
     public String monthlyGifts;
   }
@@ -70,8 +70,8 @@ public without sharing class AbcHopeAgentMonthlyGifts {
   }
 
   @InvocableMethod(
-    label='ABC Hope: Manage My Monthly Gifts'
-    description='For a signed-in donor: list monthly gifts, or pause, resume, change the amount of, or cancel one of them.'
+    label='ABC Hope: Manage My Recurring Gifts'
+    description='For a signed-in donor: list recurring gifts (weekly, monthly or yearly), or pause, resume, change the amount of, or cancel one of them.'
   )
   public static List<Result> manage(List<Request> requests) {
     List<Result> results = new List<Result>();
@@ -88,7 +88,7 @@ public without sharing class AbcHopeAgentMonthlyGifts {
       req?.verifiedAccountId
     );
     if (accountId == null) {
-      r.message = 'The user is not signed in. Monthly gifts can only be managed after signing in on the ABC Hope site.';
+      r.message = 'The user is not signed in. Recurring gifts can only be managed after signing in on the ABC Hope site.';
       return r;
     }
     String op = req.operation == null ? '' : req.operation.trim().toLowerCase();
@@ -101,12 +101,12 @@ public without sharing class AbcHopeAgentMonthlyGifts {
       r.success = true;
       r.monthlyGifts = describe(gifts);
       r.message = gifts.isEmpty()
-        ? 'The donor has no active monthly gifts.'
-        : 'Listed ' + gifts.size() + ' monthly gift(s).';
+        ? 'The donor has no active recurring gifts.'
+        : 'Listed ' + gifts.size() + ' recurring gift(s).';
       return r;
     }
     if (gifts.isEmpty()) {
-      r.message = 'The donor has no active monthly gifts to change.';
+      r.message = 'The donor has no active recurring gifts to change.';
       return r;
     }
     Gift target;
@@ -122,7 +122,7 @@ public without sharing class AbcHopeAgentMonthlyGifts {
     ) {
       target = gifts[giftNumber - 1];
     } else {
-      r.message = 'Ask the donor which monthly gift they mean.';
+      r.message = 'Ask the donor which recurring gift they mean.';
       r.monthlyGifts = describe(gifts);
       return r;
     }
@@ -146,7 +146,7 @@ public without sharing class AbcHopeAgentMonthlyGifts {
       r.message = 'The change could not be made right now. Offer to connect the donor with the ABC Hope team.';
       System.debug(
         LoggingLevel.ERROR,
-        'Monthly gift ' + op + ' failed: ' + e.getMessage()
+        'Recurring gift ' + op + ' failed: ' + e.getMessage()
       );
     }
     r.monthlyGifts = describe(loadGifts(accountId));
@@ -156,7 +156,7 @@ public without sharing class AbcHopeAgentMonthlyGifts {
   static void pause(Gift g, Integer months, Result r) {
     if (g.pauseSchedule != null) {
       r.message =
-        'This monthly gift is already paused until ' +
+        'This recurring gift is already paused until ' +
         g.pauseSchedule.EndDate.format() +
         '.';
       return;
@@ -166,7 +166,7 @@ public without sharing class AbcHopeAgentMonthlyGifts {
       return;
     }
     if (g.openSchedule == null) {
-      r.message = 'This monthly gift has no active schedule to pause.';
+      r.message = 'This recurring gift has no active schedule to pause.';
       return;
     }
     Date startDate = later(Date.today().addDays(1), g.openSchedule.StartDate);
@@ -193,7 +193,7 @@ public without sharing class AbcHopeAgentMonthlyGifts {
 
   static void resume(Gift g, Result r) {
     if (g.pauseSchedule == null) {
-      r.message = 'This monthly gift is not paused.';
+      r.message = 'This recurring gift is not paused.';
       return;
     }
     Invocable.Action a = Invocable.Action.createStandardAction(
@@ -203,7 +203,7 @@ public without sharing class AbcHopeAgentMonthlyGifts {
       'giftCommitmentScheduleId',
       String.valueOf(g.pauseSchedule.Id)
     );
-    apply(a, r, 'The monthly gift has been resumed.');
+    apply(a, r, 'The recurring gift has been resumed.');
   }
 
   static void changeAmount(Gift g, Decimal amount, Result r) {
@@ -212,11 +212,11 @@ public without sharing class AbcHopeAgentMonthlyGifts {
       amount < DonationIntakeService.MIN_AMOUNT ||
       amount > DonationIntakeService.MAX_AMOUNT
     ) {
-      r.message = 'Ask for a new monthly amount between THB 100 and THB 1,000,000.';
+      r.message = 'Ask for a new amount between THB 100 and THB 1,000,000.';
       return;
     }
     if (g.openSchedule == null) {
-      r.message = 'This monthly gift has no active schedule to change.';
+      r.message = 'This recurring gift has no active schedule to change.';
       return;
     }
     Date effective = later(Date.today().addDays(1), g.openSchedule.StartDate);
@@ -234,8 +234,10 @@ public without sharing class AbcHopeAgentMonthlyGifts {
     apply(
       a,
       r,
-      'The monthly amount is now ' +
+      'The amount is now ' +
         AbcHopeAgentSupport.money(amount) +
+        ' per ' +
+        MonthlyGiftService.unit(g.openSchedule.TransactionPeriod) +
         ', starting ' +
         effective.format() +
         '.'
@@ -253,7 +255,7 @@ public without sharing class AbcHopeAgentMonthlyGifts {
     apply(
       a,
       r,
-      'The monthly gift has been cancelled. No further gifts will be scheduled.'
+      'The recurring gift has been cancelled. No further gifts will be scheduled.'
     );
   }
 
@@ -327,7 +329,7 @@ public without sharing class AbcHopeAgentMonthlyGifts {
 
   static String describe(List<Gift> gifts) {
     if (gifts.isEmpty()) {
-      return 'No active monthly gifts.';
+      return 'No active recurring gifts.';
     }
     List<String> lines = new List<String>();
     for (Integer i = 0; i < gifts.size(); i++) {
@@ -336,9 +338,13 @@ public without sharing class AbcHopeAgentMonthlyGifts {
         (i + 1) +
         '. ' +
         (g.openSchedule == null
-          ? 'Monthly gift'
-          : AbcHopeAgentSupport.money(g.openSchedule.TransactionAmount) +
-            ' per month');
+          ? 'Recurring gift'
+          : 'Recurring (' +
+            MonthlyGiftService.typeLabel(g.openSchedule.TransactionPeriod) +
+            '): ' +
+            AbcHopeAgentSupport.money(g.openSchedule.TransactionAmount) +
+            ' per ' +
+            MonthlyGiftService.unit(g.openSchedule.TransactionPeriod));
       if (String.isNotBlank(g.designation)) {
         line += ' to ' + g.designation;
       }

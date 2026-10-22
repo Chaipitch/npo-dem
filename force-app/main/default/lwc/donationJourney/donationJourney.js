@@ -224,7 +224,7 @@ export default class DonationJourney extends LightningElement {
     return `${this.currencyLabel} ${formatNumber(this.amount)}`;
   }
   get frequencyDisplay() {
-    return this.isRecurring ? `Recurring · ${this.period}` : "One-time";
+    return this.isRecurring ? `Recurring (${this.period})` : "One-time";
   }
   get recurringHint() {
     return `${this.currencyLabel} ${formatNumber(this.amount || 0)} will be given every ${this.periodUnit}. You can stop anytime.`;

@@ -264,7 +264,12 @@ private class DonorPortalControllerTest {
     Assert.areEqual(500, gifts[0].amount);
     Assert.areEqual('Test Meals', gifts[0].designation);
     Assert.areEqual('Test Monthly Appeal', gifts[0].campaignName);
+    Assert.areEqual('Monthly', gifts[0].period);
     Assert.isFalse(gifts[0].isPaused);
+    Assert.areEqual(
+      new List<String>{ 'Monthly' },
+      DonorPortalController.getDashboard().activeRecurringTypes
+    );
 
     Test.startTest();
     DonorPortalController.MonthlyGiftsResult paused = DonorPortalController.manageMonthlyGift(
@@ -288,6 +293,7 @@ private class DonorPortalControllerTest {
       'a paused gift is not counted as active'
     );
     Assert.areEqual(1, d.pausedMonthlyGifts);
+    Assert.isTrue(d.activeRecurringTypes.isEmpty(), 'only active gifts');
     Assert.areEqual(paused.gifts[0].pausedUntil, d.pausedUntil);
 
     DonorPortalController.MonthlyGiftsResult resumed = DonorPortalController.manageMonthlyGift(

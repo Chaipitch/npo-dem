@@ -60,6 +60,8 @@ public without sharing class DonorPortalController {
     @AuraEnabled
     public Date pausedUntil; // earliest pause end among paused gifts
     @AuraEnabled
+    public List<String> activeRecurringTypes = new List<String>(); // e.g. Weekly, Monthly (D-24)
+    @AuraEnabled
     public List<String> causes = new List<String>();
     @AuraEnabled
     public List<Gift> gifts = new List<Gift>();
@@ -170,6 +172,7 @@ public without sharing class DonorPortalController {
       }
     }
     // NPC keeps paused commitments Active, so count pauses from their schedules (D-22).
+    Set<String> activeTypes = new Set<String>();
     for (MonthlyGiftService.Gift mg : MonthlyGiftService.load(acc.Id)) {
       if (mg.isPaused) {
         d.pausedMonthlyGifts++;
@@ -182,6 +185,12 @@ public without sharing class DonorPortalController {
         }
       } else {
         d.activeMonthlyGifts++;
+        activeTypes.add(MonthlyGiftService.typeLabel(mg.period));
+      }
+    }
+    for (String t : new List<String>{ 'Weekly', 'Monthly', 'Yearly' }) {
+      if (activeTypes.contains(t)) {
+        d.activeRecurringTypes.add(t);
       }
     }
 
@@ -291,7 +300,7 @@ public without sharing class DonorPortalController {
     return MonthlyGiftService.load(currentAccount().Id);
   }
 
-  /** Pause, resume, change or cancel one of the signed-in donor's own monthly gifts. */
+  /** Pause, resume, change or cancel one of the signed-in donor's own recurring gifts. */
   @AuraEnabled
   public static MonthlyGiftsResult manageMonthlyGift(
     String giftId,
@@ -306,7 +315,7 @@ public without sharing class DonorPortalController {
     }
     MonthlyGiftService.Gift gift = MonthlyGiftService.find(acc.Id, giftId);
     if (gift == null) {
-      throw auraError('This monthly gift could not be found.');
+      throw auraError('This recurring gift could not be found.');
     }
     MonthlyGiftService.Outcome outcome;
     if (op == 'pause') {

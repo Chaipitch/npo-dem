@@ -320,7 +320,7 @@ private class AbcHopeAgentActionsTest {
     Test.stopTest();
     Assert.isTrue(r.isVerified);
     Assert.areEqual('Maya', r.donorFirstName);
-    Assert.isTrue(r.summary.contains('Active monthly gifts: 1'));
+    Assert.isTrue(r.summary.contains('Active recurring gifts: 1 (Monthly)'));
     Assert.isTrue(r.summary.contains('School Supplies'));
   }
 
@@ -335,7 +335,9 @@ private class AbcHopeAgentActionsTest {
     Test.stopTest();
     Assert.isTrue(r.success);
     Assert.isTrue(
-      r.monthlyGifts.contains('THB 500 per month to School Supplies'),
+      r.monthlyGifts.contains(
+        'Recurring (Monthly): THB 500 per month to School Supplies'
+      ),
       r.monthlyGifts
     );
   }

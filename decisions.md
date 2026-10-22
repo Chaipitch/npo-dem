@@ -224,8 +224,15 @@ Yearly** (Monthly preselected). The journey sends the chosen period as the reque
 `Weekly`, `Monthly` or `Yearly`), and `DonationIntakeService` writes it straight to
 `GiftCommitmentSchedule.TransactionPeriod` (all three are standard NPC picklist values; interval stays 1). My Giving
 cards show the period after the amount ("THB 300 / week"); older `Custom` schedules read as monthly. Pause, resume,
-change amount and cancel work the same for every period. Wording elsewhere still says "monthly gifts" (dashboard line,
-My Giving heading, agent) — not changed yet.
+change amount and cancel work the same for every period.
+
+Wording follow-up (user, same day): everything donors see says **recurring gifts**, with the type in brackets where a
+single gift or the active set is described — "Recurring (Weekly)" on the My Giving card and the review step, "1 active
+recurring gift (Monthly)" on the dashboard (new `Dashboard.activeRecurringTypes`), "Recurring Gifts" as the My Giving
+heading, and the agent's action replies ("1. Recurring (Weekly): THB 300 per week to …"). API names stay as they are
+(`donorMonthlyGifts`, `getMonthlyGifts`, `AbcHopeAgentMonthlyGifts`, subagent `monthly_gifts`, anchor `#monthly`)
+because the site, agent and tests are wired to them. The Agent Script wording is updated and validated but, like D-23,
+not yet published.
 
 Step 1 and step 2 of the journey also show the campaign photo as a banner across the top of the card (same
 `abcHopeCampaignPhotos` choice as the cards and the review step).

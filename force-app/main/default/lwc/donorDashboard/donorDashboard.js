@@ -206,7 +206,12 @@ export default class DonorDashboard extends LightningElement {
     const n = this.data?.activeMonthlyGifts || 0;
     const p = this.data?.pausedMonthlyGifts || 0;
     const parts = [];
-    if (n > 0) parts.push(`${n} active monthly gift${n === 1 ? "" : "s"}`);
+    if (n > 0) {
+      const types = (this.data.activeRecurringTypes || []).join(", ");
+      parts.push(
+        `${n} active recurring gift${n === 1 ? "" : "s"}${types ? ` (${types})` : ""}`
+      );
+    }
     if (p > 0) {
       const until = this.data.pausedUntil
         ? ` until ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(`${this.data.pausedUntil}T00:00:00Z`))}`
@@ -469,14 +474,17 @@ export default class DonorDashboard extends LightningElement {
     if (!d) return null;
     const q = raw.toLowerCase();
     const base = basePath || "";
-    if (/monthly|recurring|pause|resume|cancel/.test(q)) {
+    if (/monthly|weekly|yearly|recurring|pause|resume|cancel/.test(q)) {
       return {
         text: this.monthlyNote
           ? `You have ${this.monthlyNote}. You can pause, resume, change or cancel them on My Giving.`
-          : "You don’t have a monthly gift at the moment. You can start one from any campaign.",
+          : "You don’t have a recurring gift at the moment. You can start a weekly, monthly or yearly gift from any campaign.",
         link: this.monthlyNote
-          ? { href: `${base}/my-giving#monthly`, label: "Manage monthly gifts" }
-          : { href: this.donateHref, label: "Give monthly" }
+          ? {
+              href: `${base}/my-giving#monthly`,
+              label: "Manage recurring gifts"
+            }
+          : { href: this.donateHref, label: "Start a recurring gift" }
       };
     }
     if (/history|recent gifts?|past gifts?|last gifts?|receipt/.test(q)) {

@@ -58,8 +58,9 @@ describe("c-donor-monthly-gifts", () => {
     jest.clearAllMocks();
   });
 
-  it("lists a monthly gift with its program, status and next gift", async () => {
+  it("lists a recurring gift with its type, program, status and next gift", async () => {
     const el = await mount([ACTIVE]);
+    expect(text(el, '[data-id="type"]')).toBe("Recurring (Monthly)");
     expect(text(el, ".gift-amount")).toBe("THB 500 / month");
     expect(text(el, ".gift-meta")).toBe(
       "School Supplies · Education Access program · Christmas Giving 2026"
@@ -71,6 +72,7 @@ describe("c-donor-monthly-gifts", () => {
 
   it("shows the schedule period after the amount", async () => {
     const el = await mount([{ ...ACTIVE, amount: 300, period: "Weekly" }]);
+    expect(text(el, '[data-id="type"]')).toBe("Recurring (Weekly)");
     expect(text(el, ".gift-amount")).toBe("THB 300 / week");
   });
 
@@ -114,7 +116,7 @@ describe("c-donor-monthly-gifts", () => {
   it("resumes a paused gift", async () => {
     const el = await mount([PAUSED]);
     manageMonthlyGift.mockResolvedValue({
-      message: "The monthly gift has been resumed.",
+      message: "The recurring gift has been resumed.",
       gifts: [ACTIVE]
     });
     click(el, "resume");
@@ -156,7 +158,7 @@ describe("c-donor-monthly-gifts", () => {
     const el = await mount([ACTIVE]);
     click(el, "open-cancel");
     await flush();
-    expect(text(el, ".panel-warn")).toContain("Cancel this monthly gift?");
+    expect(text(el, ".panel-warn")).toContain("Cancel this recurring gift?");
 
     $(el, ".panel-warn .btn-quiet").dispatchEvent(new CustomEvent("click"));
     await flush();
@@ -164,7 +166,7 @@ describe("c-donor-monthly-gifts", () => {
     expect(manageMonthlyGift).not.toHaveBeenCalled();
 
     manageMonthlyGift.mockResolvedValue({
-      message: "The monthly gift has been cancelled.",
+      message: "The recurring gift has been cancelled.",
       gifts: []
     });
     click(el, "open-cancel");
@@ -181,14 +183,14 @@ describe("c-donor-monthly-gifts", () => {
   it("shows the server's message when a change fails", async () => {
     const el = await mount([ACTIVE]);
     manageMonthlyGift.mockRejectedValue({
-      body: { message: "This monthly gift could not be found." }
+      body: { message: "This recurring gift could not be found." }
     });
     click(el, "open-cancel");
     await flush();
     click(el, "confirm-cancel");
     await flush();
     expect(text(el, '[data-id="error"]')).toBe(
-      "This monthly gift could not be found."
+      "This recurring gift could not be found."
     );
     expect($(el, ".gift")).not.toBeNull();
   });

@@ -153,7 +153,7 @@ describe("c-donation-journey", () => {
     click($(el, '[data-id="next"]'));
     await flush();
     expect($(el, ".review-grid dd").textContent).toContain(
-      "Recurring · Weekly"
+      "Recurring (Weekly)"
     );
     click($(el, '[data-id="submit"]'));
     await flush();
