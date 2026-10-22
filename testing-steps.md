@@ -20,7 +20,7 @@ sf apex run test -o npo-demo -n DonationIntakeServiceTest,DonationIntakeControll
 npm run test:unit
 ```
 
-Pass criteria: 53 Apex test methods (add `DonorAgentControllerTest` to the run) and 25 Jest tests pass.
+Pass criteria: 53 Apex test methods (add `DonorAgentControllerTest` to the run) and 29 Jest tests pass.
 
 ## 2. Public journey (private window, desktop then 375 px)
 
@@ -137,6 +137,9 @@ Notes:
 | A3  | "Can I pause my monthly gift?"                                        | Monthly gift count + link "Manage monthly gifts" (`/my-giving#monthly`)                     |
 | A4  | "Which campaigns are open?" then "Tell me about clean water"          | Answers from the Donor Assistant ("Assistant is typing…"); the follow-up keeps the context  |
 | A5  | Long conversation                                                     | Panel stays within the screen height; the conversation scrolls; newest message in view      |
+
+| A6 | Header box on `/my-giving`: type "How much have I given?" → Enter | Goes to `/dashboard#agent`, the panel answers; `?ask=` disappears from the URL |
+| A7 | Header box on `/dashboard`; then sidebar **Ask Our AI** | Answers in the panel without reloading; Ask Our AI scrolls to the panel and focuses its input |
 
 After D-23 is finished (`USE_AGENT_API = true`), A1 and A3 come from the agent itself using Maya's verified account.
 

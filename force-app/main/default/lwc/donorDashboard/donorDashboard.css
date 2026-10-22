@@ -474,6 +474,7 @@ ol {
 .agent {
   position: sticky;
   top: 90px;
+  scroll-margin-top: 90px;
   display: flex;
   flex-direction: column;
   max-height: calc(

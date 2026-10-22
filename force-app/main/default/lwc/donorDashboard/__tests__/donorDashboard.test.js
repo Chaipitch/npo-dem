@@ -164,4 +164,26 @@ describe("c-donor-dashboard agent panel", () => {
     await ask(el, "Which campaigns are open?");
     expect(lastReply(el)).toBe("The assistant could not answer right now.");
   });
+
+  it("answers a question sent from the header box on this page", async () => {
+    const el = await mount();
+    const detail = { question: "How much have I given?", handled: false };
+    window.dispatchEvent(new CustomEvent("abchope:ask", { detail }));
+    await flush();
+    expect(detail.handled).toBe(true);
+    expect(lastReply(el)).toContain("THB 2,250");
+  });
+
+  it("asks the question from ?ask= after arriving from another page", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      "/dashboard?ask=How%20much%20have%20I%20given%3F#agent"
+    );
+    const el = await mount();
+    expect(lastReply(el)).toContain("THB 2,250");
+    expect(window.location.search).toBe("");
+    expect(window.location.hash).toBe("#agent");
+    window.history.replaceState(null, "", "/");
+  });
 });

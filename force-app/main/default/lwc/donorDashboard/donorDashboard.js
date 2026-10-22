@@ -12,6 +12,8 @@ const IMPACT_STYLE = [
   { icon: "heart-fill", tone: "tone-red" }
 ];
 const STORY_ART = ["water", "school", "sprout"];
+/** Sent by the portal layout's header question box and "Ask Our AI" (c-abc-hope-portal-layout). */
+const ASK_EVENT = "abchope:ask";
 
 // Free Unsplash photos (Unsplash License) used when no image is configured for a campaign or story.
 const unsplash = (id, w) =>
@@ -97,6 +99,7 @@ export default class DonorDashboard extends LightningElement {
     if (data) {
       this.data = data;
       this.error = undefined;
+      this.flushPendingAsk();
     } else if (error) {
       this.error =
         error.body?.message || "We could not load your giving summary.";
@@ -110,9 +113,60 @@ export default class DonorDashboard extends LightningElement {
       this.scrollToHash();
     };
     window.addEventListener("hashchange", this._onHash);
+    this._onAsk = (event) => this.handleAskEvent(event);
+    window.addEventListener(ASK_EVENT, this._onAsk);
+    this.readAskFromUrl();
   }
   disconnectedCallback() {
     window.removeEventListener("hashchange", this._onHash);
+    window.removeEventListener(ASK_EVENT, this._onAsk);
+  }
+
+  // ------------------------------------------------------------ questions from the header
+  /** The header box or "Ask Our AI" on this page: answer in the panel (home view only). */
+  handleAskEvent(event) {
+    if (!this.isHome || !event.detail) return;
+    event.detail.handled = true;
+    this.focusAgent(event.detail.question);
+  }
+  /** Arriving from another page with /dashboard?ask=…#agent. */
+  readAskFromUrl() {
+    if (!this.isHome || typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const question = params.get("ask");
+    if (question === null) return;
+    params.delete("ask");
+    const query = params.toString();
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`
+    );
+    this.focusAgent(question);
+  }
+  focusAgent(question) {
+    const text = (question || "").trim();
+    if (text) {
+      // Personal answers need the dashboard data; wait for it if it is still loading.
+      this._pendingAsk = text;
+      this.flushPendingAsk();
+    }
+    // eslint-disable-next-line @lwc/lwc/no-async-operation
+    requestAnimationFrame(() => {
+      const panel = this.template.querySelector('[data-section="agent"]');
+      if (panel?.scrollIntoView) {
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      if (!text) {
+        this.template.querySelector('[data-id="chat-input"]')?.focus();
+      }
+    });
+  }
+  flushPendingAsk() {
+    if (!this._pendingAsk || !this.data) return;
+    const text = this._pendingAsk;
+    this._pendingAsk = undefined;
+    this.sendChat(text);
   }
   renderedCallback() {
     this.scrollToHash();
