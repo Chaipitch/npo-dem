@@ -102,6 +102,28 @@ private class DonorPortalControllerTest {
   }
 
   @IsTest
+  static void profileDonorSinceMatchesDashboardSupporterSince() {
+    Account maya = createDonor();
+    Campaign camp = new Campaign(Name = 'Test Since', IsActive = true);
+    insert camp;
+    GiftDesignation gd = new GiftDesignation(
+      Name = 'Test Since Fund',
+      IsActive = true
+    );
+    insert gd;
+    createGift(maya, camp, gd, 300, Date.newInstance(2024, 5, 1), 'Unpaid');
+    DonorPortalController.accountIdOverride = maya.Id;
+
+    Test.startTest();
+    DonorPortalController.Profile p = DonorPortalController.getProfile();
+    DonorPortalController.Dashboard d = DonorPortalController.getDashboard();
+    Test.stopTest();
+
+    Assert.areEqual('2024', p.donorSince, 'first gift, not account creation');
+    Assert.areEqual(d.supporterSince, p.donorSince);
+  }
+
+  @IsTest
   static void profileCanBeReadAndSaved() {
     Account maya = createDonor();
     DonorPortalController.accountIdOverride = maya.Id;
