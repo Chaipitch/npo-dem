@@ -14,19 +14,19 @@ Embedded Messaging component in Experience Builder so the chat appears on the si
 
 ## Status
 
-| Area                                  | State                                                                                                                                                                                                                                                            |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Demo data                             | ✅ 4 fundraising campaigns (Christmas Giving 2026, Clean Water for Rural Schools, Girls' Education Scholarships, Green Communities Tree Planting) with goals and default designations; 6 designations; source code `XMAS26-EMAIL`; Maya's 2023–2025 gift history |
-| Apex                                  | ✅ 33 test methods pass. Coverage: DonationIntakeService 98%, DonationIntakeController 84%, DonorPortalController 96%, agent actions 70–100%                                                                                                                     |
-| LWC                                   | ✅ donationJourney (11 Jest tests), abcHopeHero, donorDashboard, donorProfile, abcHopeIcon, public + portal theme layouts                                                                                                                                        |
-| Site                                  | ✅ Live. Home + Donate are public; portal pages require login (guests go to login, then back to `/dashboard`)                                                                                                                                                    |
-| Dashboard campaigns                   | ✅ Card grid: raised (real gifts) vs goal (`Campaign.ExpectedRevenue`), days left, designations. A card opens `/donate?campaign=<name>`                                                                                                                          |
-| Signed-in donor                       | ✅ Maya Grande portal user. Email set to `wchaipitch@terrasky.co.th` and a password-reset email sent; the user chooses the password (none stored anywhere)                                                                                                       |
-| Agent                                 | ✅ ABC Hope Donor Assistant active (new version with D-20: lists every open campaign); routing flow `ABC_Hope_Chat_Routing`; channel + deployment `ABC_Hope_Chat` (Auth, guests allowed)                                                                         |
-| Chat on site                          | 🟨 Embedded Messaging component not yet placed (manual — see below)                                                                                                                                                                                              |
-| Photos                                | ✅ Unsplash: hero (Christian Bowen), dashboard banner (Ben Kupke), sidebar (Artem Makarov); credits shown                                                                                                                                                        |
-| Git                                   | ✅ `git@github.com:Chaipitch/npo-dem.git`, `main`                                                                                                                                                                                                                |
-| Flows / VRs / custom objects / fields | Only `ABC_Hope_Chat_Routing` (approved exception). Nothing else.                                                                                                                                                                                                 |
+| Area                                  | State                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Demo data                             | ✅ 4 fundraising campaigns (Christmas Giving 2026, Clean Water for Rural Schools, Girls' Education Scholarships, Green Communities Tree Planting) with goals and default designations; 6 designations; source code `XMAS26-EMAIL`; Maya's 2023–2025 gift history                                                                                                  |
+| Apex                                  | ✅ 45 test methods pass. Coverage: DonationIntakeService 98%, DonationIntakeController 84%, DonorPortalController 96%, MonthlyGiftService 89%, agent actions 64–100%                                                                                                                                                                                              |
+| LWC                                   | ✅ donationJourney (12 Jest tests), donorMonthlyGifts (8 Jest tests), abcHopeHero, donorDashboard, donorProfile, abcHopeIcon, public + portal theme layouts                                                                                                                                                                                                       |
+| Site                                  | ✅ Live. Home + Donate are public; portal pages require login (guests go to login, then back to `/dashboard`)                                                                                                                                                                                                                                                     |
+| Dashboard campaigns                   | ✅ Card grid: raised (real gifts) vs goal (`Campaign.ExpectedRevenue`), days left, designations. A card opens `/donate?campaign=<name>`                                                                                                                                                                                                                           |
+| Signed-in donor                       | ✅ Maya Grande portal user. Email set to `wchaipitch@terrasky.co.th` and a password-reset email sent; the user chooses the password (none stored anywhere)                                                                                                                                                                                                        |
+| Agent                                 | ✅ ABC Hope Donor Assistant active (new version with D-20: lists every open campaign); routing flow `ABC_Hope_Chat_Routing`; channel + deployment `ABC_Hope_Chat` (Auth, guests allowed)                                                                                                                                                                          |
+| Chat on site                          | 🟨 Embedded Messaging component not yet placed (manual — see below)                                                                                                                                                                                                                                                                                               |
+| Photos                                | ✅ Unsplash (free licence): hero (Christian Bowen), banner (Ben Kupke), sidebar (Artem Makarov); campaign cards — water (Lisa Marie Theck), education (Yogendra Singh), environment (Hammilton Ojijo), other (Larm Rmah); stories (Andrew Itaga, Yannis H, Elly M); the donation journey's review/thank-you photo follows the campaign. Credits shown or on hover |
+| Git                                   | ✅ `git@github.com:Chaipitch/npo-dem.git`, `main`                                                                                                                                                                                                                                                                                                                 |
+| Flows / VRs / custom objects / fields | Only `ABC_Hope_Chat_Routing` (approved exception). Nothing else.                                                                                                                                                                                                                                                                                                  |
 
 ## How to sign in as Maya
 
@@ -75,10 +75,19 @@ How the build compares:
   Don't create Program records or seed data without asking.
 - Data gap: Maya's seeded 2023–2025 gifts (`seedMayaHistory.apex`) have no `CampaignId`.
 
+## Campaign → Program and monthly gift self-service (2026‑10‑22)
+
+- **Programs (D-21):** Campaign ─< GiftDefaultDesignation >─ GiftDesignation ─> Program via the existing
+  `NGOTV_Program__c` lookup. Seed: `sf apex run -o npo-demo -f scripts/apex/seedPrograms.apex`.
+- **My Giving → Monthly Gifts (D-22):** pause / resume / change amount / cancel for the signed-in donor;
+  the dashboard shows paused gifts separately. Test: `testing-steps.md` §8.
+- **Site outage fixed:** on 2026‑10‑21 ~16:00 UTC the templates of `abcHopePublicLayout`, `abcHopePortalLayout` and
+  `abcHopeHero` were commented out directly in the org (not in git). The next publish blanked the site; the repo
+  versions were redeployed and republished on 2026‑10‑22. Before publishing, check the org still matches git.
+
 ## Open items
 
 1. Place the Embedded Messaging component (above), then test signed-in agent conversations end to end.
-2. Images for the three non-Christmas campaign cards and the story cards (currently SVG illustrations;
-   set the `campaignImages` and story properties).
+2. Done 2026‑10‑22: campaign cards, story cards and the journey's review/thank-you image use Unsplash photos.
 3. Header nav "Our Work" and "About" point to `/` until those pages exist.
 4. Optional: raise `AbcHopeAgentSupport` coverage (the real MessagingSession path can't be built in tests).

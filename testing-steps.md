@@ -20,7 +20,7 @@ sf apex run test -o npo-demo -n DonationIntakeServiceTest,DonationIntakeControll
 npm run test:unit
 ```
 
-Pass criteria: 41 Apex test methods and 12 Jest tests pass.
+Pass criteria: 45 Apex test methods and 20 Jest tests pass.
 
 ## 2. Public journey (private window, desktop then 375 px)
 
@@ -88,14 +88,13 @@ sf agent preview send -o npo-demo --authoring-bundle ABC_Hope_Donor_Assistant --
   → agent restates and asks to confirm → after "yes", the schedule shows a pause; "Change my email to …" →
   confirm → Account updated. No console CORS/CSP errors.
 
-## 8. E2E: monthly gift → pause → resume → change amount → cancel (Maya)
+## 8. E2E: monthly gift → pause → resume → change amount → cancel (Maya, on the site)
 
-A donor starts a monthly gift on the site, then changes their mind over the following weeks. Steps
-E6–E14 need the chat widget on the site (Handover → Manual step: chat widget); until it is placed, run
-E1–E5 and E15 only. This adds a real (closed) monthly gift to Maya's history — that is fine for the demo.
-Expected results for E4, E8, E10 and E13 come from a rolled-back dry run in the org on 2026‑10‑22.
+A donor starts a monthly gift on the site, then changes their mind over the following weeks, using
+**My Giving → Monthly Gifts** (D-22). This adds a real (closed) monthly gift to Maya's history — fine for the demo.
+Back-office expectations come from a rolled-back dry run in the org on 2026‑10‑22.
 
-Back-office queries used below (replace `<gc>` with the commitment Id from E4):
+Back-office queries (replace `<gc>` with the commitment Id from E4):
 
 ```bash
 sf data query -o npo-demo -q "SELECT Id, Name, Status, Campaign.Name, CreatedDate FROM GiftCommitment WHERE Donor.Name = 'Maya Grande' ORDER BY CreatedDate DESC LIMIT 3"
@@ -104,31 +103,30 @@ sf data query -o npo-demo -q "SELECT Name, Status, TransactionDueDate, OriginalA
 sf data query -o npo-demo -q "SELECT GiftDesignation.Name, GiftDesignation.NGOTV_Program__r.Name, AllocatedPercentage FROM GiftDefaultDesignation WHERE ParentRecordId = '<gc>'"
 ```
 
-| #   | Step                                                                                    | Expected                                                                                                                                                                                                                                                                                                                       |
-| --- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| E1  | Sign in as Maya → `/dashboard`                                                          | Note the "N active monthly gifts" line under the KPIs (absent when N = 0) — this is the baseline                                                                                                                                                                                                                               |
-| E2  | Christmas Giving 2026 card                                                              | Card shows **Funds Education Access** above the designation chip (D-21). Click it                                                                                                                                                                                                                                              |
-| E3  | `/donate`: Monthly → THB 500 → Support **School Supplies** → Next → Review → Submit     | Hint "Funds our Education Access program." under Support; step 2 says "Welcome back, Maya Grande"; Review shows Monthly · THB 500 · School Supplies; thank-you step                                                                                                                                                            |
-| E4  | Back office (queries above)                                                             | New commitment **Active**, campaign Christmas Giving 2026; one `CreateTransactions` schedule, start today, no end, THB 500 Monthly; default designation School Supplies 100% (program Education Access); no transactions yet                                                                                                   |
-| E5  | Back to `/dashboard`                                                                    | Monthly line shows N + 1                                                                                                                                                                                                                                                                                                       |
-| E6  | Chat: "Show my monthly gifts"                                                           | Numbered list includes "THB 500 per month to School Supplies (Christmas Giving 2026)"                                                                                                                                                                                                                                          |
-| E7  | "Pause it for 2 months" (pick the number if asked)                                      | Agent restates and asks to confirm; after "yes": "Paused from <tomorrow> to <tomorrow + 2 months − 1 day>. Gifts restart automatically after that."                                                                                                                                                                            |
-| E8  | Back office                                                                             | Commitment **still Active** (NPC does not use the Paused status for this). Schedules: original ends today; `PauseTransactions` tomorrow → pause end; new open `CreateTransactions` from the day after. One **Unpaid** transaction, due on the first payment date after the pause (e.g. 2027‑01‑01 for a pause starting 22 Oct) |
-| E9  | Chat: "Show my monthly gifts"; then `/dashboard`                                        | Agent shows "— paused <start> to <end>". Dashboard still counts it as active (gap G1)                                                                                                                                                                                                                                          |
-| E10 | "Resume my monthly gift" → yes                                                          | "The monthly gift has been resumed." Pause schedule becomes `CreateTransactions`; the Unpaid transaction moves back to the next payment date (e.g. 2026‑11‑01)                                                                                                                                                                 |
-| E11 | "Change it to THB 800" → yes                                                            | "The monthly amount is now THB 800, starting <tomorrow>." Open schedule shows 800                                                                                                                                                                                                                                              |
-| E12 | "Cancel my monthly gift" → yes                                                          | Agent confirms first; then "The monthly gift has been cancelled. No further gifts will be scheduled."                                                                                                                                                                                                                          |
-| E13 | Back office                                                                             | Commitment **Closed**. **Check** the upcoming Unpaid transaction: expected **Canceled** (not confirmed — see G3). Christmas Giving 2026 "raised" on the dashboard card must not include it                                                                                                                                     |
-| E14 | Chat: "Show my monthly gifts"; then `/dashboard`                                        | Cancelled gift no longer listed; monthly line back to N. Past gifts and causes stay in My Giving                                                                                                                                                                                                                               |
-| E15 | Guards: guest chat "Pause my monthly gift"; Maya: "pause for 13 months"; "change to 50" | Guest → asked to sign in; 13 months → asked for 1–12; 50 → asked for THB 100–1,000,000. Nothing changes in the back office                                                                                                                                                                                                     |
+| #   | Step                                                                                | Expected                                                                                                                                                                                                                           |
+| --- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| E1  | Sign in as Maya → `/dashboard`                                                      | Note the monthly line under the KPIs ("N active monthly gifts", absent when none) — the baseline. Campaign and story cards show photos, no drawings                                                                                |
+| E2  | Christmas Giving 2026 card                                                          | Card shows **Funds Education Access** above the designation chip (D-21). Click it                                                                                                                                                  |
+| E3  | `/donate`: Monthly → THB 500 → Support **School Supplies** → Next → Review → Submit | Hint "Funds our Education Access program."; step 2 "Welcome back, Maya Grande"; Review shows the campaign photo, Monthly · THB 500 · School Supplies; thank-you step shows the same photo                                          |
+| E4  | Back office                                                                         | New commitment **Active**, campaign Christmas Giving 2026; one `CreateTransactions` schedule from today, no end, THB 500 Monthly; default designation School Supplies 100% (program Education Access)                              |
+| E5  | `/dashboard` → **Manage** (next to the monthly line)                                | Opens `/my-giving#monthly`; the line shows N + 1 active                                                                                                                                                                            |
+| E6  | Monthly Gifts card for the new gift                                                 | "THB 500 / month", "School Supplies · Education Access program · Christmas Giving 2026", status **Active**, buttons Pause / Change amount / Cancel gift                                                                            |
+| E7  | **Pause** → 2 months → **Confirm pause**                                            | Green notice "Paused from <tomorrow> to <tomorrow + 2 months − 1 day>…"; status "Paused <start> – <end>"; only Resume now / Cancel gift remain                                                                                     |
+| E8  | Back office                                                                         | Commitment **still Active** (NPC does not use the Paused status). Schedules: original ends today; `PauseTransactions` tomorrow → pause end; new open `CreateTransactions` after it. One **Unpaid** transaction due after the pause |
+| E9  | `/dashboard`                                                                        | Monthly line: "N active monthly gifts · 1 paused until <end>" — the paused gift is no longer counted as active                                                                                                                     |
+| E10 | My Giving → **Resume now**                                                          | Notice "The monthly gift has been resumed."; status Active; the Unpaid transaction moves back to the next payment date                                                                                                             |
+| E11 | **Change amount** → 50 → Save; then 800 → Save                                      | 50 → inline error "between THB 100 and THB 1,000,000", nothing sent; 800 → "The monthly amount is now THB 800, starting <tomorrow>."; card shows THB 800 / month                                                                   |
+| E12 | **Cancel gift** → **Keep my gift**; then **Cancel gift** → **Yes, cancel gift**     | First time nothing changes; second time notice "The monthly gift has been cancelled…" and the card disappears                                                                                                                      |
+| E13 | Back office                                                                         | Commitment **Closed**. **Check** the upcoming Unpaid transaction: expected **Canceled** (not confirmed — see G3); the campaign's raised total on its card must not include it                                                      |
+| E14 | `/dashboard`                                                                        | Monthly line back to the baseline; past gifts and causes stay in My Giving → Giving History                                                                                                                                        |
+| E15 | Security: private window → `/my-giving`                                             | Redirects to login. (Server side, a gift Id that is not the signed-in donor's is rejected — covered by `DonorPortalControllerTest`)                                                                                                |
 
-Known gaps this scenario exposes (not fixed yet):
+Notes:
 
-- **G1** Paused gifts: NPC keeps the commitment Active, so the dashboard counts it as active and shows no pause.
-- **G2** No self-service pause/cancel on the portal pages — only through the agent (needs the chat widget).
+- Fixed by D-22: paused gifts are shown and no longer counted as active; donors can pause/cancel on the portal.
 - **G3** In the dry run, cancelling in the same database transaction as a pause/resume failed with a record-lock
-  error on the upcoming transaction, so the cancelled transaction's final status is unconfirmed. Agent requests
-  run in separate transactions; E13 is the real check.
+  error on the upcoming transaction, so the cancelled transaction's final status is unconfirmed. Each button click
+  runs in its own transaction; E13 is the real check.
 
 ## Demo script (3–5 min)
 

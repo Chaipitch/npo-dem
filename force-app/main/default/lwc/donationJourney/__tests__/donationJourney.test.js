@@ -245,9 +245,12 @@ describe("c-donation-journey", () => {
     expect($(el, ".review-campaign").textContent).toBe(
       "Clean Water for Rural Schools"
     );
+    // Clean Water gets the water photo on review and thank-you (no SVG placeholder).
+    expect($(el, ".review-img").src).toContain("photo-1740741705746");
     click($(el, '[data-id="submit"]'));
     await flush();
     await flush();
+    expect($(el, ".thanks-img").src).toContain("photo-1740741705746");
     const sent = JSON.parse(submitDonation.mock.calls[0][0].requestJson);
     expect(sent.campaignName).toBe("Clean Water for Rural Schools");
     expect(sent.designationId).toBe("cw1");

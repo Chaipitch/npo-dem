@@ -304,12 +304,6 @@ p {
   border-radius: 10px;
   flex-shrink: 0;
 }
-.review-img_placeholder {
-  display: grid;
-  place-items: center;
-  font-size: 36px;
-  background: linear-gradient(135deg, #fde8e8, #fff4d6);
-}
 .review-campaign {
   font-weight: 800;
   color: var(--dj-navy);
@@ -507,20 +501,16 @@ p {
 .journey {
   padding-bottom: 72px;
 }
-.review-img_placeholder {
-  background: linear-gradient(135deg, #fde3e3 0%, #fff3d6 100%);
-}
-.books {
-  width: 78px;
-  height: 58px;
-}
-.books_small {
-  width: 64px;
-  height: 48px;
-}
 .thanks-icon {
   display: grid;
   place-items: center;
+}
+.thanks-img {
+  display: block;
+  width: 72px;
+  height: 54px;
+  object-fit: cover;
+  border-radius: 10px;
 }
 .select-icon {
   color: var(--dj-blue);

@@ -175,3 +175,26 @@ exactly, then partially, and returns that campaign's own causes (default designa
 Needed"; the Christmas campaign keeps its configured list). Only campaigns with a `GiftDefaultDesignation`
 are ever described, so internal campaigns stay hidden from guests. Agent instructions no longer imply a
 single campaign and tell it to call the action with an empty name for "which/how many campaigns" questions.
+
+### D-21 · Campaign → Program through designations — Accepted (user, 2026‑10‑22)
+
+Program is what a campaign spends the money on. Link: Campaign ─< GiftDefaultDesignation >─ GiftDesignation ─>
+Program, using the org's existing unmanaged lookup `GiftDesignation.NGOTV_Program__c` (created with the org
+template on 2026‑10‑09; retrieved into source). No new schema. Many-to-many on purpose: one program can be funded
+by several campaigns (Education Access ← Christmas Giving 2026 and Girls' Education Scholarships), so the user's
+diagram line Campaign ─< Program reads as "campaign funds programs". Seeded by `scripts/apex/seedPrograms.apex`
+(Education Access, Clean Water, Green Communities). Shown on campaign cards ("Funds …"), the donation journey
+("Funds our … program."), giving history and the agent's campaign answers. No Program access was granted to the
+guest profile: Apex reads it in system mode, like designations; a grant would expose Program records to anonymous
+API reads.
+
+### D-22 · Monthly gift self-service on My Giving — Accepted (user, 2026‑10‑22)
+
+Signed-in donors pause (1, 2, 3, 6 or 12 months, starting tomorrow), resume, change the amount of (from tomorrow)
+or cancel their own monthly gifts on `/my-giving` (`donorMonthlyGifts`, inside `donorDashboard`). Logic lives in
+`MonthlyGiftService` and uses the same NPC standard actions as the agent (`pauseGiftCommitmentSchedule`,
+`resumeGiftCommitmentSchedule`, `manageRcrGiftCmtSchd`, `closeGiftCommitment`). `DonorPortalController` resolves the
+donor from the running user and only acts on that donor's own commitments (D-12). Cancel asks for confirmation.
+NPC keeps a paused commitment **Active** and adds a `PauseTransactions` schedule, so "paused" means a current or
+upcoming pause schedule: the dashboard now shows "N active monthly gifts · M paused until <date>" and no longer
+counts paused gifts as active. The agent action was left unchanged (scope: Experience Cloud only).

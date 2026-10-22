@@ -169,4 +169,184 @@ private class DonorPortalControllerTest {
       Assert.isTrue(e.getMessage().contains('sign in'));
     }
   }
+
+  // ---------------------------------------------------------------- monthly gifts (D-22)
+
+  /** A monthly gift made through the site; returns the donor's account Id. */
+  static Id donorWithMonthlyGift(String email) {
+    // NPC schedule actions require an org-wide default designation.
+    if (
+      [
+        SELECT COUNT()
+        FROM GiftDesignation
+        WHERE IsDefault = TRUE AND IsActive = TRUE
+      ] == 0
+    ) {
+      insert new GiftDesignation(
+        Name = 'Test General Fund',
+        IsActive = true,
+        IsDefault = true
+      );
+    }
+    List<Campaign> camps = [
+      SELECT Id
+      FROM Campaign
+      WHERE Name = 'Test Monthly Appeal'
+    ];
+    if (camps.isEmpty()) {
+      insert new Campaign(Name = 'Test Monthly Appeal', IsActive = true);
+    }
+    List<GiftDesignation> gds = [
+      SELECT Id
+      FROM GiftDesignation
+      WHERE Name = 'Test Meals'
+    ];
+    if (gds.isEmpty()) {
+      gds.add(new GiftDesignation(Name = 'Test Meals', IsActive = true));
+      insert gds;
+    }
+    DonationIntakeService.Request req = new DonationIntakeService.Request();
+    req.campaignName = 'Test Monthly Appeal';
+    req.frequency = DonationIntakeService.FREQ_MONTHLY;
+    req.amount = 500;
+    req.designationId = gds[0].Id;
+    req.donorType = DonationIntakeService.TYPE_INDIVIDUAL;
+    req.firstName = 'Mona';
+    req.lastName = 'Monthly';
+    req.email = email;
+    DonationIntakeService.submit(req);
+    return [SELECT Id FROM Account WHERE PersonEmail = :email].Id;
+  }
+
+  static String manageError(
+    String giftId,
+    String op,
+    Integer months,
+    Decimal amount
+  ) {
+    try {
+      DonorPortalController.manageMonthlyGift(giftId, op, months, amount);
+    } catch (AuraHandledException e) {
+      return e.getMessage();
+    }
+    return null;
+  }
+
+  @IsTest
+  static void donorPausesAndResumesOwnMonthlyGift() {
+    DonorPortalController.accountIdOverride = donorWithMonthlyGift(
+      'mona.pause@example.com'
+    );
+    List<MonthlyGiftService.Gift> gifts = DonorPortalController.getMonthlyGifts();
+    Assert.areEqual(1, gifts.size());
+    Assert.areEqual(500, gifts[0].amount);
+    Assert.areEqual('Test Meals', gifts[0].designation);
+    Assert.areEqual('Test Monthly Appeal', gifts[0].campaignName);
+    Assert.isFalse(gifts[0].isPaused);
+
+    Test.startTest();
+    DonorPortalController.MonthlyGiftsResult paused = DonorPortalController.manageMonthlyGift(
+      gifts[0].id,
+      'pause',
+      2,
+      null
+    );
+    Test.stopTest();
+
+    Assert.isTrue(paused.message.startsWith('Paused from'), paused.message);
+    Assert.isTrue(paused.gifts[0].isPaused);
+    Assert.areEqual(
+      Date.today().addDays(1).addMonths(2).addDays(-1),
+      paused.gifts[0].pausedUntil
+    );
+    DonorPortalController.Dashboard d = DonorPortalController.getDashboard();
+    Assert.areEqual(
+      0,
+      d.activeMonthlyGifts,
+      'a paused gift is not counted as active'
+    );
+    Assert.areEqual(1, d.pausedMonthlyGifts);
+    Assert.areEqual(paused.gifts[0].pausedUntil, d.pausedUntil);
+
+    DonorPortalController.MonthlyGiftsResult resumed = DonorPortalController.manageMonthlyGift(
+      gifts[0].id,
+      'resume',
+      null,
+      null
+    );
+    Assert.isFalse(resumed.gifts[0].isPaused, resumed.message);
+  }
+
+  @IsTest
+  static void donorChangesAmountOfOwnMonthlyGift() {
+    DonorPortalController.accountIdOverride = donorWithMonthlyGift(
+      'mona.change@example.com'
+    );
+    String giftId = DonorPortalController.getMonthlyGifts()[0].id;
+
+    Test.startTest();
+    DonorPortalController.MonthlyGiftsResult r = DonorPortalController.manageMonthlyGift(
+      giftId,
+      'change_amount',
+      null,
+      800
+    );
+    Test.stopTest();
+
+    Assert.isTrue(r.message.contains('THB 800'), r.message);
+    Assert.areEqual(800, r.gifts[0].amount);
+  }
+
+  @IsTest
+  static void donorCancelsOwnMonthlyGift() {
+    Id accountId = donorWithMonthlyGift('mona.cancel@example.com');
+    DonorPortalController.accountIdOverride = accountId;
+    String giftId = DonorPortalController.getMonthlyGifts()[0].id;
+
+    Test.startTest();
+    DonorPortalController.MonthlyGiftsResult r = DonorPortalController.manageMonthlyGift(
+      giftId,
+      'cancel',
+      null,
+      null
+    );
+    Test.stopTest();
+
+    Assert.isTrue(r.gifts.isEmpty(), 'closed gifts are no longer listed');
+    Assert.areEqual(
+      'Closed',
+      [SELECT Status FROM GiftCommitment WHERE DonorId = :accountId].Status
+    );
+    Assert.areEqual(0, DonorPortalController.getDashboard().activeMonthlyGifts);
+  }
+
+  @IsTest
+  static void donorCannotManageSomeoneElsesGiftOrSendBadInput() {
+    Id owner = donorWithMonthlyGift('mona.owner@example.com');
+    DonorPortalController.accountIdOverride = owner;
+    String giftId = DonorPortalController.getMonthlyGifts()[0].id;
+
+    Assert.isTrue(
+      manageError(giftId, 'delete', null, null).contains('Unknown action')
+    );
+    Assert.isTrue(
+      manageError(giftId, 'pause', 13, null).contains('how many months')
+    );
+    Assert.isTrue(
+      manageError(giftId, 'change_amount', null, 50).contains('between THB 100')
+    );
+    Assert.isTrue(
+      manageError(giftId, 'resume', null, null).contains('not paused')
+    );
+
+    DonorPortalController.accountIdOverride = createDonor().Id;
+    Assert.isTrue(
+      manageError(giftId, 'cancel', null, null).contains('could not be found'),
+      'another donor cannot touch this gift'
+    );
+    Assert.areEqual(
+      'Active',
+      [SELECT Status FROM GiftCommitment WHERE DonorId = :owner].Status
+    );
+  }
 }

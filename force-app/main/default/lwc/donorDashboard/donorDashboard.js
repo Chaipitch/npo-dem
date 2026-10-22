@@ -1,4 +1,5 @@
 import { LightningElement, api, wire } from "lwc";
+import { refreshApex } from "@salesforce/apex";
 import basePath from "@salesforce/community/basePath";
 import getDashboard from "@salesforce/apex/DonorPortalController.getDashboard";
 import getCampaigns from "@salesforce/apex/DonationIntakeController.getCampaigns";
@@ -10,6 +11,42 @@ const IMPACT_STYLE = [
   { icon: "heart-fill", tone: "tone-red" }
 ];
 const STORY_ART = ["water", "school", "sprout"];
+
+// Free Unsplash photos (Unsplash License) used when no image is configured for a campaign or story.
+const unsplash = (id, w) =>
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=75`;
+const CAMPAIGN_PHOTOS = {
+  water: {
+    url: unsplash("photo-1740741705746-74e6f9b93b4f", 900),
+    credit: "Photo: Lisa Marie Theck / Unsplash"
+  },
+  school: {
+    url: unsplash("photo-1573894998033-c0cef4ed722b", 900),
+    credit: "Photo: Yogendra Singh / Unsplash"
+  },
+  sprout: {
+    url: unsplash("photo-1777150895644-2ca253ee1c93", 900),
+    credit: "Photo: Hammilton Ojijo / Unsplash"
+  },
+  gift: {
+    url: unsplash("photo-1488521787991-ed7bbaae773c", 900),
+    credit: "Photo: Larm Rmah / Unsplash"
+  }
+};
+const STORY_PHOTOS = {
+  water: {
+    url: unsplash("photo-1760873059715-7c7cfbe2a2c6", 600),
+    credit: "Photo: Andrew Itaga / Unsplash"
+  },
+  school: {
+    url: unsplash("photo-1542810634-71277d95dcbb", 600),
+    credit: "Photo: Yannis H / Unsplash"
+  },
+  sprout: {
+    url: unsplash("photo-1779085031158-a2519daf9747", 600),
+    credit: "Photo: Elly M / Unsplash"
+  }
+};
 const JOURNEY_TONES = ["jt-red", "jt-green", "jt-amber", "jt-purple"];
 const JOURNEY_ICONS = ["heart", "sprout", "book", "gift"];
 
@@ -34,9 +71,9 @@ export default class DonorDashboard extends LightningElement {
   @api agentSuggestions =
     "Explore my causes;View giving history;Show next milestones";
 
-  /** "Campaign name|image URL" pairs separated by ";" — campaigns without one get an illustration */
+  /** "Campaign name|image URL|credit" entries separated by ";" — other campaigns get a themed Unsplash photo */
   @api campaignImages =
-    "Christmas Giving 2026|https://images.unsplash.com/photo-1606916693216-69bd7e1cf2fa?auto=format&fit=crop&w=900&q=75";
+    "Christmas Giving 2026|https://images.unsplash.com/photo-1606916693216-69bd7e1cf2fa?auto=format&fit=crop&w=900&q=75|Photo: Christian Bowen / Unsplash";
 
   data;
   error;
@@ -50,8 +87,12 @@ export default class DonorDashboard extends LightningElement {
   }
   _scrolledTo;
 
+  _wiredDashboard;
+
   @wire(getDashboard)
-  wiredDashboard({ data, error }) {
+  wiredDashboard(result) {
+    this._wiredDashboard = result;
+    const { data, error } = result;
     if (data) {
       this.data = data;
       this.error = undefined;
@@ -116,7 +157,22 @@ export default class DonorDashboard extends LightningElement {
   }
   get monthlyNote() {
     const n = this.data?.activeMonthlyGifts || 0;
-    return n > 0 ? `${n} active monthly gift${n === 1 ? "" : "s"}` : "";
+    const p = this.data?.pausedMonthlyGifts || 0;
+    const parts = [];
+    if (n > 0) parts.push(`${n} active monthly gift${n === 1 ? "" : "s"}`);
+    if (p > 0) {
+      const until = this.data.pausedUntil
+        ? ` until ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(`${this.data.pausedUntil}T00:00:00Z`))}`
+        : "";
+      parts.push(`${p} paused${until}`);
+    }
+    return parts.join(" · ");
+  }
+  get manageMonthlyHref() {
+    return `${basePath || ""}/my-giving#monthly`;
+  }
+  handleGiftsChange() {
+    refreshApex(this._wiredDashboard);
   }
   get givingHref() {
     return `${basePath || ""}/my-giving`;
@@ -157,9 +213,8 @@ export default class DonorDashboard extends LightningElement {
         title,
         summary,
         tagClass: `tag tag-${i % 3}`,
-        isWater: art === "water",
-        isSchool: art === "school",
-        isSprout: art === "sprout"
+        imageUrl: STORY_PHOTOS[art].url,
+        imageCredit: STORY_PHOTOS[art].credit
       };
     });
   }
@@ -204,9 +259,11 @@ export default class DonorDashboard extends LightningElement {
   }
   get campaignCards() {
     const images = new Map(
-      splitList(this.campaignImages).map((pair) => {
-        const [name, url] = pair.split("|").map((x) => (x || "").trim());
-        return [name, url];
+      splitList(this.campaignImages).map((entry) => {
+        const [name, url, credit] = entry
+          .split("|")
+          .map((x) => (x || "").trim());
+        return [name, { url, credit: credit || "Photo: Unsplash" }];
       })
     );
     const base = basePath || "";
@@ -235,11 +292,8 @@ export default class DonorDashboard extends LightningElement {
         name: c.name,
         description: c.description,
         href: `${base}/donate?campaign=${encodeURIComponent(c.name)}`,
-        imageUrl: images.get(c.name),
-        isWater: art === "water",
-        isSchool: art === "school",
-        isSprout: art === "sprout",
-        isGift: art === "gift",
+        imageUrl: (images.get(c.name) || CAMPAIGN_PHOTOS[art]).url,
+        imageCredit: (images.get(c.name) || CAMPAIGN_PHOTOS[art]).credit,
         raisedDisplay: this.money(raised),
         goalDisplay: goal > 0 ? this.money(goal) : "",
         hasGoal: goal > 0,
