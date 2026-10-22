@@ -131,6 +131,9 @@
             <p class="monthly">
               <c-abc-hope-icon name="repeat" size="16"></c-abc-hope-icon>
               {monthlyNote}
+              <template lwc:if={isHome}>
+                <a class="monthly-manage" href={manageMonthlyHref}>Manage</a>
+              </template>
             </p>
           </template>
 
@@ -149,134 +152,12 @@
                     aria-label={c.name}
                   >
                     <div class="campaign-art" aria-hidden="true">
-                      <template lwc:if={c.imageUrl}>
-                        <img src={c.imageUrl} alt="" />
-                      </template>
-                      <template lwc:elseif={c.isWater}>
-                        <svg
-                          viewBox="0 0 120 80"
-                          preserveAspectRatio="xMidYMid slice"
-                        >
-                          <rect width="120" height="80" fill="#dcecf9" />
-                          <rect y="58" width="120" height="22" fill="#9fc6e6" />
-                          <rect
-                            x="34"
-                            y="20"
-                            width="40"
-                            height="10"
-                            rx="4"
-                            fill="#8a96a8"
-                          />
-                          <rect
-                            x="66"
-                            y="20"
-                            width="9"
-                            height="22"
-                            rx="4"
-                            fill="#8a96a8"
-                          />
-                          <rect
-                            x="26"
-                            y="14"
-                            width="11"
-                            height="22"
-                            rx="4"
-                            fill="#6f7b8d"
-                          />
-                          <path
-                            d="M70 46c0 0-5 6-5 9a5 5 0 0 0 10 0c0-3-5-9-5-9Z"
-                            fill="#3b8fd9"
-                          />
-                        </svg>
-                      </template>
-                      <template lwc:elseif={c.isSchool}>
-                        <svg
-                          viewBox="0 0 120 80"
-                          preserveAspectRatio="xMidYMid slice"
-                        >
-                          <rect width="120" height="80" fill="#fbecd3" />
-                          <path
-                            d="M24 50c12-6 24-6 36 0v24c-12-6-24-6-36 0Z"
-                            fill="#fff"
-                          />
-                          <path
-                            d="M60 50c12-6 24-6 36 0v24c-12-6-24-6-36 0Z"
-                            fill="#f4f1ea"
-                          />
-                          <path
-                            d="M60 50v24"
-                            stroke="#c9b9a0"
-                            stroke-width="2"
-                          />
-                          <path d="M52 10 60 6l8 4-8 4Z" fill="#14185b" />
-                          <rect
-                            x="46"
-                            y="16"
-                            width="28"
-                            height="26"
-                            rx="5"
-                            fill="#2f6fd6"
-                          />
-                          <circle cx="60" cy="30" r="5" fill="#f5b83d" />
-                        </svg>
-                      </template>
-                      <template lwc:elseif={c.isSprout}>
-                        <svg
-                          viewBox="0 0 120 80"
-                          preserveAspectRatio="xMidYMid slice"
-                        >
-                          <rect width="120" height="80" fill="#e4f2dc" />
-                          <circle cx="96" cy="18" r="10" fill="#fff4cf" />
-                          <path
-                            d="M0 60c30-6 70-8 120-2v22H0Z"
-                            fill="#5b3a22"
-                          />
-                          <path
-                            d="M60 60V36"
-                            stroke="#4f9a3c"
-                            stroke-width="4"
-                            stroke-linecap="round"
-                          />
-                          <path
-                            d="M60 44c-12-3-20 1-24 9 11 3 19-1 24-9Z"
-                            fill="#6cc04a"
-                          />
-                          <path
-                            d="M61 40c8-10 18-13 28-9-6 9-16 12-28 9Z"
-                            fill="#7ed05a"
-                          />
-                        </svg>
-                      </template>
-                      <template lwc:else>
-                        <svg
-                          viewBox="0 0 120 80"
-                          preserveAspectRatio="xMidYMid slice"
-                        >
-                          <rect width="120" height="80" fill="#fde8ea" />
-                          <rect
-                            x="40"
-                            y="30"
-                            width="40"
-                            height="34"
-                            rx="3"
-                            fill="#d63131"
-                          />
-                          <rect
-                            x="56"
-                            y="30"
-                            width="8"
-                            height="34"
-                            fill="#f5c84d"
-                          />
-                          <rect
-                            x="40"
-                            y="42"
-                            width="40"
-                            height="7"
-                            fill="#f5c84d"
-                          />
-                        </svg>
-                      </template>
+                      <img
+                        src={c.imageUrl}
+                        alt=""
+                        title={c.imageCredit}
+                        loading="lazy"
+                      />
                     </div>
                     <div class="campaign-body">
                       <h3 class="campaign-name">{c.name}</h3>
@@ -298,6 +179,12 @@
                           ><span>· {c.timing}</span></template
                         >
                       </p>
+                      <template lwc:if={c.programsDisplay}>
+                        <p class="campaign-program">
+                          <span class="muted">Funds</span>
+                          {c.programsDisplay}
+                        </p>
+                      </template>
                       <div class="campaign-chips">
                         <template for:each={c.chips} for:item="d">
                           <span key={d.key} class="campaign-chip"
@@ -356,124 +243,12 @@
               <template for:each={storyCards} for:item="s">
                 <article key={s.key} class="story">
                   <div class="story-art" aria-hidden="true">
-                    <template lwc:if={s.isWater}>
-                      <svg viewBox="0 0 120 150">
-                        <rect width="120" height="150" fill="#dcecf9" />
-                        <rect
-                          x="0"
-                          y="110"
-                          width="120"
-                          height="40"
-                          fill="#9fc6e6"
-                        />
-                        <rect
-                          x="22"
-                          y="40"
-                          width="54"
-                          height="16"
-                          rx="6"
-                          fill="#8a96a8"
-                        />
-                        <rect
-                          x="66"
-                          y="40"
-                          width="12"
-                          height="34"
-                          rx="5"
-                          fill="#8a96a8"
-                        />
-                        <rect
-                          x="14"
-                          y="30"
-                          width="16"
-                          height="36"
-                          rx="5"
-                          fill="#6f7b8d"
-                        />
-                        <path
-                          d="M72 82c0 0-7 9-7 14a7 7 0 0 0 14 0c0-5-7-14-7-14Z"
-                          fill="#3b8fd9"
-                        />
-                        <path
-                          d="M72 104c0 0-5 7-5 10a5 5 0 0 0 10 0c0-3-5-10-5-10Z"
-                          fill="#3b8fd9"
-                          opacity=".7"
-                        />
-                        <circle
-                          cx="40"
-                          cy="128"
-                          r="10"
-                          fill="#fff"
-                          opacity=".35"
-                        />
-                      </svg>
-                    </template>
-                    <template lwc:if={s.isSchool}>
-                      <svg viewBox="0 0 120 150">
-                        <rect width="120" height="150" fill="#fbecd3" />
-                        <path
-                          d="M14 92c16-8 30-8 46 0v40c-16-8-30-8-46 0Z"
-                          fill="#fff"
-                        />
-                        <path
-                          d="M60 92c16-8 30-8 46 0v40c-16-8-30-8-46 0Z"
-                          fill="#f4f1ea"
-                        />
-                        <path d="M60 92v40" stroke="#c9b9a0" stroke-width="2" />
-                        <path
-                          d="M22 102h28M22 110h28M68 102h28M68 110h22"
-                          stroke="#d4c6ae"
-                          stroke-width="3"
-                        />
-                        <rect
-                          x="40"
-                          y="26"
-                          width="40"
-                          height="44"
-                          rx="6"
-                          fill="#2f6fd6"
-                        />
-                        <rect
-                          x="40"
-                          y="26"
-                          width="40"
-                          height="10"
-                          rx="5"
-                          fill="#5a8fe6"
-                        />
-                        <circle cx="60" cy="52" r="7" fill="#f5b83d" />
-                        <path
-                          d="M92 30 104 74"
-                          stroke="#e5484d"
-                          stroke-width="7"
-                          stroke-linecap="round"
-                        />
-                      </svg>
-                    </template>
-                    <template lwc:if={s.isSprout}>
-                      <svg viewBox="0 0 120 150">
-                        <rect width="120" height="150" fill="#e4f2dc" />
-                        <circle cx="92" cy="30" r="16" fill="#fff4cf" />
-                        <path
-                          d="M0 112c30-10 70-12 120-2v40H0Z"
-                          fill="#5b3a22"
-                        />
-                        <path
-                          d="M60 112V70"
-                          stroke="#4f9a3c"
-                          stroke-width="5"
-                          stroke-linecap="round"
-                        />
-                        <path
-                          d="M60 84c-18-4-30 2-36 14 16 4 28-2 36-14Z"
-                          fill="#6cc04a"
-                        />
-                        <path
-                          d="M61 76c12-16 28-20 42-14-8 14-24 18-42 14Z"
-                          fill="#7ed05a"
-                        />
-                      </svg>
-                    </template>
+                    <img
+                      src={s.imageUrl}
+                      alt=""
+                      title={s.imageCredit}
+                      loading="lazy"
+                    />
                   </div>
                   <div class="story-body">
                     <span class={s.tagClass}>{s.tag}</span>
@@ -535,6 +310,15 @@
           </template>
 
           <template lwc:if={isGiving}>
+            <div class="section-head" data-section="monthly">
+              <h2 class="section-title">Monthly Gifts</h2>
+            </div>
+            <c-donor-monthly-gifts
+              currency-label={currencyLabel}
+              donate-href={donateHref}
+              ongiftschange={handleGiftsChange}
+            ></c-donor-monthly-gifts>
+
             <div class="section-head" data-section="history">
               <h2 class="section-title">Giving History</h2>
               <a class="give-again" href={donateHref}
@@ -554,6 +338,7 @@
                       <th scope="col">Date</th>
                       <th scope="col">Campaign</th>
                       <th scope="col">Designation</th>
+                      <th scope="col">Program</th>
                       <th scope="col" class="num">Amount</th>
                       <th scope="col">Status</th>
                     </tr>
@@ -564,6 +349,7 @@
                         <td data-label="Date">{g.dateDisplay}</td>
                         <td data-label="Campaign">{g.campaignName}</td>
                         <td data-label="Designation">{g.designations}</td>
+                        <td data-label="Program">{g.programs}</td>
                         <td data-label="Amount" class="num strong">
                           {g.amountDisplay}
                         </td>

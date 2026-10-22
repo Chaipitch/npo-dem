@@ -65,29 +65,205 @@ private class AbcHopeAgentActionsTest {
     )[0];
   }
 
-  @IsTest
-  static void campaignInfoDescribesCampaignAndDonateLink() {
-    Test.startTest();
-    AbcHopeAgentCampaignInfo.Result r = AbcHopeAgentCampaignInfo.getInfo(
-      new List<AbcHopeAgentCampaignInfo.Request>{
-        new AbcHopeAgentCampaignInfo.Request()
-      }
+  /** Fundraising campaigns carry a default designation (D-18); returns the campaign Id. */
+  static Id fundraisingCampaign(
+    String name,
+    Date endDate,
+    String designationName
+  ) {
+    List<Campaign> camps = [SELECT Id FROM Campaign WHERE Name = :name];
+    Campaign camp = camps.isEmpty()
+      ? new Campaign(Name = name, IsActive = true)
+      : camps[0];
+    camp.EndDate = endDate;
+    camp.ExpectedRevenue = 50000;
+    upsert camp;
+    List<GiftDesignation> gds = [
+      SELECT Id
+      FROM GiftDesignation
+      WHERE Name = :designationName
+    ];
+    GiftDesignation gd = gds.isEmpty()
+      ? new GiftDesignation(Name = designationName, IsActive = true)
+      : gds[0];
+    upsert gd;
+    insert new GiftDefaultDesignation(
+      ParentRecordId = camp.Id,
+      GiftDesignationId = gd.Id,
+      AllocatedPercentage = 100
+    );
+    return camp.Id;
+  }
+
+  static AbcHopeAgentCampaignInfo.Result campaignInfo(String name) {
+    AbcHopeAgentCampaignInfo.Request req = new AbcHopeAgentCampaignInfo.Request();
+    req.campaignName = name;
+    return AbcHopeAgentCampaignInfo.getInfo(
+      new List<AbcHopeAgentCampaignInfo.Request>{ req }
     )[0];
+  }
+
+  @IsTest
+  static void campaignInfoListsEveryOpenCampaign() {
+    fundraisingCampaign(CAMPAIGN, Date.today().addDays(30), 'School Supplies');
+    fundraisingCampaign(
+      'Test Spring Appeal',
+      Date.today().addDays(10),
+      'Test Meals'
+    );
+    fundraisingCampaign(
+      'Test Ended Appeal',
+      Date.today().addDays(-1),
+      'Test Meals'
+    );
+    insert new Campaign(Name = 'Test Internal Campaign', IsActive = true);
+
+    Test.startTest();
+    AbcHopeAgentCampaignInfo.Result r = campaignInfo(null);
     Test.stopTest();
-    Assert.isTrue(r.summary.contains(CAMPAIGN));
-    Assert.isTrue(r.summary.contains('School Supplies'));
+
+    Assert.isTrue(r.summary.contains('2 campaigns open'), r.summary);
+    Assert.isTrue(r.summary.contains(CAMPAIGN), r.summary);
+    Assert.isTrue(r.summary.contains('Test Spring Appeal'), r.summary);
+    Assert.isTrue(r.summary.contains('of a THB 50,000 goal'), r.summary);
+    Assert.isTrue(
+      r.summary.contains('/donate?campaign=Test%20Spring%20Appeal'),
+      r.summary
+    );
+    Assert.isFalse(
+      r.summary.contains('Test Ended Appeal'),
+      'ended campaigns are not open'
+    );
+    Assert.isFalse(
+      r.summary.contains('Test Internal Campaign'),
+      'non-fundraising campaigns stay hidden'
+    );
     Assert.isTrue(r.summary.contains('no payment is collected'));
     Assert.isTrue(r.donateUrl.endsWith('/donate'));
   }
 
   @IsTest
+  static void campaignInfoDescribesCampaignByPartialName() {
+    fundraisingCampaign(CAMPAIGN, Date.today().addDays(30), 'School Supplies');
+
+    Test.startTest();
+    AbcHopeAgentCampaignInfo.Result r = campaignInfo('christmas');
+    Test.stopTest();
+
+    Assert.isTrue(
+      r.summary.contains('Campaign: ' + CAMPAIGN + '\n'),
+      r.summary
+    );
+    Assert.isTrue(
+      r.summary.contains('School Supplies — Notebooks and pencils.'),
+      r.summary
+    );
+    Assert.isTrue(r.summary.contains('Progress: Raised THB 0'), r.summary);
+    Assert.isTrue(r.summary.contains('no payment is collected'));
+    Assert.isTrue(
+      r.donateUrl.endsWith('/donate?campaign=Christmas%20Giving%202026'),
+      r.donateUrl
+    );
+  }
+
+  @IsTest
+  static void campaignInfoNamesTheProgramsACampaignFunds() {
+    Program edu = new Program(
+      Name = 'Test Education Access',
+      Status = 'Active'
+    );
+    insert edu;
+    update new GiftDesignation(
+      Id = [SELECT Id FROM GiftDesignation WHERE Name = 'School Supplies']
+      .Id,
+      NGOTV_Program__c = edu.Id
+    );
+    fundraisingCampaign(CAMPAIGN, Date.today().addDays(30), 'School Supplies');
+
+    Test.startTest();
+    AbcHopeAgentCampaignInfo.Result listed = campaignInfo('');
+    AbcHopeAgentCampaignInfo.Result described = campaignInfo(CAMPAIGN);
+    Test.stopTest();
+
+    Assert.isTrue(
+      listed.summary.contains('Funds: Test Education Access. Raised'),
+      listed.summary
+    );
+    Assert.isTrue(
+      described.summary.contains('Programs funded: Test Education Access\n'),
+      described.summary
+    );
+    Assert.isTrue(
+      described.summary.contains(
+        'School Supplies (Test Education Access program) — Notebooks and pencils.'
+      ),
+      described.summary
+    );
+  }
+
+  @IsTest
+  static void campaignInfoUsesEachCampaignsOwnCauses() {
+    insert new GiftDesignation(
+      Name = DonationIntakeService.GENERAL_DESIGNATION,
+      IsActive = true
+    );
+    fundraisingCampaign(
+      'Test Spring Appeal',
+      Date.today().addDays(10),
+      'Test Meals'
+    );
+
+    AbcHopeAgentCampaignInfo.Result r = campaignInfo('Test Spring Appeal');
+
+    Assert.isTrue(
+      r.summary.contains(
+        'Causes donors can choose: Test Meals; Where Most Needed'
+      ),
+      r.summary
+    );
+    Assert.isFalse(r.summary.contains('School Supplies'), r.summary);
+  }
+
+  @IsTest
+  static void campaignInfoFlagsClosedCampaign() {
+    fundraisingCampaign(
+      'Test Ended Appeal',
+      Date.today().addDays(-1),
+      'Test Meals'
+    );
+
+    AbcHopeAgentCampaignInfo.Result r = campaignInfo('Test Ended Appeal');
+
+    Assert.isTrue(
+      r.summary.contains('(not currently accepting gifts)'),
+      r.summary
+    );
+    Assert.isFalse(r.summary.contains('Progress:'), r.summary);
+    Assert.isTrue(
+      r.donateUrl.endsWith('/donate'),
+      'no donate link for a closed campaign'
+    );
+  }
+
+  @IsTest
   static void campaignInfoUnknownCampaign() {
-    AbcHopeAgentCampaignInfo.Request req = new AbcHopeAgentCampaignInfo.Request();
-    req.campaignName = 'Summer Fun Run';
-    AbcHopeAgentCampaignInfo.Result r = AbcHopeAgentCampaignInfo.getInfo(
-      new List<AbcHopeAgentCampaignInfo.Request>{ req }
-    )[0];
-    Assert.isTrue(r.summary.contains('no campaign'));
+    fundraisingCampaign(CAMPAIGN, Date.today().addDays(30), 'School Supplies');
+    insert new Campaign(Name = 'Test Internal Campaign', IsActive = true);
+
+    AbcHopeAgentCampaignInfo.Result unknown = campaignInfo('Summer Fun Run');
+    AbcHopeAgentCampaignInfo.Result internal = campaignInfo(
+      'Test Internal Campaign'
+    );
+
+    Assert.isTrue(unknown.summary.contains('no campaign'), unknown.summary);
+    Assert.isTrue(
+      unknown.summary.contains('Campaigns open for donations: ' + CAMPAIGN),
+      unknown.summary
+    );
+    Assert.isTrue(
+      internal.summary.contains('no campaign'),
+      'non-fundraising campaigns are not described'
+    );
   }
 
   @IsTest

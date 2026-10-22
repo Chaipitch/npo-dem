@@ -124,6 +124,11 @@
               </select>
             </span>
           </label>
+          <template lwc:if={designationProgram}>
+            <p class="hint" data-id="program-hint">
+              Funds our {designationProgram} program.
+            </p>
+          </template>
           <template lwc:if={designationError}>
             <p class="field-error" role="alert">{designationError}</p>
           </template>
@@ -253,78 +258,7 @@
           <p class="subtitle">Please check your details before submitting.</p>
           <div class="review">
             <div class="review-head">
-              <template lwc:if={reviewImageUrl}>
-                <img class="review-img" src={reviewImageUrl} alt="" />
-              </template>
-              <template lwc:else>
-                <span class="review-img review-img_placeholder">
-                  <svg class="books" viewBox="0 0 120 90" aria-hidden="true">
-                    <rect
-                      x="8"
-                      y="66"
-                      width="100"
-                      height="16"
-                      rx="3"
-                      fill="#2f6fd6"
-                    />
-                    <rect
-                      x="8"
-                      y="66"
-                      width="100"
-                      height="4"
-                      fill="#fff"
-                      opacity=".3"
-                    />
-                    <rect
-                      x="14"
-                      y="51"
-                      width="90"
-                      height="15"
-                      rx="3"
-                      fill="#f5b83d"
-                    />
-                    <rect
-                      x="20"
-                      y="51"
-                      width="4"
-                      height="15"
-                      fill="#fff"
-                      opacity=".5"
-                    />
-                    <rect
-                      x="4"
-                      y="36"
-                      width="96"
-                      height="15"
-                      rx="3"
-                      fill="#e5484d"
-                    />
-                    <rect
-                      x="10"
-                      y="36"
-                      width="4"
-                      height="15"
-                      fill="#fff"
-                      opacity=".5"
-                    />
-                    <rect
-                      x="74"
-                      y="10"
-                      width="26"
-                      height="26"
-                      rx="4"
-                      fill="#e9e2d6"
-                    />
-                    <path
-                      d="M80 10 77 -4M87 10V-6M94 10l3-13"
-                      stroke-width="5"
-                      stroke-linecap="round"
-                      fill="none"
-                      stroke="#2f8a4a"
-                    />
-                  </svg>
-                </span>
-              </template>
+              <img class="review-img" src={reviewImage} alt="" />
               <div>
                 <p class="review-campaign">{campaignLabel}</p>
                 <p class="review-label">Designation</p>
@@ -405,75 +339,8 @@
             </p>
             <div class="thanks-card">
               <span class="thanks-icon"
-                ><svg
-                  class="books books_small"
-                  viewBox="0 0 120 90"
-                  aria-hidden="true"
-                >
-                  <rect
-                    x="8"
-                    y="66"
-                    width="100"
-                    height="16"
-                    rx="3"
-                    fill="#2f6fd6"
-                  />
-                  <rect
-                    x="8"
-                    y="66"
-                    width="100"
-                    height="4"
-                    fill="#fff"
-                    opacity=".3"
-                  />
-                  <rect
-                    x="14"
-                    y="51"
-                    width="90"
-                    height="15"
-                    rx="3"
-                    fill="#f5b83d"
-                  />
-                  <rect
-                    x="20"
-                    y="51"
-                    width="4"
-                    height="15"
-                    fill="#fff"
-                    opacity=".5"
-                  />
-                  <rect
-                    x="4"
-                    y="36"
-                    width="96"
-                    height="15"
-                    rx="3"
-                    fill="#e5484d"
-                  />
-                  <rect
-                    x="10"
-                    y="36"
-                    width="4"
-                    height="15"
-                    fill="#fff"
-                    opacity=".5"
-                  />
-                  <rect
-                    x="74"
-                    y="10"
-                    width="26"
-                    height="26"
-                    rx="4"
-                    fill="#e9e2d6"
-                  />
-                  <path
-                    d="M80 10 77 -4M87 10V-6M94 10l3-13"
-                    stroke-width="5"
-                    stroke-linecap="round"
-                    fill="none"
-                    stroke="#2f8a4a"
-                  /></svg
-              ></span>
+                ><img class="thanks-img" src={reviewImage} alt=""
+              /></span>
               <div>
                 <p class="thanks-amount">
                   {resultAmountDisplay}

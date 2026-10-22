@@ -29,6 +29,8 @@ public without sharing class DonorPortalController {
     public String campaignName;
     @AuraEnabled
     public String designations;
+    @AuraEnabled
+    public String programs; // what the designations fund (D-21)
   }
 
   public class Milestone {
@@ -52,7 +54,11 @@ public without sharing class DonorPortalController {
     @AuraEnabled
     public String supporterSince;
     @AuraEnabled
-    public Integer activeMonthlyGifts = 0;
+    public Integer activeMonthlyGifts = 0; // open and not paused
+    @AuraEnabled
+    public Integer pausedMonthlyGifts = 0; // current or upcoming pause (D-22)
+    @AuraEnabled
+    public Date pausedUntil; // earliest pause end among paused gifts
     @AuraEnabled
     public List<String> causes = new List<String>();
     @AuraEnabled
@@ -110,10 +116,14 @@ public without sharing class DonorPortalController {
       ]
     );
     Map<Id, List<String>> designationsByTxn = new Map<Id, List<String>>();
+    Map<Id, List<String>> programsByTxn = new Map<Id, List<String>>();
     // Year a cause was first supported, for the impact journey.
     Map<String, Integer> firstYearByCause = new Map<String, Integer>();
     for (GiftTransactionDesignation gtd : [
-      SELECT GiftTransactionId, GiftDesignation.Name
+      SELECT
+        GiftTransactionId,
+        GiftDesignation.Name,
+        GiftDesignation.NGOTV_Program__r.Name
       FROM GiftTransactionDesignation
       WHERE GiftTransactionId IN :txns.keySet() AND GiftDesignationId != NULL
     ]) {
@@ -122,6 +132,11 @@ public without sharing class DonorPortalController {
         designationsByTxn.put(gtd.GiftTransactionId, new List<String>());
       }
       designationsByTxn.get(gtd.GiftTransactionId).add(cause);
+      DonationIntakeService.addProgram(
+        programsByTxn,
+        gtd.GiftTransactionId,
+        gtd.GiftDesignation.NGOTV_Program__r?.Name
+      );
       Integer year = giftYear(txns.get(gtd.GiftTransactionId));
       if (
         !firstYearByCause.containsKey(cause) ||
@@ -148,6 +163,9 @@ public without sharing class DonorPortalController {
         g.designations = designationsByTxn.containsKey(gt.Id)
           ? String.join(designationsByTxn.get(gt.Id), ', ')
           : '';
+        g.programs = programsByTxn.containsKey(gt.Id)
+          ? String.join(programsByTxn.get(gt.Id), ', ')
+          : '';
         d.gifts.add(g);
       }
     }
@@ -165,11 +183,21 @@ public without sharing class DonorPortalController {
         firstYearByCause.put(gdd.GiftDesignation.Name, Date.today().year());
       }
     }
-    d.activeMonthlyGifts = [
-      SELECT COUNT()
-      FROM GiftCommitment
-      WHERE DonorId = :acc.Id AND Status = 'Active'
-    ];
+    // NPC keeps paused commitments Active, so count pauses from their schedules (D-22).
+    for (MonthlyGiftService.Gift mg : MonthlyGiftService.load(acc.Id)) {
+      if (mg.isPaused) {
+        d.pausedMonthlyGifts++;
+        if (
+          mg.pausedUntil != null &&
+          (d.pausedUntil == null ||
+          mg.pausedUntil < d.pausedUntil)
+        ) {
+          d.pausedUntil = mg.pausedUntil;
+        }
+      } else {
+        d.activeMonthlyGifts++;
+      }
+    }
 
     d.causes = new List<String>(firstYearByCause.keySet());
     d.causes.sort();
@@ -251,6 +279,63 @@ public without sharing class DonorPortalController {
       throw auraError('We could not save your profile. ' + e.getDmlMessage(0));
     }
     return getProfile();
+  }
+
+  // ---------------------------------------------------------------- monthly gifts
+
+  public class MonthlyGiftsResult {
+    @AuraEnabled
+    public String message;
+    @AuraEnabled
+    public List<MonthlyGiftService.Gift> gifts;
+  }
+
+  static final Set<String> MONTHLY_OPERATIONS = new Set<String>{
+    'pause',
+    'resume',
+    'change_amount',
+    'cancel'
+  };
+
+  @AuraEnabled
+  public static List<MonthlyGiftService.Gift> getMonthlyGifts() {
+    return MonthlyGiftService.load(currentAccount().Id);
+  }
+
+  /** Pause, resume, change or cancel one of the signed-in donor's own monthly gifts. */
+  @AuraEnabled
+  public static MonthlyGiftsResult manageMonthlyGift(
+    String giftId,
+    String operation,
+    Integer pauseMonths,
+    Decimal newAmount
+  ) {
+    Account acc = currentAccount();
+    String op = operation == null ? '' : operation.trim().toLowerCase();
+    if (!MONTHLY_OPERATIONS.contains(op)) {
+      throw auraError('Unknown action.');
+    }
+    MonthlyGiftService.Gift gift = MonthlyGiftService.find(acc.Id, giftId);
+    if (gift == null) {
+      throw auraError('This monthly gift could not be found.');
+    }
+    MonthlyGiftService.Outcome outcome;
+    if (op == 'pause') {
+      outcome = MonthlyGiftService.pause(gift, pauseMonths);
+    } else if (op == 'resume') {
+      outcome = MonthlyGiftService.resume(gift);
+    } else if (op == 'change_amount') {
+      outcome = MonthlyGiftService.changeAmount(gift, newAmount);
+    } else {
+      outcome = MonthlyGiftService.cancel(gift);
+    }
+    if (!outcome.success) {
+      throw auraError(outcome.message);
+    }
+    MonthlyGiftsResult res = new MonthlyGiftsResult();
+    res.message = outcome.message;
+    res.gifts = MonthlyGiftService.load(acc.Id);
+    return res;
   }
 
   // ---------------------------------------------------------------- helpers

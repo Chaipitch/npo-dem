@@ -406,4 +406,53 @@ private class DonationIntakeServiceTest {
       opts.designations[1].label
     );
   }
+
+  @IsTest
+  static void campaignsAndOptionsCarryEachDesignationsProgram() {
+    Program edu = new Program(
+      Name = 'Test Education Access',
+      Status = 'Active'
+    );
+    insert edu;
+    update new GiftDesignation(
+      Id = designationId('Test School Supplies'),
+      NGOTV_Program__c = edu.Id
+    );
+    Id campId = [SELECT Id FROM Campaign WHERE Name = :CAMPAIGN].Id;
+    GiftDefaultDesignation existing = [
+      SELECT Id
+      FROM GiftDefaultDesignation
+      WHERE ParentRecordId = :campId
+    ];
+    existing.AllocatedPercentage = 50;
+    update existing;
+    insert new GiftDefaultDesignation(
+      ParentRecordId = campId,
+      GiftDesignationId = designationId('Test Learning Kits'),
+      AllocatedPercentage = 50
+    );
+
+    Test.startTest();
+    DonationIntakeService.CampaignCard card;
+    for (
+      DonationIntakeService.CampaignCard c : DonationIntakeService.getCampaigns()
+    ) {
+      if (c.name == CAMPAIGN) {
+        card = c;
+      }
+    }
+    DonationIntakeService.Options opts = DonationIntakeService.getOptions(
+      CAMPAIGN,
+      'Test School Supplies, Test Learning Kits'
+    );
+    Test.stopTest();
+
+    Assert.areEqual(
+      new List<String>{ 'Test Education Access' },
+      card.programs,
+      'one entry per program; designations without one are skipped'
+    );
+    Assert.areEqual('Test Education Access', opts.designations[0].program);
+    Assert.isNull(opts.designations[1].program);
+  }
 }

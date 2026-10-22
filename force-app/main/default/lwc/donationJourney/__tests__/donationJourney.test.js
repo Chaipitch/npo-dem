@@ -104,6 +104,27 @@ describe("c-donation-journey", () => {
     expect($(el, ".hint").textContent).toContain("every month");
   });
 
+  it("shows the program the chosen designation funds", async () => {
+    const el = mount();
+    getOptions.emit({
+      ...OPTIONS,
+      designations: [
+        { label: "School Supplies", value: "a01", program: "Education Access" },
+        { label: "Where Most Needed", value: "a03" }
+      ]
+    });
+    await flush();
+    expect($(el, '[data-id="program-hint"]').textContent).toContain(
+      "Funds our Education Access program."
+    );
+
+    const select = $(el, '[data-id="designation"]');
+    select.value = "a03";
+    select.dispatchEvent(new CustomEvent("change"));
+    await flush();
+    expect($(el, '[data-id="program-hint"]')).toBeNull();
+  });
+
   it("validates details and switches fields for organizations", async () => {
     const el = mount();
     await goToDetails(el);
@@ -224,9 +245,12 @@ describe("c-donation-journey", () => {
     expect($(el, ".review-campaign").textContent).toBe(
       "Clean Water for Rural Schools"
     );
+    // Clean Water gets the water photo on review and thank-you (no SVG placeholder).
+    expect($(el, ".review-img").src).toContain("photo-1740741705746");
     click($(el, '[data-id="submit"]'));
     await flush();
     await flush();
+    expect($(el, ".thanks-img").src).toContain("photo-1740741705746");
     const sent = JSON.parse(submitDonation.mock.calls[0][0].requestJson);
     expect(sent.campaignName).toBe("Clean Water for Rural Schools");
     expect(sent.designationId).toBe("cw1");

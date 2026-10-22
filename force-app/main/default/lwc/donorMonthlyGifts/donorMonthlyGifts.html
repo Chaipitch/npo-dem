@@ -1,0 +1,210 @@
+<template>
+  <div class="monthly-gifts">
+    <template lwc:if={notice}>
+      <p class="notice" role="status" data-id="notice">{notice}</p>
+    </template>
+    <template lwc:if={error}>
+      <p class="error" role="alert" data-id="error">{error}</p>
+    </template>
+    <template lwc:if={loadError}>
+      <p class="error" role="alert">{loadError}</p>
+    </template>
+
+    <template lwc:if={isEmpty}>
+      <p class="empty muted" data-id="empty">
+        You have no monthly gifts.
+        <a class="link" href={donateHref}>Start one from any campaign</a>
+      </p>
+    </template>
+
+    <template lwc:if={hasGifts}>
+      <ul class="gift-list">
+        <template for:each={cards} for:item="g">
+          <li key={g.id} class="gift" data-gift={g.id}>
+            <div class="gift-main">
+              <div>
+                <p class="gift-amount">{g.amountDisplay}</p>
+                <p class="gift-meta muted">{g.meta}</p>
+              </div>
+              <span class={g.statusClass} data-id="status"
+                >{g.statusLabel}</span
+              >
+            </div>
+            <template lwc:if={g.nextGift}>
+              <p class="gift-next muted">{g.nextGift}</p>
+            </template>
+
+            <template lwc:if={g.showActions}>
+              <div class="actions">
+                <template lwc:if={g.isPaused}>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-id={g.id}
+                    data-action="resume"
+                    disabled={busy}
+                    onclick={resume}
+                  >
+                    Resume now
+                  </button>
+                </template>
+                <template lwc:else>
+                  <button
+                    type="button"
+                    class="btn"
+                    data-id={g.id}
+                    data-panel="pause"
+                    data-action="open-pause"
+                    disabled={busy}
+                    onclick={openFor}
+                  >
+                    Pause
+                  </button>
+                  <button
+                    type="button"
+                    class="btn"
+                    data-id={g.id}
+                    data-panel="amount"
+                    data-action="open-amount"
+                    disabled={busy}
+                    onclick={openFor}
+                  >
+                    Change amount
+                  </button>
+                </template>
+                <button
+                  type="button"
+                  class="btn btn-quiet"
+                  data-id={g.id}
+                  data-panel="cancel"
+                  data-action="open-cancel"
+                  disabled={busy}
+                  onclick={openFor}
+                >
+                  Cancel gift
+                </button>
+              </div>
+            </template>
+
+            <template lwc:if={g.showPause}>
+              <div class="panel">
+                <label class="field">
+                  <span class="field-label">Pause for</span>
+                  <select
+                    class="input"
+                    data-id="months"
+                    onchange={handleMonths}
+                  >
+                    <template for:each={pauseOptions} for:item="opt">
+                      <option
+                        key={opt.value}
+                        value={opt.value}
+                        selected={opt.selected}
+                      >
+                        {opt.label}
+                      </option>
+                    </template>
+                  </select>
+                </label>
+                <p class="hint muted">
+                  The pause starts tomorrow. Gifts restart automatically
+                  afterwards.
+                </p>
+                <div class="actions">
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-id={g.id}
+                    data-action="confirm-pause"
+                    disabled={busy}
+                    onclick={confirmPause}
+                  >
+                    Confirm pause
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-quiet"
+                    disabled={busy}
+                    onclick={closePanel}
+                  >
+                    Back
+                  </button>
+                </div>
+              </div>
+            </template>
+
+            <template lwc:if={g.showAmount}>
+              <div class="panel">
+                <label class="field">
+                  <span class="field-label"
+                    >New monthly amount ({currencyLabel})</span
+                  >
+                  <input
+                    class="input"
+                    type="number"
+                    inputmode="numeric"
+                    min="100"
+                    step="1"
+                    data-id="amount"
+                    oninput={handleAmount}
+                  />
+                </label>
+                <p class="hint muted">The new amount applies from tomorrow.</p>
+                <div class="actions">
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-id={g.id}
+                    data-action="confirm-amount"
+                    disabled={busy}
+                    onclick={confirmAmount}
+                  >
+                    Save amount
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-quiet"
+                    disabled={busy}
+                    onclick={closePanel}
+                  >
+                    Back
+                  </button>
+                </div>
+              </div>
+            </template>
+
+            <template lwc:if={g.showCancel}>
+              <div class="panel panel-warn">
+                <p class="strong">Cancel this monthly gift?</p>
+                <p class="hint muted">
+                  No further gifts will be scheduled. Gifts you have already
+                  made stay in your history.
+                </p>
+                <div class="actions">
+                  <button
+                    type="button"
+                    class="btn btn-danger"
+                    data-id={g.id}
+                    data-action="confirm-cancel"
+                    disabled={busy}
+                    onclick={confirmCancel}
+                  >
+                    Yes, cancel gift
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-quiet"
+                    disabled={busy}
+                    onclick={closePanel}
+                  >
+                    Keep my gift
+                  </button>
+                </div>
+              </div>
+            </template>
+          </li>
+        </template>
+      </ul>
+    </template>
+  </div>
+</template>
