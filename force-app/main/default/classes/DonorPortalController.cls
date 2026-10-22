@@ -60,6 +60,8 @@ public without sharing class DonorPortalController {
     @AuraEnabled
     public Date pausedUntil; // earliest pause end among paused gifts
     @AuraEnabled
+    public List<String> activeRecurringTypes = new List<String>(); // e.g. Weekly, Monthly (D-24)
+    @AuraEnabled
     public List<String> causes = new List<String>();
     @AuraEnabled
     public List<Gift> gifts = new List<Gift>();
@@ -100,20 +102,7 @@ public without sharing class DonorPortalController {
     d.firstName = String.isNotBlank(acc.FirstName) ? acc.FirstName : acc.Name;
 
     Map<Id, GiftTransaction> txns = new Map<Id, GiftTransaction>(
-      [
-        SELECT
-          Id,
-          Name,
-          TransactionDate,
-          CreatedDate,
-          OriginalAmount,
-          Status,
-          Campaign.Name
-        FROM GiftTransaction
-        WHERE DonorId = :acc.Id AND Status NOT IN :EXCLUDED_STATUSES
-        ORDER BY TransactionDate DESC NULLS LAST, CreatedDate DESC
-        LIMIT 200
-      ]
+      countedGifts(acc.Id)
     );
     Map<Id, List<String>> designationsByTxn = new Map<Id, List<String>>();
     Map<Id, List<String>> programsByTxn = new Map<Id, List<String>>();
@@ -146,10 +135,9 @@ public without sharing class DonorPortalController {
       }
     }
 
-    Integer firstYear = acc.CreatedDate.year();
+    Integer firstYear = supporterSinceYear(acc, txns.values());
     for (GiftTransaction gt : txns.values()) {
       d.totalContributions += gt.OriginalAmount == null ? 0 : gt.OriginalAmount;
-      firstYear = Math.min(firstYear, giftYear(gt));
       if (d.gifts.size() < 50) {
         Gift g = new Gift();
         g.id = gt.Id;
@@ -184,6 +172,7 @@ public without sharing class DonorPortalController {
       }
     }
     // NPC keeps paused commitments Active, so count pauses from their schedules (D-22).
+    Set<String> activeTypes = new Set<String>();
     for (MonthlyGiftService.Gift mg : MonthlyGiftService.load(acc.Id)) {
       if (mg.isPaused) {
         d.pausedMonthlyGifts++;
@@ -196,6 +185,12 @@ public without sharing class DonorPortalController {
         }
       } else {
         d.activeMonthlyGifts++;
+        activeTypes.add(MonthlyGiftService.typeLabel(mg.period));
+      }
+    }
+    for (String t : new List<String>{ 'Weekly', 'Monthly', 'Yearly' }) {
+      if (activeTypes.contains(t)) {
+        d.activeRecurringTypes.add(t);
       }
     }
 
@@ -236,7 +231,10 @@ public without sharing class DonorPortalController {
     p.city = acc.PersonMailingCity;
     p.country = acc.PersonMailingCountry;
     p.emailOptOut = acc.PersonHasOptedOutOfEmail;
-    p.donorSince = String.valueOf(acc.CreatedDate.year());
+    // Same rule as the dashboard's Supporter Since: earliest of account creation and first gift.
+    p.donorSince = String.valueOf(
+      supporterSinceYear(acc, countedGifts(acc.Id))
+    );
     return p;
   }
 
@@ -302,7 +300,7 @@ public without sharing class DonorPortalController {
     return MonthlyGiftService.load(currentAccount().Id);
   }
 
-  /** Pause, resume, change or cancel one of the signed-in donor's own monthly gifts. */
+  /** Pause, resume, change or cancel one of the signed-in donor's own recurring gifts. */
   @AuraEnabled
   public static MonthlyGiftsResult manageMonthlyGift(
     String giftId,
@@ -317,7 +315,7 @@ public without sharing class DonorPortalController {
     }
     MonthlyGiftService.Gift gift = MonthlyGiftService.find(acc.Id, giftId);
     if (gift == null) {
-      throw auraError('This monthly gift could not be found.');
+      throw auraError('This recurring gift could not be found.');
     }
     MonthlyGiftService.Outcome outcome;
     if (op == 'pause') {
@@ -354,6 +352,33 @@ public without sharing class DonorPortalController {
       }
       return cause.compareTo(o.cause);
     }
+  }
+
+  /** The donor's gifts that count (not cancelled, failed, refunded or written off), newest first. */
+  static List<GiftTransaction> countedGifts(Id accountId) {
+    return [
+      SELECT
+        Id,
+        Name,
+        TransactionDate,
+        CreatedDate,
+        OriginalAmount,
+        Status,
+        Campaign.Name
+      FROM GiftTransaction
+      WHERE DonorId = :accountId AND Status NOT IN :EXCLUDED_STATUSES
+      ORDER BY TransactionDate DESC NULLS LAST, CreatedDate DESC
+      LIMIT 200
+    ];
+  }
+
+  /** Supporter since: the earliest of the account's creation year and its first counted gift. */
+  static Integer supporterSinceYear(Account acc, List<GiftTransaction> gifts) {
+    Integer year = acc.CreatedDate.year();
+    for (GiftTransaction gt : gifts) {
+      year = Math.min(year, giftYear(gt));
+    }
+    return year;
   }
 
   static Integer giftYear(GiftTransaction gt) {

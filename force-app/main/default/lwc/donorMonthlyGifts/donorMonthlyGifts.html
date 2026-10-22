@@ -12,7 +12,7 @@
 
     <template lwc:if={isEmpty}>
       <p class="empty muted" data-id="empty">
-        You have no monthly gifts.
+        You have no recurring gifts.
         <a class="link" href={donateHref}>Start one from any campaign</a>
       </p>
     </template>
@@ -23,6 +23,7 @@
           <li key={g.id} class="gift" data-gift={g.id}>
             <div class="gift-main">
               <div>
+                <p class="gift-type" data-id="type">{g.typeLabel}</p>
                 <p class="gift-amount">{g.amountDisplay}</p>
                 <p class="gift-meta muted">{g.meta}</p>
               </div>
@@ -136,9 +137,7 @@
             <template lwc:if={g.showAmount}>
               <div class="panel">
                 <label class="field">
-                  <span class="field-label"
-                    >New monthly amount ({currencyLabel})</span
-                  >
+                  <span class="field-label">{g.amountLabel}</span>
                   <input
                     class="input"
                     type="number"
@@ -175,7 +174,7 @@
 
             <template lwc:if={g.showCancel}>
               <div class="panel panel-warn">
-                <p class="strong">Cancel this monthly gift?</p>
+                <p class="strong">Cancel this recurring gift?</p>
                 <p class="hint muted">
                   No further gifts will be scheduled. Gifts you have already
                   made stay in your history.

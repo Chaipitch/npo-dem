@@ -1,4 +1,4 @@
-/** Agent action: the verified donor's own giving summary (totals, causes, recent gifts, monthly gifts). */
+/** Agent action: the verified donor's own giving summary (totals, causes, recent gifts, recurring gifts). */
 public without sharing class AbcHopeAgentGivingSummary {
   public class Request {
     @InvocableVariable(
@@ -30,7 +30,7 @@ public without sharing class AbcHopeAgentGivingSummary {
 
   @InvocableMethod(
     label='ABC Hope: Get My Giving Summary'
-    description='For a signed-in donor, returns their total giving, causes supported, recent gifts and active monthly gifts. Returns isVerified=false for guests.'
+    description='For a signed-in donor, returns their total giving, causes supported, recent gifts and active recurring gifts. Returns isVerified=false for guests.'
   )
   public static List<Result> getSummary(List<Request> requests) {
     List<Result> results = new List<Result>();
@@ -84,7 +84,13 @@ public without sharing class AbcHopeAgentGivingSummary {
           );
         }
       }
-      lines.add('Active monthly gifts: ' + d.activeMonthlyGifts);
+      lines.add(
+        'Active recurring gifts: ' +
+          d.activeMonthlyGifts +
+          (d.activeRecurringTypes.isEmpty()
+            ? ''
+            : ' (' + String.join(d.activeRecurringTypes, ', ') + ')')
+      );
       List<String> journey = new List<String>();
       for (DonorPortalController.Milestone m : d.journey) {
         journey.add(m.year + ' ' + m.label);

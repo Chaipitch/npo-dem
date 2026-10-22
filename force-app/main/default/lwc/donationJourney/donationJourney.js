@@ -11,7 +11,14 @@ const STEPS = [
   { key: "thanks", label: "Thank You" }
 ];
 const ONE_TIME = "One-time";
-const MONTHLY = "Monthly";
+const RECURRING = "Recurring";
+// Recurring periods; the chosen one is sent to Apex as the frequency (D-24).
+const PERIODS = [
+  { value: "Weekly", unit: "week" },
+  { value: "Monthly", unit: "month" },
+  { value: "Yearly", unit: "year" }
+];
+const DEFAULT_PERIOD = "Monthly";
 const INDIVIDUAL = "Individual";
 const ORGANIZATION = "Organization";
 const MIN_AMOUNT = 100;
@@ -31,6 +38,7 @@ export default class DonationJourney extends LightningElement {
 
   stepIndex = 0;
   frequency = ONE_TIME;
+  period = DEFAULT_PERIOD;
   selectedAmount;
   isOther = false;
   otherAmount;
@@ -139,6 +147,13 @@ export default class DonationJourney extends LightningElement {
     if (this.reviewImageUrl) return this.reviewImageUrl;
     return campaignPhoto(this.campaignLabel, { width: 400, height: 300 }).url;
   }
+  /** Campaign photo across the top of the card on the choose and details steps. */
+  get showBanner() {
+    return this.isChoose || this.isDetails;
+  }
+  get banner() {
+    return campaignPhoto(this.campaignLabel, { width: 1280, height: 400 });
+  }
   get subtitleText() {
     return this.urlCampaign && this.campaignDescription
       ? this.campaignDescription
@@ -159,14 +174,31 @@ export default class DonationJourney extends LightningElement {
   get isOneTime() {
     return this.frequency === ONE_TIME;
   }
-  get isMonthly() {
-    return this.frequency === MONTHLY;
+  get isRecurring() {
+    return this.frequency === RECURRING;
   }
   get oneTimeClass() {
     return this.isOneTime ? "toggle-btn toggle-btn_on" : "toggle-btn";
   }
-  get monthlyClass() {
-    return this.isMonthly ? "toggle-btn toggle-btn_on" : "toggle-btn";
+  get recurringClass() {
+    return this.isRecurring ? "toggle-btn toggle-btn_on" : "toggle-btn";
+  }
+  get periodOptions() {
+    return PERIODS.map((p) => {
+      const selected = p.value === this.period;
+      return {
+        value: p.value,
+        selected,
+        className: selected ? "period-btn period-btn_on" : "period-btn"
+      };
+    });
+  }
+  get periodUnit() {
+    return PERIODS.find((p) => p.value === this.period)?.unit || "month";
+  }
+  /** What Apex receives: "One-time", or the recurring period ("Weekly" | "Monthly" | "Yearly"). */
+  get submitFrequency() {
+    return this.isRecurring ? this.period : ONE_TIME;
   }
   get amountTiles() {
     return parseAmounts(this.amountOptions).map((value) => {
@@ -192,10 +224,10 @@ export default class DonationJourney extends LightningElement {
     return `${this.currencyLabel} ${formatNumber(this.amount)}`;
   }
   get frequencyDisplay() {
-    return this.isMonthly ? "Monthly" : "One-time";
+    return this.isRecurring ? `Recurring (${this.period})` : "One-time";
   }
-  get monthlyHint() {
-    return `${this.currencyLabel} ${formatNumber(this.amount || 0)} will be given every month. You can stop anytime.`;
+  get recurringHint() {
+    return `${this.currencyLabel} ${formatNumber(this.amount || 0)} will be given every ${this.periodUnit}. You can stop anytime.`;
   }
   get designationOptions() {
     return this.designations.map((d) => ({
@@ -221,6 +253,9 @@ export default class DonationJourney extends LightningElement {
 
   handleFrequency(event) {
     this.frequency = event.currentTarget.dataset.value;
+  }
+  handlePeriod(event) {
+    this.period = event.currentTarget.dataset.value;
   }
   handleAmount(event) {
     this.isOther = false;
@@ -379,7 +414,7 @@ export default class DonationJourney extends LightningElement {
     this.submitError = undefined;
     const request = {
       campaignName: this.activeCampaign || this.campaignName,
-      frequency: this.frequency,
+      frequency: this.submitFrequency,
       amount: this.amount,
       designationId: this.designationId,
       donorType: this.isSignedIn ? null : this.donorType,
@@ -407,6 +442,7 @@ export default class DonationJourney extends LightningElement {
     this.otherAmount = undefined;
     this.selectedAmount = Number(this.defaultAmount) || null;
     this.frequency = ONE_TIME;
+    this.period = DEFAULT_PERIOD;
     this.goTo(0);
   }
 
@@ -416,9 +452,8 @@ export default class DonationJourney extends LightningElement {
       : "";
   }
   get resultFrequencyNote() {
-    return this.result && this.result.frequency === MONTHLY
-      ? "every month"
-      : "";
+    const p = PERIODS.find((x) => x.value === this.result?.frequency);
+    return p ? `every ${p.unit}` : "";
   }
   get submitLabel() {
     return this.isSubmitting ? "Submitting…" : "Submit Donation Details";

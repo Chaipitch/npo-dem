@@ -18,7 +18,7 @@ Embedded Messaging component in Experience Builder so the chat appears on the si
 | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Demo data                             | ✅ 4 fundraising campaigns (Christmas Giving 2026, Clean Water for Rural Schools, Girls' Education Scholarships, Green Communities Tree Planting) with goals and default designations; 6 designations; source code `XMAS26-EMAIL`; Maya's 2023–2025 gift history                                                                                                  |
 | Apex                                  | ✅ 45 test methods pass. Coverage: DonationIntakeService 98%, DonationIntakeController 84%, DonorPortalController 96%, MonthlyGiftService 89%, agent actions 64–100%                                                                                                                                                                                              |
-| LWC                                   | ✅ donationJourney (12 Jest tests), donorMonthlyGifts (8 Jest tests), abcHopeHero, donorDashboard, donorProfile, abcHopeIcon, public + portal theme layouts                                                                                                                                                                                                       |
+| LWC                                   | ✅ donationJourney (14 Jest tests), donorMonthlyGifts (9 Jest tests), abcHopeHero, donorDashboard, donorProfile, abcHopeIcon, public + portal theme layouts                                                                                                                                                                                                       |
 | Site                                  | ✅ Live. Home + Donate are public; portal pages require login (guests go to login, then back to `/dashboard`)                                                                                                                                                                                                                                                     |
 | Dashboard campaigns                   | ✅ Card grid: raised (real gifts) vs goal (`Campaign.ExpectedRevenue`), days left, designations. A card opens `/donate?campaign=<name>`                                                                                                                                                                                                                           |
 | Signed-in donor                       | ✅ Maya Grande portal user. Email set to `wchaipitch@terrasky.co.th` and a password-reset email sent; the user chooses the password (none stored anywhere)                                                                                                                                                                                                        |
@@ -113,9 +113,18 @@ goal, gifts, time left, dates, the programs the campaign funds and the causes do
 Data: `DonationIntakeController.getCampaignDetail` — open fundraising campaigns only (D-18), else "Campaign not found".
 Photos come from the shared `abcHopeCampaignPhotos` module. Route added in `scripts/sitePages.py`.
 
+## Recurring gifts and journey banner (2026‑10‑22, D-24)
+
+Step 1 of `/donate` offers **One-time | Recurring**; Recurring adds **Weekly · Monthly · Yearly** (Monthly
+preselected). The period is stored on the gift's schedule (`TransactionPeriod`), and My Giving shows it after the
+amount ("THB 300 / week") under a "Recurring (Weekly)" label; the dashboard says "N active recurring gifts (types)"
+and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a banner across the top of the card.
+
 ## Open items
 
 1. Place the Embedded Messaging component (above), then test signed-in agent conversations end to end.
 2. Done 2026‑10‑22: campaign cards, story cards and the journey's review/thank-you image use Unsplash photos.
 3. Header nav "Our Work" and "About" point to `/` until those pages exist.
-4. Optional: raise `AbcHopeAgentSupport` coverage (the real MessagingSession path can't be built in tests).
+4. Publish the agent (`sf agent publish authoring-bundle …`, then activate) to make the D-23 variable and the D-24
+   "recurring gifts" wording live in the assistant's own instructions; its Apex action replies are already live.
+5. Optional: raise `AbcHopeAgentSupport` coverage (the real MessagingSession path can't be built in tests).

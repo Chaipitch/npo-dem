@@ -102,6 +102,28 @@ private class DonorPortalControllerTest {
   }
 
   @IsTest
+  static void profileDonorSinceMatchesDashboardSupporterSince() {
+    Account maya = createDonor();
+    Campaign camp = new Campaign(Name = 'Test Since', IsActive = true);
+    insert camp;
+    GiftDesignation gd = new GiftDesignation(
+      Name = 'Test Since Fund',
+      IsActive = true
+    );
+    insert gd;
+    createGift(maya, camp, gd, 300, Date.newInstance(2024, 5, 1), 'Unpaid');
+    DonorPortalController.accountIdOverride = maya.Id;
+
+    Test.startTest();
+    DonorPortalController.Profile p = DonorPortalController.getProfile();
+    DonorPortalController.Dashboard d = DonorPortalController.getDashboard();
+    Test.stopTest();
+
+    Assert.areEqual('2024', p.donorSince, 'first gift, not account creation');
+    Assert.areEqual(d.supporterSince, p.donorSince);
+  }
+
+  @IsTest
   static void profileCanBeReadAndSaved() {
     Account maya = createDonor();
     DonorPortalController.accountIdOverride = maya.Id;
@@ -242,7 +264,12 @@ private class DonorPortalControllerTest {
     Assert.areEqual(500, gifts[0].amount);
     Assert.areEqual('Test Meals', gifts[0].designation);
     Assert.areEqual('Test Monthly Appeal', gifts[0].campaignName);
+    Assert.areEqual('Monthly', gifts[0].period);
     Assert.isFalse(gifts[0].isPaused);
+    Assert.areEqual(
+      new List<String>{ 'Monthly' },
+      DonorPortalController.getDashboard().activeRecurringTypes
+    );
 
     Test.startTest();
     DonorPortalController.MonthlyGiftsResult paused = DonorPortalController.manageMonthlyGift(
@@ -266,6 +293,7 @@ private class DonorPortalControllerTest {
       'a paused gift is not counted as active'
     );
     Assert.areEqual(1, d.pausedMonthlyGifts);
+    Assert.isTrue(d.activeRecurringTypes.isEmpty(), 'only active gifts');
     Assert.areEqual(paused.gifts[0].pausedUntil, d.pausedUntil);
 
     DonorPortalController.MonthlyGiftsResult resumed = DonorPortalController.manageMonthlyGift(

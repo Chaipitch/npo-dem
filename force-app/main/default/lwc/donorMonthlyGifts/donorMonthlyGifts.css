@@ -66,6 +66,13 @@ ul {
   justify-content: space-between;
   gap: 8px 16px;
 }
+.gift-type {
+  margin-bottom: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--mg-purple);
+}
 .gift-amount {
   font-size: 17px;
   font-weight: 700;

@@ -1,5 +1,5 @@
 /**
- * Monthly gifts (gift commitments) for one donor on the ABC Hope site's My Giving page:
+ * Recurring gifts (gift commitments: weekly, monthly or yearly, D-24) for one donor on the ABC Hope site's My Giving page:
  * list, pause, resume, change amount, cancel (D-22). Mutations go through NPC's standard
  * invocable actions — the same ones the agent's AbcHopeAgentMonthlyGifts action uses.
  *
@@ -19,6 +19,9 @@ public without sharing class MonthlyGiftService {
     public String name;
     @AuraEnabled
     public Decimal amount;
+    /** Schedule period: Weekly, Monthly or Yearly (D-24); older schedules may say Custom. */
+    @AuraEnabled
+    public String period;
     @AuraEnabled
     public String designation;
     @AuraEnabled
@@ -48,7 +51,18 @@ public without sharing class MonthlyGiftService {
     }
   }
 
-  /** The donor's open monthly gifts, oldest first. */
+  /** "Weekly" | "Monthly" | "Yearly" for a schedule period; anything else (e.g. Custom) reads as Monthly. */
+  public static String typeLabel(String period) {
+    return period == 'Weekly' || period == 'Yearly' ? period : 'Monthly';
+  }
+
+  /** "week" | "month" | "year", for "THB 300 per week". */
+  public static String unit(String period) {
+    String t = typeLabel(period);
+    return t == 'Weekly' ? 'week' : t == 'Yearly' ? 'year' : 'month';
+  }
+
+  /** The donor's open recurring gifts, oldest first. */
   public static List<Gift> load(Id accountId) {
     Map<Id, Gift> byId = new Map<Id, Gift>();
     for (GiftCommitment gc : [
@@ -94,6 +108,7 @@ public without sharing class MonthlyGiftService {
       } else if (s.Type == 'CreateTransactions' && s.EndDate == null) {
         g.openSchedule = s;
         g.amount = s.TransactionAmount;
+        g.period = s.TransactionPeriod;
       }
     }
     for (GiftDefaultDesignation gdd : [
@@ -139,7 +154,7 @@ public without sharing class MonthlyGiftService {
     if (g.pauseSchedule != null) {
       return new Outcome(
         false,
-        'This monthly gift is already paused until ' +
+        'This recurring gift is already paused until ' +
           (g.pauseSchedule.EndDate == null
             ? 'further notice'
             : g.pauseSchedule.EndDate.format()) +
@@ -155,7 +170,7 @@ public without sharing class MonthlyGiftService {
     if (g.openSchedule == null) {
       return new Outcome(
         false,
-        'This monthly gift has no active schedule to pause.'
+        'This recurring gift has no active schedule to pause.'
       );
     }
     Date startDate = later(Date.today().addDays(1), g.openSchedule.StartDate);
@@ -181,7 +196,7 @@ public without sharing class MonthlyGiftService {
 
   public static Outcome resume(Gift g) {
     if (g.pauseSchedule == null) {
-      return new Outcome(false, 'This monthly gift is not paused.');
+      return new Outcome(false, 'This recurring gift is not paused.');
     }
     Invocable.Action a = Invocable.Action.createStandardAction(
       'resumeGiftCommitmentSchedule'
@@ -190,7 +205,7 @@ public without sharing class MonthlyGiftService {
       'giftCommitmentScheduleId',
       String.valueOf(g.pauseSchedule.Id)
     );
-    return apply(a, 'The monthly gift has been resumed.');
+    return apply(a, 'The recurring gift has been resumed.');
   }
 
   public static Outcome changeAmount(Gift g, Decimal amount) {
@@ -201,13 +216,13 @@ public without sharing class MonthlyGiftService {
     ) {
       return new Outcome(
         false,
-        'Please enter a monthly amount between THB 100 and THB 1,000,000.'
+        'Please enter an amount between THB 100 and THB 1,000,000.'
       );
     }
     if (g.openSchedule == null) {
       return new Outcome(
         false,
-        'This monthly gift has no active schedule to change.'
+        'This recurring gift has no active schedule to change.'
       );
     }
     Date effective = later(Date.today().addDays(1), g.openSchedule.StartDate);
@@ -224,8 +239,10 @@ public without sharing class MonthlyGiftService {
     a.setInvocationParameter('effectiveFromDate', effective);
     return apply(
       a,
-      'The monthly amount is now ' +
+      'The amount is now ' +
         AbcHopeAgentSupport.money(amount) +
+        ' per ' +
+        unit(g.openSchedule.TransactionPeriod) +
         ', starting ' +
         effective.format() +
         '.'
@@ -242,7 +259,7 @@ public without sharing class MonthlyGiftService {
     );
     return apply(
       a,
-      'The monthly gift has been cancelled. No further gifts will be scheduled.'
+      'The recurring gift has been cancelled. No further gifts will be scheduled.'
     );
   }
 

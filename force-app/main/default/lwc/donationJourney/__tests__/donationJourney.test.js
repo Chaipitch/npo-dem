@@ -95,13 +95,73 @@ describe("c-donation-journey", () => {
     );
   });
 
-  it("shows monthly hint when Monthly is selected", async () => {
+  it("Recurring shows Weekly / Monthly / Yearly, Monthly first", async () => {
+    const el = mount();
+    getOptions.emit(OPTIONS);
+    await flush();
+    expect($(el, '[data-id="periods"]')).toBeNull();
+    const recurring = $$(el, ".toggle-btn")[1];
+    expect(recurring.textContent.trim()).toBe("Recurring");
+    click(recurring);
+    await flush();
+    expect($$(el, ".period-btn").map((b) => b.textContent.trim())).toEqual([
+      "Weekly",
+      "Monthly",
+      "Yearly"
+    ]);
+    expect($(el, ".period-btn_on").textContent.trim()).toBe("Monthly");
+    expect($(el, ".hint").textContent).toContain("every month");
+
+    click($$(el, ".period-btn")[2]);
+    await flush();
+    expect($(el, ".period-btn_on").textContent.trim()).toBe("Yearly");
+    expect($(el, ".hint").textContent).toContain("every year");
+  });
+
+  it("shows the campaign photo banner on the choose and details steps", async () => {
+    const el = mount();
+    getOptions.emit(OPTIONS);
+    await flush();
+    const img = $(el, '[data-id="banner"] img');
+    expect(img.getAttribute("src")).toContain("images.unsplash.com");
+    expect($(el, ".banner-credit").textContent).toContain("Unsplash");
+    click($(el, '[data-id="next"]'));
+    await flush();
+    expect($(el, '[data-id="banner"]')).not.toBeNull();
+  });
+
+  it("submits a weekly recurring gift with frequency Weekly", async () => {
+    submitDonation.mockResolvedValue({
+      reference: "XMAS-2",
+      amount: 300,
+      frequency: "Weekly",
+      designationName: "School Supplies"
+    });
     const el = mount();
     getOptions.emit(OPTIONS);
     await flush();
     click($$(el, ".toggle-btn")[1]);
     await flush();
-    expect($(el, ".hint").textContent).toContain("every month");
+    click($$(el, ".period-btn")[0]);
+    click($$(el, ".amount-tile")[0]);
+    await flush();
+    click($(el, '[data-id="next"]'));
+    await flush();
+    type($(el, '[data-field="firstName"]'), "Ann");
+    type($(el, '[data-field="lastName"]'), "Demo");
+    type($(el, '[data-field="email"]'), "ann@example.com");
+    click($(el, '[data-id="next"]'));
+    await flush();
+    expect($(el, ".review-grid dd").textContent).toContain(
+      "Recurring (Weekly)"
+    );
+    click($(el, '[data-id="submit"]'));
+    await flush();
+    await flush();
+
+    const sent = JSON.parse(submitDonation.mock.calls[0][0].requestJson);
+    expect(sent).toMatchObject({ frequency: "Weekly", amount: 300 });
+    expect($(el, ".thanks-amount").textContent).toContain("every week");
   });
 
   it("shows the program the chosen designation funds", async () => {

@@ -44,6 +44,7 @@ const DASHBOARD = {
   supporterSince: "2023",
   activeMonthlyGifts: 1,
   pausedMonthlyGifts: 0,
+  activeRecurringTypes: ["Monthly"],
   causes: ["General Fund", "Food Insecurity Fund"],
   gifts: [
     {
@@ -129,10 +130,10 @@ describe("c-donor-dashboard agent panel", () => {
     expect(askAgent).not.toHaveBeenCalled();
   });
 
-  it("points monthly gift requests to My Giving", async () => {
+  it("points recurring gift requests to My Giving", async () => {
     const el = await mount();
     await ask(el, "Can I pause my monthly gift?");
-    expect(lastReply(el)).toContain("1 active monthly gift");
+    expect(lastReply(el)).toContain("1 active recurring gift (Monthly)");
     expect($(el, ".chat-log a.chat-link").getAttribute("href")).toBe(
       "/my-giving#monthly"
     );

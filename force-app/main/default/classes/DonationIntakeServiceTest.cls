@@ -213,6 +213,43 @@ private class DonationIntakeServiceTest {
   }
 
   @IsTest
+  static void weeklyAndYearlyGiftsUseTheirSchedulePeriod() {
+    DonationIntakeService.Request weekly = individual('weekly@example.com');
+    weekly.frequency = DonationIntakeService.FREQ_WEEKLY;
+    weekly.amount = 300;
+    DonationIntakeService.Request yearly = individual('yearly@example.com');
+    yearly.frequency = DonationIntakeService.FREQ_YEARLY;
+    yearly.amount = 5000;
+
+    Test.startTest();
+    DonationIntakeService.Result weeklyRes = DonationIntakeService.submit(
+      weekly
+    );
+    DonationIntakeService.submit(yearly);
+    Test.stopTest();
+
+    Assert.areEqual('Weekly', weeklyRes.frequency);
+    Map<String, String> periodByEmail = new Map<String, String>();
+    for (GiftCommitmentSchedule gcs : [
+      SELECT GiftCommitment.Donor.PersonEmail, TransactionPeriod
+      FROM GiftCommitmentSchedule
+      WHERE
+        GiftCommitment.Donor.PersonEmail IN (
+          'weekly@example.com',
+          'yearly@example.com'
+        )
+        AND Type = 'CreateTransactions'
+    ]) {
+      periodByEmail.put(
+        gcs.GiftCommitment.Donor.PersonEmail,
+        gcs.TransactionPeriod
+      );
+    }
+    Assert.areEqual('Weekly', periodByEmail.get('weekly@example.com'));
+    Assert.areEqual('Yearly', periodByEmail.get('yearly@example.com'));
+  }
+
+  @IsTest
   static void doubleSubmitReturnsSameGift() {
     Test.startTest();
     DonationIntakeService.Result first = DonationIntakeService.submit(
@@ -296,7 +333,7 @@ private class DonationIntakeServiceTest {
     r = individual('ann@');
     bad.put('bad email', r);
     r = individual('a@example.com');
-    r.frequency = 'Weekly';
+    r.frequency = 'Daily';
     bad.put('bad frequency', r);
     r = individual('a@example.com');
     r.donorType = 'Robot';

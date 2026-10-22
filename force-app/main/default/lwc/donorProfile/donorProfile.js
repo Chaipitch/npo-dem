@@ -30,7 +30,7 @@ export default class DonorProfile extends LightningElement {
   async load() {
     try {
       this.profile = await getProfile();
-      this.draft = { ...this.profile };
+      this.draft = toDraft(this.profile);
       this.error = undefined;
     } catch (e) {
       this.error = e.body?.message || "We could not load your profile.";
@@ -127,7 +127,7 @@ export default class DonorProfile extends LightningElement {
       this.profile = await saveProfile({
         profileJson: JSON.stringify(this.draft)
       });
-      this.draft = { ...this.profile };
+      this.draft = toDraft(this.profile);
       this.saved = true;
     } catch (e) {
       this.saveError = e.body?.message || "We could not save your profile.";
@@ -135,4 +135,26 @@ export default class DonorProfile extends LightningElement {
       this.isSaving = false;
     }
   }
+}
+
+const TEXT_FIELDS = [
+  "firstName",
+  "lastName",
+  "email",
+  "phone",
+  "street",
+  "city",
+  "country"
+];
+
+/**
+ * Apex leaves empty fields out of its response, and an input given `undefined`
+ * shows the word "undefined": empty fields become "" for the form.
+ */
+export function toDraft(profile) {
+  const draft = { ...profile };
+  for (const field of TEXT_FIELDS) {
+    draft[field] = profile?.[field] ?? "";
+  }
+  return draft;
 }

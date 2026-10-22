@@ -3,12 +3,18 @@ import getMonthlyGifts from "@salesforce/apex/DonorPortalController.getMonthlyGi
 import manageMonthlyGift from "@salesforce/apex/DonorPortalController.manageMonthlyGift";
 
 const PAUSE_MONTHS = [1, 2, 3, 6, 12];
+// Schedule period → type and unit; anything else (e.g. Custom) reads as Monthly (D-24).
+const PERIODS = {
+  Weekly: { type: "Weekly", unit: "week" },
+  Monthly: { type: "Monthly", unit: "month" },
+  Yearly: { type: "Yearly", unit: "year" }
+};
 const MIN_AMOUNT = 100;
 const MAX_AMOUNT = 1000000;
 
 /**
- * My Giving → Monthly gifts: the signed-in donor pauses, resumes, changes or cancels their own
- * monthly gifts (D-22). The server checks every gift belongs to the running user.
+ * My Giving → Recurring gifts: the signed-in donor pauses, resumes, changes or cancels their own
+ * weekly, monthly or yearly gifts (D-22, D-24). The server checks every gift belongs to the running user.
  * Fires "giftschange" after a change so the dashboard can refresh its counts.
  */
 export default class DonorMonthlyGifts extends LightningElement {
@@ -35,7 +41,7 @@ export default class DonorMonthlyGifts extends LightningElement {
       this.gifts = (await getMonthlyGifts()) || [];
       this.loadError = undefined;
     } catch (e) {
-      this.loadError = message(e, "We could not load your monthly gifts.");
+      this.loadError = message(e, "We could not load your recurring gifts.");
     }
     this.loaded = true;
   }
@@ -59,6 +65,7 @@ export default class DonorMonthlyGifts extends LightningElement {
       const panel = this.openPanel?.startsWith(`${g.id}:`)
         ? this.openPanel.split(":")[1]
         : "";
+      const period = PERIODS[g.period] || PERIODS.Monthly;
       const meta = [
         g.designation,
         g.program ? `${g.program} program` : "",
@@ -66,9 +73,11 @@ export default class DonorMonthlyGifts extends LightningElement {
       ].filter(Boolean);
       return {
         id: g.id,
+        typeLabel: `Recurring (${period.type})`,
         amountDisplay: g.amount
-          ? `${this.currencyLabel} ${formatNumber(g.amount)} / month`
-          : "Monthly gift",
+          ? `${this.currencyLabel} ${formatNumber(g.amount)} / ${period.unit}`
+          : "Recurring gift",
+        amountLabel: `New amount per ${period.unit} (${this.currencyLabel})`,
         meta: meta.join(" · "),
         isPaused: g.isPaused,
         statusLabel: g.isPaused
@@ -116,7 +125,7 @@ export default class DonorMonthlyGifts extends LightningElement {
   confirmAmount(event) {
     const amount = Number(this.newAmount);
     if (!amount || amount < MIN_AMOUNT || amount > MAX_AMOUNT) {
-      this.error = `Please enter a monthly amount between ${this.currencyLabel} ${formatNumber(MIN_AMOUNT)} and ${this.currencyLabel} ${formatNumber(MAX_AMOUNT)}.`;
+      this.error = `Please enter an amount between ${this.currencyLabel} ${formatNumber(MIN_AMOUNT)} and ${this.currencyLabel} ${formatNumber(MAX_AMOUNT)}.`;
       return;
     }
     this.run(event.currentTarget.dataset.id, "change_amount", {

@@ -99,6 +99,31 @@ p {
   padding: 28px 24px;
   box-shadow: 0 10px 30px rgba(20, 24, 91, 0.08);
 }
+/* Campaign photo banner across the top of the card (bleeds to the card edges) */
+.banner {
+  position: relative;
+  height: 160px;
+  margin: -28px -24px 22px;
+  border-radius: var(--dj-radius) var(--dj-radius) 0 0;
+  overflow: hidden;
+  background: #e9ecf5;
+}
+.banner-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.banner-credit {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 11px;
+}
 .loading {
   text-align: center;
   color: var(--dj-muted);
@@ -144,6 +169,34 @@ p {
   background: var(--dj-blue);
   color: #fff;
   box-shadow: 0 2px 6px rgba(11, 79, 196, 0.35);
+}
+
+/* Recurring period: a smaller segmented row under the frequency toggle */
+.periods {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: -10px 0 20px;
+}
+.period-btn {
+  border: 1.5px solid var(--dj-border);
+  border-radius: 999px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dj-muted);
+  background: #fff;
+  cursor: pointer;
+}
+.period-btn:hover {
+  border-color: var(--dj-blue);
+}
+.period-btn_on {
+  border-color: var(--dj-blue);
+  background: var(--dj-blue-soft);
+  color: var(--dj-blue);
+  box-shadow: 0 0 0 1px var(--dj-blue) inset;
 }
 
 /* Amount tiles */
@@ -482,6 +535,10 @@ p {
 @media (max-width: 480px) {
   .card {
     padding: 22px 16px;
+  }
+  .banner {
+    height: 120px;
+    margin: -22px -16px 18px;
   }
   .amounts {
     grid-template-columns: repeat(2, 1fr);
