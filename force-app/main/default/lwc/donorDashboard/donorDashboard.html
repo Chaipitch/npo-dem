@@ -392,91 +392,93 @@
             >
           </div>
 
-          <div class="msg msg_user">
-            <span class="msg-avatar">{initial}</span>
-            <p class="bubble">How are the programs I supported doing?</p>
-          </div>
-          <div class="msg msg_agent">
-            <span class="msg-avatar msg-avatar_agent"
-              ><c-abc-hope-icon
-                name="sparkle"
-                size="20"
-                stroke-width="2"
-              ></c-abc-hope-icon
-            ></span>
-            <div class="bubble bubble_agent">
-              <p class="agent-intro">{agentIntro}</p>
-              <ul class="agent-list">
-                <template for:each={agentCauses} for:item="a">
-                  <li key={a.key} class="agent-row">
-                    <span class={a.artClass}
-                      ><c-abc-hope-icon
-                        name="heart"
-                        size="22"
-                        stroke-width="2"
-                      ></c-abc-hope-icon
-                    ></span>
-                    <span class="agent-row-text">
-                      <span class="agent-row-title">{a.label}</span>
-                      <span class="agent-row-sub">You gave {a.amount}</span>
-                    </span>
-                    <span class="agent-trend"
-                      ><c-abc-hope-icon
-                        name="trend"
-                        size="16"
-                        stroke-width="2.2"
-                      ></c-abc-hope-icon
-                    ></span>
-                  </li>
-                </template>
-              </ul>
-              <p class="agent-outro">
-                Your next chance to help: Christmas Giving 2026 — school
-                supplies for children.
-              </p>
+          <div class="agent-body" data-id="agent-body">
+            <div class="msg msg_user">
+              <span class="msg-avatar">{initial}</span>
+              <p class="bubble">How are the programs I supported doing?</p>
             </div>
-          </div>
+            <div class="msg msg_agent">
+              <span class="msg-avatar msg-avatar_agent"
+                ><c-abc-hope-icon
+                  name="sparkle"
+                  size="20"
+                  stroke-width="2"
+                ></c-abc-hope-icon
+              ></span>
+              <div class="bubble bubble_agent">
+                <p class="agent-intro">{agentIntro}</p>
+                <ul class="agent-list">
+                  <template for:each={agentCauses} for:item="a">
+                    <li key={a.key} class="agent-row">
+                      <span class={a.artClass}
+                        ><c-abc-hope-icon
+                          name="heart"
+                          size="22"
+                          stroke-width="2"
+                        ></c-abc-hope-icon
+                      ></span>
+                      <span class="agent-row-text">
+                        <span class="agent-row-title">{a.label}</span>
+                        <span class="agent-row-sub">You gave {a.amount}</span>
+                      </span>
+                      <span class="agent-trend"
+                        ><c-abc-hope-icon
+                          name="trend"
+                          size="16"
+                          stroke-width="2.2"
+                        ></c-abc-hope-icon
+                      ></span>
+                    </li>
+                  </template>
+                </ul>
+                <p class="agent-outro">
+                  Your next chance to help: Christmas Giving 2026 — school
+                  supplies for children.
+                </p>
+              </div>
+            </div>
 
-          <div class="agent-chips">
-            <template for:each={suggestions} for:item="q">
-              <button
-                key={q.key}
-                type="button"
-                class="agent-chip"
-                data-text={q.label}
-                disabled={chatBusy}
-                onclick={handleSuggestion}
-              >
-                {q.label}
-              </button>
+            <div class="agent-chips">
+              <template for:each={suggestions} for:item="q">
+                <button
+                  key={q.key}
+                  type="button"
+                  class="agent-chip"
+                  data-text={q.label}
+                  disabled={chatBusy}
+                  onclick={handleSuggestion}
+                >
+                  {q.label}
+                </button>
+              </template>
+            </div>
+            <template lwc:if={chatHasMessages}>
+              <div class="chat-log" aria-live="polite">
+                <template for:each={chatMessages} for:item="m">
+                  <div key={m.key} class={m.rowClass}>
+                    <template lwc:if={m.isUser}>
+                      <span class="msg-avatar">{initial}</span>
+                    </template>
+                    <template lwc:else>
+                      <span class="msg-avatar msg-avatar_agent"
+                        ><c-abc-hope-icon
+                          name="sparkle"
+                          size="20"
+                          stroke-width="2"
+                        ></c-abc-hope-icon
+                      ></span>
+                    </template>
+                    <p class={m.bubbleClass}>{m.text}</p>
+                  </div>
+                </template>
+                <template lwc:if={chatBusy}>
+                  <p class="chat-typing muted small" data-id="typing">
+                    Assistant is typing…
+                  </p>
+                </template>
+              </div>
             </template>
           </div>
-          <template lwc:if={chatHasMessages}>
-            <div class="chat-log" aria-live="polite">
-              <template for:each={chatMessages} for:item="m">
-                <div key={m.key} class={m.rowClass}>
-                  <template lwc:if={m.isUser}>
-                    <span class="msg-avatar">{initial}</span>
-                  </template>
-                  <template lwc:else>
-                    <span class="msg-avatar msg-avatar_agent"
-                      ><c-abc-hope-icon
-                        name="sparkle"
-                        size="20"
-                        stroke-width="2"
-                      ></c-abc-hope-icon
-                    ></span>
-                  </template>
-                  <p class={m.bubbleClass}>{m.text}</p>
-                </div>
-              </template>
-              <template lwc:if={chatBusy}>
-                <p class="chat-typing muted small" data-id="typing">
-                  Assistant is typing…
-                </p>
-              </template>
-            </div>
-          </template>
           <div class="agent-input">
             <input
               class="agent-input-field"

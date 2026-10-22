@@ -116,6 +116,15 @@ export default class DonorDashboard extends LightningElement {
   }
   renderedCallback() {
     this.scrollToHash();
+    this.scrollChatToEnd();
+  }
+  /** Keep the newest chat message in view inside the panel's scroll area. */
+  scrollChatToEnd() {
+    const count = this.chatMessages.length + (this.chatBusy ? 1 : 0);
+    if (count === this._chatScrolledCount) return;
+    this._chatScrolledCount = count;
+    const body = this.template.querySelector('[data-id="agent-body"]');
+    if (body && count > 0) body.scrollTop = body.scrollHeight;
   }
   scrollToHash() {
     const hash = (window.location.hash || "").replace("#", "");
