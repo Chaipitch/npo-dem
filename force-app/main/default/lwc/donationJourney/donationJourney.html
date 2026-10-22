@@ -26,6 +26,12 @@
     </template>
     <template lwc:else>
       <div class="card">
+        <template lwc:if={showBanner}>
+          <div class="banner" data-id="banner">
+            <img class="banner-img" src={banner.url} alt="" />
+            <span class="banner-credit">{banner.credit}</span>
+          </div>
+        </template>
         <!-- Step 1: Choose donation -->
         <template lwc:if={isChoose}>
           <p class="eyebrow">{campaignLabel}</p>
@@ -44,14 +50,35 @@
             </button>
             <button
               type="button"
-              class={monthlyClass}
-              data-value="Monthly"
-              aria-pressed={isMonthly}
+              class={recurringClass}
+              data-value="Recurring"
+              aria-pressed={isRecurring}
               onclick={handleFrequency}
             >
-              Monthly
+              Recurring
             </button>
           </div>
+          <template lwc:if={isRecurring}>
+            <div
+              class="periods"
+              role="group"
+              aria-label="How often"
+              data-id="periods"
+            >
+              <template for:each={periodOptions} for:item="p">
+                <button
+                  key={p.value}
+                  type="button"
+                  class={p.className}
+                  data-value={p.value}
+                  aria-pressed={p.selected}
+                  onclick={handlePeriod}
+                >
+                  {p.value}
+                </button>
+              </template>
+            </div>
+          </template>
 
           <div class="amounts" role="group" aria-label="Donation amount">
             <template for:each={amountTiles} for:item="tile">
@@ -97,8 +124,8 @@
           <template lwc:if={amountError}>
             <p class="field-error" role="alert">{amountError}</p>
           </template>
-          <template lwc:if={isMonthly}>
-            <p class="hint">{monthlyHint}</p>
+          <template lwc:if={isRecurring}>
+            <p class="hint">{recurringHint}</p>
           </template>
 
           <label class="field">

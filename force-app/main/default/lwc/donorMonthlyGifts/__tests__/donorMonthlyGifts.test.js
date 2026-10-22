@@ -69,6 +69,11 @@ describe("c-donor-monthly-gifts", () => {
     expect($(el, '[data-action="resume"]')).toBeNull();
   });
 
+  it("shows the schedule period after the amount", async () => {
+    const el = await mount([{ ...ACTIVE, amount: 300, period: "Weekly" }]);
+    expect(text(el, ".gift-amount")).toBe("THB 300 / week");
+  });
+
   it("shows an empty state with a link to give", async () => {
     const el = await mount([]);
     expect($(el, '[data-id="empty"]')).not.toBeNull();

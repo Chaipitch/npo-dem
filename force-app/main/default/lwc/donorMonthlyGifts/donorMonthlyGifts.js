@@ -3,6 +3,8 @@ import getMonthlyGifts from "@salesforce/apex/DonorPortalController.getMonthlyGi
 import manageMonthlyGift from "@salesforce/apex/DonorPortalController.manageMonthlyGift";
 
 const PAUSE_MONTHS = [1, 2, 3, 6, 12];
+// Schedule period → the unit after the amount; anything else (e.g. Custom) reads as monthly.
+const PERIOD_UNITS = { Weekly: "week", Monthly: "month", Yearly: "year" };
 const MIN_AMOUNT = 100;
 const MAX_AMOUNT = 1000000;
 
@@ -67,8 +69,8 @@ export default class DonorMonthlyGifts extends LightningElement {
       return {
         id: g.id,
         amountDisplay: g.amount
-          ? `${this.currencyLabel} ${formatNumber(g.amount)} / month`
-          : "Monthly gift",
+          ? `${this.currencyLabel} ${formatNumber(g.amount)} / ${PERIOD_UNITS[g.period] || "month"}`
+          : "Recurring gift",
         meta: meta.join(" · "),
         isPaused: g.isPaused,
         statusLabel: g.isPaused

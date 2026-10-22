@@ -19,6 +19,9 @@ public without sharing class MonthlyGiftService {
     public String name;
     @AuraEnabled
     public Decimal amount;
+    /** Schedule period: Weekly, Monthly or Yearly (D-24); older schedules may say Custom. */
+    @AuraEnabled
+    public String period;
     @AuraEnabled
     public String designation;
     @AuraEnabled
@@ -94,6 +97,7 @@ public without sharing class MonthlyGiftService {
       } else if (s.Type == 'CreateTransactions' && s.EndDate == null) {
         g.openSchedule = s;
         g.amount = s.TransactionAmount;
+        g.period = s.TransactionPeriod;
       }
     }
     for (GiftDefaultDesignation gdd : [

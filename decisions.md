@@ -216,3 +216,16 @@ Until the principal holds the secret, `DonorAgentController.USE_AGENT_API = fals
 questions itself from the dashboard data (total, causes, recent gifts, monthly gifts, journey — with links) and sends
 everything else to the agent through `generateAiAgentResponse`. Agent Script changes are validated but **not
 published** yet.
+
+### D-24 · Recurring gifts: weekly, monthly or yearly — Accepted (user, 2026‑10‑22)
+
+The donation journey's frequency toggle is **One-time | Recurring**; Recurring opens a second row **Weekly · Monthly ·
+Yearly** (Monthly preselected). The journey sends the chosen period as the request's `frequency` (`One-time`,
+`Weekly`, `Monthly` or `Yearly`), and `DonationIntakeService` writes it straight to
+`GiftCommitmentSchedule.TransactionPeriod` (all three are standard NPC picklist values; interval stays 1). My Giving
+cards show the period after the amount ("THB 300 / week"); older `Custom` schedules read as monthly. Pause, resume,
+change amount and cancel work the same for every period. Wording elsewhere still says "monthly gifts" (dashboard line,
+My Giving heading, agent) — not changed yet.
+
+Step 1 and step 2 of the journey also show the campaign photo as a banner across the top of the card (same
+`abcHopeCampaignPhotos` choice as the cards and the review step).

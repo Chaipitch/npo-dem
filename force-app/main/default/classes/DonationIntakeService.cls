@@ -1,7 +1,7 @@
 /**
  * Donation intake for the ABC Hope LWR site (guest and signed-in donors).
  * Validates the request, matches or creates the donor, creates the gift
- * (GiftTransaction for one-time, GiftCommitment + schedule for monthly)
+ * (GiftTransaction for one-time, GiftCommitment + schedule for weekly, monthly or yearly)
  * and allocates it to a GiftDesignation. Payment is simulated: nothing is charged.
  *
  * Runs without sharing because the guest user must be able to match existing
@@ -9,7 +9,15 @@
  */
 public without sharing class DonationIntakeService {
   public static final String FREQ_ONE_TIME = 'One-time';
+  public static final String FREQ_WEEKLY = 'Weekly';
   public static final String FREQ_MONTHLY = 'Monthly';
+  public static final String FREQ_YEARLY = 'Yearly';
+  /** Recurring frequencies; each is also the GiftCommitmentSchedule.TransactionPeriod value (D-24). */
+  public static final Set<String> RECURRING_FREQUENCIES = new Set<String>{
+    FREQ_WEEKLY,
+    FREQ_MONTHLY,
+    FREQ_YEARLY
+  };
   public static final String TYPE_INDIVIDUAL = 'Individual';
   public static final String TYPE_ORGANIZATION = 'Organization';
   public static final Decimal MIN_AMOUNT = 100;
@@ -206,7 +214,7 @@ public without sharing class DonationIntakeService {
     res.donorName = donor.Name;
     res.donorEmail = donor.IsPersonAccount ? donor.PersonEmail : req.email;
 
-    if (req.frequency == FREQ_MONTHLY) {
+    if (RECURRING_FREQUENCIES.contains(req.frequency)) {
       res.reference = createCommitment(
         req,
         donor,
@@ -233,8 +241,13 @@ public without sharing class DonationIntakeService {
     if (req == null) {
       throw new DonationException('Missing donation details.');
     }
-    if (req.frequency != FREQ_ONE_TIME && req.frequency != FREQ_MONTHLY) {
-      throw new DonationException('Please choose one-time or monthly.');
+    if (
+      req.frequency != FREQ_ONE_TIME &&
+      !RECURRING_FREQUENCIES.contains(req.frequency)
+    ) {
+      throw new DonationException(
+        'Please choose one-time, or a weekly, monthly or yearly recurring gift.'
+      );
     }
     if (
       req.amount == null ||
@@ -692,7 +705,7 @@ public without sharing class DonationIntakeService {
       GiftCommitmentId = gc.Id,
       Type = 'CreateTransactions',
       TransactionAmount = req.amount,
-      TransactionPeriod = 'Monthly',
+      TransactionPeriod = req.frequency,
       TransactionInterval = 1,
       StartDate = startDate,
       PaymentMethod = 'Unknown',
