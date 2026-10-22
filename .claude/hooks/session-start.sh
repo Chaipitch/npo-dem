@@ -15,7 +15,7 @@ if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
 fi
 
 # Jest, ESLint, Prettier (husky/lint-staged pre-commit)
-npm install --no-audit --no-fund
+npm install --no-save --no-audit --no-fund
 
 # Salesforce CLI
 if ! command -v sf >/dev/null 2>&1; then
