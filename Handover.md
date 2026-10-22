@@ -85,6 +85,34 @@ How the build compares:
   `abcHopeHero` were commented out directly in the org (not in git). The next publish blanked the site; the repo
   versions were redeployed and republished on 2026‑10‑22. Before publishing, check the org still matches git.
 
+## Dashboard agent panel (D-23) — waiting on the consumer secret
+
+**Live now:** the panel answers personal questions from the dashboard data and sends other questions to the
+Donor Assistant (`DonorAgentController`, `USE_AGENT_API = false`). **Deployed but unused:** External Client App,
+External/Named Credential `ABC_Hope_Agent_API`, integration user, portal permission set access to the principal,
+updated agent actions (optional `verifiedAccountId`). **Validated, not published:** the Agent Script with
+`verified_account_id`.
+
+To finish (about 15 minutes):
+
+1. An admin copies the app's **Consumer Key and Secret** (External Client App Manager → ABC Hope Agent API →
+   Settings → OAuth Settings) into Setup → Named Credentials → External Credentials → ABC Hope Agent API →
+   principal **AgentApiPrincipal** (Client ID / Client Secret). Never paste them anywhere else.
+2. Connection test (needs principal access for whoever runs it) → if the Agent API asks for it, add the app to the
+   agent's connections in Agentforce Builder.
+3. `sf agent publish authoring-bundle -o npo-demo --api-name ABC_Hope_Donor_Assistant` and activate the new version.
+4. Set `USE_AGENT_API = true` in `DonorAgentController`, remove the local personal answers in `donorDashboard`
+   (or keep them as an offline fallback), deploy, publish the site.
+5. Maya test: "How much have I given?" and "Show my monthly gifts" in the panel → her own data.
+
+## Campaign detail page (2026‑10‑22)
+
+Dashboard campaign cards have **Donate now** (`/donate?campaign=…`) and **View more** (`/campaign?name=…`). The new
+portal page `Campaign` (sign-in required, Portal layout, `c:campaignDetail`) shows the photo, description, raised vs
+goal, gifts, time left, dates, the programs the campaign funds and the causes donors can choose, with Donate now.
+Data: `DonationIntakeController.getCampaignDetail` — open fundraising campaigns only (D-18), else "Campaign not found".
+Photos come from the shared `abcHopeCampaignPhotos` module. Route added in `scripts/sitePages.py`.
+
 ## Open items
 
 1. Place the Embedded Messaging component (above), then test signed-in agent conversations end to end.

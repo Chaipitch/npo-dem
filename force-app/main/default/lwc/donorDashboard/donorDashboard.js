@@ -3,6 +3,8 @@ import { refreshApex } from "@salesforce/apex";
 import basePath from "@salesforce/community/basePath";
 import getDashboard from "@salesforce/apex/DonorPortalController.getDashboard";
 import getCampaigns from "@salesforce/apex/DonationIntakeController.getCampaigns";
+import askAgent from "@salesforce/apex/DonorAgentController.ask";
+import { campaignPhoto } from "c/abcHopeCampaignPhotos";
 
 const IMPACT_STYLE = [
   { icon: "users", tone: "tone-blue" },
@@ -11,28 +13,12 @@ const IMPACT_STYLE = [
   { icon: "heart-fill", tone: "tone-red" }
 ];
 const STORY_ART = ["water", "school", "sprout"];
+/** Sent by the portal layout's header question box and "Ask Our AI" (c-abc-hope-portal-layout). */
+const ASK_EVENT = "abchope:ask";
 
 // Free Unsplash photos (Unsplash License) used when no image is configured for a campaign or story.
 const unsplash = (id, w) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=75`;
-const CAMPAIGN_PHOTOS = {
-  water: {
-    url: unsplash("photo-1740741705746-74e6f9b93b4f", 900),
-    credit: "Photo: Lisa Marie Theck / Unsplash"
-  },
-  school: {
-    url: unsplash("photo-1573894998033-c0cef4ed722b", 900),
-    credit: "Photo: Yogendra Singh / Unsplash"
-  },
-  sprout: {
-    url: unsplash("photo-1777150895644-2ca253ee1c93", 900),
-    credit: "Photo: Hammilton Ojijo / Unsplash"
-  },
-  gift: {
-    url: unsplash("photo-1488521787991-ed7bbaae773c", 900),
-    credit: "Photo: Larm Rmah / Unsplash"
-  }
-};
 const STORY_PHOTOS = {
   water: {
     url: unsplash("photo-1760873059715-7c7cfbe2a2c6", 600),
@@ -96,6 +82,7 @@ export default class DonorDashboard extends LightningElement {
     if (data) {
       this.data = data;
       this.error = undefined;
+      this.flushPendingAsk();
     } else if (error) {
       this.error =
         error.body?.message || "We could not load your giving summary.";
@@ -109,12 +96,72 @@ export default class DonorDashboard extends LightningElement {
       this.scrollToHash();
     };
     window.addEventListener("hashchange", this._onHash);
+    this._onAsk = (event) => this.handleAskEvent(event);
+    window.addEventListener(ASK_EVENT, this._onAsk);
+    this.readAskFromUrl();
   }
   disconnectedCallback() {
     window.removeEventListener("hashchange", this._onHash);
+    window.removeEventListener(ASK_EVENT, this._onAsk);
+  }
+
+  // ------------------------------------------------------------ questions from the header
+  /** The header box or "Ask Our AI" on this page: answer in the panel (home view only). */
+  handleAskEvent(event) {
+    if (!this.isHome || !event.detail) return;
+    event.detail.handled = true;
+    this.focusAgent(event.detail.question);
+  }
+  /** Arriving from another page with /dashboard?ask=…#agent. */
+  readAskFromUrl() {
+    if (!this.isHome || typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const question = params.get("ask");
+    if (question === null) return;
+    params.delete("ask");
+    const query = params.toString();
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`
+    );
+    this.focusAgent(question);
+  }
+  focusAgent(question) {
+    const text = (question || "").trim();
+    if (text) {
+      // Personal answers need the dashboard data; wait for it if it is still loading.
+      this._pendingAsk = text;
+      this.flushPendingAsk();
+    }
+    // eslint-disable-next-line @lwc/lwc/no-async-operation
+    requestAnimationFrame(() => {
+      const panel = this.template.querySelector('[data-section="agent"]');
+      if (panel?.scrollIntoView) {
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      if (!text) {
+        this.template.querySelector('[data-id="chat-input"]')?.focus();
+      }
+    });
+  }
+  flushPendingAsk() {
+    if (!this._pendingAsk || !this.data) return;
+    const text = this._pendingAsk;
+    this._pendingAsk = undefined;
+    this.sendChat(text);
   }
   renderedCallback() {
     this.scrollToHash();
+    this.scrollChatToEnd();
+  }
+  /** Keep the newest chat message in view inside the panel's scroll area. */
+  scrollChatToEnd() {
+    const count = this.chatMessages.length + (this.chatBusy ? 1 : 0);
+    if (count === this._chatScrolledCount) return;
+    this._chatScrolledCount = count;
+    const body = this.template.querySelector('[data-id="agent-body"]');
+    if (body && count > 0) body.scrollTop = body.scrollHeight;
   }
   scrollToHash() {
     const hash = (window.location.hash || "").replace("#", "");
@@ -272,14 +319,6 @@ export default class DonorDashboard extends LightningElement {
       const raised = Number(c.raised) || 0;
       const pct =
         goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
-      const name = (c.name || "").toLowerCase();
-      const art = /water/.test(name)
-        ? "water"
-        : /school|educat|scholar|girl/.test(name)
-          ? "school"
-          : /tree|green|environment|plant/.test(name)
-            ? "sprout"
-            : "gift";
       let timing = "";
       if (c.daysLeft !== null && c.daysLeft !== undefined) {
         timing =
@@ -292,8 +331,11 @@ export default class DonorDashboard extends LightningElement {
         name: c.name,
         description: c.description,
         href: `${base}/donate?campaign=${encodeURIComponent(c.name)}`,
-        imageUrl: (images.get(c.name) || CAMPAIGN_PHOTOS[art]).url,
-        imageCredit: (images.get(c.name) || CAMPAIGN_PHOTOS[art]).credit,
+        detailHref: `${base}/campaign?name=${encodeURIComponent(c.name)}`,
+        donateLabel: `Donate now to ${c.name}`,
+        detailLabel: `View more about ${c.name}`,
+        imageUrl: (images.get(c.name) || campaignPhoto(c.name)).url,
+        imageCredit: (images.get(c.name) || campaignPhoto(c.name)).credit,
         raisedDisplay: this.money(raised),
         goalDisplay: goal > 0 ? this.money(goal) : "",
         hasGoal: goal > 0,
@@ -348,15 +390,150 @@ export default class DonorDashboard extends LightningElement {
       label
     }));
   }
-  agentUnavailable = false;
+  // ------------------------------------------------------------ inline agent chat
+  // Personal questions are answered here from the dashboard data (the agent cannot verify
+  // the donor from this panel yet, D-23); everything else goes to the Donor Assistant.
+  chatMessages = [];
+  chatDraft = "";
+  chatBusy = false;
+  chatSessionId;
+  _chatSeq = 0;
 
-  handleAsk() {
-    const bootstrap = window.embeddedservice_bootstrap;
-    if (bootstrap?.utilAPI?.launchChat) {
-      bootstrap.utilAPI.launchChat();
-    } else {
-      this.agentUnavailable = true;
+  get chatHasMessages() {
+    return this.chatMessages.length > 0;
+  }
+  get chatSendDisabled() {
+    return this.chatBusy || !this.chatDraft.trim();
+  }
+  handleChatInput(event) {
+    this.chatDraft = event.target.value;
+  }
+  handleChatKeydown(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      this.sendChat(this.chatDraft);
     }
+  }
+  handleChatSend() {
+    this.sendChat(this.chatDraft);
+  }
+  handleSuggestion(event) {
+    this.sendChat(event.currentTarget.dataset.text);
+  }
+  addChat(role, text, link) {
+    this._chatSeq += 1;
+    this.chatMessages = [
+      ...this.chatMessages,
+      {
+        key: `m${this._chatSeq}`,
+        text,
+        link,
+        isUser: role === "user",
+        rowClass: role === "user" ? "msg msg_user" : "msg msg_agent",
+        bubbleClass:
+          role === "user"
+            ? "bubble"
+            : role === "error"
+              ? "bubble bubble_agent bubble_error"
+              : "bubble bubble_agent"
+      }
+    ];
+  }
+  async sendChat(raw) {
+    const text = (raw || "").trim();
+    if (!text || this.chatBusy) return;
+    this.addChat("user", text);
+    this.chatDraft = "";
+    const local = this.localAnswer(text);
+    if (local) {
+      this.addChat("agent", local.text, local.link);
+      return;
+    }
+    this.chatBusy = true;
+    try {
+      const reply = await askAgent({
+        message: text,
+        sessionId: this.chatSessionId || null
+      });
+      if (reply.sessionId) this.chatSessionId = reply.sessionId;
+      this.addChat(reply.error ? "error" : "agent", reply.error || reply.text);
+    } catch {
+      this.addChat("error", "The assistant could not answer right now.");
+    }
+    this.chatBusy = false;
+  }
+
+  /** Answers about the donor's own giving, from the dashboard data; null = ask the agent. */
+  localAnswer(raw) {
+    const d = this.data;
+    if (!d) return null;
+    const q = raw.toLowerCase();
+    const base = basePath || "";
+    if (/monthly|recurring|pause|resume|cancel/.test(q)) {
+      return {
+        text: this.monthlyNote
+          ? `You have ${this.monthlyNote}. You can pause, resume, change or cancel them on My Giving.`
+          : "You don’t have a monthly gift at the moment. You can start one from any campaign.",
+        link: this.monthlyNote
+          ? { href: `${base}/my-giving#monthly`, label: "Manage monthly gifts" }
+          : { href: this.donateHref, label: "Give monthly" }
+      };
+    }
+    if (/history|recent gifts?|past gifts?|last gifts?|receipt/.test(q)) {
+      const recent = (d.gifts || []).slice(0, 3).map((g) => {
+        const cause = g.designations ? ` to ${g.designations}` : "";
+        return `• ${this.formatGiftDate(g.giftDate)}: ${this.money(g.amount)}${cause}`;
+      });
+      return {
+        text: recent.length
+          ? `Your most recent gifts:\n${recent.join("\n")}`
+          : "You haven’t made a gift yet.",
+        link: { href: `${base}/my-giving`, label: "See all my giving" }
+      };
+    }
+    if (/milestone|journey|next step/.test(q)) {
+      const steps = (d.journey || []).map((m) => `• ${m.year} — ${m.label}`);
+      return {
+        text: steps.length
+          ? `Your impact journey so far:\n${steps.join("\n")}\nYour next milestone is your next gift.`
+          : "Your impact journey starts with your first gift.",
+        link: { href: this.journeyHref, label: "View my journey" }
+      };
+    }
+    if (
+      /\b(cause|causes|supported|programs? i)\b|where .*(giving|gift|money)/.test(
+        q
+      )
+    ) {
+      const top = this.agentCauses.map(
+        (c) => `• ${c.label} — you gave ${c.amount}`
+      );
+      return {
+        text: top.length
+          ? `${this.agentIntro}\n${top.join("\n")}`
+          : "You haven’t supported a cause yet.",
+        link: { href: this.causesHref, label: "Explore my causes" }
+      };
+    }
+    if (
+      /how much|total|i('ve| have) (given|donated)|my (giving|gifts|donations)/.test(
+        q
+      )
+    ) {
+      return {
+        text: `You’ve given ${this.totalDisplay} in total since ${d.supporterSince}, supporting ${d.causesSupported} cause${d.causesSupported === 1 ? "" : "s"}.`,
+        link: { href: `${base}/my-giving`, label: "See my giving history" }
+      };
+    }
+    return null;
+  }
+  formatGiftDate(value) {
+    return value
+      ? new Intl.DateTimeFormat("en-GB", {
+          dateStyle: "medium",
+          timeZone: "UTC"
+        }).format(new Date(`${value}T00:00:00Z`))
+      : "";
   }
 
   money(value) {

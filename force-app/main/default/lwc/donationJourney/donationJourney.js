@@ -2,17 +2,7 @@ import { LightningElement, api, wire } from "lwc";
 import { CurrentPageReference } from "lightning/navigation";
 import getOptions from "@salesforce/apex/DonationIntakeController.getOptions";
 import submitDonation from "@salesforce/apex/DonationIntakeController.submitDonation";
-
-// Free Unsplash photos (Unsplash License) for the review and thank-you steps, by campaign theme.
-const unsplash = (id) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=400&h=300&q=75`;
-const CAMPAIGN_PHOTOS = [
-  [/christmas/, unsplash("photo-1606916693216-69bd7e1cf2fa")],
-  [/water/, unsplash("photo-1740741705746-74e6f9b93b4f")],
-  [/school|educat|scholar|girl/, unsplash("photo-1573894998033-c0cef4ed722b")],
-  [/tree|green|environment|plant/, unsplash("photo-1777150895644-2ca253ee1c93")]
-];
-const DEFAULT_PHOTO = unsplash("photo-1488521787991-ed7bbaae773c");
+import { campaignPhoto } from "c/abcHopeCampaignPhotos";
 
 const STEPS = [
   { key: "choose", label: "Choose Donation" },
@@ -147,9 +137,7 @@ export default class DonationJourney extends LightningElement {
   /** Admin-set review image, else a photo matching the campaign's theme. */
   get reviewImage() {
     if (this.reviewImageUrl) return this.reviewImageUrl;
-    const name = (this.campaignLabel || "").toLowerCase();
-    const match = CAMPAIGN_PHOTOS.find(([pattern]) => pattern.test(name));
-    return match ? match[1] : DEFAULT_PHOTO;
+    return campaignPhoto(this.campaignLabel, { width: 400, height: 300 }).url;
   }
   get subtitleText() {
     return this.urlCampaign && this.campaignDescription

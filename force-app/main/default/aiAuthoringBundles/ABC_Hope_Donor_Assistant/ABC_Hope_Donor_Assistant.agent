@@ -29,6 +29,9 @@ variables:
         description: "True once a giving lookup confirmed the chat user is a signed-in ABC Hope donor"
     donor_first_name: mutable string = ""
         description: "First name of the verified donor"
+    verified_account_id: mutable string = ""
+        description: "Account Id of the signed-in donor. Set only by the ABC Hope dashboard when it starts the conversation through the Agent API (D-23); never taken from what the user types."
+        visibility: "External"
 
 language:
     default_locale: "en_US"
@@ -98,7 +101,10 @@ subagent my_giving:
             inputs:
                 messagingSessionId: string
                     description: "Current messaging session Id"
-                    is_required: True
+                    is_required: False
+                verifiedAccountId: string
+                    description: "Verified donor account Id supplied by the ABC Hope dashboard (not user input)"
+                    is_required: False
             outputs:
                 isVerified: boolean
                     description: "True when the chat user is a signed-in ABC Hope donor"
@@ -117,6 +123,7 @@ subagent my_giving:
         actions:
             get_giving_summary: @actions.get_giving_summary
                 with messagingSessionId=@variables.RoutableId
+                with verifiedAccountId=@variables.verified_account_id
                 set @variables.is_verified_donor = @outputs.isVerified
                 set @variables.donor_first_name = @outputs.donorFirstName
 
@@ -131,7 +138,10 @@ subagent monthly_gifts:
             inputs:
                 messagingSessionId: string
                     description: "Current messaging session Id"
-                    is_required: True
+                    is_required: False
+                verifiedAccountId: string
+                    description: "Verified donor account Id supplied by the ABC Hope dashboard (not user input)"
+                    is_required: False
                 operation: string
                     description: "One of: list, pause, resume, change_amount, cancel"
                     is_required: True
@@ -163,6 +173,7 @@ subagent monthly_gifts:
         actions:
             manage_monthly_gifts: @actions.manage_monthly_gifts
                 with messagingSessionId=@variables.RoutableId
+                with verifiedAccountId=@variables.verified_account_id
                 with operation=...
                 with giftNumber=...
                 with pauseMonths=...
@@ -179,7 +190,10 @@ subagent update_profile:
             inputs:
                 messagingSessionId: string
                     description: "Current messaging session Id"
-                    is_required: True
+                    is_required: False
+                verifiedAccountId: string
+                    description: "Verified donor account Id supplied by the ABC Hope dashboard (not user input)"
+                    is_required: False
                 email: string
                     description: "New email address, only if the donor asked to change it"
                     is_required: False
@@ -211,6 +225,7 @@ subagent update_profile:
         actions:
             update_contact_details: @actions.update_contact_details
                 with messagingSessionId=@variables.RoutableId
+                with verifiedAccountId=@variables.verified_account_id
                 with email=...
                 with phone=...
                 with street=...

@@ -145,12 +145,7 @@
               </div>
               <div class="campaigns">
                 <template for:each={campaignCards} for:item="c">
-                  <a
-                    key={c.key}
-                    class="campaign"
-                    href={c.href}
-                    aria-label={c.name}
-                  >
+                  <article key={c.key} class="campaign" data-id="campaign-card">
                     <div class="campaign-art" aria-hidden="true">
                       <img
                         src={c.imageUrl}
@@ -192,16 +187,29 @@
                           >
                         </template>
                       </div>
-                      <span class="campaign-cta"
-                        >Give now
-                        <c-abc-hope-icon
-                          name="arrow"
-                          size="16"
-                          stroke-width="2.4"
-                        ></c-abc-hope-icon
-                      ></span>
+                      <div class="campaign-actions">
+                        <a
+                          class="campaign-cta"
+                          href={c.href}
+                          aria-label={c.donateLabel}
+                          data-id="campaign-donate"
+                          >Donate now
+                          <c-abc-hope-icon
+                            name="arrow"
+                            size="16"
+                            stroke-width="2.4"
+                          ></c-abc-hope-icon
+                        ></a>
+                        <a
+                          class="campaign-more"
+                          href={c.detailHref}
+                          aria-label={c.detailLabel}
+                          data-id="campaign-more"
+                          >View more</a
+                        >
+                      </div>
                     </div>
-                  </a>
+                  </article>
                 </template>
               </div>
             </template>
@@ -371,7 +379,7 @@
         </div>
 
         <!-- Agent panel -->
-        <aside class="agent">
+        <aside class="agent" data-section="agent">
           <div class="agent-head">
             <span class="agent-icon"
               ><c-abc-hope-icon
@@ -392,78 +400,128 @@
             >
           </div>
 
-          <div class="msg msg_user">
-            <span class="msg-avatar">{initial}</span>
-            <p class="bubble">How are the programs I supported doing?</p>
-          </div>
-          <div class="msg msg_agent">
-            <span class="msg-avatar msg-avatar_agent"
-              ><c-abc-hope-icon
-                name="sparkle"
-                size="20"
-                stroke-width="2"
-              ></c-abc-hope-icon
-            ></span>
-            <div class="bubble bubble_agent">
-              <p class="agent-intro">{agentIntro}</p>
-              <ul class="agent-list">
-                <template for:each={agentCauses} for:item="a">
-                  <li key={a.key} class="agent-row">
-                    <span class={a.artClass}
-                      ><c-abc-hope-icon
-                        name="heart"
-                        size="22"
-                        stroke-width="2"
-                      ></c-abc-hope-icon
-                    ></span>
-                    <span class="agent-row-text">
-                      <span class="agent-row-title">{a.label}</span>
-                      <span class="agent-row-sub">You gave {a.amount}</span>
-                    </span>
-                    <span class="agent-trend"
-                      ><c-abc-hope-icon
-                        name="trend"
-                        size="16"
-                        stroke-width="2.2"
-                      ></c-abc-hope-icon
-                    ></span>
-                  </li>
-                </template>
-              </ul>
-              <p class="agent-outro">
-                Your next chance to help: Christmas Giving 2026 — school
-                supplies for children.
-              </p>
+          <div class="agent-body" data-id="agent-body">
+            <div class="msg msg_user">
+              <span class="msg-avatar">{initial}</span>
+              <p class="bubble">How are the programs I supported doing?</p>
             </div>
-          </div>
+            <div class="msg msg_agent">
+              <span class="msg-avatar msg-avatar_agent"
+                ><c-abc-hope-icon
+                  name="sparkle"
+                  size="20"
+                  stroke-width="2"
+                ></c-abc-hope-icon
+              ></span>
+              <div class="bubble bubble_agent">
+                <p class="agent-intro">{agentIntro}</p>
+                <ul class="agent-list">
+                  <template for:each={agentCauses} for:item="a">
+                    <li key={a.key} class="agent-row">
+                      <span class={a.artClass}
+                        ><c-abc-hope-icon
+                          name="heart"
+                          size="22"
+                          stroke-width="2"
+                        ></c-abc-hope-icon
+                      ></span>
+                      <span class="agent-row-text">
+                        <span class="agent-row-title">{a.label}</span>
+                        <span class="agent-row-sub">You gave {a.amount}</span>
+                      </span>
+                      <span class="agent-trend"
+                        ><c-abc-hope-icon
+                          name="trend"
+                          size="16"
+                          stroke-width="2.2"
+                        ></c-abc-hope-icon
+                      ></span>
+                    </li>
+                  </template>
+                </ul>
+                <p class="agent-outro">
+                  Your next chance to help: Christmas Giving 2026 — school
+                  supplies for children.
+                </p>
+              </div>
+            </div>
 
-          <div class="agent-chips">
-            <template for:each={suggestions} for:item="q">
-              <button
-                key={q.key}
-                type="button"
-                class="agent-chip"
-                onclick={handleAsk}
-              >
-                {q.label}
-              </button>
+            <div class="agent-chips">
+              <template for:each={suggestions} for:item="q">
+                <button
+                  key={q.key}
+                  type="button"
+                  class="agent-chip"
+                  data-text={q.label}
+                  disabled={chatBusy}
+                  onclick={handleSuggestion}
+                >
+                  {q.label}
+                </button>
+              </template>
+            </div>
+            <template lwc:if={chatHasMessages}>
+              <div class="chat-log" aria-live="polite">
+                <template for:each={chatMessages} for:item="m">
+                  <div key={m.key} class={m.rowClass}>
+                    <template lwc:if={m.isUser}>
+                      <span class="msg-avatar">{initial}</span>
+                    </template>
+                    <template lwc:else>
+                      <span class="msg-avatar msg-avatar_agent"
+                        ><c-abc-hope-icon
+                          name="sparkle"
+                          size="20"
+                          stroke-width="2"
+                        ></c-abc-hope-icon
+                      ></span>
+                    </template>
+                    <div class={m.bubbleClass}>
+                      <p class="chat-text">{m.text}</p>
+                      <template lwc:if={m.link}>
+                        <a class="chat-link" href={m.link.href}
+                          >{m.link.label}</a
+                        >
+                      </template>
+                    </div>
+                  </div>
+                </template>
+                <template lwc:if={chatBusy}>
+                  <p class="chat-typing muted small" data-id="typing">
+                    Assistant is typing…
+                  </p>
+                </template>
+              </div>
             </template>
           </div>
-          <button type="button" class="agent-input" onclick={handleAsk}>
-            <span>Ask another question about your impact…</span>
-            <span class="agent-send"
-              ><c-abc-hope-icon
+          <div class="agent-input">
+            <input
+              class="agent-input-field"
+              type="text"
+              maxlength="1000"
+              placeholder="Ask another question about your impact…"
+              aria-label="Ask the ABC Hope assistant"
+              value={chatDraft}
+              disabled={chatBusy}
+              oninput={handleChatInput}
+              onkeydown={handleChatKeydown}
+              data-id="chat-input"
+            />
+            <button
+              type="button"
+              class="agent-send"
+              aria-label="Send"
+              disabled={chatSendDisabled}
+              onclick={handleChatSend}
+              data-id="chat-send"
+            >
+              <c-abc-hope-icon
                 name="send"
                 size="18"
                 stroke-width="2.4"
-              ></c-abc-hope-icon
-            ></span>
-          </button>
-          <template lwc:if={agentUnavailable}>
-            <p class="muted small">
-              Chat is not available on this page right now.
-            </p>
-          </template>
+              ></c-abc-hope-icon>
+            </button>
+          </div>
         </aside>
       </div>
     </template>

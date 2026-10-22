@@ -4,12 +4,46 @@
  * Identity rule: a chat is tied to a donor ONLY through MessagingEndUser.AuthenticatedEndUserId,
  * which Salesforce sets when the site user is verified. Contact links created from pre-chat
  * input (e.g. a typed email) are ignored, so a guest can never read or change someone else's data.
+ *
+ * Second path (D-23): conversations started by the dashboard panel through the Agent API carry the
+ * signed-in donor's account Id in the agent variable verified_account_id. Only DonorAgentController
+ * sets it, server-side from the running portal user, using the ABC Hope Agent API client credentials;
+ * the agent script binds it to actions directly (never from user input). It is honoured only when
+ * there is no messaging session and the account belongs to an active portal user.
  */
 public without sharing class AbcHopeAgentSupport {
   public static final String CURRENCY_LABEL = 'THB';
 
   @TestVisible
   static Id accountIdOverride; // lets tests simulate a verified donor without a messaging session
+
+  public static Id verifiedAccountId(
+    String messagingSessionId,
+    String dashboardAccountId
+  ) {
+    if (accountIdOverride != null) {
+      return accountIdOverride;
+    }
+    if (String.isNotBlank(messagingSessionId)) {
+      return verifiedAccountId(messagingSessionId);
+    }
+    Id accountId = toId(dashboardAccountId);
+    if (
+      accountId == null ||
+      accountId.getSobjectType() != Account.SObjectType
+    ) {
+      return null;
+    }
+    for (User u : [
+      SELECT Contact.AccountId
+      FROM User
+      WHERE Contact.AccountId = :accountId AND IsActive = TRUE
+      LIMIT 1
+    ]) {
+      return u.Contact.AccountId;
+    }
+    return null;
+  }
 
   public static Id verifiedAccountId(String messagingSessionId) {
     if (accountIdOverride != null) {

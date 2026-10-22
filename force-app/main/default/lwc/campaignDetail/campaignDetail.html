@@ -1,0 +1,123 @@
+<template>
+  <div class="page">
+    <a class="back" href={backHref} data-id="back">
+      <c-abc-hope-icon
+        name="arrow-left"
+        size="18"
+        stroke-width="2.2"
+      ></c-abc-hope-icon>
+      Back to campaigns
+    </a>
+
+    <template lwc:if={isLoading}>
+      <p class="state muted" role="status">Loading campaign…</p>
+    </template>
+
+    <template lwc:if={error}>
+      <p class="state error" role="alert">{error}</p>
+    </template>
+
+    <template lwc:if={notFound}>
+      <div class="state empty" data-id="not-found">
+        <h1 class="title">Campaign not found</h1>
+        <p class="muted">
+          This campaign isn’t open for donations right now. See the campaigns
+          you can support on your dashboard.
+        </p>
+      </div>
+    </template>
+
+    <template lwc:if={hasDetail}>
+      <section class="hero">
+        <img class="hero-img" src={photo.url} alt="" />
+        <span class="credit">{photo.credit}</span>
+      </section>
+
+      <div class="layout">
+        <div class="main">
+          <h1 class="title" data-id="title">{card.name}</h1>
+          <p class="desc">{card.description}</p>
+
+          <template lwc:if={hasPrograms}>
+            <h2 class="section-title">What your gift funds</h2>
+            <ul class="programs">
+              <template for:each={programs} for:item="p">
+                <li key={p.key} class="program">
+                  <span class="program-icon" aria-hidden="true"
+                    ><c-abc-hope-icon name="sprout" size="22"></c-abc-hope-icon
+                  ></span>
+                  <div>
+                    <p class="program-name">{p.name}</p>
+                    <p class="muted small">{p.summary}</p>
+                  </div>
+                </li>
+              </template>
+            </ul>
+          </template>
+
+          <template lwc:if={hasCauses}>
+            <h2 class="section-title">Causes you can choose</h2>
+            <ul class="causes">
+              <template for:each={causes} for:item="c">
+                <li key={c.key} class="cause">
+                  <p class="cause-name">{c.name}</p>
+                  <template lwc:if={c.description}>
+                    <p class="muted small">{c.description}</p>
+                  </template>
+                  <template lwc:if={c.program}>
+                    <span class="chip">{c.program} program</span>
+                  </template>
+                </li>
+              </template>
+            </ul>
+            <p class="muted small note">
+              You can also choose “Where Most Needed” when you donate.
+            </p>
+          </template>
+        </div>
+
+        <aside class="side">
+          <div class="stats">
+            <p class="raised">
+              <span class="strong" data-id="raised">{raisedDisplay}</span>
+              <template lwc:if={hasGoal}
+                ><span class="muted"> raised of {goalDisplay}</span></template
+              >
+            </p>
+            <template lwc:if={hasGoal}>
+              <div class="progress" aria-hidden="true">
+                <span class="progress-bar" style={barStyle}></span>
+              </div>
+              <p class="muted small">{pctDisplay}</p>
+            </template>
+            <dl class="facts">
+              <div>
+                <dt>Gifts</dt>
+                <dd>{giftsDisplay}</dd>
+              </div>
+              <div>
+                <dt>Time left</dt>
+                <dd>{timingDisplay}</dd>
+              </div>
+              <template lwc:if={datesDisplay}>
+                <div>
+                  <dt>Dates</dt>
+                  <dd>{datesDisplay}</dd>
+                </div>
+              </template>
+            </dl>
+            <a class="donate" href={donateHref} data-id="donate"
+              >Donate now
+              <c-abc-hope-icon
+                name="arrow"
+                size="18"
+                stroke-width="2.4"
+              ></c-abc-hope-icon
+            ></a>
+            <p class="muted small center">One-time or monthly, from THB 100.</p>
+          </div>
+        </aside>
+      </div>
+    </template>
+  </div>
+</template>

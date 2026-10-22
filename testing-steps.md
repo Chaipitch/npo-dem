@@ -20,7 +20,7 @@ sf apex run test -o npo-demo -n DonationIntakeServiceTest,DonationIntakeControll
 npm run test:unit
 ```
 
-Pass criteria: 45 Apex test methods and 20 Jest tests pass.
+Pass criteria: 55 Apex test methods (add `DonorAgentControllerTest` to the run) and 33 Jest tests pass.
 
 ## 2. Public journey (private window, desktop then 375 px)
 
@@ -58,15 +58,16 @@ one Ann Demo account only.
 
 Sign in (Handover → How to sign in as Maya) → lands on `/dashboard`.
 
-| #   | Check          | Expected                                                                                                                                                  |
-| --- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| P1  | Layout         | Sidebar (Home, My Giving, Campaigns, Causes I Support, My Journey, Stories, Ask Our AI, My Profile), sprout photo, top bar with avatar                    |
-| P2  | KPIs           | THB 2,250+ total, 3+ causes, "Since 2023"                                                                                                                 |
-| P3  | Campaign cards | Christmas Giving 2026, Clean Water, Girls' Education, Green Communities (+ any other active campaign with a default designation); progress bar, days left |
-| P4  | Card → donate  | Click Clean Water card → `/donate?campaign=…`; "Welcome back, Maya Grande" on step 2; submit → gift on Maya's account with Clean Water campaign           |
-| P5  | My Giving      | `/my-giving` table shows the new gift                                                                                                                     |
-| P6  | Profile        | `/my-profile` → change phone → Save → "Your changes have been saved"                                                                                      |
-| P7  | Log out        | Avatar menu → Log out → back to the public site                                                                                                           |
+| #   | Check          | Expected                                                                                                                                                                                                                                                                  |
+| --- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P1  | Layout         | Sidebar (Home, My Giving, Campaigns, Causes I Support, My Journey, Stories, Ask Our AI, My Profile), sprout photo, top bar with avatar                                                                                                                                    |
+| P2  | KPIs           | THB 2,250+ total, 3+ causes, "Since 2023"                                                                                                                                                                                                                                 |
+| P3  | Campaign cards | Christmas Giving 2026, Clean Water, Girls' Education, Green Communities (+ any other active campaign with a default designation); progress bar, days left                                                                                                                 |
+| P4  | Card → donate  | Click Clean Water card → `/donate?campaign=…`; "Welcome back, Maya Grande" on step 2; submit → gift on Maya's account with Clean Water campaign                                                                                                                           |
+| P4b | Card links     | Each card shows **Donate now** and **View more**; View more → `/campaign?name=…` with photo, progress, dates, "What your gift funds", "Causes you can choose" and Donate now; `/campaign?name=Nope` → "Campaign not found"; signed out → login, then back to the campaign |
+| P5  | My Giving      | `/my-giving` table shows the new gift                                                                                                                                                                                                                                     |
+| P6  | Profile        | `/my-profile` → change phone → Save → "Your changes have been saved"                                                                                                                                                                                                      |
+| P7  | Log out        | Avatar menu → Log out → back to the public site                                                                                                                                                                                                                           |
 
 ## 6. Agent (CLI preview — no chat widget needed)
 
@@ -127,6 +128,21 @@ Notes:
 - **G3** In the dry run, cancelling in the same database transaction as a pause/resume failed with a record-lock
   error on the upcoming transaction, so the cancelled transaction's final status is unconfirmed. Each button click
   runs in its own transaction; E13 is the real check.
+
+## 9. Dashboard agent panel (Maya)
+
+| #   | Ask in "Ask About Your Journey"                                       | Expected (today, `USE_AGENT_API = false`)                                                   |
+| --- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| A1  | "How much have I given?"                                              | Instant answer from the dashboard: total, since year, causes + link "See my giving history" |
+| A2  | Chips: Explore my causes / View giving history / Show next milestones | Local answers with links to Causes, My Giving, My Journey                                   |
+| A3  | "Can I pause my monthly gift?"                                        | Monthly gift count + link "Manage monthly gifts" (`/my-giving#monthly`)                     |
+| A4  | "Which campaigns are open?" then "Tell me about clean water"          | Answers from the Donor Assistant ("Assistant is typing…"); the follow-up keeps the context  |
+| A5  | Long conversation                                                     | Panel stays within the screen height; the conversation scrolls; newest message in view      |
+
+| A6 | Header box on `/my-giving`: type "How much have I given?" → Enter | Goes to `/dashboard#agent`, the panel answers; `?ask=` disappears from the URL |
+| A7 | Header box on `/dashboard`; then sidebar **Ask Our AI** | Answers in the panel without reloading; Ask Our AI scrolls to the panel and focuses its input |
+
+After D-23 is finished (`USE_AGENT_API = true`), A1 and A3 come from the agent itself using Maya's verified account.
 
 ## Demo script (3–5 min)
 

@@ -89,7 +89,7 @@ ol {
   position: relative;
 }
 .banner-title {
-  font-size: clamp(28px, 3.6vw, 48px);
+  font-size: clamp(26.6px, 3.42vw, 45.6px);
   font-weight: 800;
   line-height: 1.08;
   letter-spacing: -0.01em;
@@ -97,7 +97,7 @@ ol {
 }
 .banner-sub {
   margin-top: 10px;
-  font-size: 20px;
+  font-size: 19px;
   opacity: 0.95;
 }
 .banner-script {
@@ -110,6 +110,9 @@ ol {
 }
 
 /* Layout */
+.main {
+  min-width: 0;
+}
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 380px;
@@ -128,7 +131,7 @@ ol {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 23px;
+  font-size: 21.85px;
   font-weight: 800;
   color: var(--dd-navy);
 }
@@ -138,11 +141,22 @@ ol {
 
 /* KPIs */
 .kpis {
+  /* One row that scrolls sideways when the column is too narrow for all cards. */
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(210px, 1fr);
   gap: 16px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  /* room for the card shadows inside the scroll area */
+  margin: -6px -6px -12px;
+  padding: 6px 6px 12px;
 }
 .kpi {
+  scroll-snap-align: start;
+  min-width: 0;
   display: flex;
   gap: 18px;
   align-items: center;
@@ -214,7 +228,7 @@ ol {
 /* Shared impact */
 .impact {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 14px;
 }
 .impact-tile {
@@ -460,6 +474,12 @@ ol {
 .agent {
   position: sticky;
   top: 90px;
+  scroll-margin-top: 90px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(
+    100vh - 110px
+  ); /* fits the viewport; the conversation scrolls */
   padding: 22px;
   border-radius: 20px;
   background:
@@ -489,7 +509,7 @@ ol {
   box-shadow: 0 6px 16px rgba(106, 63, 214, 0.35);
 }
 .agent-title {
-  font-size: 21px;
+  font-size: 19.95px;
   font-weight: 800;
   color: var(--dd-navy);
   padding-right: 70px;
@@ -638,12 +658,25 @@ ol {
   color: var(--dd-muted);
   cursor: text;
 }
+.agent-input-field {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  color: #2b2f45;
+  outline: none;
+}
 .agent-send {
   width: 38px;
   height: 38px;
+  border: 0;
   border-radius: 50%;
   display: grid;
   place-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
   background: linear-gradient(135deg, #7b5cf0, #5a35c9);
   color: #fff;
 }
@@ -672,7 +705,7 @@ ol {
     border-color 0.15s;
 }
 .dash .campaign:hover,
-.dash .campaign:focus-visible {
+.dash .campaign:focus-within {
   transform: translateY(-3px);
   border-color: #c9d6f5;
   box-shadow: 0 14px 30px rgba(20, 24, 91, 0.12);
@@ -754,17 +787,55 @@ ol {
   font-size: 12px;
   font-weight: 600;
 }
-.campaign-cta {
+.campaign-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: auto;
+  padding-top: 14px;
+}
+.campaign-actions a.campaign-cta,
+.campaign-actions a.campaign-cta:visited {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: auto;
-  padding-top: 14px;
   color: #d63131;
   font-weight: 700;
   font-size: 14px;
+  text-decoration: none;
+}
+.campaign-actions a.campaign-more,
+.campaign-actions a.campaign-more:visited {
+  color: var(--dd-blue);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: underline;
+}
+.campaign-actions a:hover {
+  text-decoration: underline;
+}
+.campaign-actions a:focus-visible {
+  outline: 3px solid rgba(11, 79, 196, 0.35);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
+/* Below ~1385px the main column (next to the agent panel, or full width on tablets/phones)
+   cannot fit three KPI cards side by side: stack them, full width, no sideways scroll. */
+@media (max-width: 1385px) {
+  .kpis {
+    grid-auto-flow: row;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+  .kpi {
+    padding: 16px 18px;
+  }
+}
 @media (max-width: 1280px) {
   .stories {
     grid-template-columns: 1fr;
@@ -779,18 +850,12 @@ ol {
   }
   .agent {
     position: static;
-  }
-  .impact {
-    grid-template-columns: repeat(2, 1fr);
+    max-height: 80vh;
   }
 }
 @media (max-width: 700px) {
   .dash {
     padding: 4px 14px 32px;
-  }
-  .kpis,
-  .impact {
-    grid-template-columns: 1fr;
   }
   .banner {
     padding: 24px;
@@ -816,4 +881,54 @@ ol {
   .journey-item {
     flex-wrap: wrap;
   }
+}
+.agent-send:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.agent-input:focus-within {
+  border-color: var(--dd-purple);
+}
+.agent-head,
+.agent-input {
+  flex-shrink: 0;
+}
+.agent-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  margin-right: -10px;
+  padding-right: 10px;
+  overscroll-behavior: contain;
+}
+.chat-log {
+  margin-top: 6px;
+}
+.campaign-program .muted {
+  margin-right: 4px;
+}
+.chat-log .bubble {
+  margin: 0;
+  white-space: pre-line;
+}
+.chat-log .msg_user .bubble {
+  background: var(--dd-purple-soft);
+}
+.bubble_error {
+  border-color: #f3c7c7;
+  color: #b42318;
+}
+.chat-typing {
+  margin: 10px 0 0 50px;
+}
+.chat-text {
+  margin: 0;
+}
+.chat-log a.chat-link,
+.chat-log a.chat-link:visited {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--dd-purple);
+  font-weight: 700;
+  text-decoration: underline;
 }

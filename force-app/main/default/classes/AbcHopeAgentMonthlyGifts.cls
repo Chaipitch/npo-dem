@@ -16,10 +16,14 @@ public without sharing class AbcHopeAgentMonthlyGifts {
   public class Request {
     @InvocableVariable(
       label='Messaging session ID'
-      description='Current messaging session (MessagingSession Id).'
-      required=true
+      description='Current messaging session (MessagingSession Id). Empty for dashboard (Agent API) conversations.'
     )
     public String messagingSessionId;
+    @InvocableVariable(
+      label='Verified account ID'
+      description='Signed-in donor account Id supplied by the ABC Hope dashboard (Agent API). Not user input.'
+    )
+    public String verifiedAccountId;
     @InvocableVariable(
       label='Operation'
       description='One of: list, pause, resume, change_amount, cancel.'
@@ -80,7 +84,8 @@ public without sharing class AbcHopeAgentMonthlyGifts {
   static Result handle(Request req) {
     Result r = new Result();
     Id accountId = AbcHopeAgentSupport.verifiedAccountId(
-      req?.messagingSessionId
+      req?.messagingSessionId,
+      req?.verifiedAccountId
     );
     if (accountId == null) {
       r.message = 'The user is not signed in. Monthly gifts can only be managed after signing in on the ABC Hope site.';

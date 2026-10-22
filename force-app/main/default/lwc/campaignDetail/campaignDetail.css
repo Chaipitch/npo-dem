@@ -1,0 +1,246 @@
+:host {
+  --cd-navy: #14185b;
+  --cd-blue: #0b4fc4;
+  --cd-purple: #6a3fd6;
+  --cd-purple-soft: #f3efff;
+  --cd-muted: #6b7088;
+  --cd-border: #e6e9f2;
+  display: block;
+  color: #2b2f45;
+}
+* {
+  box-sizing: border-box;
+}
+p,
+h1,
+h2,
+ul,
+dl,
+dd {
+  margin: 0;
+}
+.page {
+  padding: 4px 16px 40px;
+}
+.muted {
+  color: var(--cd-muted);
+}
+.small {
+  font-size: 14px;
+  line-height: 1.45;
+}
+.strong {
+  font-weight: 800;
+  color: var(--cd-navy);
+}
+.center {
+  text-align: center;
+}
+.page a.back,
+.page a.back:visited {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 16px;
+  color: var(--cd-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+.page a.back:hover {
+  text-decoration: underline;
+}
+.state {
+  padding: 24px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid var(--cd-border);
+}
+.error {
+  color: #b42318;
+}
+.empty .title {
+  margin-bottom: 8px;
+}
+.hero {
+  position: relative;
+  height: 200px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #e9ecf5;
+}
+.hero-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.credit {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 11px;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-top: 22px;
+}
+.main {
+  min-width: 0;
+}
+.title {
+  font-size: 26.6px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--cd-navy);
+}
+.desc {
+  margin-top: 10px;
+  font-size: 16px;
+  line-height: 1.55;
+}
+.section-title {
+  margin: 28px 0 12px;
+  font-size: 18.05px;
+  font-weight: 800;
+  color: var(--cd-navy);
+}
+.programs,
+.causes {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+.program {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--cd-border);
+}
+.program-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: #e6f6ea;
+  color: #2f8a4a;
+}
+.program-name,
+.cause-name {
+  font-weight: 700;
+  color: var(--cd-navy);
+}
+.cause {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--cd-border);
+}
+.chip {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--cd-purple-soft);
+  color: var(--cd-purple);
+  font-size: 12px;
+  font-weight: 600;
+}
+.note {
+  margin-top: 10px;
+}
+.stats {
+  padding: 22px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid var(--cd-border);
+  box-shadow: 0 6px 18px rgba(20, 24, 91, 0.06);
+}
+.raised {
+  font-size: 18px;
+}
+.progress {
+  height: 10px;
+  margin: 12px 0 6px;
+  border-radius: 999px;
+  background: #eef0f6;
+  overflow: hidden;
+}
+.progress-bar {
+  display: block;
+  height: 100%;
+  min-width: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2f8a4a, #46b96a);
+}
+.facts {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+}
+.facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+.facts dt {
+  color: var(--cd-muted);
+}
+.facts dd {
+  font-weight: 600;
+  text-align: right;
+}
+.stats a.donate,
+.stats a.donate:visited {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  background: #d63131;
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none;
+}
+.stats a.donate:hover {
+  background: #bd2626;
+}
+.stats a.donate:focus-visible {
+  outline: 3px solid rgba(214, 49, 49, 0.35);
+  outline-offset: 2px;
+}
+
+@media (min-width: 900px) {
+  .page {
+    padding: 4px 28px 48px;
+  }
+  .hero {
+    height: 300px;
+  }
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: start;
+  }
+  .side {
+    position: sticky;
+    top: 90px;
+  }
+  .title {
+    font-size: 30.4px;
+  }
+}

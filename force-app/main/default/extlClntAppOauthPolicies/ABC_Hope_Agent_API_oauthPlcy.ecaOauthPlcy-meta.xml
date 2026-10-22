@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ExtlClntAppOauthConfigurablePolicies
+  xmlns="http://soap.sforce.com/2006/04/metadata"
+>
+    <clientCredentialsFlowUser
+  >agentapi.abchope@abchope.demo.00dg700000kmyyx</clientCredentialsFlowUser>
+    <externalClientApplication>ABC_Hope_Agent_API</externalClientApplication>
+    <ipRelaxationPolicyType>Enforce</ipRelaxationPolicyType>
+    <isClientCredentialsFlowEnabled>true</isClientCredentialsFlowEnabled>
+    <isGuestCodeCredFlowEnabled>false</isGuestCodeCredFlowEnabled>
+    <isTokenExchangeFlowEnabled>false</isTokenExchangeFlowEnabled>
+    <label>ABC Hope Agent API OAuth Policies</label>
+    <permittedUsersPolicyType
+  >AdminApprovedPreAuthorized</permittedUsersPolicyType>
+    <refreshTokenPolicyType>Infinite</refreshTokenPolicyType>
+</ExtlClntAppOauthConfigurablePolicies>

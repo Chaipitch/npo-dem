@@ -112,18 +112,31 @@ export default class AbcHopePortalLayout extends LightningElement {
   handleAsk(event) {
     event.preventDefault();
     this.closeDrawer();
-    launchChat();
+    askAssistant("");
   }
   handleSearchKey(event) {
-    if (event.key === "Enter") {
-      launchChat();
-    }
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    const question = (event.target.value || "").trim();
+    if (!question) return;
+    event.target.value = "";
+    askAssistant(question);
   }
 }
 
-function launchChat() {
-  const bootstrap = window.embeddedservice_bootstrap;
-  if (bootstrap?.utilAPI?.launchChat) {
-    bootstrap.utilAPI.launchChat();
+/** Window event the dashboard's agent panel listens for (c-donor-dashboard). */
+export const ASK_EVENT = "abchope:ask";
+
+/**
+ * Sends a question (or just "open the assistant" when empty) to the dashboard agent panel.
+ * If the panel is on this page it marks the event handled; otherwise go to the dashboard,
+ * which asks the question on load (?ask=) and scrolls to the panel (#agent).
+ */
+export function askAssistant(question) {
+  const detail = { question, handled: false };
+  window.dispatchEvent(new CustomEvent(ASK_EVENT, { detail }));
+  if (!detail.handled) {
+    const query = question ? `?ask=${encodeURIComponent(question)}` : "";
+    window.location.assign(`${basePath || ""}/dashboard${query}#agent`);
   }
 }
