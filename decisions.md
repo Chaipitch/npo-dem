@@ -214,8 +214,8 @@ user. The client ID/secret live only on the `AgentApiPrincipal` principal in Set
 
 Until the principal holds the secret, `DonorAgentController.USE_AGENT_API = false`: the panel answers personal
 questions itself from the dashboard data (total, causes, recent gifts, monthly gifts, journey — with links) and sends
-everything else to the agent through `generateAiAgentResponse`. Agent Script changes are validated but **not
-published** yet.
+everything else to the agent through `generateAiAgentResponse`. The Agent Script (with `verified_account_id`) was
+published and activated as **version 5** on 2026‑10‑22 (user approved).
 
 ### D-24 · Recurring gifts: weekly, monthly or yearly — Accepted (user, 2026‑10‑22)
 
@@ -231,8 +231,8 @@ single gift or the active set is described — "Recurring (Weekly)" on the My Gi
 recurring gift (Monthly)" on the dashboard (new `Dashboard.activeRecurringTypes`), "Recurring Gifts" as the My Giving
 heading, and the agent's action replies ("1. Recurring (Weekly): THB 300 per week to …"). API names stay as they are
 (`donorMonthlyGifts`, `getMonthlyGifts`, `AbcHopeAgentMonthlyGifts`, subagent `monthly_gifts`, anchor `#monthly`)
-because the site, agent and tests are wired to them. The Agent Script wording is updated and validated but, like D-23,
-not yet published.
+because the site, agent and tests are wired to them. The Agent Script wording went live with agent version 5
+(published and activated 2026‑10‑22).
 
 Step 1 and step 2 of the journey also show the campaign photo as a banner across the top of the card (same
 `abcHopeCampaignPhotos` choice as the cards and the review step).

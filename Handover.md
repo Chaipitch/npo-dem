@@ -90,8 +90,8 @@ How the build compares:
 **Live now:** the panel answers personal questions from the dashboard data and sends other questions to the
 Donor Assistant (`DonorAgentController`, `USE_AGENT_API = false`). **Deployed but unused:** External Client App,
 External/Named Credential `ABC_Hope_Agent_API`, integration user, portal permission set access to the principal,
-updated agent actions (optional `verifiedAccountId`). **Validated, not published:** the Agent Script with
-`verified_account_id`.
+updated agent actions (optional `verifiedAccountId`). **Published and active (v5, 2026‑10‑22):** the Agent Script
+with `verified_account_id` and the D-24 "recurring gifts" wording.
 
 To finish (about 15 minutes):
 
@@ -100,10 +100,10 @@ To finish (about 15 minutes):
    principal **AgentApiPrincipal** (Client ID / Client Secret). Never paste them anywhere else.
 2. Connection test (needs principal access for whoever runs it) → if the Agent API asks for it, add the app to the
    agent's connections in Agentforce Builder.
-3. `sf agent publish authoring-bundle -o npo-demo --api-name ABC_Hope_Donor_Assistant` and activate the new version.
+3. Done 2026‑10‑22: agent published and version 5 activated (`sf agent activate … --version 5`).
 4. Set `USE_AGENT_API = true` in `DonorAgentController`, remove the local personal answers in `donorDashboard`
    (or keep them as an offline fallback), deploy, publish the site.
-5. Maya test: "How much have I given?" and "Show my monthly gifts" in the panel → her own data.
+5. Maya test: "How much have I given?" and "Show my recurring gifts" in the panel → her own data.
 
 ## Campaign detail page (2026‑10‑22)
 
@@ -125,6 +125,4 @@ and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a b
 1. Place the Embedded Messaging component (above), then test signed-in agent conversations end to end.
 2. Done 2026‑10‑22: campaign cards, story cards and the journey's review/thank-you image use Unsplash photos.
 3. Header nav "Our Work" and "About" point to `/` until those pages exist.
-4. Publish the agent (`sf agent publish authoring-bundle …`, then activate) to make the D-23 variable and the D-24
-   "recurring gifts" wording live in the assistant's own instructions; its Apex action replies are already live.
-5. Optional: raise `AbcHopeAgentSupport` coverage (the real MessagingSession path can't be built in tests).
+4. Optional: raise `AbcHopeAgentSupport` coverage (the real MessagingSession path can't be built in tests).
