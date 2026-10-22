@@ -298,6 +298,12 @@
                           ><span>· {c.timing}</span></template
                         >
                       </p>
+                      <template lwc:if={c.programsDisplay}>
+                        <p class="campaign-program">
+                          <span class="muted">Funds</span>
+                          {c.programsDisplay}
+                        </p>
+                      </template>
                       <div class="campaign-chips">
                         <template for:each={c.chips} for:item="d">
                           <span key={d.key} class="campaign-chip"
@@ -554,6 +560,7 @@
                       <th scope="col">Date</th>
                       <th scope="col">Campaign</th>
                       <th scope="col">Designation</th>
+                      <th scope="col">Program</th>
                       <th scope="col" class="num">Amount</th>
                       <th scope="col">Status</th>
                     </tr>
@@ -564,6 +571,7 @@
                         <td data-label="Date">{g.dateDisplay}</td>
                         <td data-label="Campaign">{g.campaignName}</td>
                         <td data-label="Designation">{g.designations}</td>
+                        <td data-label="Program">{g.programs}</td>
                         <td data-label="Amount" class="num strong">
                           {g.amountDisplay}
                         </td>

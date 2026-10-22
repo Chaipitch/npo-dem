@@ -728,6 +728,12 @@ ol {
   font-size: 13px;
   color: var(--dd-muted);
 }
+.campaign-program {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dd-navy);
+}
 .campaign-chips {
   display: flex;
   flex-wrap: wrap;

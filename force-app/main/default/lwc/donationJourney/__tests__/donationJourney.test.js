@@ -104,6 +104,27 @@ describe("c-donation-journey", () => {
     expect($(el, ".hint").textContent).toContain("every month");
   });
 
+  it("shows the program the chosen designation funds", async () => {
+    const el = mount();
+    getOptions.emit({
+      ...OPTIONS,
+      designations: [
+        { label: "School Supplies", value: "a01", program: "Education Access" },
+        { label: "Where Most Needed", value: "a03" }
+      ]
+    });
+    await flush();
+    expect($(el, '[data-id="program-hint"]').textContent).toContain(
+      "Funds our Education Access program."
+    );
+
+    const select = $(el, '[data-id="designation"]');
+    select.value = "a03";
+    select.dispatchEvent(new CustomEvent("change"));
+    await flush();
+    expect($(el, '[data-id="program-hint"]')).toBeNull();
+  });
+
   it("validates details and switches fields for organizations", async () => {
     const el = mount();
     await goToDetails(el);

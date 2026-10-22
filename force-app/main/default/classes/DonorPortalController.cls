@@ -29,6 +29,8 @@ public without sharing class DonorPortalController {
     public String campaignName;
     @AuraEnabled
     public String designations;
+    @AuraEnabled
+    public String programs; // what the designations fund (D-21)
   }
 
   public class Milestone {
@@ -110,10 +112,14 @@ public without sharing class DonorPortalController {
       ]
     );
     Map<Id, List<String>> designationsByTxn = new Map<Id, List<String>>();
+    Map<Id, List<String>> programsByTxn = new Map<Id, List<String>>();
     // Year a cause was first supported, for the impact journey.
     Map<String, Integer> firstYearByCause = new Map<String, Integer>();
     for (GiftTransactionDesignation gtd : [
-      SELECT GiftTransactionId, GiftDesignation.Name
+      SELECT
+        GiftTransactionId,
+        GiftDesignation.Name,
+        GiftDesignation.NGOTV_Program__r.Name
       FROM GiftTransactionDesignation
       WHERE GiftTransactionId IN :txns.keySet() AND GiftDesignationId != NULL
     ]) {
@@ -122,6 +128,11 @@ public without sharing class DonorPortalController {
         designationsByTxn.put(gtd.GiftTransactionId, new List<String>());
       }
       designationsByTxn.get(gtd.GiftTransactionId).add(cause);
+      DonationIntakeService.addProgram(
+        programsByTxn,
+        gtd.GiftTransactionId,
+        gtd.GiftDesignation.NGOTV_Program__r?.Name
+      );
       Integer year = giftYear(txns.get(gtd.GiftTransactionId));
       if (
         !firstYearByCause.containsKey(cause) ||
@@ -147,6 +158,9 @@ public without sharing class DonorPortalController {
         g.campaignName = gt.Campaign?.Name;
         g.designations = designationsByTxn.containsKey(gt.Id)
           ? String.join(designationsByTxn.get(gt.Id), ', ')
+          : '';
+        g.programs = programsByTxn.containsKey(gt.Id)
+          ? String.join(programsByTxn.get(gt.Id), ', ')
           : '';
         d.gifts.add(g);
       }

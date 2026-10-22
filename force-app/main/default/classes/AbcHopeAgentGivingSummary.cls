@@ -68,6 +68,9 @@ public without sharing class AbcHopeAgentGivingSummary {
               ': ' +
               AbcHopeAgentSupport.money(g.amount) +
               (String.isBlank(g.designations) ? '' : ' to ' + g.designations) +
+              (String.isBlank(g.programs)
+                ? ''
+                : ' [program: ' + g.programs + ']') +
               (String.isBlank(g.campaignName)
                 ? ''
                 : ' (' + g.campaignName + ')') +

@@ -167,6 +167,41 @@ private class AbcHopeAgentActionsTest {
   }
 
   @IsTest
+  static void campaignInfoNamesTheProgramsACampaignFunds() {
+    Program edu = new Program(
+      Name = 'Test Education Access',
+      Status = 'Active'
+    );
+    insert edu;
+    update new GiftDesignation(
+      Id = [SELECT Id FROM GiftDesignation WHERE Name = 'School Supplies']
+      .Id,
+      NGOTV_Program__c = edu.Id
+    );
+    fundraisingCampaign(CAMPAIGN, Date.today().addDays(30), 'School Supplies');
+
+    Test.startTest();
+    AbcHopeAgentCampaignInfo.Result listed = campaignInfo('');
+    AbcHopeAgentCampaignInfo.Result described = campaignInfo(CAMPAIGN);
+    Test.stopTest();
+
+    Assert.isTrue(
+      listed.summary.contains('Funds: Test Education Access. Raised'),
+      listed.summary
+    );
+    Assert.isTrue(
+      described.summary.contains('Programs funded: Test Education Access\n'),
+      described.summary
+    );
+    Assert.isTrue(
+      described.summary.contains(
+        'School Supplies (Test Education Access program) — Notebooks and pencils.'
+      ),
+      described.summary
+    );
+  }
+
+  @IsTest
   static void campaignInfoUsesEachCampaignsOwnCauses() {
     insert new GiftDesignation(
       Name = DonationIntakeService.GENERAL_DESIGNATION,

@@ -124,6 +124,11 @@
               </select>
             </span>
           </label>
+          <template lwc:if={designationProgram}>
+            <p class="hint" data-id="program-hint">
+              Funds our {designationProgram} program.
+            </p>
+          </template>
           <template lwc:if={designationError}>
             <p class="field-error" role="alert">{designationError}</p>
           </template>

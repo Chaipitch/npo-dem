@@ -249,6 +249,7 @@ export default class DonorDashboard extends LightningElement {
           ? `${c.giftCount} gift${c.giftCount === 1 ? "" : "s"}`
           : "Be the first to give",
         timing,
+        programsDisplay: (c.programs || []).join(", "),
         chips: (c.designations || []).map((d, j) => ({
           key: `d${j}`,
           label: d

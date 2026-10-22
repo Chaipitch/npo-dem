@@ -74,6 +74,7 @@ public without sharing class AbcHopeAgentCampaignInfo {
             ' — ' +
             purpose(card.description) +
             ' ' +
+            funds(card.programs) +
             progress(card) +
             ' Donate: ' +
             donateUrl(card.name)
@@ -127,6 +128,9 @@ public without sharing class AbcHopeAgentCampaignInfo {
       (c.EndDate == null ? 'open' : c.EndDate.format())
     };
     if (card != null) {
+      if (!card.programs.isEmpty()) {
+        lines.add('Programs funded: ' + String.join(card.programs, ', '));
+      }
       lines.add('Progress: ' + progress(card));
     }
     lines.add('Causes donors can choose: ' + causes(c));
@@ -192,7 +196,7 @@ public without sharing class AbcHopeAgentCampaignInfo {
     }
     Map<String, GiftDesignation> byName = new Map<String, GiftDesignation>();
     for (GiftDesignation gd : [
-      SELECT Name, Description
+      SELECT Name, Description, NGOTV_Program__r.Name
       FROM GiftDesignation
       WHERE IsActive = TRUE AND Name IN :wanted
     ]) {
@@ -202,9 +206,11 @@ public without sharing class AbcHopeAgentCampaignInfo {
     for (String n : wanted) {
       GiftDesignation gd = byName.remove(n); // remove: skip duplicate names
       if (gd != null) {
+        String program = gd.NGOTV_Program__r?.Name;
         out.add(
           gd.Name +
-          (String.isBlank(gd.Description) ? '' : ' — ' + gd.Description)
+            (String.isBlank(program) ? '' : ' (' + program + ' program)') +
+            (String.isBlank(gd.Description) ? '' : ' — ' + gd.Description)
         );
       }
     }
@@ -217,6 +223,13 @@ public without sharing class AbcHopeAgentCampaignInfo {
     return String.isBlank(description)
       ? 'Supports ABC Hope\'s work with children.'
       : AbcHopeAgentSupport.clean(description, 300);
+  }
+
+  /** "Funds: A, B. " — the programs a campaign spends gifts on (D-21); empty when none. */
+  static String funds(List<String> programs) {
+    return programs == null || programs.isEmpty()
+      ? ''
+      : 'Funds: ' + String.join(programs, ', ') + '. ';
   }
 
   static String progress(DonationIntakeService.CampaignCard card) {

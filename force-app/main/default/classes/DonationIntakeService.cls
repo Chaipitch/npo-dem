@@ -70,9 +70,12 @@ public without sharing class DonationIntakeService {
     public String label;
     @AuraEnabled
     public String value;
-    Option(String label, String value) {
+    @AuraEnabled
+    public String program;
+    Option(String label, String value, String program) {
       this.label = label;
       this.value = value;
+      this.program = program;
     }
   }
 
@@ -118,14 +121,14 @@ public without sharing class DonationIntakeService {
     }
     List<GiftDesignation> gds = wanted.isEmpty()
       ? [
-          SELECT Id, Name
+          SELECT Id, Name, NGOTV_Program__r.Name
           FROM GiftDesignation
           WHERE IsActive = TRUE
           ORDER BY Name
           LIMIT 50
         ]
       : [
-          SELECT Id, Name
+          SELECT Id, Name, NGOTV_Program__r.Name
           FROM GiftDesignation
           WHERE IsActive = TRUE AND Name IN :wanted
         ];
@@ -138,7 +141,8 @@ public without sharing class DonationIntakeService {
       String n : wanted.isEmpty() ? new List<String>(byName.keySet()) : wanted
     ) {
       if (byName.containsKey(n)) {
-        opts.designations.add(new Option(n, byName.get(n).Id));
+        GiftDesignation gd = byName.get(n);
+        opts.designations.add(new Option(n, gd.Id, gd.NGOTV_Program__r?.Name));
       }
     }
     for (GiftDefaultDesignation gdd : [
@@ -300,20 +304,27 @@ public without sharing class DonationIntakeService {
     public Integer giftCount = 0;
     @AuraEnabled
     public List<String> designations = new List<String>();
+    @AuraEnabled
+    public List<String> programs = new List<String>();
   }
 
   /**
    * Campaigns open for donations: active, not ended, and set up with at least one
    * default designation (that is what marks a campaign as a fundraising campaign here).
    * Raised = sum of non-cancelled gift transactions attributed to the campaign.
+   * Programs = what the campaign spends the money on, via each designation's Program (D-21).
    */
   public static List<CampaignCard> getCampaigns() {
     Date today = Date.today();
     Map<Id, CampaignCard> cards = new Map<Id, CampaignCard>();
     Set<Id> withDefaults = new Set<Id>();
     Map<Id, List<String>> designationsByCampaign = new Map<Id, List<String>>();
+    Map<Id, List<String>> programsByCampaign = new Map<Id, List<String>>();
     for (GiftDefaultDesignation gdd : [
-      SELECT ParentRecordId, GiftDesignation.Name
+      SELECT
+        ParentRecordId,
+        GiftDesignation.Name,
+        GiftDesignation.NGOTV_Program__r.Name
       FROM GiftDefaultDesignation
       WHERE
         ParentRecordId IN (
@@ -330,6 +341,11 @@ public without sharing class DonationIntakeService {
       }
       designationsByCampaign.get(gdd.ParentRecordId)
         .add(gdd.GiftDesignation.Name);
+      addProgram(
+        programsByCampaign,
+        gdd.ParentRecordId,
+        gdd.GiftDesignation.NGOTV_Program__r?.Name
+      );
     }
     for (Campaign c : [
       SELECT Id, Name, Description, EndDate, ExpectedRevenue
@@ -346,6 +362,9 @@ public without sharing class DonationIntakeService {
       card.daysLeft = c.EndDate == null ? null : today.daysBetween(c.EndDate);
       card.goal = c.ExpectedRevenue;
       card.designations = designationsByCampaign.get(c.Id);
+      if (programsByCampaign.containsKey(c.Id)) {
+        card.programs = programsByCampaign.get(c.Id);
+      }
       cards.put(c.Id, card);
     }
     for (AggregateResult ar : [
@@ -368,6 +387,23 @@ public without sharing class DonationIntakeService {
       card.giftCount = (Integer) ar.get('n');
     }
     return cards.values();
+  }
+
+  /** Adds a program name to the record's list once; designations without a program are skipped. */
+  public static void addProgram(
+    Map<Id, List<String>> programsById,
+    Id recordId,
+    String programName
+  ) {
+    if (String.isBlank(programName)) {
+      return;
+    }
+    if (!programsById.containsKey(recordId)) {
+      programsById.put(recordId, new List<String>());
+    }
+    if (!programsById.get(recordId).contains(programName)) {
+      programsById.get(recordId).add(programName);
+    }
   }
 
   static Campaign findCampaign(String campaignName) {

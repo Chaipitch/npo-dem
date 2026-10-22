@@ -201,6 +201,11 @@ export default class DonationJourney extends LightningElement {
     const d = this.designations.find((x) => x.value === this.designationId);
     return d ? d.label : "";
   }
+  // Program the chosen designation funds (D-21); empty when it has none.
+  get designationProgram() {
+    const d = this.designations.find((x) => x.value === this.designationId);
+    return d?.program || "";
+  }
   get otherMin() {
     return MIN_AMOUNT;
   }
