@@ -31,7 +31,8 @@ fi
 
 auth_file="$(umask 077 && mktemp)"
 trap 'rm -f "$auth_file"' EXIT
-printf '%s' "$SF_AUTH_URL" > "$auth_file"
+# Strip whitespace: a trailing newline pasted into the secret makes the CLI reject it.
+printf '%s' "$SF_AUTH_URL" | tr -d '[:space:]' > "$auth_file"
 
 if sf org login sfdx-url --sfdx-url-file "$auth_file" --alias npo-demo --set-default --json >/dev/null 2>&1 &&
   sf org display -o npo-demo --json >/dev/null 2>&1; then
