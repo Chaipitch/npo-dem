@@ -94,7 +94,7 @@ dd {
   min-width: 0;
 }
 .title {
-  font-size: 28px;
+  font-size: 26.6px;
   font-weight: 800;
   line-height: 1.2;
   color: var(--cd-navy);
@@ -106,7 +106,7 @@ dd {
 }
 .section-title {
   margin: 28px 0 12px;
-  font-size: 19px;
+  font-size: 18.05px;
   font-weight: 800;
   color: var(--cd-navy);
 }
@@ -241,6 +241,6 @@ dd {
     top: 90px;
   }
   .title {
-    font-size: 32px;
+    font-size: 30.4px;
   }
 }

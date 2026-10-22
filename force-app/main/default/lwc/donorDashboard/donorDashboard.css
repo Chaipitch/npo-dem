@@ -89,7 +89,7 @@ ol {
   position: relative;
 }
 .banner-title {
-  font-size: clamp(28px, 3.6vw, 48px);
+  font-size: clamp(26.6px, 3.42vw, 45.6px);
   font-weight: 800;
   line-height: 1.08;
   letter-spacing: -0.01em;
@@ -97,7 +97,7 @@ ol {
 }
 .banner-sub {
   margin-top: 10px;
-  font-size: 20px;
+  font-size: 19px;
   opacity: 0.95;
 }
 .banner-script {
@@ -131,7 +131,7 @@ ol {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 23px;
+  font-size: 21.85px;
   font-weight: 800;
   color: var(--dd-navy);
 }
@@ -509,7 +509,7 @@ ol {
   box-shadow: 0 6px 16px rgba(106, 63, 214, 0.35);
 }
 .agent-title {
-  font-size: 21px;
+  font-size: 19.95px;
   font-weight: 800;
   color: var(--dd-navy);
   padding-right: 70px;
