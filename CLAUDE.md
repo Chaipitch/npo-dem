@@ -95,7 +95,7 @@ python3 scripts/sitePages.py && sf project deploy start -o npo-demo -d force-app
 sf agent validate authoring-bundle -o npo-demo --api-name ABC_Hope_Donor_Assistant
 sf agent preview start -o npo-demo --authoring-bundle ABC_Hope_Donor_Assistant --use-live-actions
 sf agent publish authoring-bundle -o npo-demo --api-name ABC_Hope_Donor_Assistant
-sf agent activate -o npo-demo -n ABC_Hope_Donor_Assistant
+sf agent activate -o npo-demo -n ABC_Hope_Donor_Assistant --version <n>   # without --version it prompts
 ```
 
 ## Conventions & gotchas
@@ -112,6 +112,8 @@ sf agent activate -o npo-demo -n ABC_Hope_Donor_Assistant
 - **Campaign cards** list campaigns that are active, not ended and have a `GiftDefaultDesignation` (D-18).
 - **Cloud sessions:** `.claude/hooks/session-start.sh` runs `npm install`, installs the `sf` CLI and logs in
   as `npo-demo` from the `SF_AUTH_URL` environment secret. Never echo that URL — it holds a refresh token.
+- `sf agent publish` retrieves metadata back into the repo (unformatted class files, new `aiAgents/` and
+  `aiAgentDefinitionVersions/` folders) — discard those with `git checkout`/`rm` after publishing.
 - Prettier runs on commit (husky + lint-staged) and reformats files — re-read before scripted edits.
 - Docs: decisions → `decisions.md` (D-xx); status → `Handover.md`; demo/test → `testing-steps.md`.
 - Commits end with the `Co-Authored-By` line.
