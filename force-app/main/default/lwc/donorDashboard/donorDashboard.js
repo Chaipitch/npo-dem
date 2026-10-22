@@ -358,12 +358,13 @@ export default class DonorDashboard extends LightningElement {
       label
     }));
   }
-  // ------------------------------------------------------------ inline agent chat (spike)
+  // ------------------------------------------------------------ inline agent chat
+  // Personal questions are answered here from the dashboard data (the agent cannot verify
+  // the donor from this panel yet, D-23); everything else goes to the Donor Assistant.
   chatMessages = [];
   chatDraft = "";
   chatBusy = false;
   chatSessionId;
-  chatDiagnostic;
   _chatSeq = 0;
 
   get chatHasMessages() {
@@ -387,13 +388,14 @@ export default class DonorDashboard extends LightningElement {
   handleSuggestion(event) {
     this.sendChat(event.currentTarget.dataset.text);
   }
-  addChat(role, text) {
+  addChat(role, text, link) {
     this._chatSeq += 1;
     this.chatMessages = [
       ...this.chatMessages,
       {
         key: `m${this._chatSeq}`,
         text,
+        link,
         isUser: role === "user",
         rowClass: role === "user" ? "msg msg_user" : "msg msg_agent",
         bubbleClass:
@@ -410,20 +412,96 @@ export default class DonorDashboard extends LightningElement {
     if (!text || this.chatBusy) return;
     this.addChat("user", text);
     this.chatDraft = "";
+    const local = this.localAnswer(text);
+    if (local) {
+      this.addChat("agent", local.text, local.link);
+      return;
+    }
     this.chatBusy = true;
     try {
       const reply = await askAgent({
         message: text,
         sessionId: this.chatSessionId || null
       });
-      this.chatDiagnostic = reply.diagnostic;
       if (reply.sessionId) this.chatSessionId = reply.sessionId;
       this.addChat(reply.error ? "error" : "agent", reply.error || reply.text);
-    } catch (e) {
-      this.chatDiagnostic = e?.body?.message;
+    } catch {
       this.addChat("error", "The assistant could not answer right now.");
     }
     this.chatBusy = false;
+  }
+
+  /** Answers about the donor's own giving, from the dashboard data; null = ask the agent. */
+  localAnswer(raw) {
+    const d = this.data;
+    if (!d) return null;
+    const q = raw.toLowerCase();
+    const base = basePath || "";
+    if (/monthly|recurring|pause|resume|cancel/.test(q)) {
+      return {
+        text: this.monthlyNote
+          ? `You have ${this.monthlyNote}. You can pause, resume, change or cancel them on My Giving.`
+          : "You don’t have a monthly gift at the moment. You can start one from any campaign.",
+        link: this.monthlyNote
+          ? { href: `${base}/my-giving#monthly`, label: "Manage monthly gifts" }
+          : { href: this.donateHref, label: "Give monthly" }
+      };
+    }
+    if (/history|recent gifts?|past gifts?|last gifts?|receipt/.test(q)) {
+      const recent = (d.gifts || []).slice(0, 3).map((g) => {
+        const cause = g.designations ? ` to ${g.designations}` : "";
+        return `• ${this.formatGiftDate(g.giftDate)}: ${this.money(g.amount)}${cause}`;
+      });
+      return {
+        text: recent.length
+          ? `Your most recent gifts:\n${recent.join("\n")}`
+          : "You haven’t made a gift yet.",
+        link: { href: `${base}/my-giving`, label: "See all my giving" }
+      };
+    }
+    if (/milestone|journey|next step/.test(q)) {
+      const steps = (d.journey || []).map((m) => `• ${m.year} — ${m.label}`);
+      return {
+        text: steps.length
+          ? `Your impact journey so far:\n${steps.join("\n")}\nYour next milestone is your next gift.`
+          : "Your impact journey starts with your first gift.",
+        link: { href: this.journeyHref, label: "View my journey" }
+      };
+    }
+    if (
+      /\b(cause|causes|supported|programs? i)\b|where .*(giving|gift|money)/.test(
+        q
+      )
+    ) {
+      const top = this.agentCauses.map(
+        (c) => `• ${c.label} — you gave ${c.amount}`
+      );
+      return {
+        text: top.length
+          ? `${this.agentIntro}\n${top.join("\n")}`
+          : "You haven’t supported a cause yet.",
+        link: { href: this.causesHref, label: "Explore my causes" }
+      };
+    }
+    if (
+      /how much|total|i('ve| have) (given|donated)|my (giving|gifts|donations)/.test(
+        q
+      )
+    ) {
+      return {
+        text: `You’ve given ${this.totalDisplay} in total since ${d.supporterSince}, supporting ${d.causesSupported} cause${d.causesSupported === 1 ? "" : "s"}.`,
+        link: { href: `${base}/my-giving`, label: "See my giving history" }
+      };
+    }
+    return null;
+  }
+  formatGiftDate(value) {
+    return value
+      ? new Intl.DateTimeFormat("en-GB", {
+          dateStyle: "medium",
+          timeZone: "UTC"
+        }).format(new Date(`${value}T00:00:00Z`))
+      : "";
   }
 
   money(value) {

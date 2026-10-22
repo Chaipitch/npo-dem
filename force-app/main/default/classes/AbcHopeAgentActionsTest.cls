@@ -445,4 +445,34 @@ private class AbcHopeAgentActionsTest {
     Assert.isFalse(bad.success);
     Assert.isFalse(nothing.success);
   }
+
+  @IsTest
+  static void dashboardAccountIdIsOnlyTrustedForActivePortalDonors() {
+    Account noPortalUser = new Account(Name = 'No Portal User Org');
+    insert noPortalUser;
+    Assert.isNull(AbcHopeAgentSupport.verifiedAccountId(null, null));
+    Assert.isNull(AbcHopeAgentSupport.verifiedAccountId('', 'not-an-id'));
+    Assert.isNull(
+      AbcHopeAgentSupport.verifiedAccountId(null, UserInfo.getUserId()),
+      'only Account Ids are accepted'
+    );
+    Assert.isNull(
+      AbcHopeAgentSupport.verifiedAccountId(null, noPortalUser.Id),
+      'an account without an active portal user is not a verified donor'
+    );
+    Assert.isNull(
+      AbcHopeAgentSupport.verifiedAccountId('not-a-session', noPortalUser.Id),
+      'a messaging session, when present, decides on its own'
+    );
+  }
+
+  @IsTest
+  static void givingSummaryWithoutAnyIdentityAsksToSignIn() {
+    AbcHopeAgentGivingSummary.Request req = new AbcHopeAgentGivingSummary.Request();
+    req.verifiedAccountId = '001000000000000AAA';
+    AbcHopeAgentGivingSummary.Result r = AbcHopeAgentGivingSummary.getSummary(
+      new List<AbcHopeAgentGivingSummary.Request>{ req }
+    )[0];
+    Assert.isFalse(r.isVerified);
+  }
 }

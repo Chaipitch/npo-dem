@@ -198,3 +198,21 @@ donor from the running user and only acts on that donor's own commitments (D-12)
 NPC keeps a paused commitment **Active** and adds a `PauseTransactions` schedule, so "paused" means a current or
 upcoming pause schedule: the dashboard now shows "N active monthly gifts · M paused until <date>" and no longer
 counts paused gifts as active. The agent action was left unchanged (scope: Experience Cloud only).
+
+### D-23 · Agent inside the dashboard panel (Agent API, verified donor) — Accepted (user, 2026‑10‑22)
+
+The dashboard's "Ask About Your Journey" panel talks to the same **ABC Hope Donor Assistant** inline (no second
+agent). Spike findings: a portal user can call the agent from Apex through the standard `generateAiAgentResponse`
+action, but the agent's actions run as the agent user and that action only takes a message and session Id, so the
+agent cannot tell who is asking. Chosen design (option A): `DonorAgentController` calls the **Agent API** with the
+`ABC_Hope_Agent_API` named credential (External Client App, OAuth client credentials, run-as integration user
+`agentapi.abchope@abchope.demo.00dg700000kmyyx`) and starts each session with the agent variable
+`verified_account_id` = the running portal user's account (`visibility: "External"`, set only at session start, bound
+straight to the actions' `verifiedAccountId` input, never from user input). `AbcHopeAgentSupport.verifiedAccountId`
+prefers a messaging session (chat window) and otherwise trusts that Id only for an account with an active portal
+user. The client ID/secret live only on the `AgentApiPrincipal` principal in Setup — never in git.
+
+Until the principal holds the secret, `DonorAgentController.USE_AGENT_API = false`: the panel answers personal
+questions itself from the dashboard data (total, causes, recent gifts, monthly gifts, journey — with links) and sends
+everything else to the agent through `generateAiAgentResponse`. Agent Script changes are validated but **not
+published** yet.

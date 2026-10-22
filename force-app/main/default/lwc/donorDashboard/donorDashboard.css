@@ -875,6 +875,14 @@ ol {
 .chat-typing {
   margin: 10px 0 0 50px;
 }
-.chat-diagnostic {
-  word-break: break-word;
+.chat-text {
+  margin: 0;
+}
+.chat-log a.chat-link,
+.chat-log a.chat-link:visited {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--dd-purple);
+  font-weight: 700;
+  text-decoration: underline;
 }

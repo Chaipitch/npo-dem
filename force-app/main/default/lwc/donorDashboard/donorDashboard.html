@@ -468,7 +468,14 @@
                         ></c-abc-hope-icon
                       ></span>
                     </template>
-                    <p class={m.bubbleClass}>{m.text}</p>
+                    <div class={m.bubbleClass}>
+                      <p class="chat-text">{m.text}</p>
+                      <template lwc:if={m.link}>
+                        <a class="chat-link" href={m.link.href}
+                          >{m.link.label}</a
+                        >
+                      </template>
+                    </div>
                   </div>
                 </template>
                 <template lwc:if={chatBusy}>
@@ -507,11 +514,6 @@
               ></c-abc-hope-icon>
             </button>
           </div>
-          <template lwc:if={chatDiagnostic}>
-            <p class="muted small chat-diagnostic" data-id="chat-diagnostic">
-              Spike diagnostic: {chatDiagnostic}
-            </p>
-          </template>
         </aside>
       </div>
     </template>

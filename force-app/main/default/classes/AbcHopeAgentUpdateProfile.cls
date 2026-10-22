@@ -7,10 +7,14 @@ public without sharing class AbcHopeAgentUpdateProfile {
   public class Request {
     @InvocableVariable(
       label='Messaging session ID'
-      description='Current messaging session (MessagingSession Id).'
-      required=true
+      description='Current messaging session (MessagingSession Id). Empty for dashboard (Agent API) conversations.'
     )
     public String messagingSessionId;
+    @InvocableVariable(
+      label='Verified account ID'
+      description='Signed-in donor account Id supplied by the ABC Hope dashboard (Agent API). Not user input.'
+    )
+    public String verifiedAccountId;
     @InvocableVariable(
       label='Email'
       description='New email address, if the donor asked to change it.'
@@ -57,7 +61,8 @@ public without sharing class AbcHopeAgentUpdateProfile {
   static Result handle(Request req) {
     Result r = new Result();
     Id accountId = AbcHopeAgentSupport.verifiedAccountId(
-      req?.messagingSessionId
+      req?.messagingSessionId,
+      req?.verifiedAccountId
     );
     if (accountId == null) {
       r.message = 'The user is not signed in. Contact details can only be changed after signing in on the ABC Hope site.';

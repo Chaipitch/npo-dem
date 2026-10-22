@@ -3,10 +3,14 @@ public without sharing class AbcHopeAgentGivingSummary {
   public class Request {
     @InvocableVariable(
       label='Messaging session ID'
-      description='Current messaging session (MessagingSession Id).'
-      required=true
+      description='Current messaging session (MessagingSession Id). Empty for dashboard (Agent API) conversations.'
     )
     public String messagingSessionId;
+    @InvocableVariable(
+      label='Verified account ID'
+      description='Signed-in donor account Id supplied by the ABC Hope dashboard (Agent API). Not user input.'
+    )
+    public String verifiedAccountId;
   }
 
   public class Result {
@@ -33,7 +37,8 @@ public without sharing class AbcHopeAgentGivingSummary {
     for (Request req : requests) {
       Result r = new Result();
       Id accountId = AbcHopeAgentSupport.verifiedAccountId(
-        req?.messagingSessionId
+        req?.messagingSessionId,
+        req?.verifiedAccountId
       );
       if (accountId == null) {
         r.summary = 'The user is not signed in. Ask them to sign in on the ABC Hope site to see their giving.';
