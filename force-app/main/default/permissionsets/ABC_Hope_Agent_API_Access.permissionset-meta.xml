@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description
+  >Approves the Agent API run-as user (agentapi.abchope@…) for the ABC Hope Agent API External Client App (D-23). Assign to that user only; select it under the app's OAuth policies in Setup.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>ABC Hope Agent API Access</label>
+</PermissionSet>

@@ -30,6 +30,14 @@ private class DonorAgentControllerTest {
   }
 
   @IsTest
+  static void usesVerifiedAgentReflectsTheSwitch() {
+    DonorAgentController.USE_AGENT_API = false;
+    Assert.isFalse(DonorAgentController.usesVerifiedAgent());
+    DonorAgentController.USE_AGENT_API = true;
+    Assert.isTrue(DonorAgentController.usesVerifiedAgent());
+  }
+
+  @IsTest
   static void blankMessageIsRejectedBeforeCallingTheAgent() {
     DonorAgentController.Reply r = DonorAgentController.ask('   ', null);
     Assert.areEqual('Please type a question.', r.error);
@@ -38,6 +46,7 @@ private class DonorAgentControllerTest {
 
   @IsTest
   static void invocablePathFailsGracefullyInTests() {
+    DonorAgentController.USE_AGENT_API = false;
     // The agent cannot run in a test context, so this exercises the failure path.
     DonorAgentController.Reply r = DonorAgentController.ask(
       'Which campaigns are open?',
