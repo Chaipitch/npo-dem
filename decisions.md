@@ -380,7 +380,7 @@ Communities is live too (it was typed as 12). `{programs}` is still the active P
 
 ### D-35 · Impact Journey as one card per year — Accepted (user, 2026‑10‑26)
 
-The zigzag timeline ("2026 · Supported X" for each cause) was hard to read. The dashboard now shows one card per year,
+The zigzag timeline ("2026 · Supported X" for each cause) was hard to read. The dashboard now shows one card per year, stacked in one column,
 oldest first: the year, "USD total · N gifts", a "Joined" badge on the supporter-since year, and the causes given to
 that year (each once, with its program and amount, largest first; "New" marks the first year for that cause; an
 active recurring gift with no payment yet shows "Recurring gift"). Built in Apex as `Dashboard.journeyYears` from the
