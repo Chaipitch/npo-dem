@@ -128,6 +128,14 @@ and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a b
 New one-time gifts are `Paid`; a new recurring gift adds a Paid first payment today (later instalments Unpaid).
 Payment is still simulated. Tests use `Pending` because of the org's "*ASL Trigger v2" flow.
 
+## Shared impact tiles (2026‑10‑26)
+
+The dashboard's Shared impact tiles are the `sharedImpact` property with live placeholders, computed org-wide in
+`DonorPortalController.buildDashboard`: `{peopleReached}` = distinct accounts with an In Progress/Completed
+`ProgramEnrollment` (1,002), `{programs}` = active `Program` count (8), `{volunteers}` = distinct accounts with a
+Complete/In Progress `JobPositionAssignment` (96). Communities stays typed (12): no field defines a community.
+The enrolments and assignments are the org's existing demo data, not ABC Hope campaign records.
+
 ## Open items
 
 1. **Chat window (D-25):** the button, verified sessions (Maya is `AuthenticatedEndUserId`) and the routing to the

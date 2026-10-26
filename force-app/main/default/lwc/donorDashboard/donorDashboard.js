@@ -12,6 +12,13 @@ import askAgent from "@salesforce/apex/DonorAgentController.ask";
 import usesVerifiedAgent from "@salesforce/apex/DonorAgentController.usesVerifiedAgent";
 import { campaignPhoto } from "c/abcHopeCampaignPhotos";
 
+/** Shared impact placeholders → Dashboard fields. */
+const IMPACT_FIELDS = {
+  programs: "activePrograms",
+  peopleReached: "peopleReached",
+  volunteers: "volunteersEngaged"
+};
+
 const IMPACT_STYLE = [
   { icon: "users", tone: "tone-blue" },
   { icon: "home", tone: "tone-indigo" },
@@ -51,9 +58,13 @@ export default class DonorDashboard extends LightningElement {
   @api currencyLabel = "USD";
   @api bannerTitle = "See What We’ve Achieved Together";
   @api bannerSubtitle = "Your support is part of something bigger.";
-  /** "value|label" pairs separated by ";" */
+  /**
+   * "value|label" pairs separated by ";". Live placeholders: {peopleReached} (people with an active or completed
+   * program enrollment), {programs} (active Programs), {volunteers} (people with a completed or ongoing
+   * volunteer assignment). Anything else is shown as typed.
+   */
   @api sharedImpact =
-    "8,400|People Reached;12|Communities;6|Programs;125|Volunteers Engaged";
+    "{peopleReached}|People Reached;12|Communities;{programs}|Programs;{volunteers}|Volunteers Engaged";
   /** "tag|title|summary" triples separated by ";" */
   @api stories =
     "Clean Water|Clean Water Brings New Opportunities|See how improved access to clean water is changing lives in rural communities.;" +
@@ -274,7 +285,12 @@ export default class DonorDashboard extends LightningElement {
   // ------------------------------------------------------------ content
   get impactTiles() {
     return splitList(this.sharedImpact).map((item, i) => {
-      const [value, label] = item.split("|").map((x) => (x || "").trim());
+      const [raw, label] = item.split("|").map((x) => (x || "").trim());
+      const value = raw.replace(/\{(\w+)\}/g, (token, name) => {
+        const field = IMPACT_FIELDS[name];
+        if (!field) return token;
+        return this.data ? formatCount(this.data[field]) : "…";
+      });
       const style = IMPACT_STYLE[i % IMPACT_STYLE.length];
       return {
         key: `i${i}`,
@@ -591,6 +607,10 @@ export default class DonorDashboard extends LightningElement {
     const n = Number(value);
     return `${this.currencyLabel} ${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Number.isFinite(n) ? n : 0)}`;
   }
+}
+
+function formatCount(n) {
+  return Number(n || 0).toLocaleString("en-US");
 }
 
 function splitList(value) {
