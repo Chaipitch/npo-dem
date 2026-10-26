@@ -118,7 +118,7 @@ public without sharing class MonthlyGiftService {
         GiftDesignation.NGOTV_Program__r.Name
       FROM GiftDefaultDesignation
       WHERE ParentRecordId IN :byId.keySet()
-      ORDER BY AllocatedPercentage DESC
+      ORDER BY AllocatedPercentage DESC, CreatedDate ASC
     ]) {
       Gift g = byId.get(gdd.ParentRecordId);
       if (g.designation == null) {

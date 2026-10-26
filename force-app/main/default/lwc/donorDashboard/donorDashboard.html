@@ -145,7 +145,13 @@
               </div>
               <div class="campaigns">
                 <template for:each={campaignCards} for:item="c">
-                  <article key={c.key} class="campaign" data-id="campaign-card">
+                  <article
+                    key={c.key}
+                    class="campaign"
+                    data-id="campaign-card"
+                    data-href={c.detailHref}
+                    onclick={handleCampaignClick}
+                  >
                     <div class="campaign-art" aria-hidden="true">
                       <img
                         src={c.imageUrl}

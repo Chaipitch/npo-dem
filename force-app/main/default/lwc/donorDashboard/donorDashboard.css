@@ -698,6 +698,7 @@ ol {
   overflow: hidden;
   color: inherit;
   text-decoration: none;
+  cursor: pointer;
   box-shadow: 0 6px 18px rgba(20, 24, 91, 0.05);
   transition:
     transform 0.15s,

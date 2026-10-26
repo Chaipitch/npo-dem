@@ -278,6 +278,12 @@ export default class DonorDashboard extends LightningElement {
   get journeyHref() {
     return `${basePath || ""}/dashboard#journey`;
   }
+  /** A click anywhere on a campaign card opens its detail page; links inside it keep their own target. */
+  handleCampaignClick(event) {
+    if (event.target.closest && event.target.closest("a, button")) return;
+    const href = event.currentTarget.dataset.href;
+    if (href) window.location.assign(href);
+  }
   get donateHref() {
     return `${basePath || ""}${this.donatePath}`;
   }

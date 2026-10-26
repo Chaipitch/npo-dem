@@ -323,7 +323,7 @@ Verified live as Maya: pause and resume each run in one turn; her gift is active
   place so its gifts stay (the raised total carries over). Holiday food boxes, 19 Oct – 31 Dec 2026, goal
   USD 100,000. Its default causes (General Fund 50% / Job Training Fund 50%) are replaced by **Holiday Meals**
   100% → new program **Family Support**; existing gifts keep their own designations.
-- Records only, in `seedCampaigns.apex` (rename + `REPLACE_DEFAULTS`) and `seedPrograms.apex`; both stay idempotent.
+- Records only, in `seedCampaigns.apex` (rename; causes as in D-32) and `seedPrograms.apex`; both stay idempotent.
 - Photos (Unsplash License), chosen by the user: presents by Yevhen Buzuk (`toy|present`), Christmas table by
   Anthony Cantin (`meal|food`), in `abcHopeCampaignPhotos`.
 
@@ -332,3 +332,19 @@ Verified live as Maya: pause and resume each run in one turn; her gift is active
 The thank-you step shows "Taking you to your dashboard in 5 seconds…" with a **Go now** link, then opens
 `/dashboard`, where the new gift shows (gift events, D-27). **Make another donation** cancels it. Guests have no
 dashboard, so they stay on the thank-you step.
+
+### D-32 · Several causes per campaign; whole-card click; thin highlight borders — Accepted (user, 2026‑10‑26)
+
+- **Causes:** a campaign's causes are its `GiftDefaultDesignation` rows; shares add up to 100%.
+  Christmas Toy Drive: Toys & Gifts 34 / Warm Clothes 33 / Books for Kids 33. Christmas Meals: Holiday Meals 50 /
+  Grocery Vouchers 50. Christmas Giving: School Supplies 50 / Learning Kits 50. Clean Water: Clean Water 50 /
+  Handwashing Stations 50. New causes are linked to programs (Warm Clothes → Child Wellbeing, Books for Kids →
+  Education Access, Grocery Vouchers → Family Support, Handwashing Stations → Clean Water).
+  `seedCampaigns.apex` makes each listed campaign's causes match the script exactly; it removes and shrinks shares
+  before adding, so no campaign goes over 100%.
+- The donor still picks **one** cause, and the whole gift goes to it. Splitting one gift across causes isn't built.
+  Cause lists sort by share, then by creation date, so the original cause comes first and is pre-selected on a tie.
+- **Dashboard campaign cards:** a click anywhere on the card opens `/campaign?name=…`; Donate now and View more keep
+  their own links.
+- **Highlights:** the active sidebar item and the paused recurring-gift card have a thin 1px border instead of a
+  thick left bar.

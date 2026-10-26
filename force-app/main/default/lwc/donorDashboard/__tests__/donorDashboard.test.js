@@ -273,4 +273,33 @@ describe("c-donor-dashboard agent panel", () => {
       "/campaign?name=Clean%20Water%20for%20Rural%20Schools"
     );
   });
+
+  it("a click on a campaign card opens its detail page", async () => {
+    const el = await mount();
+    getCampaigns.emit([
+      { id: "701a", name: "Christmas Toy Drive 2026", goal: 150000, raised: 0 }
+    ]);
+    await flush();
+    const assign = jest.fn();
+    const realLocation = window.location;
+    Object.defineProperty(window, "location", {
+      value: { ...realLocation, assign },
+      configurable: true
+    });
+    try {
+      $(el, '[data-id="campaign-card"]').click();
+      expect(assign).toHaveBeenCalledWith(
+        "/campaign?name=Christmas%20Toy%20Drive%202026"
+      );
+      assign.mockClear();
+      // Links inside the card keep their own target.
+      $(el, '[data-id="campaign-donate"]').click();
+      expect(assign).not.toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(window, "location", {
+        value: realLocation,
+        configurable: true
+      });
+    }
+  });
 });

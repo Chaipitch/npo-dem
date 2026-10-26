@@ -8,22 +8,27 @@ List<List<Object>> specs = new List<List<Object>>{
   new List<Object>{
     'Education Access',
     'School supplies, learning kits and scholarships that keep children learning.',
-    new List<String>{ 'School Supplies', 'Learning Kits', 'Scholarships' }
+    new List<String>{
+      'School Supplies',
+      'Learning Kits',
+      'Scholarships',
+      'Books for Kids'
+    }
   },
   new List<Object>{
     'Clean Water',
     'Water filters and handwashing stations for rural schools.',
-    new List<String>{ 'Clean Water' }
+    new List<String>{ 'Clean Water', 'Handwashing Stations' }
   },
   new List<Object>{
     'Child Wellbeing',
     'Christmas presents, warm clothes and care for children in shelters and foster care.',
-    new List<String>{ 'Toys & Gifts' }
+    new List<String>{ 'Toys & Gifts', 'Warm Clothes' }
   },
   new List<Object>{
     'Family Support',
     'Holiday meals and seasonal help for families who are struggling.',
-    new List<String>{ 'Holiday Meals' }
+    new List<String>{ 'Holiday Meals', 'Grocery Vouchers' }
   },
   new List<Object>{
     'Green Communities',

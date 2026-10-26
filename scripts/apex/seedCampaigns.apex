@@ -1,5 +1,6 @@
 // Idempotent: fundraising campaigns shown on the donor dashboard (records only — no metadata).
 // A campaign appears on the dashboard when it is active, not ended, and has a GiftDefaultDesignation.
+// Each campaign's causes (GiftDefaultDesignation rows) are made to match this script exactly.
 // Run: sf apex run -o npo-demo -f scripts/apex/seedCampaigns.apex
 List<List<Object>> specs = new List<List<Object>>{
   // name, description, start, end, goal (USD), designation, designation description
@@ -37,7 +38,7 @@ List<List<Object>> specs = new List<List<Object>>{
     Date.newInstance(2027, 3, 31),
     300000,
     'Clean Water',
-    'Water filters and handwashing stations for rural schools.'
+    'Water filters that give rural schools safe drinking water.'
   },
   new List<Object>{
     'Girls\' Education Scholarships',
@@ -58,11 +59,29 @@ List<List<Object>> specs = new List<List<Object>>{
     'Saplings, tools and community planting days.'
   }
 };
-// The org's original "Non Profit Event" campaign (with its gifts) became Christmas Meals for
-// Families 2026; its own causes are replaced by the one listed above (REPLACE_DEFAULTS).
-Set<String> REPLACE_DEFAULTS = new Set<String>{
-  'Christmas Meals for Families 2026'
+// Campaigns with more than one cause: name, percentage, description (null = keep the existing one).
+// The first cause has the highest share, so the donation journey pre-selects it. Shares add up to 100.
+// Campaigns not listed here have one cause (the spec's designation) at 100%.
+Map<String, List<List<Object>>> causes = new Map<String, List<List<Object>>>{
+  'Christmas Toy Drive 2026' => new List<List<Object>>{
+    new List<Object>{ 'Toys & Gifts', 34, null },
+    new List<Object>{ 'Warm Clothes', 33, 'Coats, jumpers and warm clothes for children this winter.' },
+    new List<Object>{ 'Books for Kids', 33, 'Picture books and storybooks children can keep.' }
+  },
+  'Christmas Meals for Families 2026' => new List<List<Object>>{
+    new List<Object>{ 'Holiday Meals', 50, null },
+    new List<Object>{ 'Grocery Vouchers', 50, 'Grocery vouchers so families can shop for the holidays.' }
+  },
+  'Christmas Giving 2026' => new List<List<Object>>{
+    new List<Object>{ 'School Supplies', 50, null },
+    new List<Object>{ 'Learning Kits', 50, null }
+  },
+  'Clean Water for Rural Schools' => new List<List<Object>>{
+    new List<Object>{ 'Clean Water', 50, null },
+    new List<Object>{ 'Handwashing Stations', 50, 'Handwashing stations and soap for rural schools.' }
+  }
 };
+// The org's original "Non Profit Event" campaign (with its gifts) became Christmas Meals for Families 2026.
 List<Campaign> oldEvent = [
   SELECT Id
   FROM Campaign
@@ -81,6 +100,20 @@ Set<String> gdNames = new Set<String>();
 for (List<Object> s : specs) {
   names.add((String) s[0]);
   gdNames.add((String) s[5]);
+  if (!causes.containsKey((String) s[0])) {
+    causes.put(
+      (String) s[0],
+      new List<List<Object>>{ new List<Object>{ (String) s[5], 100, null } }
+    );
+  }
+}
+Map<String, String> extraDescriptions = new Map<String, String>();
+for (List<List<Object>> campaignCauses : causes.values()) {
+  for (List<Object> cause : campaignCauses) {
+    gdNames.add((String) cause[0]);
+    if (cause[2] != null)
+      extraDescriptions.put((String) cause[0], (String) cause[2]);
+  }
 }
 Map<String, Campaign> camps = new Map<String, Campaign>();
 for (Campaign c : [SELECT Id, Name FROM Campaign WHERE Name IN :names])
@@ -115,6 +148,19 @@ for (List<Object> s : specs) {
   g.Description = (String) s[6];
   gdUpserts.add(g);
 }
+Set<String> specDesignations = new Set<String>();
+for (GiftDesignation g : gdUpserts)
+  specDesignations.add(g.Name);
+for (String n : extraDescriptions.keySet()) {
+  if (specDesignations.contains(n))
+    continue;
+  GiftDesignation g = gds.containsKey(n)
+    ? gds.get(n)
+    : new GiftDesignation(Name = n);
+  g.IsActive = true;
+  g.Description = extraDescriptions.get(n);
+  gdUpserts.add(g);
+}
 upsert campUpserts;
 upsert gdUpserts;
 for (Campaign c : campUpserts)
@@ -122,37 +168,49 @@ for (Campaign c : campUpserts)
 for (GiftDesignation g : gdUpserts)
   gds.put(g.Name, g);
 
-Map<String, String> designationByCampaign = new Map<String, String>();
-for (List<Object> s : specs)
-  designationByCampaign.put((String) s[0], (String) s[5]);
-Set<Id> haveDefault = new Set<Id>();
-List<GiftDefaultDesignation> replaced = new List<GiftDefaultDesignation>();
+Map<Id, String> campaignNameById = new Map<Id, String>();
+for (Campaign c : camps.values())
+  campaignNameById.put(c.Id, c.Name);
+Map<String, GiftDefaultDesignation> existingDefaults = new Map<String, GiftDefaultDesignation>();
+List<GiftDefaultDesignation> removed = new List<GiftDefaultDesignation>();
+List<GiftDefaultDesignation> changed = new List<GiftDefaultDesignation>();
 for (GiftDefaultDesignation d : [
-  SELECT ParentRecordId, ParentRecord.Name, GiftDesignation.Name
+  SELECT Id, ParentRecordId, GiftDesignation.Name, AllocatedPercentage
   FROM GiftDefaultDesignation
   WHERE ParentRecordId IN :camps.values()
 ]) {
-  if (
-    REPLACE_DEFAULTS.contains(d.ParentRecord.Name) &&
-    d.GiftDesignation.Name != designationByCampaign.get(d.ParentRecord.Name)
-  ) {
-    replaced.add(d);
-  } else {
-    haveDefault.add(d.ParentRecordId);
+  String campaignName = campaignNameById.get(d.ParentRecordId);
+  Decimal share = null;
+  for (List<Object> cause : causes.get(campaignName)) {
+    if (cause[0] == d.GiftDesignation.Name)
+      share = (Integer) cause[1];
+  }
+  if (share == null) {
+    removed.add(d);
+    continue;
+  }
+  existingDefaults.put(campaignName + '|' + d.GiftDesignation.Name, d);
+  if (d.AllocatedPercentage != share) {
+    d.AllocatedPercentage = share;
+    changed.add(d);
   }
 }
-delete replaced;
+// Remove and shrink shares before adding causes, so a campaign never goes over 100%.
+delete removed;
+update changed;
 List<GiftDefaultDesignation> defaults = new List<GiftDefaultDesignation>();
 for (List<Object> s : specs) {
   Campaign c = camps.get((String) s[0]);
-  if (!haveDefault.contains(c.Id)) {
-    defaults.add(
-      new GiftDefaultDesignation(
-        ParentRecordId = c.Id,
-        GiftDesignationId = gds.get((String) s[5]).Id,
-        AllocatedPercentage = 100
-      )
-    );
+  for (List<Object> cause : causes.get(c.Name)) {
+    if (!existingDefaults.containsKey(c.Name + '|' + cause[0])) {
+      defaults.add(
+        new GiftDefaultDesignation(
+          ParentRecordId = c.Id,
+          GiftDesignationId = gds.get((String) cause[0]).Id,
+          AllocatedPercentage = (Integer) cause[1]
+        )
+      );
+    }
   }
 }
 insert defaults;
@@ -161,7 +219,9 @@ System.debug(
     campUpserts.size() +
     ' campaigns, ' +
     defaults.size() +
-    ' new default designations, ' +
-    replaced.size() +
-    ' replaced'
+    ' causes added, ' +
+    changed.size() +
+    ' shares changed, ' +
+    removed.size() +
+    ' removed'
 );

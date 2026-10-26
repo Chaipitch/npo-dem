@@ -126,7 +126,7 @@ public without sharing class DonationIntakeService {
         SELECT GiftDesignation.Name
         FROM GiftDefaultDesignation
         WHERE ParentRecordId = :camp.Id AND GiftDesignation.IsActive = TRUE
-        ORDER BY AllocatedPercentage DESC
+        ORDER BY AllocatedPercentage DESC, CreatedDate ASC
       ]) {
         wanted.add(gdd.GiftDesignation.Name);
       }
@@ -164,7 +164,7 @@ public without sharing class DonationIntakeService {
       SELECT GiftDesignationId
       FROM GiftDefaultDesignation
       WHERE ParentRecordId = :camp.Id
-      ORDER BY AllocatedPercentage DESC
+      ORDER BY AllocatedPercentage DESC, CreatedDate ASC
       LIMIT 1
     ]) {
       opts.defaultDesignationId = gdd.GiftDesignationId;
@@ -353,7 +353,7 @@ public without sharing class DonationIntakeService {
           WHERE IsActive = TRUE AND (EndDate = NULL OR EndDate >= :today)
         )
         AND GiftDesignation.IsActive = TRUE
-      ORDER BY AllocatedPercentage DESC
+      ORDER BY AllocatedPercentage DESC, CreatedDate ASC
     ]) {
       withDefaults.add(gdd.ParentRecordId);
       if (!designationsByCampaign.containsKey(gdd.ParentRecordId)) {
@@ -472,7 +472,7 @@ public without sharing class DonationIntakeService {
         ParentRecordId IN :openCampaigns.keySet()
         AND GiftDesignation.IsActive = TRUE
         AND GiftDesignation.NGOTV_Program__c IN :byId.keySet()
-      ORDER BY AllocatedPercentage DESC
+      ORDER BY AllocatedPercentage DESC, CreatedDate ASC
     ]) {
       ProgramCard c = byId.get(gdd.GiftDesignation.NGOTV_Program__c);
       String campaign = openCampaigns.get(gdd.ParentRecordId);
@@ -535,7 +535,7 @@ public without sharing class DonationIntakeService {
         GiftDesignation.NGOTV_Program__r.Summary
       FROM GiftDefaultDesignation
       WHERE ParentRecordId = :card.id AND GiftDesignation.IsActive = TRUE
-      ORDER BY AllocatedPercentage DESC
+      ORDER BY AllocatedPercentage DESC, CreatedDate ASC
     ]) {
       CampaignCause cause = new CampaignCause();
       cause.name = gdd.GiftDesignation.Name;
