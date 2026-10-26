@@ -131,13 +131,14 @@ Notes:
 
 ## 9. Dashboard agent panel (Maya)
 
-| #   | Ask in "Ask About Your Journey"                                       | Expected (today, `USE_AGENT_API = false`)                                                   |
-| --- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| A1  | "How much have I given?"                                              | Instant answer from the dashboard: total, since year, causes + link "See my giving history" |
-| A2  | Chips: Explore my causes / View giving history / Show next milestones | Local answers with links to Causes, My Giving, My Journey                                   |
-| A3  | "Can I pause my monthly gift?"                                        | Recurring gift count and types + link "Manage recurring gifts" (`/my-giving#monthly`)       |
-| A4  | "Which campaigns are open?" then "Tell me about clean water"          | Answers from the Donor Assistant ("Assistant is typing…"); the follow-up keeps the context  |
-| A5  | Long conversation                                                     | Panel stays within the screen height; the conversation scrolls; newest message in view      |
+| #   | Ask in "Ask About Your Journey"                                       | Expected (today, `USE_AGENT_API = false`)                                                                                                             |
+| --- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | "How much have I given?"                                              | The Donor Assistant answers with her own total, gift count, since year and causes (Agent API, verified); link "See my giving history" under the reply |
+| A2  | Chips: Explore my causes / View giving history / Show next milestones | Answers from the assistant with links to Causes, My Giving, My Journey                                                                                |
+| A3  | "Can I pause my monthly gift?"                                        | Assistant lists "Recurring (Monthly): THB … per month to …" and offers pause/resume/change/cancel; link "Manage recurring gifts"                      |
+| A4  | "Which campaigns are open?" then "Tell me about clean water"          | Answers from the Donor Assistant ("Assistant is typing…"); the follow-up keeps the context                                                            |
+| A4b | "Pause my gift for 2 months" → confirm                                | The assistant pauses it (same NPC action as My Giving); My Giving shows Paused …                                                                      |
+| A5  | Long conversation                                                     | Panel stays within the screen height; the conversation scrolls; newest message in view                                                                |
 
 | A6 | Header box on `/my-giving`: type "How much have I given?" → Enter | Goes to `/dashboard#agent`, the panel answers; `?ask=` disappears from the URL |
 | A7 | Header box on `/dashboard`; then sidebar **Ask Our AI** | Answers in the panel without reloading; Ask Our AI scrolls to the panel and focuses its input |

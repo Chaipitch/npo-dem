@@ -85,25 +85,22 @@ How the build compares:
   `abcHopeHero` were commented out directly in the org (not in git). The next publish blanked the site; the repo
   versions were redeployed and republished on 2026‑10‑22. Before publishing, check the org still matches git.
 
-## Dashboard agent panel (D-23) — waiting on the consumer secret
+## Dashboard agent panel (D-23) — live with the Agent API (2026‑10‑26)
 
-**Live now:** the panel answers personal questions from the dashboard data and sends other questions to the
-Donor Assistant (`DonorAgentController`, `USE_AGENT_API = false`). **Deployed but unused:** External Client App,
-External/Named Credential `ABC_Hope_Agent_API`, integration user, portal permission set access to the principal,
-updated agent actions (optional `verifiedAccountId`). **Published and active (v5, 2026‑10‑22):** the Agent Script
-with `verified_account_id` and the D-24 "recurring gifts" wording.
+The panel sends every question to the **ABC Hope Donor Assistant** through the Agent API (`DonorAgentController`,
+`USE_AGENT_API = true`), with `verified_account_id` = the signed-in donor's account, so the agent answers personal
+questions from her own data ("You have 1 recurring gift: Recurring (Monthly): THB 1,000 per month…"). Page links the
+dashboard answer would offer (e.g. Manage recurring gifts) stay under the reply. If the agent call fails, the panel
+falls back to the dashboard-data answer.
 
-To finish (about 15 minutes):
+Setup that makes it work: External Client App **ABC Hope Agent API** (client credentials, run-as
+`agentapi.abchope@…`), its consumer key/secret on the `AgentApiPrincipal` principal (admin-entered, never in git),
+permission set **ABC Hope Agent API Access** assigned to the run-as user and selected under the app's OAuth policies
+(Permitted Users: admin approved), agent version 5 active. Portal users reach the principal through
+`ABC_Hope_Donor_Portal`.
 
-1. An admin copies the app's **Consumer Key and Secret** (External Client App Manager → ABC Hope Agent API →
-   Settings → OAuth Settings) into Setup → Named Credentials → External Credentials → ABC Hope Agent API →
-   principal **AgentApiPrincipal** (Client ID / Client Secret). Never paste them anywhere else.
-2. Connection test (needs principal access for whoever runs it) → if the Agent API asks for it, add the app to the
-   agent's connections in Agentforce Builder.
-3. Done 2026‑10‑22: agent published and version 5 activated (`sf agent activate … --version 5`).
-4. Set `USE_AGENT_API = true` in `DonorAgentController`, remove the local personal answers in `donorDashboard`
-   (or keep them as an offline fallback), deploy, publish the site.
-5. Maya test: "How much have I given?" and "Show my recurring gifts" in the panel → her own data.
+Troubleshooting: `invalid_app_access … not admin approved` = the run-as user's permission set isn't selected on the
+app; a rotated secret must be re-pasted on the principal.
 
 ## Campaign detail page (2026‑10‑22)
 
