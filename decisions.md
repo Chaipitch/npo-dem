@@ -282,3 +282,13 @@ designation on Paid gifts is re-pointed to the chosen cause (D-13). So a new rec
 once. Apex tests save `Pending` instead (`DonationIntakeService.giftStatus`): the org's managed "*ASL Trigger v2"
 flow fails on Paid gifts in a test context only; real Paid inserts were verified in the org. Existing gifts keep
 their status.
+
+### D-28 · Chat window removed; the dashboard Ask panel is the only chat — Accepted (user, 2026‑10‑26)
+
+Supersedes D-25's chat window. The Embedded Messaging component is removed from every page (`scripts/sitePages.py`);
+the ABC Hope Donor Assistant is reached only through the dashboard's **Ask About Your Journey** panel (plus the header
+box and "Ask Our AI", which send their question there), on the Agent API with the donor's verified account (D-23).
+This also retires the open issue that the agent didn't run its actions in the chat window. The deployment
+`ABC_Hope_Web_Chat`, its ESW site, the messaging channel `ABC_Hope_Chat` and the routing flow `ABC_Hope_Chat_Routing`
+stay in the org, unused, so the widget can be put back without Setup work; `AbcHopeAgentSupport` keeps the
+messaging-session path.

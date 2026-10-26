@@ -16,7 +16,7 @@
                 "layoutDirectionTablet": "column",
                 "maxContentWidth": "",
                 "sectionColumnGutterWidth": "",
-                "sectionConfig": "{\"UUID\":\"c15fbb20-7e98-43b3-87d0-f77d2eff1238\",\"columns\":[{\"UUID\":\"dd5bf822-aa47-4d0e-825d-abab497212ae\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":null}]}",
+                "sectionConfig": "{\"UUID\":\"a6601026-8e37-4cc1-ab47-9140ba492edf\",\"columns\":[{\"UUID\":\"659d92ed-8b4b-4d44-b91c-5f561c79bd13\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":null}]}",
                 "sectionMinHeight": "",
                 "sectionVerticalAlign": "flex-start"
               },
@@ -28,35 +28,22 @@
                         "view": "giving"
                       },
                       "definition": "c:donorDashboard",
-                      "id": "e33fb6f6-0335-4cdf-8563-f84ae7bd463a",
-                      "type": "component"
-                    },
-                    {
-                      "attributes": {
-                        "clientVersion": "WebV1",
-                        "deploymentName": "ABC_Hope_Web_Chat",
-                        "hideChatButtonOnLoad": "Visible",
-                        "isExpSiteAuthMode": true,
-                        "scrtUrl": "https://te1791557923677.my.salesforce-scrt.com",
-                        "siteEndpoint": "https://te1791557923677.my.site.com/ESWABCHopeWebC1792985313558"
-                      },
-                      "definition": "experience_messaging:embeddedMessaging",
-                      "id": "e4443f2c-fd29-4705-ac2f-474d7f9a991c",
+                      "id": "74391bce-8df0-4a11-aef2-ed8d7a8e234a",
                       "type": "component"
                     }
                   ],
-                  "id": "dd5bf822-aa47-4d0e-825d-abab497212ae",
+                  "id": "659d92ed-8b4b-4d44-b91c-5f561c79bd13",
                   "name": "col1",
                   "title": "Column 1",
                   "type": "region"
                 }
               ],
               "definition": "community_layout:section",
-              "id": "c15fbb20-7e98-43b3-87d0-f77d2eff1238",
+              "id": "a6601026-8e37-4cc1-ab47-9140ba492edf",
               "type": "component"
             }
           ],
-          "id": "176b8465-8401-4790-9efe-b689d6476c23",
+          "id": "d91812ee-04b6-4d76-a076-1b959e36e79c",
           "name": "content",
           "title": "Content",
           "type": "region"
@@ -71,18 +58,18 @@
                 "recordId": "{!recordId}"
               },
               "definition": "community_builder:seoAssistant",
-              "id": "21da8d9d-7c5b-43c4-ac49-4b86e8fc2c2a",
+              "id": "5c1ba39f-0c34-45e1-80ee-df3885ebbcd5",
               "type": "component"
             }
           ],
-          "id": "29539185-dc7b-4b99-bf90-4dcf704b51ab",
+          "id": "68256e00-7939-4e31-be48-35d954e4c480",
           "name": "sfdcHiddenRegion",
           "title": "sfdcHiddenRegion",
           "type": "region"
         }
       ],
       "definition": "community_layout:sldsFlexibleLayout",
-      "id": "3b332798-ef41-413b-bb1f-e9ca9193e5b6",
+      "id": "4926aa04-0758-4655-bf55-c576becfb47f",
       "type": "component"
     },
     "dataProviders": [],

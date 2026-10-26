@@ -84,7 +84,11 @@ sf agent preview send -o npo-demo --authoring-bundle ABC_Hope_Donor_Assistant --
 - "Tell me about clean water" → describes Clean Water for Rural Schools (partial name match) with its own causes.
 - "How much have I given?" / "Pause my monthly gift" → politely asks to sign in (preview has no verified user).
 
-## 7. Chat window (every page except `/dashboard`, D-25)
+## 7. No chat window (D-28)
+
+- No chat button on any page; the assistant is only in the dashboard's Ask panel (§ agent panel steps).
+
+### Former chat window steps (kept for reference)
 
 - `/dashboard` has no chat window (the Ask panel is the chat there).
 

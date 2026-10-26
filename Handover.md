@@ -6,8 +6,7 @@ _Last updated: 2026‑10‑22_
 
 The public donation journey, the signed-in donor portal and the Agentforce agent are built, deployed
 and published on the ABC Hope LWR site. Donations create real NPC records (payment simulated).
-Donors can pick any open campaign from the dashboard. Chat: the dashboard's Ask panel (Agent API, verified donor,
-D-23) and, per D-25, the Embedded Messaging chat window on every other page (being placed).
+Donors can pick any open campaign from the dashboard. Chat: only the dashboard's Ask panel (Agent API, verified donor, D-23, D-28).
 
 **Site:** https://te1791557923677.my.site.com/ —
 `/` campaign home · `/donate` (`?campaign=…`, `?src=…`) · `/dashboard` · `/my-giving` · `/my-profile`
@@ -23,7 +22,7 @@ D-23) and, per D-25, the Embedded Messaging chat window on every other page (bei
 | Dashboard campaigns                   | ✅ Card grid: raised (real gifts) vs goal (`Campaign.ExpectedRevenue`), days left, designations. A card opens `/donate?campaign=<name>`                                                                                                                                                                                                                       |
 | Signed-in donor                       | ✅ Maya Grande portal user. Email set to `wchaipitch@terrasky.co.th` and a password-reset email sent; the user chooses the password (none stored anywhere)                                                                                                                                                                                                    |
 | Agent                                 | ✅ ABC Hope Donor Assistant active (new version with D-20: lists every open campaign); routing flow `ABC_Hope_Chat_Routing`; channel + deployment `ABC_Hope_Chat` (Auth, guests allowed)                                                                                                                                                                      |
-| Chat on site                          | 🟨 Dashboard Ask panel live; chat window on every other page (D-25) in progress                                                                                                                                                                                                                                                                               |
+| Chat on site                          | ✅ Dashboard Ask panel only (D-28); no chat widget on the site                                                                                                                                                                                                                                                                                                |
 | Photos                                | ✅ Unsplash (free licence): hero (Christian Bowen), banner (Ben Kupke), sidebar (septian akbar); campaign cards — water (Lisa Marie Theck), education (Yogendra Singh), environment (Kate Cullen), other (Larm Rmah); stories (Andrew Itaga, Yannis H, Elly M); the donation journey's review/thank-you photo follows the campaign. Credits shown or on hover |
 | Git                                   | ✅ `git@github.com:Chaipitch/npo-dem.git`, `main`                                                                                                                                                                                                                                                                                                             |
 | Flows / VRs / custom objects / fields | Only `ABC_Hope_Chat_Routing` (approved exception). Nothing else.                                                                                                                                                                                                                                                                                              |
@@ -138,12 +137,8 @@ The enrolments and assignments are the org's existing demo data, not ABC Hope ca
 
 ## Open items
 
-1. **Chat window (D-25):** the button, verified sessions (Maya is `AuthenticatedEndUserId`) and the routing to the
-   agent work on every page except the dashboard, but the agent does not run its actions there: no Apex runs as the
-   agent user and it answers "please sign in" / "please wait". The same actions work through the dashboard panel
-   (Agent API), and `AbcHopeAgentSupport.verifiedAccountId(<session Id>)` returns Maya's account when called directly.
-   Next step: open the agent in Agentforce Builder → Conversation Preview / event logs (or Testing Center) with a
-   messaging session to see why the planner skips or fails the action call.
+1. Done 2026‑10‑26: chat window removed from all pages (D-28); the dashboard Ask panel is the only chat. The
+   deployment `ABC_Hope_Web_Chat`, channel and routing flow stay in the org, unused.
 2. Done 2026‑10‑22: campaign cards, story cards and the journey's review/thank-you image use Unsplash photos.
 3. Done 2026‑10‑26: public `/our-work` (programs with funding campaigns and causes, `getPrograms`) and `/about` (placeholder copy, editable in Builder) — header links point there (D-26).
 4. Done 2026‑10‑26: `AbcHopeAgentSupportTest` raises coverage to 84% (the verified-messaging-user line needs
