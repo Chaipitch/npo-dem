@@ -6,8 +6,8 @@ _Last updated: 2026‑10‑22_
 
 The public donation journey, the signed-in donor portal and the Agentforce agent are built, deployed
 and published on the ABC Hope LWR site. Donations create real NPC records (payment simulated).
-Donors can pick any open campaign from the dashboard. Chat lives in one place: the dashboard's Ask panel, on the
-Agent API with the donor's verified identity (D-23, D-25).
+Donors can pick any open campaign from the dashboard. Chat: the dashboard's Ask panel (Agent API, verified donor,
+D-23) and, per D-25, the Embedded Messaging chat window on every other page (being placed).
 
 **Site:** https://te1791557923677.my.site.com/ —
 `/` campaign home · `/donate` (`?campaign=…`, `?src=…`) · `/dashboard` · `/my-giving` · `/my-profile`
@@ -23,7 +23,7 @@ Agent API with the donor's verified identity (D-23, D-25).
 | Dashboard campaigns                   | ✅ Card grid: raised (real gifts) vs goal (`Campaign.ExpectedRevenue`), days left, designations. A card opens `/donate?campaign=<name>`                                                                                                                                                                                                                       |
 | Signed-in donor                       | ✅ Maya Grande portal user. Email set to `wchaipitch@terrasky.co.th` and a password-reset email sent; the user chooses the password (none stored anywhere)                                                                                                                                                                                                    |
 | Agent                                 | ✅ ABC Hope Donor Assistant active (new version with D-20: lists every open campaign); routing flow `ABC_Hope_Chat_Routing`; channel + deployment `ABC_Hope_Chat` (Auth, guests allowed)                                                                                                                                                                      |
-| Chat on site                          | ✅ Dashboard Ask panel only (D-25); Embedded Messaging stays deployed but unused                                                                                                                                                                                                                                                                              |
+| Chat on site                          | 🟨 Dashboard Ask panel live; chat window on every other page (D-25) in progress                                                                                                                                                                                                                                                                               |
 | Photos                                | ✅ Unsplash (free licence): hero (Christian Bowen), banner (Ben Kupke), sidebar (Artem Makarov); campaign cards — water (Lisa Marie Theck), education (Yogendra Singh), environment (Kate Cullen), other (Larm Rmah); stories (Andrew Itaga, Yannis H, Elly M); the donation journey's review/thank-you photo follows the campaign. Credits shown or on hover |
 | Git                                   | ✅ `git@github.com:Chaipitch/npo-dem.git`, `main`                                                                                                                                                                                                                                                                                                             |
 | Flows / VRs / custom objects / fields | Only `ABC_Hope_Chat_Routing` (approved exception). Nothing else.                                                                                                                                                                                                                                                                                              |
@@ -34,11 +34,12 @@ Agent API with the donor's verified identity (D-23, D-25).
   https://te1791557923677.my.site.com/ → **Sign in** → username `maya.grande@abchope.demo.00dg700000kmyyx`.
 - **Without password:** Setup → Contacts → Maya Grande → **Log in to Experience as User** → ABC Hope.
 
-## Chat widget — not used (D-25)
+## Chat window on every page except the dashboard (D-25)
 
-The Embedded Messaging channel, deployment and routing flow stay deployed but are not placed on the site: the
-dashboard's Ask panel is the only chat. To add the widget later: Experience Builder → Embedded Messaging component →
-deployment **ABC Hope Chat**, Experience Cloud site authentication on, publish.
+1. Done by hand once (component name/settings are not in any repo template): Experience Builder → ABC Hope → Home →
+   drag **Embedded Messaging** onto the page; deployment **ABC Hope Chat**; Experience Cloud site authentication on.
+2. Retrieve the Home view, copy the component into `scripts/sitePages.py` for Home, Donate, Campaign, My Giving and
+   My Profile (not Dashboard), regenerate, deploy, publish.
 
 ## Gotchas
 
@@ -116,7 +117,7 @@ and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a b
 
 ## Open items
 
-1. Done 2026‑10‑26: chat stays in the dashboard Ask panel only; no site-wide chat widget (D-25).
+1. In progress: chat window on every page except the dashboard (D-25), then test guest and signed-in chats.
 2. Done 2026‑10‑22: campaign cards, story cards and the journey's review/thank-you image use Unsplash photos.
 3. Header nav "Our Work" and "About" point to `/` until those pages exist.
 4. Optional: raise `AbcHopeAgentSupport` coverage (the real MessagingSession path can't be built in tests).

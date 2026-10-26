@@ -244,11 +244,13 @@ because the site, agent and tests are wired to them. The Agent Script wording we
 Step 1 and step 2 of the journey also show the campaign photo as a banner across the top of the card (same
 `abcHopeCampaignPhotos` choice as the cards and the review step).
 
-### D-25 · Chat lives only in the dashboard Ask panel — Accepted (user, 2026‑10‑26)
+### D-25 · Chat: dashboard Ask panel + chat window on every other page — Accepted (user, 2026‑10‑26)
 
-The ABC Hope Donor Assistant is reached in one place: the **Ask About Your Journey** panel on `/dashboard` (plus the
-header question box and "Ask Our AI", which send their question there). It uses the Agent API with the signed-in
-donor's verified account (D-23). The Embedded Messaging widget is **not** placed on the site; its channel,
-deployment (`ABC_Hope_Chat`) and routing flow (`ABC_Hope_Chat_Routing`, D-16) stay deployed but unused, and
-`AbcHopeAgentSupport` keeps the messaging-session path so the widget can be added later without code changes.
-Guests have no chat; they use the public pages and the donation journey.
+The ABC Hope Donor Assistant is reachable in two ways, never both on one page:
+
+- **`/dashboard`:** the **Ask About Your Journey** panel (plus the header box and "Ask Our AI", which send their
+  question there), on the Agent API with the donor's verified account (D-23). No chat window here.
+- **Every other page** (Home, Donate, Campaign detail, My Giving, My Profile): the **Embedded Messaging** chat window
+  (deployment `ABC_Hope_Chat`, routing flow `ABC_Hope_Chat_Routing`, D-16), placed page by page so the dashboard is
+  skipped. Guests get campaign answers; signed-in donors are verified through Experience Cloud site authentication and
+  `MessagingEndUser.AuthenticatedEndUserId` (D-15), so the agent's personal actions work there too.

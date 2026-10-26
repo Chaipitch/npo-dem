@@ -82,7 +82,9 @@ sf agent preview send -o npo-demo --authoring-bundle ABC_Hope_Donor_Assistant --
 - "Tell me about clean water" → describes Clean Water for Rural Schools (partial name match) with its own causes.
 - "How much have I given?" / "Pause my monthly gift" → politely asks to sign in (preview has no verified user).
 
-## 7. Agent in a chat widget (not used — D-25; kept for reference if the widget is ever placed)
+## 7. Chat window (every page except `/dashboard`, D-25)
+
+- `/dashboard` has no chat window (the Ask panel is the chat there).
 
 - Guest: chat opens; campaign FAQ works; personal requests → "please sign in".
 - Maya signed in: "How much have I given?" → her totals and causes; "Pause my monthly gift for 2 months"
