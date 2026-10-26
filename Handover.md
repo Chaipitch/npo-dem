@@ -96,7 +96,7 @@ falls back to the dashboard-data answer.
 Setup that makes it work: External Client App **ABC Hope Agent API** (client credentials, run-as
 `agentapi.abchope@…`), its consumer key/secret on the `AgentApiPrincipal` principal (admin-entered, never in git),
 permission set **ABC Hope Agent API Access** assigned to the run-as user and selected under the app's OAuth policies
-(Permitted Users: admin approved), agent version 5 active. Portal users reach the principal through
+(Permitted Users: admin approved), agent version 6 active (2026‑10‑26: causes vs programs wording). Portal users reach the principal through
 `ABC_Hope_Donor_Portal`.
 
 Troubleshooting: `invalid_app_access … not admin approved` = the run-as user's permission set isn't selected on the

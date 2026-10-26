@@ -322,6 +322,39 @@ private class AbcHopeAgentActionsTest {
     Assert.areEqual('Maya', r.donorFirstName);
     Assert.isTrue(r.summary.contains('Active recurring gifts: 1 (Monthly)'));
     Assert.isTrue(r.summary.contains('School Supplies'));
+    Assert.isTrue(
+      r.summary.contains(
+        'Programs funded (what the causes pay for, not the causes themselves): none recorded. Some of the donor\'s causes are not linked to a program.'
+      ),
+      r.summary
+    );
+  }
+
+  @IsTest
+  static void givingSummaryNamesProgramsNotCauses() {
+    Program edu = new Program(
+      Name = 'Test Education Access',
+      Status = 'Active'
+    );
+    insert edu;
+    update new GiftDesignation(
+      Id = [SELECT Id FROM GiftDesignation WHERE Name = 'School Supplies']
+      .Id,
+      NGOTV_Program__c = edu.Id
+    );
+    Id accountId = createDonorWithMonthlyGift('programs@example.com', 500);
+    Test.startTest();
+    String line = AbcHopeAgentGivingSummary.programsLine(
+      accountId,
+      DonorPortalController.buildDashboard(
+        DonorPortalController.loadAccount(accountId)
+      )
+    );
+    Test.stopTest();
+    Assert.areEqual(
+      'Programs funded (what the causes pay for, not the causes themselves): Test Education Access',
+      line
+    );
   }
 
   @IsTest
