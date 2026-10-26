@@ -11,9 +11,9 @@
  * Signed-in portal users only. Technical errors are logged, never returned to the browser.
  */
 public with sharing class DonorAgentController {
-  /** Flip to true once the AgentApiPrincipal principal holds the app's client ID and secret. */
+  /** True once the AgentApiPrincipal principal holds the app's client ID and secret (set 2026-10-26). */
   @TestVisible
-  static Boolean USE_AGENT_API = false;
+  static Boolean USE_AGENT_API = true;
 
   static final String AGENT = 'ABC_Hope_Donor_Assistant';
   static final String NAMED_CREDENTIAL = 'callout:ABC_Hope_Agent_API';
@@ -27,6 +27,12 @@ public with sharing class DonorAgentController {
     public String text;
     @AuraEnabled
     public String error;
+  }
+
+  /** Lets the panel send personal questions to the agent (verified donor) instead of answering them itself. */
+  @AuraEnabled(cacheable=true)
+  public static Boolean usesVerifiedAgent() {
+    return USE_AGENT_API;
   }
 
   @AuraEnabled

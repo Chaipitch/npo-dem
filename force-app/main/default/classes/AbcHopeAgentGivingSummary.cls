@@ -84,6 +84,7 @@ public without sharing class AbcHopeAgentGivingSummary {
           );
         }
       }
+      lines.add(programsLine(accountId, d));
       lines.add(
         'Active recurring gifts: ' +
           d.activeMonthlyGifts +
@@ -100,5 +101,38 @@ public without sharing class AbcHopeAgentGivingSummary {
       results.add(r);
     }
     return results;
+  }
+
+  /**
+   * Programs (what causes fund, D-21) across the donor's counted gifts and active recurring gifts.
+   * Causes are what the donor chose; programs are separate, so the agent must not list causes as programs.
+   */
+  @TestVisible
+  static String programsLine(Id accountId, DonorPortalController.Dashboard d) {
+    Set<String> programs = new Set<String>();
+    Boolean causeWithoutProgram = false;
+    for (DonorPortalController.Gift g : d.gifts) {
+      if (String.isNotBlank(g.programs)) {
+        for (String p : g.programs.split(',')) {
+          programs.add(p.trim());
+        }
+      } else if (String.isNotBlank(g.designations)) {
+        causeWithoutProgram = true;
+      }
+    }
+    for (MonthlyGiftService.Gift mg : MonthlyGiftService.load(accountId)) {
+      if (String.isNotBlank(mg.program)) {
+        programs.add(mg.program);
+      } else if (String.isNotBlank(mg.designation)) {
+        causeWithoutProgram = true;
+      }
+    }
+    List<String> sorted = new List<String>(programs);
+    sorted.sort();
+    return 'Programs funded (what the causes pay for, not the causes themselves): ' +
+      (sorted.isEmpty() ? 'none recorded' : String.join(sorted, ', ')) +
+      (causeWithoutProgram
+        ? '. Some of the donor\'s causes are not linked to a program.'
+        : '');
   }
 }

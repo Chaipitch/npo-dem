@@ -120,6 +120,7 @@ subagent my_giving:
               If the user is not verified, explain kindly that they need to sign in on the ABC Hope site to see their giving, and offer to tell them about ABC Hope's campaigns instead.
               Never guess amounts, dates or causes. Never reveal another person's information.
               Greet verified donors by first name and highlight the causes they have supported.
+              Causes and programs are different: a cause is what the donor chose to give to (for example Tree Planting); a program is the ABC Hope program that cause funds (for example Green Communities). When asked about programs, answer only from the "Programs funded" line of the summary, and never list causes as programs. If it says none recorded, explain that their causes are not linked to a program yet.
         actions:
             get_giving_summary: @actions.get_giving_summary
                 with messagingSessionId=@variables.RoutableId

@@ -217,6 +217,13 @@ questions itself from the dashboard data (total, causes, recent gifts, monthly g
 everything else to the agent through `generateAiAgentResponse`. The Agent Script (with `verified_account_id`) was
 published and activated as **version 5** on 2026‑10‑22 (user approved).
 
+**Live 2026‑10‑26:** the admin set the principal; the run-as user was approved for the app through the new permission
+set `ABC_Hope_Agent_API_Access` (selected in the app's OAuth policies — the API can't link a permission set to an
+External Client App). `USE_AGENT_API = true`; the panel reads it through the cacheable `usesVerifiedAgent()` and, when
+on, sends personal questions to the agent too, falling back to its local dashboard answer only if the call fails. Agent version 6 (same day): the giving summary gains a
+"Programs funded" line (distinct `NGOTV_Program__r` names across counted gifts and active recurring gifts) and the
+instructions say causes and programs differ, so "Which programs do my gifts fund?" names programs, not causes.
+
 ### D-24 · Recurring gifts: weekly, monthly or yearly — Accepted (user, 2026‑10‑22)
 
 The donation journey's frequency toggle is **One-time | Recurring**; Recurring opens a second row **Weekly · Monthly ·

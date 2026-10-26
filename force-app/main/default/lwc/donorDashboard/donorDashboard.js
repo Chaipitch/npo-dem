@@ -4,6 +4,7 @@ import basePath from "@salesforce/community/basePath";
 import getDashboard from "@salesforce/apex/DonorPortalController.getDashboard";
 import getCampaigns from "@salesforce/apex/DonationIntakeController.getCampaigns";
 import askAgent from "@salesforce/apex/DonorAgentController.ask";
+import usesVerifiedAgent from "@salesforce/apex/DonorAgentController.usesVerifiedAgent";
 import { campaignPhoto } from "c/abcHopeCampaignPhotos";
 
 const IMPACT_STYLE = [
@@ -64,6 +65,13 @@ export default class DonorDashboard extends LightningElement {
   data;
   error;
   campaigns = [];
+
+  /** True when the panel's agent calls carry the donor's verified identity (Agent API, D-23). */
+  verifiedAgent = false;
+  @wire(usesVerifiedAgent)
+  wiredVerifiedAgent({ data }) {
+    this.verifiedAgent = data === true;
+  }
 
   @wire(getCampaigns)
   wiredCampaigns({ data }) {
@@ -450,20 +458,29 @@ export default class DonorDashboard extends LightningElement {
     this.addChat("user", text);
     this.chatDraft = "";
     const local = this.localAnswer(text);
-    if (local) {
+    // Without a verified agent session, personal questions are answered here from the dashboard data.
+    if (local && !this.verifiedAgent) {
       this.addChat("agent", local.text, local.link);
       return;
     }
     this.chatBusy = true;
+    let reply;
     try {
-      const reply = await askAgent({
+      reply = await askAgent({
         message: text,
         sessionId: this.chatSessionId || null
       });
-      if (reply.sessionId) this.chatSessionId = reply.sessionId;
-      this.addChat(reply.error ? "error" : "agent", reply.error || reply.text);
     } catch {
-      this.addChat("error", "The assistant could not answer right now.");
+      reply = { error: "The assistant could not answer right now." };
+    }
+    if (reply.sessionId) this.chatSessionId = reply.sessionId;
+    if (!reply.error) {
+      // Keep the page link the local answer would have offered (e.g. Manage recurring gifts).
+      this.addChat("agent", reply.text, local?.link);
+    } else if (local) {
+      this.addChat("agent", local.text, local.link);
+    } else {
+      this.addChat("error", reply.error);
     }
     this.chatBusy = false;
   }

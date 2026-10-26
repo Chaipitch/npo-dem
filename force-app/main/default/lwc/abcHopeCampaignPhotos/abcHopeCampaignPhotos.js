@@ -17,8 +17,10 @@ const PHOTOS = {
     credit: "Photo: Yogendra Singh / Unsplash"
   },
   sprout: {
-    id: "photo-1777150895644-2ca253ee1c93",
-    credit: "Photo: Hammilton Ojijo / Unsplash"
+    id: "photo-1678897482068-e89e03eb4a3a",
+    credit: "Photo: Kate Cullen / Unsplash",
+    // Tall photo: keep the leaves in view in wide crops.
+    focus: "crop=focalpoint&fp-x=0.45&fp-y=0.4"
   },
   gift: {
     id: "photo-1488521787991-ed7bbaae773c",
@@ -41,7 +43,7 @@ export function campaignPhoto(name, { width = 900, height } = {}) {
   const photo = PHOTOS[campaignTheme(name)];
   const size = `w=${width}${height ? `&h=${height}` : ""}`;
   return {
-    url: `https://images.unsplash.com/${photo.id}?auto=format&fit=crop&${size}&q=75`,
+    url: `https://images.unsplash.com/${photo.id}?auto=format&fit=crop${photo.focus ? `&${photo.focus}` : ""}&${size}&q=75`,
     credit: photo.credit
   };
 }

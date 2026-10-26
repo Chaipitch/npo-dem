@@ -3,6 +3,7 @@ import DonorDashboard from "c/donorDashboard";
 import getDashboard from "@salesforce/apex/DonorPortalController.getDashboard";
 import getCampaigns from "@salesforce/apex/DonationIntakeController.getCampaigns";
 import askAgent from "@salesforce/apex/DonorAgentController.ask";
+import usesVerifiedAgent from "@salesforce/apex/DonorAgentController.usesVerifiedAgent";
 
 jest.mock(
   "@salesforce/apex/DonorPortalController.getDashboard",
@@ -23,6 +24,14 @@ jest.mock(
 jest.mock(
   "@salesforce/apex/DonorAgentController.ask",
   () => ({ default: jest.fn() }),
+  { virtual: true }
+);
+jest.mock(
+  "@salesforce/apex/DonorAgentController.usesVerifiedAgent",
+  () => {
+    const { createApexTestWireAdapter } = require("@salesforce/sfdx-lwc-jest");
+    return { default: createApexTestWireAdapter(jest.fn()) };
+  },
   { virtual: true }
 );
 jest.mock("@salesforce/apex", () => ({ refreshApex: jest.fn() }), {
@@ -186,6 +195,36 @@ describe("c-donor-dashboard agent panel", () => {
     expect(window.location.search).toBe("");
     expect(window.location.hash).toBe("#agent");
     window.history.replaceState(null, "", "/");
+  });
+
+  it("with the verified agent, personal questions go to the agent and keep the page link", async () => {
+    askAgent.mockResolvedValue({
+      sessionId: "s-9",
+      text: "You have 1 recurring gift: Recurring (Monthly), THB 1,000 per month."
+    });
+    const el = await mount();
+    usesVerifiedAgent.emit(true);
+    await flush();
+    await ask(el, "Show my recurring gifts");
+    expect(askAgent).toHaveBeenCalledWith({
+      message: "Show my recurring gifts",
+      sessionId: null
+    });
+    expect(lastReply(el)).toContain("Recurring (Monthly)");
+    expect($(el, ".chat-log a.chat-link").getAttribute("href")).toBe(
+      "/my-giving#monthly"
+    );
+  });
+
+  it("with the verified agent, falls back to the dashboard answer when the agent fails", async () => {
+    askAgent.mockResolvedValue({
+      error: "The assistant could not answer right now. Please try again."
+    });
+    const el = await mount();
+    usesVerifiedAgent.emit(true);
+    await flush();
+    await ask(el, "How much have I given?");
+    expect(lastReply(el)).toContain("THB 2,250");
   });
 
   it("campaign cards link to Donate now and View more", async () => {
