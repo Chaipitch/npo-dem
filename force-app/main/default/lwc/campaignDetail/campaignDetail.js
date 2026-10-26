@@ -3,6 +3,11 @@ import { CurrentPageReference } from "lightning/navigation";
 import basePath from "@salesforce/community/basePath";
 import getCampaignDetail from "@salesforce/apex/DonationIntakeController.getCampaignDetail";
 import { campaignPhoto } from "c/abcHopeCampaignPhotos";
+import { refreshApex } from "@salesforce/apex";
+import { giftsChangedAt } from "c/abcHopeGiftEvents";
+
+// When this page last loaded fresh data in this tab (kept across in-site navigation).
+let lastLoadedAt = 0;
 
 /**
  * Campaign detail page (/campaign?name=…), opened from "View more" on the dashboard cards.
@@ -29,7 +34,13 @@ export default class CampaignDetail extends LightningElement {
   }
 
   @wire(getCampaignDetail, { campaignName: "$campaignName" })
-  wiredDetail({ data, error }) {
+  wiredDetail(result) {
+    const { data, error } = result;
+    // Cached from before a new gift: fetch the current raised amount and gift count.
+    if (data && giftsChangedAt() > lastLoadedAt) {
+      lastLoadedAt = Date.now();
+      refreshApex(result);
+    }
     if (data !== undefined || error) {
       this.loaded = true;
     }

@@ -1,6 +1,7 @@
 import { LightningElement, api } from "lwc";
 import getMonthlyGifts from "@salesforce/apex/DonorPortalController.getMonthlyGifts";
 import manageMonthlyGift from "@salesforce/apex/DonorPortalController.manageMonthlyGift";
+import { markGiftsChanged, GIFTS_CHANGED } from "c/abcHopeGiftEvents";
 
 const PAUSE_MONTHS = [1, 2, 3, 6, 12];
 // Schedule period → type and unit; anything else (e.g. Custom) reads as Monthly (D-24).
@@ -34,6 +35,14 @@ export default class DonorMonthlyGifts extends LightningElement {
 
   connectedCallback() {
     this.load();
+    // A gift changed elsewhere on this page (e.g. by the assistant): reload the cards.
+    this._onGiftsChanged = () => {
+      if (!this.busy) this.load(); // skip the echo of this component's own change
+    };
+    window.addEventListener(GIFTS_CHANGED, this._onGiftsChanged);
+  }
+  disconnectedCallback() {
+    window.removeEventListener(GIFTS_CHANGED, this._onGiftsChanged);
   }
 
   async load() {
@@ -80,9 +89,15 @@ export default class DonorMonthlyGifts extends LightningElement {
         amountLabel: `New amount per ${period.unit} (${this.currencyLabel})`,
         meta: meta.join(" · "),
         isPaused: g.isPaused,
+        cardClass: g.isPaused ? "gift gift_paused" : "gift",
         statusLabel: g.isPaused
-          ? `Paused ${formatDate(g.pausedFrom)} – ${g.pausedUntil ? formatDate(g.pausedUntil) : "further notice"}`
+          ? g.pausedUntil
+            ? `Paused until ${formatDate(g.pausedUntil)}`
+            : "Paused"
           : "Active",
+        pauseNote: g.isPaused
+          ? `No gifts from ${formatDate(g.pausedFrom)}${g.pausedUntil ? ` to ${formatDate(g.pausedUntil)}` : ""}. Resume any time.`
+          : "",
         statusClass: g.isPaused
           ? "status status-paused"
           : "status status-active",
@@ -155,6 +170,7 @@ export default class DonorMonthlyGifts extends LightningElement {
       this.notice = res.message;
       this.openPanel = undefined;
       this.dispatchEvent(new CustomEvent("giftschange"));
+      markGiftsChanged();
     } catch (e) {
       this.error = message(e, "We could not make this change right now.");
     }

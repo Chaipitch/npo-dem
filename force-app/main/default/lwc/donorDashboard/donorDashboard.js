@@ -1,5 +1,10 @@
 import { LightningElement, api, wire } from "lwc";
 import { refreshApex } from "@salesforce/apex";
+import {
+  giftsChangedAt,
+  markGiftsChanged,
+  GIFTS_CHANGED
+} from "c/abcHopeGiftEvents";
 import basePath from "@salesforce/community/basePath";
 import getDashboard from "@salesforce/apex/DonorPortalController.getDashboard";
 import getCampaigns from "@salesforce/apex/DonationIntakeController.getCampaigns";
@@ -37,6 +42,9 @@ const STORY_PHOTOS = {
 const JOURNEY_TONES = ["jt-red", "jt-green", "jt-amber", "jt-purple"];
 const JOURNEY_ICONS = ["heart", "sprout", "book", "gift"];
 
+// When the dashboard last loaded fresh data in this tab (kept across in-site navigation).
+let lastLoadedAt = 0;
+
 export default class DonorDashboard extends LightningElement {
   /** "home" = donor home (mockup #1); "giving" = KPIs + full giving history */
   @api view = "home";
@@ -73,10 +81,12 @@ export default class DonorDashboard extends LightningElement {
     this.verifiedAgent = data === true;
   }
 
+  _wiredCampaigns;
   @wire(getCampaigns)
-  wiredCampaigns({ data }) {
-    if (data) {
-      this.campaigns = data;
+  wiredCampaigns(result) {
+    this._wiredCampaigns = result;
+    if (result.data) {
+      this.campaigns = result.data;
     }
   }
   _scrolledTo;
@@ -87,6 +97,10 @@ export default class DonorDashboard extends LightningElement {
   wiredDashboard(result) {
     this._wiredDashboard = result;
     const { data, error } = result;
+    // Cached from before a donation or gift change (possibly on another page): reload everything once.
+    if (data && giftsChangedAt() > lastLoadedAt) {
+      this.refreshData();
+    }
     if (data) {
       this.data = data;
       this.error = undefined;
@@ -106,11 +120,21 @@ export default class DonorDashboard extends LightningElement {
     window.addEventListener("hashchange", this._onHash);
     this._onAsk = (event) => this.handleAskEvent(event);
     window.addEventListener(ASK_EVENT, this._onAsk);
+    this._onGiftsChanged = () => this.refreshData();
+    window.addEventListener(GIFTS_CHANGED, this._onGiftsChanged);
     this.readAskFromUrl();
   }
   disconnectedCallback() {
     window.removeEventListener("hashchange", this._onHash);
     window.removeEventListener(ASK_EVENT, this._onAsk);
+    window.removeEventListener(GIFTS_CHANGED, this._onGiftsChanged);
+  }
+
+  /** Reload the KPIs, gift list and campaign cards (both are cacheable Apex). */
+  refreshData() {
+    lastLoadedAt = Date.now();
+    if (this._wiredDashboard) refreshApex(this._wiredDashboard);
+    if (this._wiredCampaigns) refreshApex(this._wiredCampaigns);
   }
 
   // ------------------------------------------------------------ questions from the header
@@ -232,7 +256,7 @@ export default class DonorDashboard extends LightningElement {
     return `${basePath || ""}/my-giving#monthly`;
   }
   handleGiftsChange() {
-    refreshApex(this._wiredDashboard);
+    this.refreshData();
   }
   get givingHref() {
     return `${basePath || ""}/my-giving`;
@@ -477,6 +501,8 @@ export default class DonorDashboard extends LightningElement {
     if (!reply.error) {
       // Keep the page link the local answer would have offered (e.g. Manage recurring gifts).
       this.addChat("agent", reply.text, local?.link);
+      // The agent may have paused, resumed, changed or cancelled a gift: show the current state.
+      if (this.verifiedAgent) markGiftsChanged();
     } else if (local) {
       this.addChat("agent", local.text, local.link);
     } else {

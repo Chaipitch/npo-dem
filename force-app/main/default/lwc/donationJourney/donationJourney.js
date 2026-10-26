@@ -3,6 +3,7 @@ import { CurrentPageReference } from "lightning/navigation";
 import getOptions from "@salesforce/apex/DonationIntakeController.getOptions";
 import submitDonation from "@salesforce/apex/DonationIntakeController.submitDonation";
 import { campaignPhoto } from "c/abcHopeCampaignPhotos";
+import { markGiftsChanged } from "c/abcHopeGiftEvents";
 
 const STEPS = [
   { key: "choose", label: "Choose Donation" },
@@ -428,6 +429,8 @@ export default class DonationJourney extends LightningElement {
       this.result = await submitDonation({
         requestJson: JSON.stringify(request)
       });
+      // Totals, campaign progress and recurring gifts elsewhere on the site reload with this gift.
+      markGiftsChanged();
       this.goTo(3);
     } catch (error) {
       this.submitError = reduceError(error);

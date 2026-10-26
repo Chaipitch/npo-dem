@@ -227,6 +227,14 @@ describe("c-donor-dashboard agent panel", () => {
     expect(lastReply(el)).toContain("THB 2,250");
   });
 
+  it("reloads its data when gifts change (donation or assistant)", async () => {
+    const { refreshApex } = require("@salesforce/apex");
+    await mount();
+    refreshApex.mockClear();
+    window.dispatchEvent(new CustomEvent("abchope:giftschange"));
+    expect(refreshApex).toHaveBeenCalledTimes(2); // dashboard + campaign cards
+  });
+
   it("campaign cards link to Donate now and View more", async () => {
     const el = await mount();
     getCampaigns.emit([

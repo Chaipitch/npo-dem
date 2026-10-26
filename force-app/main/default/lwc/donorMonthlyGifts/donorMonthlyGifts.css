@@ -59,6 +59,16 @@ ul {
   border-radius: 14px;
   background: #fff;
 }
+.gift_paused {
+  border-color: #f1d18a;
+  border-left: 4px solid #e0a41c;
+  background: #fffcf4;
+}
+.gift-pause {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #8a5a00;
+}
 .gift-main {
   display: flex;
   flex-wrap: wrap;

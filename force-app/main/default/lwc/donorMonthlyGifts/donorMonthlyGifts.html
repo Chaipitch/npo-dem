@@ -20,7 +20,7 @@
     <template lwc:if={hasGifts}>
       <ul class="gift-list">
         <template for:each={cards} for:item="g">
-          <li key={g.id} class="gift" data-gift={g.id}>
+          <li key={g.id} class={g.cardClass} data-gift={g.id}>
             <div class="gift-main">
               <div>
                 <p class="gift-type" data-id="type">{g.typeLabel}</p>
@@ -31,6 +31,9 @@
                 >{g.statusLabel}</span
               >
             </div>
+            <template lwc:if={g.pauseNote}>
+              <p class="gift-pause" data-id="pause-note">{g.pauseNote}</p>
+            </template>
             <template lwc:if={g.nextGift}>
               <p class="gift-next muted">{g.nextGift}</p>
             </template>
