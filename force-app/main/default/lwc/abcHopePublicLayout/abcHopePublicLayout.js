@@ -9,7 +9,7 @@ import isGuest from "@salesforce/user/isGuest";
  */
 export default class AbcHopePublicLayout extends LightningElement {
   /** "Label|/path" pairs separated by ";" */
-  @api navItems = "Our Work|/;Get Involved|/donate;About|/";
+  @api navItems = "Our Work|/our-work;Get Involved|/donate;About|/about";
   @api donateLabel = "Donate";
   @api donatePath = "/donate";
   @api dashboardPath = "/dashboard";

@@ -151,7 +151,10 @@
                     oninput={handleAmount}
                   />
                 </label>
-                <p class="hint muted">The new amount applies from tomorrow.</p>
+                <p class="hint muted">
+                  The new amount applies from tomorrow. The gift stays
+                  {g.periodWord}.
+                </p>
                 <div class="actions">
                   <button
                     type="button"
@@ -207,6 +210,9 @@
           </li>
         </template>
       </ul>
+      <p class="schedule-note muted" data-id="schedule-note">
+        {scheduleNoteLead}<a class="link" href={donateHref}>start a new one</a>.
+      </p>
     </template>
   </div>
 </template>

@@ -2,7 +2,7 @@
 // A campaign appears on the dashboard when it is active, not ended, and has a GiftDefaultDesignation.
 // Run: sf apex run -o npo-demo -f scripts/apex/seedCampaigns.apex
 List<List<Object>> specs = new List<List<Object>>{
-    // name, description, start, end, goal (THB), designation, designation description
+    // name, description, start, end, goal (USD), designation, designation description
     new List<Object>{ 'Christmas Giving 2026', 'Give the gift of learning this Christmas — school supplies for children in need.', Date.newInstance(2026, 11, 15), Date.newInstance(2026, 12, 31), 250000, 'School Supplies', 'Notebooks, pencils and books for children in need.' },
     new List<Object>{ 'Clean Water for Rural Schools', 'Install water filters and handwashing stations in rural schools so children stay healthy and in class.', Date.newInstance(2026, 9, 1), Date.newInstance(2027, 3, 31), 300000, 'Clean Water', 'Water filters and handwashing stations for rural schools.' },
     new List<Object>{ 'Girls\' Education Scholarships', 'Scholarships, uniforms and learning resources that keep girls in school in underserved areas.', Date.newInstance(2026, 6, 1), Date.newInstance(2027, 1, 31), 500000, 'Scholarships', 'School fees, uniforms and learning resources for girls.' },

@@ -529,4 +529,41 @@ private class DonationIntakeServiceTest {
     Assert.isNull(unknown);
     Assert.isNull(blank);
   }
+
+  @IsTest
+  static void programsListFundingCampaignsFirst() {
+    Program edu = new Program(
+      Name = 'Test Education Access',
+      Status = 'Active',
+      Summary = 'Keeps children learning.'
+    );
+    Program idle = new Program(Name = 'Test Idle Program', Status = 'Active');
+    insert new List<Program>{ edu, idle };
+    update new GiftDesignation(
+      Id = designationId('Test School Supplies'),
+      NGOTV_Program__c = edu.Id
+    );
+
+    Test.startTest();
+    List<DonationIntakeService.ProgramCard> programs = DonationIntakeController.getPrograms();
+    Test.stopTest();
+
+    DonationIntakeService.ProgramCard first;
+    DonationIntakeService.ProgramCard idleCard;
+    for (DonationIntakeService.ProgramCard c : programs) {
+      if (c.name == 'Test Education Access')
+        first = c;
+      if (c.name == 'Test Idle Program')
+        idleCard = c;
+    }
+    Assert.areEqual(
+      'Test Education Access',
+      programs[0].name,
+      'funded programs first'
+    );
+    Assert.areEqual('Keeps children learning.', first.summary);
+    Assert.areEqual(new List<String>{ CAMPAIGN }, first.campaigns);
+    Assert.areEqual(new List<String>{ 'Test School Supplies' }, first.causes);
+    Assert.isTrue(idleCard.campaigns.isEmpty());
+  }
 }

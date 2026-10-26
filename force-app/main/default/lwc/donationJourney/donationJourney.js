@@ -31,7 +31,7 @@ export default class DonationJourney extends LightningElement {
   @api designationNames = "School Supplies,Learning Kits,Where Most Needed";
   @api amountOptions = "300,500,1000";
   @api defaultAmount = 1000;
-  @api currencyLabel = "THB";
+  @api currencyLabel = "USD";
   @api heading = "Choose your donation";
   @api subheading =
     "Your support helps provide education opportunities for children in need.";

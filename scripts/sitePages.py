@@ -82,6 +82,9 @@ custom_page('Dashboard__c', 'dashboard', 'Dashboard', 'dashboard', 'RequiresLogi
 custom_page('My_Giving__c', 'myGiving', 'My Giving', 'my-giving', 'RequiresLogin', [("c:donorDashboard", {"view": "giving"}), CHAT], 'Portal')
 custom_page('My_Profile__c', 'myProfile', 'My Profile', 'my-profile', 'RequiresLogin', [("c:donorProfile", {}), CHAT], 'Portal')
 custom_page('Campaign__c', 'campaign', 'Campaign', 'campaign', 'RequiresLogin', [("c:campaignDetail", {}), CHAT], 'Portal')
+# Public "Our Work" and "About" (D-26), on the public layout.
+custom_page('Our_Work__c', 'ourWork', 'Our Work', 'our-work', 'Public', [("c:abcHopeOurWork", {}), CHAT])
+custom_page('About__c', 'about', 'About', 'about', 'Public', [("c:abcHopeAbout", {}), CHAT])
 
 # Home must be public too.
 home_route = os.path.join(SITE, 'sfdc_cms__route', 'Home', 'content.json')

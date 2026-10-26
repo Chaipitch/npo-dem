@@ -62,7 +62,7 @@ describe("c-campaign-detail", () => {
   it("shows the campaign, its progress, programs, causes and a donate link", async () => {
     const el = await mount("Clean Water for Rural Schools", DETAIL);
     expect(text(el, '[data-id="title"]')).toBe("Clean Water for Rural Schools");
-    expect(text(el, ".raised")).toBe("THB 75,000 raised of THB 300,000");
+    expect(text(el, ".raised")).toBe("USD 75,000 raised of USD 300,000");
     expect(text(el, ".facts")).toContain("3 gifts");
     expect(text(el, ".facts")).toContain("160 days left");
     expect(text(el, ".facts")).toContain("1 Sept 2026 – 31 Mar 2027");

@@ -61,7 +61,7 @@ describe("c-donor-monthly-gifts", () => {
   it("lists a recurring gift with its type, program, status and next gift", async () => {
     const el = await mount([ACTIVE]);
     expect(text(el, '[data-id="type"]')).toBe("Recurring (Monthly)");
-    expect(text(el, ".gift-amount")).toBe("THB 500 / month");
+    expect(text(el, ".gift-amount")).toBe("USD 500 / month");
     expect(text(el, ".gift-meta")).toBe(
       "School Supplies · Education Access program · Christmas Giving 2026"
     );
@@ -70,10 +70,20 @@ describe("c-donor-monthly-gifts", () => {
     expect($(el, '[data-action="resume"]')).toBeNull();
   });
 
+  it("explains that changing the schedule means a new gift", async () => {
+    const el = await mount([{ ...ACTIVE, period: "Weekly" }]);
+    expect(text(el, '[data-id="schedule-note"]')).toBe(
+      "Want a different schedule (weekly, monthly or yearly)? Cancel the gift and start a new one."
+    );
+    click(el, "open-amount");
+    await flush();
+    expect(text(el, ".panel .hint")).toContain("The gift stays weekly.");
+  });
+
   it("shows the schedule period after the amount", async () => {
     const el = await mount([{ ...ACTIVE, amount: 300, period: "Weekly" }]);
     expect(text(el, '[data-id="type"]')).toBe("Recurring (Weekly)");
-    expect(text(el, ".gift-amount")).toBe("THB 300 / week");
+    expect(text(el, ".gift-amount")).toBe("USD 300 / week");
   });
 
   it("shows an empty state with a link to give", async () => {
@@ -142,7 +152,7 @@ describe("c-donor-monthly-gifts", () => {
   it("validates a new amount before calling the server", async () => {
     const el = await mount([ACTIVE]);
     manageMonthlyGift.mockResolvedValue({
-      message: "The monthly amount is now THB 800, starting 10/23/2026.",
+      message: "The monthly amount is now USD 800, starting 10/23/2026.",
       gifts: [{ ...ACTIVE, amount: 800 }]
     });
     click(el, "open-amount");
@@ -153,7 +163,7 @@ describe("c-donor-monthly-gifts", () => {
     amount.dispatchEvent(new CustomEvent("input"));
     click(el, "confirm-amount");
     await flush();
-    expect(text(el, '[data-id="error"]')).toContain("between THB 100");
+    expect(text(el, '[data-id="error"]')).toContain("between USD 100");
     expect(manageMonthlyGift).not.toHaveBeenCalled();
 
     amount.value = "800";
@@ -163,7 +173,7 @@ describe("c-donor-monthly-gifts", () => {
     expect(manageMonthlyGift).toHaveBeenCalledWith(
       expect.objectContaining({ operation: "change_amount", newAmount: 800 })
     );
-    expect(text(el, ".gift-amount")).toBe("THB 800 / month");
+    expect(text(el, ".gift-amount")).toBe("USD 800 / month");
   });
 
   it("asks before cancelling and keeps the gift on 'Keep my gift'", async () => {

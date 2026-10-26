@@ -39,7 +39,7 @@
         name="currencyLabel"
         type="String"
         label="Currency label"
-        default="THB"
+        default="USD"
       />
             <property
         name="heading"

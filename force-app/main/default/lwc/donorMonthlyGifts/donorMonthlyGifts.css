@@ -35,6 +35,10 @@ ul {
   background: #fdecec;
   color: #b42318;
 }
+.schedule-note {
+  margin: 12px 2px 0;
+  font-size: 13px;
+}
 .empty {
   padding: 18px;
   border: 1px dashed var(--mg-border);

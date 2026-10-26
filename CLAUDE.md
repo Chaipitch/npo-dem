@@ -27,7 +27,7 @@ re-engagement journey for Maya Grande (#2), guest donation journey (#3), 10-item
 | Org Id / instance    | `00Dg700000KmYYXEA3` · `https://te1791557923677.my.salesforce.com`                                                  |
 | API version          | 68.0 (project); classes and LWC at 65.0                                                                             |
 | Person Accounts      | Enabled (`NGO_Fundraising_Supporter` record type for new donors)                                                    |
-| Currency             | USD only; the UI labels amounts **THB** (decisions D-05)                                                            |
+| Currency             | USD only; the UI labels amounts **USD** ("USD 1,000"; D-05, changed from USD on 2026‑10‑26)                         |
 | Site URL             | **https://te1791557923677.my.site.com/** (LWR at the domain root; `/vforcesite` is only the Visualforce/login side) |
 | Site metadata        | Network `ABC Hope`, LWR bundle `site/ABC_Hope1`, CustomSite `ABC_Hope`                                              |
 | Guest user / profile | `ABC Hope Site Guest User` / `ABC Hope Profile` (Apex access: `DonationIntakeController` only)                      |

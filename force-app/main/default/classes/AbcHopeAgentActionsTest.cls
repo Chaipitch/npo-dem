@@ -125,7 +125,7 @@ private class AbcHopeAgentActionsTest {
     Assert.isTrue(r.summary.contains('2 campaigns open'), r.summary);
     Assert.isTrue(r.summary.contains(CAMPAIGN), r.summary);
     Assert.isTrue(r.summary.contains('Test Spring Appeal'), r.summary);
-    Assert.isTrue(r.summary.contains('of a THB 50,000 goal'), r.summary);
+    Assert.isTrue(r.summary.contains('of a USD 50,000 goal'), r.summary);
     Assert.isTrue(
       r.summary.contains('/donate?campaign=Test%20Spring%20Appeal'),
       r.summary
@@ -158,7 +158,7 @@ private class AbcHopeAgentActionsTest {
       r.summary.contains('School Supplies — Notebooks and pencils.'),
       r.summary
     );
-    Assert.isTrue(r.summary.contains('Progress: Raised THB 0'), r.summary);
+    Assert.isTrue(r.summary.contains('Progress: Raised USD 0'), r.summary);
     Assert.isTrue(r.summary.contains('no payment is collected'));
     Assert.isTrue(
       r.donateUrl.endsWith('/donate?campaign=Christmas%20Giving%202026'),
@@ -369,7 +369,7 @@ private class AbcHopeAgentActionsTest {
     Assert.isTrue(r.success);
     Assert.isTrue(
       r.monthlyGifts.contains(
-        'Recurring (Monthly): THB 500 per month to School Supplies'
+        'Recurring (Monthly): USD 500 per month to School Supplies'
       ),
       r.monthlyGifts
     );
@@ -389,7 +389,7 @@ private class AbcHopeAgentActionsTest {
       monthly('pause', 24, null).message.contains('how many months')
     );
     Assert.isTrue(
-      monthly('change_amount', null, 5).message.contains('between THB 100')
+      monthly('change_amount', null, 5).message.contains('between USD 100')
     );
     Assert.isTrue(monthly('resume', null, null).message.contains('not paused'));
     Assert.isTrue(
@@ -428,7 +428,7 @@ private class AbcHopeAgentActionsTest {
     AbcHopeAgentMonthlyGifts.Result r = monthly('change_amount', null, 750);
     Test.stopTest();
     Assert.isTrue(r.success, r.message);
-    Assert.isTrue(r.monthlyGifts.contains('THB 750 per month'), r.monthlyGifts);
+    Assert.isTrue(r.monthlyGifts.contains('USD 750 per month'), r.monthlyGifts);
   }
 
   @IsTest

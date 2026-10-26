@@ -56,7 +56,7 @@ public without sharing class MonthlyGiftService {
     return period == 'Weekly' || period == 'Yearly' ? period : 'Monthly';
   }
 
-  /** "week" | "month" | "year", for "THB 300 per week". */
+  /** "week" | "month" | "year", for "USD 300 per week". */
   public static String unit(String period) {
     String t = typeLabel(period);
     return t == 'Weekly' ? 'week' : t == 'Yearly' ? 'year' : 'month';
@@ -216,7 +216,7 @@ public without sharing class MonthlyGiftService {
     ) {
       return new Outcome(
         false,
-        'Please enter an amount between THB 100 and THB 1,000,000.'
+        'Please enter an amount between USD 100 and USD 1,000,000.'
       );
     }
     if (g.openSchedule == null) {

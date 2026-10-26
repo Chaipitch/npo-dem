@@ -12,7 +12,7 @@
  * there is no messaging session and the account belongs to an active portal user.
  */
 public without sharing class AbcHopeAgentSupport {
-  public static final String CURRENCY_LABEL = 'THB';
+  public static final String CURRENCY_LABEL = 'USD';
 
   @TestVisible
   static Id accountIdOverride; // lets tests simulate a verified donor without a messaging session

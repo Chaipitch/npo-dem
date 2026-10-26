@@ -321,7 +321,7 @@ private class DonorPortalControllerTest {
     );
     Test.stopTest();
 
-    Assert.isTrue(r.message.contains('THB 800'), r.message);
+    Assert.isTrue(r.message.contains('USD 800'), r.message);
     Assert.areEqual(800, r.gifts[0].amount);
   }
 
@@ -361,7 +361,7 @@ private class DonorPortalControllerTest {
       manageError(giftId, 'pause', 13, null).contains('how many months')
     );
     Assert.isTrue(
-      manageError(giftId, 'change_amount', null, 50).contains('between THB 100')
+      manageError(giftId, 'change_amount', null, 50).contains('between USD 100')
     );
     Assert.isTrue(
       manageError(giftId, 'resume', null, null).contains('not paused')

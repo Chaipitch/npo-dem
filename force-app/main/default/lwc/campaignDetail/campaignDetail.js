@@ -15,7 +15,7 @@ let lastLoadedAt = 0;
  * choose, with a Donate now button. Unknown or closed campaigns get a friendly message.
  */
 export default class CampaignDetail extends LightningElement {
-  @api currencyLabel = "THB";
+  @api currencyLabel = "USD";
 
   campaignName;
   detail;

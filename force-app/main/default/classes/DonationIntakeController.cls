@@ -21,6 +21,11 @@ public without sharing class DonationIntakeController {
   }
 
   @AuraEnabled(cacheable=true)
+  public static List<DonationIntakeService.ProgramCard> getPrograms() {
+    return DonationIntakeService.getPrograms();
+  }
+
+  @AuraEnabled(cacheable=true)
   public static DonationIntakeService.CampaignDetail getCampaignDetail(
     String campaignName
   ) {

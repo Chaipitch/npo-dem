@@ -16,7 +16,7 @@
                 "layoutDirectionTablet": "column",
                 "maxContentWidth": "",
                 "sectionColumnGutterWidth": "",
-                "sectionConfig": "{\"UUID\":\"c59de7f0-6ef2-465e-a49c-007e25dcaf0e\",\"columns\":[{\"UUID\":\"2b4690c2-74c3-4765-93b8-70d7a2554cbe\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":null}]}",
+                "sectionConfig": "{\"UUID\":\"c15fbb20-7e98-43b3-87d0-f77d2eff1238\",\"columns\":[{\"UUID\":\"dd5bf822-aa47-4d0e-825d-abab497212ae\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":null}]}",
                 "sectionMinHeight": "",
                 "sectionVerticalAlign": "flex-start"
               },
@@ -28,7 +28,7 @@
                         "view": "giving"
                       },
                       "definition": "c:donorDashboard",
-                      "id": "b7e6764c-c980-44c8-8802-c325ed08f4b8",
+                      "id": "e33fb6f6-0335-4cdf-8563-f84ae7bd463a",
                       "type": "component"
                     },
                     {
@@ -41,22 +41,22 @@
                         "siteEndpoint": "https://te1791557923677.my.site.com/ESWABCHopeWebC1792985313558"
                       },
                       "definition": "experience_messaging:embeddedMessaging",
-                      "id": "aa4ead92-6221-41c5-a5e4-3f4bda0ccc13",
+                      "id": "e4443f2c-fd29-4705-ac2f-474d7f9a991c",
                       "type": "component"
                     }
                   ],
-                  "id": "2b4690c2-74c3-4765-93b8-70d7a2554cbe",
+                  "id": "dd5bf822-aa47-4d0e-825d-abab497212ae",
                   "name": "col1",
                   "title": "Column 1",
                   "type": "region"
                 }
               ],
               "definition": "community_layout:section",
-              "id": "c59de7f0-6ef2-465e-a49c-007e25dcaf0e",
+              "id": "c15fbb20-7e98-43b3-87d0-f77d2eff1238",
               "type": "component"
             }
           ],
-          "id": "328ab292-b6c4-458e-b010-065d1a04a1de",
+          "id": "176b8465-8401-4790-9efe-b689d6476c23",
           "name": "content",
           "title": "Content",
           "type": "region"
@@ -71,18 +71,18 @@
                 "recordId": "{!recordId}"
               },
               "definition": "community_builder:seoAssistant",
-              "id": "14b8f919-7a49-4159-8255-1cffb4152c1d",
+              "id": "21da8d9d-7c5b-43c4-ac49-4b86e8fc2c2a",
               "type": "component"
             }
           ],
-          "id": "197a389c-4d4d-4bab-ae4f-8a275612b5a1",
+          "id": "29539185-dc7b-4b99-bf90-4dcf704b51ab",
           "name": "sfdcHiddenRegion",
           "title": "sfdcHiddenRegion",
           "type": "region"
         }
       ],
       "definition": "community_layout:sldsFlexibleLayout",
-      "id": "29bfbb78-bc15-4643-92a6-347e5487d618",
+      "id": "3b332798-ef41-413b-bb1f-e9ca9193e5b6",
       "type": "component"
     },
     "dataProviders": [],

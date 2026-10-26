@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>ABC Hope Our Work</masterLabel>
+    <description
+  >Public Our Work page: active programs with the open campaigns and causes that fund them (D-26).</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+        name="heading"
+        type="String"
+        label="Heading"
+        default="Our Work"
+      />
+            <property
+        name="intro"
+        type="String"
+        label="Intro"
+        default="Every gift funds one of our programs. Choose a campaign below to support the work that matters to you."
+      />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>
