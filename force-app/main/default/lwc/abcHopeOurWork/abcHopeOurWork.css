@@ -64,6 +64,36 @@ ul {
 .summary {
   line-height: 1.5;
 }
+/* Parent-qualified: the site theme's a:link colours leak in under synthetic shadow (D-11). */
+.card a.name-link,
+.card a.name-link:visited {
+  color: var(--ow-navy);
+  text-decoration: none;
+}
+.card a.name-link:hover {
+  text-decoration: underline;
+}
+.figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.figure {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 14px;
+}
+.figure-value {
+  font-weight: 800;
+  color: var(--ow-navy);
+}
+.figure-label {
+  color: #6b7088;
+}
 .label {
   margin-top: 4px;
   font-size: 12px;

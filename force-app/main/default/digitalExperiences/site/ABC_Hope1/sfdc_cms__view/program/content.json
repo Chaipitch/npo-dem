@@ -1,0 +1,78 @@
+{
+  "type": "sfdc_cms__view",
+  "title": "Program",
+  "contentBody": {
+    "component": {
+      "children": [
+        {
+          "children": [
+            {
+              "attributes": {
+                "backgroundImageConfig": "",
+                "backgroundImageOverlay": "rgba(0,0,0,0)",
+                "componentSpacerSize": "",
+                "layoutDirectionDesktop": "row",
+                "layoutDirectionMobile": "column",
+                "layoutDirectionTablet": "column",
+                "maxContentWidth": "",
+                "sectionColumnGutterWidth": "",
+                "sectionConfig": "{\"UUID\":\"57a2fbe6-7242-45b4-aaea-99e751909829\",\"columns\":[{\"UUID\":\"34c1d515-db95-4905-b21e-388a63ee1005\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":null}]}",
+                "sectionMinHeight": "",
+                "sectionVerticalAlign": "flex-start"
+              },
+              "children": [
+                {
+                  "children": [
+                    {
+                      "attributes": {},
+                      "definition": "c:programDetail",
+                      "id": "e3ee24ad-5e6c-4c5a-ada7-6bd4b0b11bd7",
+                      "type": "component"
+                    }
+                  ],
+                  "id": "34c1d515-db95-4905-b21e-388a63ee1005",
+                  "name": "col1",
+                  "title": "Column 1",
+                  "type": "region"
+                }
+              ],
+              "definition": "community_layout:section",
+              "id": "57a2fbe6-7242-45b4-aaea-99e751909829",
+              "type": "component"
+            }
+          ],
+          "id": "b1025caf-fc68-4aff-877d-2a6fbd339862",
+          "name": "content",
+          "title": "Content",
+          "type": "region"
+        },
+        {
+          "children": [
+            {
+              "attributes": {
+                "customHeadTags": "",
+                "description": "",
+                "pageTitle": "Program",
+                "recordId": "{!recordId}"
+              },
+              "definition": "community_builder:seoAssistant",
+              "id": "dc6d1361-d9d1-4e25-813b-309d10f3441e",
+              "type": "component"
+            }
+          ],
+          "id": "f78eab5f-bbfa-476c-ae94-47bc77324aca",
+          "name": "sfdcHiddenRegion",
+          "title": "sfdcHiddenRegion",
+          "type": "region"
+        }
+      ],
+      "definition": "community_layout:sldsFlexibleLayout",
+      "id": "5d81cad9-8021-4ff6-8a89-f6a51513dd8d",
+      "type": "component"
+    },
+    "dataProviders": [],
+    "themeLayoutType": "Inner",
+    "viewType": "custom-program"
+  },
+  "urlName": "program"
+}

@@ -348,3 +348,23 @@ dashboard, so they stay on the thank-you step.
   their own links.
 - **Highlights:** the active sidebar item and the paused recurring-gift card have a thin 1px border instead of a
   thick left bar.
+
+### D-33 · Program figures, delivery data and a program page — Accepted (user, 2026‑10‑26)
+
+- **Money raised per program:** Paid gift designations added up through cause → program
+  (`GiftTransactionDesignation.Amount`, `GiftDesignation.NGOTV_Program__c`), with the number of distinct donors.
+  Nothing is stored on Program: the figures are added up live (`DonationIntakeService.addProgramFigures`), so a new
+  Paid gift shows at once.
+- **Delivery data** for our five programs, with standard Program Management objects only:
+  Benefit (with new Benefit Types "Goods Distribution" (Items) and "Meal Distribution" (Meals), and a new "Items"
+  unit) → ProgramEnrollment → BenefitAssignment → BenefitDisbursement (`DisbursedQuantity`). 260 enrollments reuse
+  people already enrolled in the org's Food Access program, so no new accounts and the People Reached tile is
+  unchanged. 450 deliveries over the last 120 days. `scripts/apex/seedProgramDelivery.apex` skips any program that
+  already has enrollments.
+- **People served** = distinct accounts enrolled (In Progress or Completed); **deliveries** = quantity per benefit
+  for disbursements that are Disbursed or Completed.
+- **Program page** `/program?name=…` (public, `c/programDetail`): photo, summary, "Impact so far", the open
+  campaigns that fund it (Donate →), its causes, the amount raised and Donate now (to the first funding campaign, or
+  plain `/donate`). Our Work names link to it and its cards show raised · people served · the largest delivery;
+  program names on the campaign page link to it. Program photos reuse the campaign themes (Child Wellbeing →
+  presents, Family Support → meal).

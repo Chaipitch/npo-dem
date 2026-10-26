@@ -16,7 +16,7 @@
                 "layoutDirectionTablet": "column",
                 "maxContentWidth": "",
                 "sectionColumnGutterWidth": "",
-                "sectionConfig": "{\"UUID\":\"a6601026-8e37-4cc1-ab47-9140ba492edf\",\"columns\":[{\"UUID\":\"659d92ed-8b4b-4d44-b91c-5f561c79bd13\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":null}]}",
+                "sectionConfig": "{\"UUID\":\"7133dece-1275-4524-a0f2-fc6e935ee726\",\"columns\":[{\"UUID\":\"967a61a6-fbb9-4625-9db3-bedf9f65b23d\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":null}]}",
                 "sectionMinHeight": "",
                 "sectionVerticalAlign": "flex-start"
               },
@@ -28,22 +28,22 @@
                         "view": "giving"
                       },
                       "definition": "c:donorDashboard",
-                      "id": "74391bce-8df0-4a11-aef2-ed8d7a8e234a",
+                      "id": "fb262e30-6d3b-4e00-aa0a-462b0f252c68",
                       "type": "component"
                     }
                   ],
-                  "id": "659d92ed-8b4b-4d44-b91c-5f561c79bd13",
+                  "id": "967a61a6-fbb9-4625-9db3-bedf9f65b23d",
                   "name": "col1",
                   "title": "Column 1",
                   "type": "region"
                 }
               ],
               "definition": "community_layout:section",
-              "id": "a6601026-8e37-4cc1-ab47-9140ba492edf",
+              "id": "7133dece-1275-4524-a0f2-fc6e935ee726",
               "type": "component"
             }
           ],
-          "id": "d91812ee-04b6-4d76-a076-1b959e36e79c",
+          "id": "83f5e6a7-6c96-49fc-b553-6f6f091b9e56",
           "name": "content",
           "title": "Content",
           "type": "region"
@@ -58,18 +58,18 @@
                 "recordId": "{!recordId}"
               },
               "definition": "community_builder:seoAssistant",
-              "id": "5c1ba39f-0c34-45e1-80ee-df3885ebbcd5",
+              "id": "b3186f46-3833-4e00-800b-4e480ca6e84a",
               "type": "component"
             }
           ],
-          "id": "68256e00-7939-4e31-be48-35d954e4c480",
+          "id": "43dbd9cd-716a-4186-b948-5ac42c1e7220",
           "name": "sfdcHiddenRegion",
           "title": "sfdcHiddenRegion",
           "type": "region"
         }
       ],
       "definition": "community_layout:sldsFlexibleLayout",
-      "id": "4926aa04-0758-4655-bf55-c576becfb47f",
+      "id": "3681d257-2c4e-421d-9191-9565b2cae092",
       "type": "component"
     },
     "dataProviders": [],

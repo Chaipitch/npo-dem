@@ -33,7 +33,10 @@ describe("c-abc-hope-our-work", () => {
         name: "Education Access",
         summary: "School supplies and scholarships.",
         campaigns: ["Christmas Giving 2026"],
-        causes: ["School Supplies", "Learning Kits"]
+        causes: ["School Supplies", "Learning Kits"],
+        raised: 9421,
+        peopleServed: 80,
+        deliveries: [{ benefit: "Storybook", quantity: 159, unit: "Items" }]
       },
       { name: "Food Access", summary: "", campaigns: [], causes: [] }
     ]);
@@ -50,6 +53,20 @@ describe("c-abc-hope-our-work", () => {
       [...cards[0].querySelectorAll(".chip")].map((c) => c.textContent)
     ).toEqual(["School Supplies", "Learning Kits"]);
     expect(cards[1].querySelector('[data-id="no-campaign"]')).not.toBeNull();
+    expect(
+      cards[0].querySelector('[data-id="program-link"]').getAttribute("href")
+    ).toBe("/program?name=Education%20Access");
+    expect(
+      [...cards[0].querySelectorAll(".figure")].map((f) =>
+        f.textContent.replace(/\s+/g, " ").trim()
+      )
+    ).toEqual([
+      "USD 9,421raised",
+      "80people served",
+      "159storybooks delivered"
+    ]);
+    // Nothing to show for a program without gifts or deliveries.
+    expect(cards[1].querySelectorAll(".figure")).toHaveLength(0);
   });
 
   it("shows a friendly error", async () => {

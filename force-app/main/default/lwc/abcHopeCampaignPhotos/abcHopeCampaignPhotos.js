@@ -36,11 +36,14 @@ const PHOTOS = {
   }
 };
 
-/** "presents" | "meal" | "christmas" | "water" | "school" | "sprout" | "gift", from the campaign name. */
+/**
+ * "presents" | "meal" | "christmas" | "water" | "school" | "sprout" | "gift", from a campaign name
+ * (or a program name: Child Wellbeing → presents, Family Support → meal, D-33).
+ */
 export function campaignTheme(name) {
   const n = (name || "").toLowerCase();
-  if (/toy|present/.test(n)) return "presents";
-  if (/meal|food/.test(n)) return "meal";
+  if (/toy|present|wellbeing/.test(n)) return "presents";
+  if (/meal|food|family/.test(n)) return "meal";
   if (/christmas/.test(n)) return "christmas";
   if (/water/.test(n)) return "water";
   if (/school|educat|scholar|girl/.test(n)) return "school";

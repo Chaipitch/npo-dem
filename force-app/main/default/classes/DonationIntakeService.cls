@@ -435,6 +435,37 @@ public without sharing class DonationIntakeService {
     public List<String> campaigns = new List<String>();
     @AuraEnabled
     public List<String> causes = new List<String>();
+    /** Paid gifts to the program's causes, in USD (D-33). */
+    @AuraEnabled
+    public Decimal raised = 0;
+    @AuraEnabled
+    public Integer donorCount = 0;
+    /** People enrolled (in progress or completed). */
+    @AuraEnabled
+    public Integer peopleServed = 0;
+    /** Quantity delivered per benefit, largest first. */
+    @AuraEnabled
+    public List<Delivery> deliveries = new List<Delivery>();
+  }
+
+  public class Delivery {
+    @AuraEnabled
+    public String benefit;
+    @AuraEnabled
+    public Decimal quantity;
+    @AuraEnabled
+    public String unit;
+  }
+
+  /** One active program by name (the /program page), or null. */
+  public static ProgramCard getProgramDetail(String programName) {
+    String name = String.isBlank(programName) ? '' : programName.trim();
+    for (ProgramCard c : getPrograms()) {
+      if (c.name.equalsIgnoreCase(name)) {
+        return c;
+      }
+    }
+    return null;
   }
 
   /**
@@ -483,6 +514,7 @@ public without sharing class DonationIntakeService {
         c.causes.add(gdd.GiftDesignation.Name);
       }
     }
+    addProgramFigures(byId);
     List<ProgramCard> funded = new List<ProgramCard>();
     List<ProgramCard> others = new List<ProgramCard>();
     for (ProgramCard c : byId.values()) {
@@ -490,6 +522,68 @@ public without sharing class DonationIntakeService {
     }
     funded.addAll(others);
     return funded;
+  }
+
+  /**
+   * Money raised (Paid gifts through cause → program), people enrolled and quantities delivered (D-33).
+   * Nothing is stored on Program: every figure is added up from the records each time.
+   */
+  @TestVisible
+  static String raisedStatus = 'Paid'; // tests can't save Paid gifts (see giftStatus)
+
+  static void addProgramFigures(Map<Id, ProgramCard> byId) {
+    Set<Id> ids = byId.keySet();
+    for (AggregateResult ar : [
+      SELECT
+        GiftDesignation.NGOTV_Program__c programId,
+        SUM(Amount) amount,
+        COUNT_DISTINCT(GiftTransaction.DonorId) donors
+      FROM GiftTransactionDesignation
+      WHERE
+        GiftTransaction.Status = :raisedStatus
+        AND GiftDesignation.NGOTV_Program__c IN :ids
+      GROUP BY GiftDesignation.NGOTV_Program__c
+    ]) {
+      ProgramCard c = byId.get((Id) ar.get('programId'));
+      c.raised = (Decimal) ar.get('amount') ?? 0;
+      c.donorCount = (Integer) ar.get('donors');
+    }
+    for (AggregateResult ar : [
+      SELECT ProgramId, COUNT_DISTINCT(AccountId) people
+      FROM ProgramEnrollment
+      WHERE ProgramId IN :ids AND Status IN ('In Progress', 'Completed')
+      GROUP BY ProgramId
+    ]) {
+      byId.get((Id) ar.get('ProgramId')).peopleServed = (Integer) ar.get(
+        'people'
+      );
+    }
+    for (AggregateResult ar : [
+      SELECT
+        BenefitAssignment.Benefit.ProgramId programId,
+        BenefitAssignment.Benefit.Name benefit,
+        BenefitAssignment.Benefit.Unit.Name unit,
+        SUM(DisbursedQuantity) quantity
+      FROM BenefitDisbursement
+      WHERE
+        BenefitAssignment.Benefit.ProgramId IN :ids
+        AND DisbursementStatus IN ('Disbursed', 'Completed')
+      GROUP BY
+        BenefitAssignment.Benefit.ProgramId,
+        BenefitAssignment.Benefit.Name,
+        BenefitAssignment.Benefit.Unit.Name
+      ORDER BY SUM(DisbursedQuantity) DESC
+    ]) {
+      Decimal quantity = (Decimal) ar.get('quantity');
+      if (quantity == null || quantity <= 0) {
+        continue;
+      }
+      Delivery d = new Delivery();
+      d.benefit = (String) ar.get('benefit');
+      d.quantity = quantity;
+      d.unit = (String) ar.get('unit');
+      byId.get((Id) ar.get('programId')).deliveries.add(d);
+    }
   }
 
   public class CampaignDetail {

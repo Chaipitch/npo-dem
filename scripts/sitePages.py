@@ -75,6 +75,8 @@ custom_page('Campaign__c', 'campaign', 'Campaign', 'campaign', 'RequiresLogin', 
 # Public "Our Work" and "About" (D-26), on the public layout.
 custom_page('Our_Work__c', 'ourWork', 'Our Work', 'our-work', 'Public', [("c:abcHopeOurWork", {})])
 custom_page('About__c', 'about', 'About', 'about', 'Public', [("c:abcHopeAbout", {})])
+# Program page (D-33): public like Our Work, which links to it.
+custom_page('Program__c', 'program', 'Program', 'program', 'Public', [("c:programDetail", {})])
 
 # Home must be public too.
 home_route = os.path.join(SITE, 'sfdc_cms__route', 'Home', 'content.json')

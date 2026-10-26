@@ -110,7 +110,8 @@ export default class CampaignDetail extends LightningElement {
   get programs() {
     return (this.detail?.programs || []).map((p, i) => ({
       ...p,
-      key: `p${i}`
+      key: `p${i}`,
+      href: `${basePath || ""}/program?name=${encodeURIComponent(p.name)}`
     }));
   }
   get hasPrograms() {

@@ -77,6 +77,10 @@ How the build compares:
 
 - **Programs (D-21):** Campaign ─< GiftDefaultDesignation >─ GiftDesignation ─> Program via the existing
   `NGOTV_Program__c` lookup. Seed: `sf apex run -o npo-demo -f scripts/apex/seedPrograms.apex`.
+- **Program figures and page (D-33):** money raised, people served and deliveries are added up live
+  (`DonationIntakeService.addProgramFigures`); Our Work shows them and links to the public `/program?name=…`.
+  Delivery demo data: `scripts/apex/seedProgramDelivery.apex` (benefits, enrollments of existing Food Access
+  people, assignments, deliveries).
 - **My Giving → Monthly Gifts (D-22):** pause / resume / change amount / cancel for the signed-in donor;
   the dashboard shows paused gifts separately. Test: `testing-steps.md` §8.
 - **Site outage fixed:** on 2026‑10‑21 ~16:00 UTC the templates of `abcHopePublicLayout`, `abcHopePortalLayout` and

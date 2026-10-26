@@ -20,10 +20,22 @@
       <ul class="grid">
         <template for:each={cards} for:item="p">
           <li key={p.key} class="card" data-id="program">
-            <h2 class="name">{p.name}</h2>
+            <h2 class="name">
+              <a class="name-link" href={p.href} data-id="program-link"
+                >{p.name}</a
+              >
+            </h2>
             <template lwc:if={p.summary}>
               <p class="summary">{p.summary}</p>
             </template>
+            <ul class="figures" data-id="figures">
+              <template for:each={p.figures} for:item="f">
+                <li key={f.key} class="figure">
+                  <span class="figure-value">{f.value}</span>
+                  <span class="figure-label">{f.label}</span>
+                </li>
+              </template>
+            </ul>
             <template lwc:if={p.hasCampaigns}>
               <p class="label">Give through</p>
               <ul class="campaigns">
