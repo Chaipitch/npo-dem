@@ -102,7 +102,11 @@ private class DonationIntakeServiceTest {
       WHERE DonorId = :donor.Id
     ];
     Assert.areEqual(1000, gt.OriginalAmount);
-    Assert.areEqual('Unpaid', gt.Status);
+    Assert.areEqual(
+      DonationIntakeService.giftStatus,
+      gt.Status,
+      'Paid in the org; Pending in tests (D-27)'
+    );
     Assert.areEqual('Unknown', gt.PaymentMethod);
     Assert.areEqual('Individual', gt.GiftType);
     Assert.areEqual(CAMPAIGN, gt.Campaign.Name);
@@ -210,6 +214,21 @@ private class DonationIntakeServiceTest {
     ];
     Assert.areEqual('Test Learning Kits', gdd.GiftDesignation.Name);
     Assert.areEqual(100, gdd.AllocatedPercentage);
+    GiftTransaction first = [
+      SELECT Id, Status, OriginalAmount, TransactionDate
+      FROM GiftTransaction
+      WHERE GiftCommitmentId = :gc.Id
+    ];
+    Assert.areEqual(DonationIntakeService.giftStatus, first.Status);
+    Assert.areEqual(500, first.OriginalAmount);
+    Assert.areEqual(Date.today(), first.TransactionDate);
+    List<GiftTransactionDesignation> gtds = [
+      SELECT GiftDesignation.Name
+      FROM GiftTransactionDesignation
+      WHERE GiftTransactionId = :first.Id
+    ];
+    Assert.areEqual(1, gtds.size());
+    Assert.areEqual('Test Learning Kits', gtds[0].GiftDesignation.Name);
   }
 
   @IsTest
@@ -565,5 +584,23 @@ private class DonationIntakeServiceTest {
     Assert.areEqual(new List<String>{ CAMPAIGN }, first.campaigns);
     Assert.areEqual(new List<String>{ 'Test School Supplies' }, first.causes);
     Assert.isTrue(idleCard.campaigns.isEmpty());
+  }
+
+  @IsTest
+  static void siteGiftStatusIsPendingInTestsAndPaidIsValid() {
+    // Tests save Pending (the org's "*ASL Trigger v2" flow fails on Paid in tests); the org saves Paid.
+    Assert.areEqual('Pending', DonationIntakeService.giftStatus);
+    Assert.areEqual(
+      1,
+      [
+        SELECT COUNT()
+        FROM PicklistValueInfo
+        WHERE
+          EntityParticle.EntityDefinition.QualifiedApiName = 'GiftTransaction'
+          AND EntityParticle.QualifiedApiName = 'Status'
+          AND Value = 'Paid'
+      ],
+      'Paid must stay a valid GiftTransaction status'
+    );
   }
 }

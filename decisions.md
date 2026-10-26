@@ -271,3 +271,14 @@ The ABC Hope Donor Assistant is reachable in two ways, never both on one page:
 - **Old deployment `ABC_Hope_Chat`** (hosted on the LWR site, never worked) is removed from the repo and deleted in the
   org; the messaging channel `ABC_Hope_Chat` stays (used by `ABC_Hope_Web_Chat`).
 - **"Non Profit Event"** stays on the site as is.
+
+### D-27 · Site gifts are saved as Paid — Accepted (user, 2026‑10‑26)
+
+Payment is still simulated (nothing charged, no card or bank data), but a finished donation is now recorded as
+received: one-time gifts are `GiftTransaction.Status = Paid` (PaymentMethod `Unknown`, TransactionDate today). A
+recurring gift also gets a Paid gift transaction today for its amount, linked to the commitment (its first payment,
+`TransactionDueDate` today); NPC still creates the later instalments as `Unpaid` on their dates. NPC's automatic 100%
+designation on Paid gifts is re-pointed to the chosen cause (D-13). So a new recurring gift now adds to the totals at
+once. Apex tests save `Pending` instead (`DonationIntakeService.giftStatus`): the org's managed "*ASL Trigger v2"
+flow fails on Paid gifts in a test context only; real Paid inserts were verified in the org. Existing gifts keep
+their status.

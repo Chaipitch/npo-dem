@@ -123,6 +123,11 @@ and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a b
   campaign page and recurring gift list reload instead of showing cached data.
 - Paused recurring gifts: amber card, "Paused until <date>", "No gifts from … to …. Resume any time."
 
+## Gifts saved as Paid (2026‑10‑26, D-27)
+
+New one-time gifts are `Paid`; a new recurring gift adds a Paid first payment today (later instalments Unpaid).
+Payment is still simulated. Tests use `Pending` because of the org's "*ASL Trigger v2" flow.
+
 ## Open items
 
 1. In progress: chat window on every page except the dashboard (D-25), then test guest and signed-in chats.
