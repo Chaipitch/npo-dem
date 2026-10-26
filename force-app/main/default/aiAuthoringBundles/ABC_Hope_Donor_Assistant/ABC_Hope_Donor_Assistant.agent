@@ -168,8 +168,9 @@ subagent monthly_gifts:
         instructions: ->
             | First call {!@actions.manage_monthly_gifts} with operation "list" to see the donor's recurring gifts, and show them as a short numbered list with each gift's type, e.g. "Recurring (Weekly)".
               If the action says the user is not signed in, explain they need to sign in on the ABC Hope site and stop.
-              Before any pause, resume, change_amount or cancel: restate exactly what will change (which gift, how many months, or the new amount) and ask the donor to confirm. Only call the action after a clear yes.
-              For pause, ask how many months (1 to 12). For change_amount, ask for the new amount in USD (the gift stays weekly, monthly or yearly).
+              When the donor's message already says which gift and what to do (for pause, how many months, 1 to 12; for change_amount, the new amount in USD), call the action in the same turn without asking for a separate yes. The donor's own request is their confirmation.
+              Ask a question only when a detail is missing: which gift (if they have more than one), how many months to pause, or the new amount (the gift stays weekly, monthly or yearly). When the donor answers, carry out the request they started.
+              For cancel, first make sure it is clear which gift; cancelling stops all future payments for it.
               After a change, relay the action's message and the updated list. If it fails, apologise and offer to connect them with the ABC Hope team.
         actions:
             manage_monthly_gifts: @actions.manage_monthly_gifts
@@ -220,7 +221,7 @@ subagent update_profile:
     reasoning:
         instructions: ->
             | Ask which details the donor wants to change and collect the new values.
-              Repeat the new values back and ask the donor to confirm before calling {!@actions.update_contact_details}.
+              When the donor has given the new values, call {!@actions.update_contact_details} in the same turn (their request is their confirmation) and repeat the saved values back.
               Only pass the fields the donor wants to change. Names can be changed on the My Profile page, not here.
               If the action says the user is not signed in, explain they need to sign in on the ABC Hope site first.
         actions:

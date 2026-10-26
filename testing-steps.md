@@ -93,9 +93,9 @@ sf agent preview send -o npo-demo --authoring-bundle ABC_Hope_Donor_Assistant --
 - `/dashboard` has no chat window (the Ask panel is the chat there).
 
 - Guest: chat opens; campaign FAQ works; personal requests → "please sign in".
-- Maya signed in: "How much have I given?" → her totals and causes; "Pause my monthly gift for 2 months"
-  → agent restates and asks to confirm → after "yes", the schedule shows a pause; "Change my email to …" →
-  confirm → Account updated. No console CORS/CSP errors.
+- Maya signed in: "How much have I given?" → her totals and causes; "Pause gift 2 for 2 months"
+  → paused in the same turn (no separate "yes", D-29), the schedule shows a pause; "Change my email to …" →
+  Account updated. No console CORS/CSP errors.
 
 ## 8. E2E: monthly gift → pause → resume → change amount → cancel (Maya, on the site)
 
@@ -145,7 +145,7 @@ Notes:
 | A2  | Chips: Explore my causes / View giving history / Show next milestones | Answers from the assistant with links to Causes, My Giving, My Journey                                                                                |
 | A3  | "Can I pause my monthly gift?"                                        | Assistant lists "Recurring (Monthly): USD … per month to …" and offers pause/resume/change/cancel; link "Manage recurring gifts"                      |
 | A4  | "Which campaigns are open?" then "Tell me about clean water"          | Answers from the Donor Assistant ("Assistant is typing…"); the follow-up keeps the context                                                            |
-| A4b | "Pause my gift for 2 months" → confirm                                | The assistant pauses it (same NPC action as My Giving); My Giving shows Paused …                                                                      |
+| A4b | "Pause gift 2 for 1 month", then "Please resume it again"             | Each runs in one turn, no "yes" step (D-29), same NPC action as My Giving; My Giving shows Paused …, then active again                                |
 | A5  | Long conversation                                                     | Panel stays within the screen height; the conversation scrolls; newest message in view                                                                |
 
 | A6 | Header box on `/my-giving`: type "How much have I given?" → Enter | Goes to `/dashboard#agent`, the panel answers; `?ask=` disappears from the URL |

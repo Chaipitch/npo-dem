@@ -3,6 +3,8 @@ private class DonorAgentControllerTest {
   /** Fake Agent API: records requests, answers start-session and send-message calls. */
   class AgentApiMock implements HttpCalloutMock {
     Integer status = 200;
+    /** Message replies that come back as the prompt guard's refusal before normal answers. */
+    Integer refusals = 0;
     List<HttpRequest> requests = new List<HttpRequest>();
     public HttpResponse respond(HttpRequest req) {
       requests.add(req);
@@ -13,6 +15,11 @@ private class DonorAgentControllerTest {
       } else if (req.getEndpoint().endsWith('/sessions')) {
         res.setBody(
           '{"sessionId":"sess-1","messages":[{"type":"Inform","message":"Hi!"}]}'
+        );
+      } else if (refusals > 0) {
+        refusals--;
+        res.setBody(
+          '{"messages":[{"type":"Inform","message":"Sorry, I can\'t assist with that. I can help with campaigns."}]}'
         );
       } else {
         res.setBody(
@@ -111,6 +118,59 @@ private class DonorAgentControllerTest {
 
     Assert.areEqual(1, mock.requests.size(), 'no new session');
     Assert.areEqual('sess-1', r.sessionId);
+  }
+
+  @IsTest
+  static void guardRefusalIsRetriedOnceInAFreshSession() {
+    DonorAgentController.USE_AGENT_API = true;
+    DonorAgentController.accountIdOverride = donorAccount();
+    AgentApiMock mock = new AgentApiMock();
+    mock.refusals = 1;
+    Test.setMock(HttpCalloutMock.class, mock);
+
+    Test.startTest();
+    DonorAgentController.Reply r = DonorAgentController.ask(
+      'Pause gift 2 for 2 months',
+      'sess-old'
+    );
+    Test.stopTest();
+
+    Assert.areEqual(3, mock.requests.size(), 'message, new session, message');
+    Assert.isTrue(mock.requests[1].getEndpoint().endsWith('/sessions'));
+    Assert.areEqual('sess-1', r.sessionId);
+    Assert.areEqual('You have given USD 2,250.', r.text);
+  }
+
+  @IsTest
+  static void guardRefusalIsNotRetriedTwice() {
+    DonorAgentController.USE_AGENT_API = true;
+    DonorAgentController.accountIdOverride = donorAccount();
+    AgentApiMock mock = new AgentApiMock();
+    mock.refusals = 2;
+    Test.setMock(HttpCalloutMock.class, mock);
+
+    Test.startTest();
+    DonorAgentController.Reply r = DonorAgentController.ask(
+      'Hello',
+      'sess-old'
+    );
+    Test.stopTest();
+
+    Assert.areEqual(3, mock.requests.size());
+    Assert.isTrue(r.text.startsWith('Sorry'));
+  }
+
+  @IsTest
+  static void isGuardRefusalMatchesOnlyTheRefusal() {
+    Assert.isTrue(
+      DonorAgentController.isGuardRefusal(
+        'Sorry, I can\u2019t assist with that.'
+      )
+    );
+    Assert.isFalse(
+      DonorAgentController.isGuardRefusal('Sorry, that gift is ended.')
+    );
+    Assert.isFalse(DonorAgentController.isGuardRefusal(null));
   }
 
   @IsTest

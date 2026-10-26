@@ -292,3 +292,25 @@ This also retires the open issue that the agent didn't run its actions in the ch
 `ABC_Hope_Web_Chat`, its ESW site, the messaging channel `ABC_Hope_Chat` and the routing flow `ABC_Hope_Chat_Routing`
 stay in the org, unused, so the widget can be put back without Setup work; `AbcHopeAgentSupport` keeps the
 messaging-session path.
+
+### D-29 · Agent acts on complete requests; one retry after a false prompt-guard flag — Accepted (2026‑10‑26)
+
+Problem: after the agent asked "Please confirm…", the reply "yes, please go ahead" got "Sorry, I can't assist with
+that…". The planner trace (`sf agent preview` on the published agent, `.sfdx/agents/…/traces`) showed Salesforce's
+built-in prompt guard replacing the user's turn with a "reverse engineering" redaction and switching to its
+`Reverse_Engineering` topic before our router ran, and telling the model to deny every later message in the session.
+It flags short replies ("yes", "confirm", "Yes, resume it") often and full requests now and then; the draft preview
+(authoring bundle) doesn't run it, and the org has no setting for it. Router changes (a follow-up rule, a remembered
+last topic) can't help, because the message is replaced before routing.
+
+Decision:
+
+- **Agent (v12):** in `monthly_gifts` and `update_profile`, a request that already names the gift and the change
+  (months to pause, new amount, new contact details) is carried out in the same turn; the donor's own request is the
+  confirmation. The agent asks only for a missing detail, and for cancel only makes sure which gift. Pause, resume
+  and amount changes are reversible from My Giving; payment stays simulated.
+- **Panel (`DonorAgentController`):** when a reply is the guard's refusal ("Sorry, I can't assist…"), the message is
+  sent once more in a fresh Agent API session for the same donor, so one false flag doesn't block the rest of the chat.
+  A genuine off-topic question just gets its refusal after one extra call.
+
+Verified live as Maya: pause and resume each run in one turn; her gift is active again afterwards.
