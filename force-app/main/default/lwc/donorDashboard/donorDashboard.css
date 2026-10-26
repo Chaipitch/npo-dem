@@ -822,6 +822,34 @@ ol {
   border-radius: 4px;
 }
 
+/* 1386–1600px: three cards fit in a row but each is only ~210–270px wide, so the icon sits above
+   the text (smaller) and the number, label and link each stay on one line. */
+@media (min-width: 1386px) and (max-width: 1600px) {
+  .kpi {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 18px;
+  }
+  .kpi-icon {
+    width: 48px;
+    height: 48px;
+  }
+  .kpi-value {
+    font-size: 26px;
+    white-space: nowrap;
+  }
+  .kpi-label {
+    margin: 2px 0 8px;
+    white-space: nowrap;
+  }
+  .dash .kpi-link,
+  .dash .kpi-link:link,
+  .dash .kpi-link:visited {
+    white-space: nowrap;
+  }
+}
+
 /* Below ~1385px the main column (next to the agent panel, or full width on tablets/phones)
    cannot fit three KPI cards side by side: stack them, full width, no sideways scroll. */
 @media (max-width: 1385px) {

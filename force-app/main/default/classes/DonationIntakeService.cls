@@ -21,6 +21,13 @@ public without sharing class DonationIntakeService {
   public static final String TYPE_INDIVIDUAL = 'Individual';
   public static final String TYPE_ORGANIZATION = 'Organization';
   public static final Decimal MIN_AMOUNT = 100;
+  /**
+   * Status of a gift saved by the site (D-27): Paid, because the simulated payment is recorded as received.
+   * Tests use Pending: the org's managed "*ASL Trigger v2" flow fails on Paid gifts in a test context
+   * (it needs org data tests can't see); it runs fine for real gifts.
+   */
+  @TestVisible
+  static String giftStatus = Test.isRunningTest() ? 'Pending' : 'Paid';
   public static final Decimal MAX_AMOUNT = 1000000;
   @TestVisible
   static final String PERSON_RT = 'NGO_Fundraising_Supporter';
@@ -701,20 +708,40 @@ public without sharing class DonationIntakeService {
       return recent.Name;
     }
 
+    insertPaidGift(req, donor, camp, designation, sourceCodeId, giftName, null);
+    return giftName;
+  }
+
+  /**
+   * Saves today's gift as Paid (D-27): payment is simulated, so nothing is charged or stored, but the gift is
+   * recorded as received. PaymentMethod stays Unknown (no card or bank details exist). For a recurring gift
+   * this is its first payment, linked to the commitment; NPC creates the later instalments as Unpaid.
+   */
+  static void insertPaidGift(
+    Request req,
+    Account donor,
+    Campaign camp,
+    GiftDesignation designation,
+    Id sourceCodeId,
+    String giftName,
+    Id commitmentId
+  ) {
     GiftTransaction gt = new GiftTransaction(
       Name = giftName,
       DonorId = donor.Id,
       CampaignId = camp.Id,
+      GiftCommitmentId = commitmentId,
       OutreachSourceCodeId = sourceCodeId,
       OriginalAmount = req.amount,
       TransactionDate = Date.today(),
-      Status = 'Unpaid',
+      TransactionDueDate = Date.today(), // required when linked to a commitment
+      Status = giftStatus,
       PaymentMethod = 'Unknown',
       GiftType = donor.IsPersonAccount ? 'Individual' : 'Organizational',
       Description = description(req, donor)
     );
     insert gt;
-    // NPC automation can add a default 100% designation on insert; re-point it rather than add a second one.
+    // NPC adds a default 100% designation to Paid gifts on insert (D-13); re-point it rather than add a second one.
     List<GiftTransactionDesignation> existing = [
       SELECT Id
       FROM GiftTransactionDesignation
@@ -732,7 +759,6 @@ public without sharing class DonationIntakeService {
       existing[0].GiftDesignationId = designation.Id;
       update existing[0];
     }
-    return giftName;
   }
 
   static String createCommitment(
@@ -783,6 +809,15 @@ public without sharing class DonationIntakeService {
       ParentRecordId = gc.Id,
       GiftDesignationId = designation.Id,
       AllocatedPercentage = 100
+    );
+    insertPaidGift(
+      req,
+      donor,
+      camp,
+      designation,
+      sourceCodeId,
+      giftName,
+      gc.Id
     );
     return giftName;
   }

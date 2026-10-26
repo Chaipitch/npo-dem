@@ -49,7 +49,7 @@ D-23) and, per D-25, the Embedded Messaging chat window on every other page (bei
 - Paid gifts get an automatic designation (D-13). NPC standard actions want String Ids.
 - The dashboard also lists the org's pre-existing _Non Profit Event_ and _Capital Campaign_ because they
   are active and have default designations (D-18). Deactivate them to hide them.
-- The org is USD-only and the UI labels amounts USD (D-05, changed from USD 2026‑10‑26).
+- The org is USD-only and the UI labels amounts USD (D-05, changed from THB 2026‑10‑26).
 
 ## Target object schema (user, 2026‑10‑22) — in progress
 
@@ -123,9 +123,21 @@ and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a b
   campaign page and recurring gift list reload instead of showing cached data.
 - Paused recurring gifts: amber card, "Paused until <date>", "No gifts from … to …. Resume any time."
 
+## Gifts saved as Paid (2026‑10‑26, D-27)
+
+New one-time gifts are `Paid`; a new recurring gift adds a Paid first payment today (later instalments Unpaid).
+Payment is still simulated. Tests use `Pending` because of the org's "*ASL Trigger v2" flow.
+
 ## Open items
 
-1. In progress: chat window on every page except the dashboard (D-25), then test guest and signed-in chats.
+1. **Chat window (D-25):** the button, verified sessions (Maya is `AuthenticatedEndUserId`) and the routing to the
+   agent work on every page except the dashboard, but the agent does not run its actions there: no Apex runs as the
+   agent user and it answers "please sign in" / "please wait". The same actions work through the dashboard panel
+   (Agent API), and `AbcHopeAgentSupport.verifiedAccountId(<session Id>)` returns Maya's account when called directly.
+   Next step: open the agent in Agentforce Builder → Conversation Preview / event logs (or Testing Center) with a
+   messaging session to see why the planner skips or fails the action call.
 2. Done 2026‑10‑22: campaign cards, story cards and the journey's review/thank-you image use Unsplash photos.
 3. Done 2026‑10‑26: public `/our-work` (programs with funding campaigns and causes, `getPrograms`) and `/about` (placeholder copy, editable in Builder) — header links point there (D-26).
-4. Optional: raise `AbcHopeAgentSupport` coverage (the real MessagingSession path can't be built in tests).
+4. Done 2026‑10‑26: `AbcHopeAgentSupportTest` raises coverage to 84% (the verified-messaging-user line needs
+   `AuthenticatedEndUserId`, which tests can't set).
+5. Done 2026‑10‑26: KPI cards use an icon-above layout at 1386–1600px so values, labels and links stay on one line.
