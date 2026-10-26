@@ -57,8 +57,13 @@ public without sharing class DonorPortalController {
     public Integer activeMonthlyGifts = 0; // open and not paused
     @AuraEnabled
     public Integer pausedMonthlyGifts = 0; // current or upcoming pause (D-22)
+    // Org-wide figures for the Shared impact tiles ("{programs}", "{peopleReached}", "{volunteers}").
     @AuraEnabled
-    public Integer activePrograms = 0; // org-wide active Programs, for the "{programs}" impact tile
+    public Integer activePrograms = 0; // active Programs
+    @AuraEnabled
+    public Integer peopleReached = 0; // distinct accounts with an In Progress/Completed program enrollment
+    @AuraEnabled
+    public Integer volunteersEngaged = 0; // distinct accounts with a Complete/In Progress volunteer assignment
     @AuraEnabled
     public Date pausedUntil; // earliest pause end among paused gifts
     @AuraEnabled
@@ -201,6 +206,18 @@ public without sharing class DonorPortalController {
     d.causesSupported = d.causes.size();
     d.supporterSince = String.valueOf(firstYear);
     d.activePrograms = [SELECT COUNT() FROM Program WHERE Status = 'Active'];
+    d.peopleReached = (Integer) [
+        SELECT COUNT_DISTINCT(AccountId) n
+        FROM ProgramEnrollment
+        WHERE Status IN ('In Progress', 'Completed')
+      ][0]
+      .get('n');
+    d.volunteersEngaged = (Integer) [
+        SELECT COUNT_DISTINCT(AssignedAccountId) n
+        FROM JobPositionAssignment
+        WHERE Status IN ('Complete', 'In Progress')
+      ][0]
+      .get('n');
 
     Milestone joined = new Milestone();
     joined.year = String.valueOf(firstYear);

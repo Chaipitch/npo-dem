@@ -130,11 +130,11 @@ Payment is still simulated. Tests use `Pending` because of the org's "*ASL Trigg
 
 ## Shared impact tiles (2026‑10‑26)
 
-The dashboard's Shared impact tiles are the `sharedImpact` property; **Programs is live** (`{programs}` →
-`Dashboard.activePrograms`, active `Program` count, 8 today). People Reached, Communities and Volunteers Engaged are
-typed. Data that could drive them: ~1,002 distinct accounts with an In Progress/Completed `ProgramEnrollment`
-(People Reached) and ~96 distinct accounts with a Complete/In Progress `JobPositionAssignment` (Volunteers). Communities
-has no clean source (enrolled accounts' `BillingCity` is ~991 distinct values; `BillingState` 21; 7 `Location` sites).
+The dashboard's Shared impact tiles are the `sharedImpact` property with live placeholders, computed org-wide in
+`DonorPortalController.buildDashboard`: `{peopleReached}` = distinct accounts with an In Progress/Completed
+`ProgramEnrollment` (1,002), `{programs}` = active `Program` count (8), `{volunteers}` = distinct accounts with a
+Complete/In Progress `JobPositionAssignment` (96). Communities stays typed (12): no field defines a community.
+The enrolments and assignments are the org's existing demo data, not ABC Hope campaign records.
 
 ## Open items
 

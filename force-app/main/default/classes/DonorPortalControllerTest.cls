@@ -391,4 +391,64 @@ private class DonorPortalControllerTest {
     Test.stopTest();
     Assert.areEqual(before + 1, d.activePrograms, 'only Active programs count');
   }
+
+  @IsTest
+  static void dashboardCountsPeopleReachedAndVolunteers() {
+    Program p = new Program(Name = 'Test Reach Program', Status = 'Active');
+    insert p;
+    Account a1 = new Account(Name = 'Reach One Org');
+    Account a2 = new Account(Name = 'Reach Two Org');
+    insert new List<Account>{ a1, a2 };
+    insert new List<ProgramEnrollment>{
+      new ProgramEnrollment(
+        Name = 'E1',
+        ProgramId = p.Id,
+        AccountId = a1.Id,
+        Status = 'In Progress'
+      ),
+      new ProgramEnrollment(
+        Name = 'E2',
+        ProgramId = p.Id,
+        AccountId = a1.Id,
+        Status = 'Completed'
+      ),
+      new ProgramEnrollment(
+        Name = 'E3',
+        ProgramId = p.Id,
+        AccountId = a2.Id,
+        Status = 'Applied'
+      )
+    };
+    JobPosition job = new JobPosition(
+      Name = 'Test Shift Lead',
+      Title = 'Shift Lead'
+    );
+    insert job;
+    insert new List<JobPositionAssignment>{
+      new JobPositionAssignment(
+        JobPositionId = job.Id,
+        AssignedAccountId = a1.Id,
+        Status = 'Complete'
+      ),
+      new JobPositionAssignment(
+        JobPositionId = job.Id,
+        AssignedAccountId = a2.Id,
+        Status = 'Canceled'
+      )
+    };
+    DonorPortalController.accountIdOverride = createDonor().Id;
+    Test.startTest();
+    DonorPortalController.Dashboard d = DonorPortalController.getDashboard();
+    Test.stopTest();
+    Assert.areEqual(
+      1,
+      d.peopleReached,
+      'distinct accounts, active or completed enrollments only'
+    );
+    Assert.areEqual(
+      1,
+      d.volunteersEngaged,
+      'distinct accounts, completed or ongoing assignments only'
+    );
+  }
 }
