@@ -49,7 +49,7 @@ D-23) and, per D-25, the Embedded Messaging chat window on every other page (bei
 - Paid gifts get an automatic designation (D-13). NPC standard actions want String Ids.
 - The dashboard also lists the org's pre-existing _Non Profit Event_ and _Capital Campaign_ because they
   are active and have default designations (D-18). Deactivate them to hide them.
-- The org is USD-only and the UI labels amounts USD (D-05, changed from USD 2026‑10‑26).
+- The org is USD-only and the UI labels amounts USD (D-05, changed from THB 2026‑10‑26).
 
 ## Target object schema (user, 2026‑10‑22) — in progress
 
