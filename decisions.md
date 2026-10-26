@@ -243,3 +243,28 @@ because the site, agent and tests are wired to them. The Agent Script wording we
 
 Step 1 and step 2 of the journey also show the campaign photo as a banner across the top of the card (same
 `abcHopeCampaignPhotos` choice as the cards and the review step).
+
+### D-25 · Chat: dashboard Ask panel + chat window on every other page — Accepted (user, 2026‑10‑26)
+
+The ABC Hope Donor Assistant is reachable in two ways, never both on one page:
+
+- **`/dashboard`:** the **Ask About Your Journey** panel (plus the header box and "Ask Our AI", which send their
+  question there), on the Agent API with the donor's verified account (D-23). No chat window here.
+- **Every other page** (Home, Donate, Campaign detail, My Giving, My Profile): the **Embedded Messaging** chat window
+  (deployment `ABC_Hope_Chat`, routing flow `ABC_Hope_Chat_Routing`, D-16), placed page by page so the dashboard is
+  skipped, on the Setup-created deployment `ABC_Hope_Web_Chat` (hosted on its own ESW site). **Signed-in donors only**
+  (user, 2026‑10‑26): the channel is authenticated, so guests see no chat button; no separate guest channel.
+  Open issue: in the chat window the agent does not yet run its actions (it answers "please sign in" although the
+  session is verified) — paused by the user.
+
+### D-26 · Product decisions batch — Accepted (user, 2026‑10‑26)
+
+- **Guests without an account** (e.g. Ann Demo) keep giving with name + email; the donor Account is matched or created
+  behind the scenes. No forced sign-in, no account offer.
+- **"Our Work" and "About"** become two simple public pages: Our Work lists programs and open campaigns; About has
+  placeholder demo copy, editable in Experience Builder.
+- **Changing a recurring gift's period** (weekly ↔ monthly ↔ yearly) is not offered; the card says to cancel and start
+  a new gift.
+- **Old deployment `ABC_Hope_Chat`** (hosted on the LWR site, never worked) is removed from the repo and deleted in the
+  org; the messaging channel `ABC_Hope_Chat` stays (used by `ABC_Hope_Web_Chat`).
+- **"Non Profit Event"** stays on the site as is.

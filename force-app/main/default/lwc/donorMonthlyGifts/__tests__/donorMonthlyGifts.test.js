@@ -106,11 +106,14 @@ describe("c-donor-monthly-gifts", () => {
       newAmount: null
     });
     expect(text(el, '[data-id="notice"]')).toContain("Paused from");
-    expect(text(el, '[data-id="status"]')).toBe(
-      "Paused 23 Oct 2026 – 22 Jan 2027"
+    expect(text(el, '[data-id="status"]')).toBe("Paused until 22 Jan 2027");
+    expect(text(el, '[data-id="pause-note"]')).toBe(
+      "No gifts from 23 Oct 2026 to 22 Jan 2027. Resume any time."
     );
+    expect($(el, ".gift").classList.contains("gift_paused")).toBe(true);
     expect($(el, '[data-action="resume"]')).not.toBeNull();
     expect(changed).toHaveBeenCalledTimes(1);
+    expect(sessionStorage.getItem("abchope:giftsChangedAt")).not.toBeNull();
   });
 
   it("resumes a paused gift", async () => {
@@ -125,6 +128,15 @@ describe("c-donor-monthly-gifts", () => {
       expect.objectContaining({ giftId: "gc1", operation: "resume" })
     );
     expect(text(el, '[data-id="status"]')).toBe("Active");
+    expect($(el, '[data-id="pause-note"]')).toBeNull();
+  });
+
+  it("reloads when a gift changes elsewhere on the page (e.g. the assistant)", async () => {
+    const el = await mount([ACTIVE]);
+    getMonthlyGifts.mockResolvedValue([PAUSED]);
+    window.dispatchEvent(new CustomEvent("abchope:giftschange"));
+    await flush();
+    expect(text(el, '[data-id="status"]')).toBe("Paused until 22 Dec 2026");
   });
 
   it("validates a new amount before calling the server", async () => {

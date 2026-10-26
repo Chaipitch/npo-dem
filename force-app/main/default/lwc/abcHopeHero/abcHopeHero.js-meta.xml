@@ -4,13 +4,25 @@
     <isExposed>true</isExposed>
     <masterLabel>ABC Hope Hero</masterLabel>
     <description
-  >Campaign hero with Donate CTA; keeps the ?src= source code on the link.</description>
+  >Home carousel of open campaigns (featured first, every 10 s, arrows/dots/pause); Donate links keep ?src=.</description>
     <targets>
         <target>lightningCommunity__Page</target>
         <target>lightningCommunity__Default</target>
     </targets>
     <targetConfigs>
         <targetConfig targets="lightningCommunity__Default">
+            <property
+        name="featuredCampaign"
+        type="String"
+        label="Featured campaign (first slide)"
+        default="Christmas Giving 2026"
+      />
+            <property
+        name="intervalSeconds"
+        type="Integer"
+        label="Seconds per slide"
+        default="10"
+      />
             <property
         name="headlineStart"
         type="String"
@@ -45,6 +57,12 @@
         name="backgroundImageUrl"
         type="String"
         label="Background image URL"
+      />
+            <property
+        name="imageCredit"
+        type="String"
+        label="Background image credit"
+        default="Photo: Christian Bowen / Unsplash"
       />
             <property
         name="benefits"

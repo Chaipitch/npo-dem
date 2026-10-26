@@ -24,18 +24,19 @@ Pass criteria: 55 Apex test methods (add `DonorAgentControllerTest` to the run) 
 
 ## 2. Public journey (private window, desktop then 375 px)
 
-| #   | Scenario         | Steps                                                         | Expected                                                                                                  |
-| --- | ---------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| T1  | Discover         | Open `/?src=XMAS26-EMAIL`                                     | Header (logo, nav, Donate), photo hero "Make Christmas Brighter", benefits strip                          |
-| T2  | Defaults         | Click Donate Now                                              | `/donate?src=XMAS26-EMAIL`; step 1; One-time; THB 1,000; School Supplies; eyebrow Christmas Giving 2026   |
-| T3  | Other amount     | Other → 50, then 2500                                         | 50 → inline error, cannot continue; 2500 → OK                                                             |
-| T4  | Recurring        | Select Recurring, then Weekly / Monthly / Yearly              | Period row appears, Monthly preselected; hint "…every week/month/year"; Review shows "Recurring · Weekly" |
-| T5  | Validation       | Next with empty name / `ann@`                                 | Field errors                                                                                              |
-| T6  | Organization     | Switch to Organization                                        | Org name shown, first/last hidden                                                                         |
-| T7  | Back             | Review → Back twice                                           | Values kept                                                                                               |
-| T8  | Submit           | Ann Demo / ann@example.com / 1,000 → Submit                   | "Your details have been received", THB 1,000 School Supplies, "No payment collected in this demo"         |
-| T9  | Other campaign   | Open `/donate?campaign=Clean%20Water%20for%20Rural%20Schools` | Eyebrow + description for Clean Water; Support = Clean Water (+ Where Most Needed)                        |
-| T10 | Unknown campaign | `/donate?campaign=Nope`                                       | "This campaign is not accepting donations right now."                                                     |
+| #   | Scenario          | Steps                                                         | Expected                                                                                                                                                                      |
+| --- | ----------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T1  | Discover          | Open `/?src=XMAS26-EMAIL`                                     | Header (logo, nav, Donate), photo hero "Make Christmas Brighter", benefits strip                                                                                              |
+| T1b | Campaign carousel | Wait 10 s; use ‹ › and the dots; hover; press ❚❚              | Moves to the next open campaign every 10 s (one slide per campaign card); arrows/dots move it; hover or pause stops it; each Donate Now opens `/donate?campaign=<name>&src=…` |
+| T2  | Defaults          | Click Donate Now                                              | `/donate?src=XMAS26-EMAIL`; step 1; One-time; THB 1,000; School Supplies; eyebrow Christmas Giving 2026                                                                       |
+| T3  | Other amount      | Other → 50, then 2500                                         | 50 → inline error, cannot continue; 2500 → OK                                                                                                                                 |
+| T4  | Recurring         | Select Recurring, then Weekly / Monthly / Yearly              | Period row appears, Monthly preselected; hint "…every week/month/year"; Review shows "Recurring · Weekly"                                                                     |
+| T5  | Validation        | Next with empty name / `ann@`                                 | Field errors                                                                                                                                                                  |
+| T6  | Organization      | Switch to Organization                                        | Org name shown, first/last hidden                                                                                                                                             |
+| T7  | Back              | Review → Back twice                                           | Values kept                                                                                                                                                                   |
+| T8  | Submit            | Ann Demo / ann@example.com / 1,000 → Submit                   | "Your details have been received", THB 1,000 School Supplies, "No payment collected in this demo"                                                                             |
+| T9  | Other campaign    | Open `/donate?campaign=Clean%20Water%20for%20Rural%20Schools` | Eyebrow + description for Clean Water; Support = Clean Water (+ Where Most Needed)                                                                                            |
+| T10 | Unknown campaign  | `/donate?campaign=Nope`                                       | "This campaign is not accepting donations right now."                                                                                                                         |
 
 ## 3. Back-office verification
 
@@ -82,7 +83,9 @@ sf agent preview send -o npo-demo --authoring-bundle ABC_Hope_Donor_Assistant --
 - "Tell me about clean water" → describes Clean Water for Rural Schools (partial name match) with its own causes.
 - "How much have I given?" / "Pause my monthly gift" → politely asks to sign in (preview has no verified user).
 
-## 7. Agent on the site (after the Embedded Messaging component is placed)
+## 7. Chat window (every page except `/dashboard`, D-25)
+
+- `/dashboard` has no chat window (the Ask panel is the chat there).
 
 - Guest: chat opens; campaign FAQ works; personal requests → "please sign in".
 - Maya signed in: "How much have I given?" → her totals and causes; "Pause my monthly gift for 2 months"

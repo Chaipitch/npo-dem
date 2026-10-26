@@ -6,8 +6,8 @@ _Last updated: 2026‑10‑22_
 
 The public donation journey, the signed-in donor portal and the Agentforce agent are built, deployed
 and published on the ABC Hope LWR site. Donations create real NPC records (payment simulated).
-Donors can pick any open campaign from the dashboard. **One manual step remains:** place the
-Embedded Messaging component in Experience Builder so the chat appears on the site.
+Donors can pick any open campaign from the dashboard. Chat: the dashboard's Ask panel (Agent API, verified donor,
+D-23) and, per D-25, the Embedded Messaging chat window on every other page (being placed).
 
 **Site:** https://te1791557923677.my.site.com/ —
 `/` campaign home · `/donate` (`?campaign=…`, `?src=…`) · `/dashboard` · `/my-giving` · `/my-profile`
@@ -23,7 +23,7 @@ Embedded Messaging component in Experience Builder so the chat appears on the si
 | Dashboard campaigns                   | ✅ Card grid: raised (real gifts) vs goal (`Campaign.ExpectedRevenue`), days left, designations. A card opens `/donate?campaign=<name>`                                                                                                                                                                                                                       |
 | Signed-in donor                       | ✅ Maya Grande portal user. Email set to `wchaipitch@terrasky.co.th` and a password-reset email sent; the user chooses the password (none stored anywhere)                                                                                                                                                                                                    |
 | Agent                                 | ✅ ABC Hope Donor Assistant active (new version with D-20: lists every open campaign); routing flow `ABC_Hope_Chat_Routing`; channel + deployment `ABC_Hope_Chat` (Auth, guests allowed)                                                                                                                                                                      |
-| Chat on site                          | 🟨 Embedded Messaging component not yet placed (manual — see below)                                                                                                                                                                                                                                                                                           |
+| Chat on site                          | 🟨 Dashboard Ask panel live; chat window on every other page (D-25) in progress                                                                                                                                                                                                                                                                               |
 | Photos                                | ✅ Unsplash (free licence): hero (Christian Bowen), banner (Ben Kupke), sidebar (Artem Makarov); campaign cards — water (Lisa Marie Theck), education (Yogendra Singh), environment (Kate Cullen), other (Larm Rmah); stories (Andrew Itaga, Yannis H, Elly M); the donation journey's review/thank-you photo follows the campaign. Credits shown or on hover |
 | Git                                   | ✅ `git@github.com:Chaipitch/npo-dem.git`, `main`                                                                                                                                                                                                                                                                                                             |
 | Flows / VRs / custom objects / fields | Only `ABC_Hope_Chat_Routing` (approved exception). Nothing else.                                                                                                                                                                                                                                                                                              |
@@ -34,14 +34,12 @@ Embedded Messaging component in Experience Builder so the chat appears on the si
   https://te1791557923677.my.site.com/ → **Sign in** → username `maya.grande@abchope.demo.00dg700000kmyyx`.
 - **Without password:** Setup → Contacts → Maya Grande → **Log in to Experience as User** → ABC Hope.
 
-## Manual step: chat widget
+## Chat window on every page except the dashboard (D-25)
 
-1. Experience Builder → ABC Hope → open a page that uses the _ABC Hope Public_ layout.
-2. Components → **Embedded Messaging** → drag into the theme **Footer**; deployment **ABC Hope Chat**;
-   enable **Experience Cloud site authentication** (so signed-in donors are verified).
-3. Repeat on a page that uses the _ABC Hope Portal_ layout. **Publish.**
-4. `sf project retrieve start -o npo-demo -m "DigitalExperienceBundle:site/ABC_Hope1"`, commit, then run
-   the agent checks in `testing-steps.md` §7.
+1. Done by hand once (component name/settings are not in any repo template): Experience Builder → ABC Hope → Home →
+   drag **Embedded Messaging** onto the page; deployment **ABC Hope Chat**; Experience Cloud site authentication on.
+2. Retrieve the Home view, copy the component into `scripts/sitePages.py` for Home, Donate, Campaign, My Giving and
+   My Profile (not Dashboard), regenerate, deploy, publish.
 
 ## Gotchas
 
@@ -117,9 +115,17 @@ preselected). The period is stored on the gift's schedule (`TransactionPeriod`),
 amount ("THB 300 / week") under a "Recurring (Weekly)" label; the dashboard says "N active recurring gifts (types)"
 and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a banner across the top of the card.
 
+## Home carousel, data refresh, paused card (2026‑10‑26)
+
+- Home hero is a carousel: featured Christmas slide, then one slide per open campaign (`getCampaigns`), every 10 s,
+  with arrows, dots and a pause button; pauses on hover/focus. Builder properties: featured campaign, seconds per slide.
+- `c/abcHopeGiftEvents`: a donation, a My Giving change or an assistant reply marks gifts changed, and the dashboard,
+  campaign page and recurring gift list reload instead of showing cached data.
+- Paused recurring gifts: amber card, "Paused until <date>", "No gifts from … to …. Resume any time."
+
 ## Open items
 
-1. Place the Embedded Messaging component (above), then test signed-in agent conversations end to end.
+1. In progress: chat window on every page except the dashboard (D-25), then test guest and signed-in chats.
 2. Done 2026‑10‑22: campaign cards, story cards and the journey's review/thank-you image use Unsplash photos.
 3. Header nav "Our Work" and "About" point to `/` until those pages exist.
 4. Optional: raise `AbcHopeAgentSupport` coverage (the real MessagingSession path can't be built in tests).
