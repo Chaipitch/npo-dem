@@ -130,7 +130,14 @@ Payment is still simulated. Tests use `Pending` because of the org's "*ASL Trigg
 
 ## Open items
 
-1. In progress: chat window on every page except the dashboard (D-25), then test guest and signed-in chats.
+1. **Chat window (D-25):** the button, verified sessions (Maya is `AuthenticatedEndUserId`) and the routing to the
+   agent work on every page except the dashboard, but the agent does not run its actions there: no Apex runs as the
+   agent user and it answers "please sign in" / "please wait". The same actions work through the dashboard panel
+   (Agent API), and `AbcHopeAgentSupport.verifiedAccountId(<session Id>)` returns Maya's account when called directly.
+   Next step: open the agent in Agentforce Builder → Conversation Preview / event logs (or Testing Center) with a
+   messaging session to see why the planner skips or fails the action call.
 2. Done 2026‑10‑22: campaign cards, story cards and the journey's review/thank-you image use Unsplash photos.
 3. Done 2026‑10‑26: public `/our-work` (programs with funding campaigns and causes, `getPrograms`) and `/about` (placeholder copy, editable in Builder) — header links point there (D-26).
-4. Optional: raise `AbcHopeAgentSupport` coverage (the real MessagingSession path can't be built in tests).
+4. Done 2026‑10‑26: `AbcHopeAgentSupportTest` raises coverage to 84% (the verified-messaging-user line needs
+   `AuthenticatedEndUserId`, which tests can't set).
+5. Done 2026‑10‑26: KPI cards use an icon-above layout at 1386–1600px so values, labels and links stay on one line.
