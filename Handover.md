@@ -128,6 +128,14 @@ and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a b
 New one-time gifts are `Paid`; a new recurring gift adds a Paid first payment today (later instalments Unpaid).
 Payment is still simulated. Tests use `Pending` because of the org's "*ASL Trigger v2" flow.
 
+## Shared impact tiles (2026‑10‑26)
+
+The dashboard's Shared impact tiles are the `sharedImpact` property; **Programs is live** (`{programs}` →
+`Dashboard.activePrograms`, active `Program` count, 8 today). People Reached, Communities and Volunteers Engaged are
+typed. Data that could drive them: ~1,002 distinct accounts with an In Progress/Completed `ProgramEnrollment`
+(People Reached) and ~96 distinct accounts with a Complete/In Progress `JobPositionAssignment` (Volunteers). Communities
+has no clean source (enrolled accounts' `BillingCity` is ~991 distinct values; `BillingState` 21; 7 `Location` sites).
+
 ## Open items
 
 1. **Chat window (D-25):** the button, verified sessions (Maya is `AuthenticatedEndUserId`) and the routing to the

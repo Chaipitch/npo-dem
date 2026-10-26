@@ -54,6 +54,7 @@ const DASHBOARD = {
   activeMonthlyGifts: 1,
   pausedMonthlyGifts: 0,
   activeRecurringTypes: ["Monthly"],
+  activePrograms: 8,
   causes: ["General Fund", "Food Insecurity Fund"],
   gifts: [
     {
@@ -233,6 +234,14 @@ describe("c-donor-dashboard agent panel", () => {
     refreshApex.mockClear();
     window.dispatchEvent(new CustomEvent("abchope:giftschange"));
     expect(refreshApex).toHaveBeenCalledTimes(2); // dashboard + campaign cards
+  });
+
+  it("fills the Programs impact tile with the live count", async () => {
+    const el = await mount();
+    const values = $$(el, ".impact-value").map((v) => v.textContent);
+    const labels = $$(el, ".impact-label").map((v) => v.textContent);
+    expect(values[labels.indexOf("Programs")]).toBe("8");
+    expect(values[labels.indexOf("People Reached")]).toBe("8,400");
   });
 
   it("campaign cards link to Donate now and View more", async () => {

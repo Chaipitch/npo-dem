@@ -39,8 +39,8 @@
             <property
         name="sharedImpact"
         type="String"
-        label="Shared impact (value|label;...)"
-        default="8,400|People Reached;12|Communities;6|Programs;125|Volunteers Engaged"
+        label="Shared impact (value|label;...; {programs} = live count)"
+        default="8,400|People Reached;12|Communities;{programs}|Programs;125|Volunteers Engaged"
       />
             <property
         name="donatePath"

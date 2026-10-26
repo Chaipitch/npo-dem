@@ -58,6 +58,8 @@ public without sharing class DonorPortalController {
     @AuraEnabled
     public Integer pausedMonthlyGifts = 0; // current or upcoming pause (D-22)
     @AuraEnabled
+    public Integer activePrograms = 0; // org-wide active Programs, for the "{programs}" impact tile
+    @AuraEnabled
     public Date pausedUntil; // earliest pause end among paused gifts
     @AuraEnabled
     public List<String> activeRecurringTypes = new List<String>(); // e.g. Weekly, Monthly (D-24)
@@ -198,6 +200,7 @@ public without sharing class DonorPortalController {
     d.causes.sort();
     d.causesSupported = d.causes.size();
     d.supporterSince = String.valueOf(firstYear);
+    d.activePrograms = [SELECT COUNT() FROM Program WHERE Status = 'Active'];
 
     Milestone joined = new Milestone();
     joined.year = String.valueOf(firstYear);

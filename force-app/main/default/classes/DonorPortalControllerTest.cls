@@ -377,4 +377,18 @@ private class DonorPortalControllerTest {
       [SELECT Status FROM GiftCommitment WHERE DonorId = :owner].Status
     );
   }
+
+  @IsTest
+  static void dashboardCountsActivePrograms() {
+    Integer before = [SELECT COUNT() FROM Program WHERE Status = 'Active'];
+    insert new List<Program>{
+      new Program(Name = 'Test Active Program', Status = 'Active'),
+      new Program(Name = 'Test Closed Program', Status = 'Completed')
+    };
+    DonorPortalController.accountIdOverride = createDonor().Id;
+    Test.startTest();
+    DonorPortalController.Dashboard d = DonorPortalController.getDashboard();
+    Test.stopTest();
+    Assert.areEqual(before + 1, d.activePrograms, 'only Active programs count');
+  }
 }
