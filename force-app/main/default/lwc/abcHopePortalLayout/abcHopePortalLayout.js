@@ -24,8 +24,9 @@ const NAV = [
  */
 export default class AbcHopePortalLayout extends LightningElement {
   @api logoutPath = "/vforcesite/secur/logout.jsp";
+  /** Sidebar sprout photo: septian akbar / Unsplash (Unsplash License). */
   @api sidebarImageUrl =
-    "https://images.unsplash.com/photo-1583263840577-b174af9ac796?auto=format&fit=crop&w=600&q=80";
+    "https://images.unsplash.com/photo-1734794049686-38f3e8df8b98?auto=format&fit=crop&w=600&q=80";
 
   drawerOpen = false;
   userMenuOpen = false;
