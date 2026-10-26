@@ -148,7 +148,7 @@ Omni-Channel routing flow, copied from `NGO_Donor_Support_MIAW`, with `routingTy
 
 ### D-17 · Photography from Unsplash (hotlinked) — Accepted (user, 2026‑10‑21)
 
-Hero (Christian Bowen), dashboard banner (Ben Kupke), sidebar sprout (Artem Makarov) are served from
+Hero (Christian Bowen), dashboard banner (Ben Kupke), sidebar sprout (septian akbar, since 2026‑10‑26) are served from
 `images.unsplash.com` (CSP Trusted Site `Unsplash_Images`, img-src, Communities) — not downloaded. Credits
 shown on hero and banner. SVG illustrations remain as fallbacks when the URL properties are cleared.
 

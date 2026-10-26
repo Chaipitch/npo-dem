@@ -208,10 +208,15 @@
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.35);
   color: #fff;
-  font-size: 30px;
-  line-height: 38px;
+  /* Centre the SVG chevron exactly (a text glyph sat low and off-centre). */
+  display: grid;
+  place-items: center;
+  padding: 0;
   cursor: pointer;
   transition: background 0.15s;
+}
+.arrow-icon {
+  display: block;
 }
 .arrow:hover,
 .arrow:focus-visible {
