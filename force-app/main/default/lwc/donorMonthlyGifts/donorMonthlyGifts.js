@@ -19,7 +19,7 @@ const MAX_AMOUNT = 1000000;
  * Fires "giftschange" after a change so the dashboard can refresh its counts.
  */
 export default class DonorMonthlyGifts extends LightningElement {
-  @api currencyLabel = "THB";
+  @api currencyLabel = "USD";
   @api donateHref = "/donate";
 
   gifts = [];

@@ -42,7 +42,7 @@ public without sharing class AbcHopeAgentMonthlyGifts {
     public Decimal pauseMonths;
     @InvocableVariable(
       label='New amount'
-      description='For change_amount: the new amount per gift in THB, 100 to 1,000,000. The schedule (weekly, monthly or yearly) stays the same.'
+      description='For change_amount: the new amount per gift in USD, 100 to 1,000,000. The schedule (weekly, monthly or yearly) stays the same.'
     )
     public Decimal newAmount;
   }
@@ -212,7 +212,7 @@ public without sharing class AbcHopeAgentMonthlyGifts {
       amount < DonationIntakeService.MIN_AMOUNT ||
       amount > DonationIntakeService.MAX_AMOUNT
     ) {
-      r.message = 'Ask for a new amount between THB 100 and THB 1,000,000.';
+      r.message = 'Ask for a new amount between USD 100 and USD 1,000,000.';
       return;
     }
     if (g.openSchedule == null) {

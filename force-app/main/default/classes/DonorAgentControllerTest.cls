@@ -16,7 +16,7 @@ private class DonorAgentControllerTest {
         );
       } else {
         res.setBody(
-          '{"messages":[{"type":"Inform","message":"You have given THB 2,250."}]}'
+          '{"messages":[{"type":"Inform","message":"You have given USD 2,250."}]}'
         );
       }
       return res;
@@ -72,7 +72,7 @@ private class DonorAgentControllerTest {
 
     Assert.isNull(r.error);
     Assert.areEqual('sess-1', r.sessionId);
-    Assert.areEqual('You have given THB 2,250.', r.text);
+    Assert.areEqual('You have given USD 2,250.', r.text);
     Assert.areEqual(2, mock.requests.size(), 'start session, then message');
     HttpRequest start = mock.requests[0];
     Assert.isTrue(

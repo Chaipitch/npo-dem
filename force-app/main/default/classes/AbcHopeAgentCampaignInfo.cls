@@ -34,7 +34,7 @@ public without sharing class AbcHopeAgentCampaignInfo {
     DonationIntakeService.GENERAL_DESIGNATION
   };
 
-  static final String GIVING_FACTS = 'Suggested amounts: THB 300, THB 500, THB 1,000, or any amount from THB 100. Gifts can be one-time or recurring (weekly, monthly or yearly).';
+  static final String GIVING_FACTS = 'Suggested amounts: USD 300, USD 500, USD 1,000, or any amount from USD 100. Gifts can be one-time or recurring (weekly, monthly or yearly).';
   static final String DONOR_FACTS = 'Individuals and organizations can give. Donors only need a name and email; signed-in donors skip that step.';
   static final String DEMO_FACTS = 'This is a demo site: no payment is collected when a gift is submitted.';
 

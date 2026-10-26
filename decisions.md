@@ -43,6 +43,9 @@ Options: (a) enable multi-currency + add THB (irreversible org change — needs 
 in reports); (c) relabel UI to USD. **Recommendation: (b) for the demo with a visible note in
 Handover**, revisit if reports are shown to the client.
 
+**Superseded 2026‑10‑26 (user): option (c).** The site and the agent now label amounts **USD** ("USD 1,000",
+"USD 300 / week"), matching what the org stores; no conversion and no org currency change.
+
 ### D-06 · Donor matching rule — Accepted
 
 Individual: match **Person Account** by `PersonEmail` (case-insensitive, most recently
@@ -230,13 +233,13 @@ The donation journey's frequency toggle is **One-time | Recurring**; Recurring o
 Yearly** (Monthly preselected). The journey sends the chosen period as the request's `frequency` (`One-time`,
 `Weekly`, `Monthly` or `Yearly`), and `DonationIntakeService` writes it straight to
 `GiftCommitmentSchedule.TransactionPeriod` (all three are standard NPC picklist values; interval stays 1). My Giving
-cards show the period after the amount ("THB 300 / week"); older `Custom` schedules read as monthly. Pause, resume,
+cards show the period after the amount ("USD 300 / week"); older `Custom` schedules read as monthly. Pause, resume,
 change amount and cancel work the same for every period.
 
 Wording follow-up (user, same day): everything donors see says **recurring gifts**, with the type in brackets where a
 single gift or the active set is described — "Recurring (Weekly)" on the My Giving card and the review step, "1 active
 recurring gift (Monthly)" on the dashboard (new `Dashboard.activeRecurringTypes`), "Recurring Gifts" as the My Giving
-heading, and the agent's action replies ("1. Recurring (Weekly): THB 300 per week to …"). API names stay as they are
+heading, and the agent's action replies ("1. Recurring (Weekly): USD 300 per week to …"). API names stay as they are
 (`donorMonthlyGifts`, `getMonthlyGifts`, `AbcHopeAgentMonthlyGifts`, subagent `monthly_gifts`, anchor `#monthly`)
 because the site, agent and tests are wired to them. The Agent Script wording went live with agent version 5
 (published and activated 2026‑10‑22).

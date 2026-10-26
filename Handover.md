@@ -49,7 +49,7 @@ D-23) and, per D-25, the Embedded Messaging chat window on every other page (bei
 - Paid gifts get an automatic designation (D-13). NPC standard actions want String Ids.
 - The dashboard also lists the org's pre-existing _Non Profit Event_ and _Capital Campaign_ because they
   are active and have default designations (D-18). Deactivate them to hide them.
-- The org is USD-only; the UI labels amounts THB (D-05).
+- The org is USD-only and the UI labels amounts USD (D-05, changed from USD 2026‑10‑26).
 
 ## Target object schema (user, 2026‑10‑22) — in progress
 
@@ -87,7 +87,7 @@ How the build compares:
 
 The panel sends every question to the **ABC Hope Donor Assistant** through the Agent API (`DonorAgentController`,
 `USE_AGENT_API = true`), with `verified_account_id` = the signed-in donor's account, so the agent answers personal
-questions from her own data ("You have 1 recurring gift: Recurring (Monthly): THB 1,000 per month…"). Page links the
+questions from her own data ("You have 1 recurring gift: Recurring (Monthly): USD 1,000 per month…"). Page links the
 dashboard answer would offer (e.g. Manage recurring gifts) stay under the reply. If the agent call fails, the panel
 falls back to the dashboard-data answer.
 
@@ -112,7 +112,7 @@ Photos come from the shared `abcHopeCampaignPhotos` module. Route added in `scri
 
 Step 1 of `/donate` offers **One-time | Recurring**; Recurring adds **Weekly · Monthly · Yearly** (Monthly
 preselected). The period is stored on the gift's schedule (`TransactionPeriod`), and My Giving shows it after the
-amount ("THB 300 / week") under a "Recurring (Weekly)" label; the dashboard says "N active recurring gifts (types)"
+amount ("USD 300 / week") under a "Recurring (Weekly)" label; the dashboard says "N active recurring gifts (types)"
 and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a banner across the top of the card.
 
 ## Home carousel, data refresh, paused card (2026‑10‑26)

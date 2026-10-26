@@ -119,7 +119,7 @@ describe("c-donor-dashboard agent panel", () => {
     const el = await mount();
     await ask(el, "How much have I given?");
     expect(lastReply(el)).toBe(
-      "You’ve given THB 2,250 in total since 2023, supporting 2 causes."
+      "You’ve given USD 2,250 in total since 2023, supporting 2 causes."
     );
     expect($(el, ".chat-log a.chat-link").getAttribute("href")).toBe(
       "/my-giving"
@@ -135,7 +135,7 @@ describe("c-donor-dashboard agent panel", () => {
     chip.dispatchEvent(new CustomEvent("click"));
     await flush();
     expect(lastReply(el)).toContain("Your most recent gifts:");
-    expect(lastReply(el)).toContain("THB 1,000 to Food Insecurity Fund");
+    expect(lastReply(el)).toContain("USD 1,000 to Food Insecurity Fund");
     expect(askAgent).not.toHaveBeenCalled();
   });
 
@@ -181,7 +181,7 @@ describe("c-donor-dashboard agent panel", () => {
     window.dispatchEvent(new CustomEvent("abchope:ask", { detail }));
     await flush();
     expect(detail.handled).toBe(true);
-    expect(lastReply(el)).toContain("THB 2,250");
+    expect(lastReply(el)).toContain("USD 2,250");
   });
 
   it("asks the question from ?ask= after arriving from another page", async () => {
@@ -191,7 +191,7 @@ describe("c-donor-dashboard agent panel", () => {
       "/dashboard?ask=How%20much%20have%20I%20given%3F#agent"
     );
     const el = await mount();
-    expect(lastReply(el)).toContain("THB 2,250");
+    expect(lastReply(el)).toContain("USD 2,250");
     expect(window.location.search).toBe("");
     expect(window.location.hash).toBe("#agent");
     window.history.replaceState(null, "", "/");
@@ -200,7 +200,7 @@ describe("c-donor-dashboard agent panel", () => {
   it("with the verified agent, personal questions go to the agent and keep the page link", async () => {
     askAgent.mockResolvedValue({
       sessionId: "s-9",
-      text: "You have 1 recurring gift: Recurring (Monthly), THB 1,000 per month."
+      text: "You have 1 recurring gift: Recurring (Monthly), USD 1,000 per month."
     });
     const el = await mount();
     usesVerifiedAgent.emit(true);
@@ -224,7 +224,7 @@ describe("c-donor-dashboard agent panel", () => {
     usesVerifiedAgent.emit(true);
     await flush();
     await ask(el, "How much have I given?");
-    expect(lastReply(el)).toContain("THB 2,250");
+    expect(lastReply(el)).toContain("USD 2,250");
   });
 
   it("reloads its data when gifts change (donation or assistant)", async () => {

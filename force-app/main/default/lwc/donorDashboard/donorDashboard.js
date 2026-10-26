@@ -48,7 +48,7 @@ let lastLoadedAt = 0;
 export default class DonorDashboard extends LightningElement {
   /** "home" = donor home (mockup #1); "giving" = KPIs + full giving history */
   @api view = "home";
-  @api currencyLabel = "THB";
+  @api currencyLabel = "USD";
   @api bannerTitle = "See What We’ve Achieved Together";
   @api bannerSubtitle = "Your support is part of something bigger.";
   /** "value|label" pairs separated by ";" */

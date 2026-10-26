@@ -235,7 +235,7 @@ describe("c-donation-journey", () => {
     expect($(el, ".thanks .title").textContent).toBe(
       "Your details have been received"
     );
-    expect($(el, ".thanks-amount").textContent).toContain("THB 1,000");
+    expect($(el, ".thanks-amount").textContent).toContain("USD 1,000");
     // Tells the rest of the site to reload totals and campaign progress.
     expect(sessionStorage.getItem("abchope:giftsChangedAt")).not.toBeNull();
   });
