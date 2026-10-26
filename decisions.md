@@ -270,7 +270,7 @@ The ABC Hope Donor Assistant is reachable in two ways, never both on one page:
   a new gift.
 - **Old deployment `ABC_Hope_Chat`** (hosted on the LWR site, never worked) is removed from the repo and deleted in the
   org; the messaging channel `ABC_Hope_Chat` stays (used by `ABC_Hope_Web_Chat`).
-- **"Non Profit Event"** stays on the site as is.
+- **"Non Profit Event"** stays on the site as is. _(Superseded by D-30: it is now Christmas Meals for Families 2026.)_
 
 ### D-27 · Site gifts are saved as Paid — Accepted (user, 2026‑10‑26)
 
@@ -314,3 +314,21 @@ Decision:
   A genuine off-topic question just gets its refusal after one extra call.
 
 Verified live as Maya: pause and resume each run in one turn; her gift is active again afterwards.
+
+### D-30 · Two more Christmas campaigns; Non Profit Event becomes Christmas Meals — Accepted (user, 2026‑10‑26)
+
+- **Christmas Toy Drive 2026** (new): toys, books and warm clothes for children in shelters and foster care,
+  1 Nov – 24 Dec 2026, goal USD 150,000, cause **Toys & Gifts** → new program **Child Wellbeing**.
+- **Christmas Meals for Families 2026**: the org's original _Non Profit Event_ record, renamed and repurposed in
+  place so its gifts stay (the raised total carries over). Holiday food boxes, 19 Oct – 31 Dec 2026, goal
+  USD 100,000. Its default causes (General Fund 50% / Job Training Fund 50%) are replaced by **Holiday Meals**
+  100% → new program **Family Support**; existing gifts keep their own designations.
+- Records only, in `seedCampaigns.apex` (rename + `REPLACE_DEFAULTS`) and `seedPrograms.apex`; both stay idempotent.
+- Photos (Unsplash License), chosen by the user: presents by Yevhen Buzuk (`toy|present`), Christmas table by
+  Anthony Cantin (`meal|food`), in `abcHopeCampaignPhotos`.
+
+### D-31 · Signed-in donors go to the dashboard 5 seconds after donating — Accepted (user, 2026‑10‑26)
+
+The thank-you step shows "Taking you to your dashboard in 5 seconds…" with a **Go now** link, then opens
+`/dashboard`, where the new gift shows (gift events, D-27). **Make another donation** cancels it. Guests have no
+dashboard, so they stay on the thank-you step.

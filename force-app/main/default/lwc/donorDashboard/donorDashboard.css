@@ -760,6 +760,10 @@ ol {
   margin-top: 8px;
   font-size: 14px;
 }
+/* The template compiler drops the space before "raised of": keep the gap here. */
+.campaign-stats .muted {
+  margin-left: 0.3em;
+}
 .campaign-meta {
   display: flex;
   gap: 6px;

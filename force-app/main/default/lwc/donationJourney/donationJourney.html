@@ -386,6 +386,12 @@
                 ></c-abc-hope-icon></span
               >No payment collected in this demo.
             </p>
+            <template lwc:if={showRedirect}>
+              <p class="redirect" data-id="redirect" aria-live="polite">
+                {redirectNote}
+                <a class="redirect-link" href={dashboardHref}>Go now</a>
+              </p>
+            </template>
             <button
               type="button"
               class="btn btn_secondary"

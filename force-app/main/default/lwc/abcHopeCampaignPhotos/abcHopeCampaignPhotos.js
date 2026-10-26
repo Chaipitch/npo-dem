@@ -4,6 +4,14 @@
  * so a campaign always shows the same picture.
  */
 const PHOTOS = {
+  presents: {
+    id: "photo-1634038036367-7c0e7a95fa4c",
+    credit: "Photo: Yevhen Buzuk / Unsplash"
+  },
+  meal: {
+    id: "photo-1766688350317-a74650b69e0e",
+    credit: "Photo: Anthony Cantin / Unsplash"
+  },
   christmas: {
     id: "photo-1606916693216-69bd7e1cf2fa",
     credit: "Photo: Christian Bowen / Unsplash"
@@ -28,9 +36,11 @@ const PHOTOS = {
   }
 };
 
-/** "christmas" | "water" | "school" | "sprout" | "gift", from the campaign name. */
+/** "presents" | "meal" | "christmas" | "water" | "school" | "sprout" | "gift", from the campaign name. */
 export function campaignTheme(name) {
   const n = (name || "").toLowerCase();
+  if (/toy|present/.test(n)) return "presents";
+  if (/meal|food/.test(n)) return "meal";
   if (/christmas/.test(n)) return "christmas";
   if (/water/.test(n)) return "water";
   if (/school|educat|scholar|girl/.test(n)) return "school";

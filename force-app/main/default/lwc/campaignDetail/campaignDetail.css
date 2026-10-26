@@ -170,6 +170,10 @@ dd {
 .raised {
   font-size: 18px;
 }
+/* The template compiler drops the space before "raised of": keep the gap here. */
+.raised .muted {
+  margin-left: 0.3em;
+}
 .progress {
   height: 10px;
   margin: 12px 0 6px;
