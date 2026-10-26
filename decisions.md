@@ -368,3 +368,21 @@ dashboard, so they stay on the thank-you step.
   plain `/donate`). Our Work names link to it and its cards show raised · people served · the largest delivery;
   program names on the campaign page link to it. Program photos reuse the campaign themes (Child Wellbeing →
   presents, Family Support → meal).
+
+### D-34 · Shared impact tiles add up Program reach fields — Accepted (user, 2026‑10‑26)
+
+The user added three Number fields on Program: **People Reached** (`People_Reached__c`), **Communities**
+(`Communities__c`) and **Volunteers Engaged** (`Volunteers_Engaged__c`). They are the user's own exception to the
+"no custom fields" guardrail; they're retrieved into `objects/Program/fields/` so the repo deploys. The tiles now show
+the sums over **active** Programs (blank = 0) instead of counting enrollments and volunteer assignments, and
+Communities is live too (it was typed as 12). `{programs}` is still the active Program count. The program page's
+"people served" (D-33) still counts enrollments, which is a different measure.
+
+### D-35 · Impact Journey as one card per year — Accepted (user, 2026‑10‑26)
+
+The zigzag timeline ("2026 · Supported X" for each cause) was hard to read. The dashboard now shows one card per year,
+oldest first: the year, "USD total · N gifts", a "Joined" badge on the supporter-since year, and the causes given to
+that year (each once, with its program and amount, largest first; "New" marks the first year for that cause; an
+active recurring gift with no payment yet shows "Recurring gift"). Built in Apex as `Dashboard.journeyYears` from the
+same counted gifts as Total Contributions, so the year totals add up to it. The old `journey` milestones stay for
+the agent and the chat panel's "journey" answer.

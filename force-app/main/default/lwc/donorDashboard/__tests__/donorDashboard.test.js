@@ -56,6 +56,7 @@ const DASHBOARD = {
   activeRecurringTypes: ["Monthly"],
   activePrograms: 8,
   peopleReached: 1002,
+  communities: 2415,
   volunteersEngaged: 96,
   causes: ["General Fund", "Food Insecurity Fund"],
   gifts: [
@@ -77,6 +78,25 @@ const DASHBOARD = {
   journey: [
     { year: "2023", label: "Joined as a supporter", kind: "joined" },
     { year: "2024", label: "Supported General Fund", kind: "cause" }
+  ],
+  journeyYears: [
+    { year: "2023", joined: true, total: 0, giftCount: 0, items: [] },
+    {
+      year: "2024",
+      joined: false,
+      total: 1250,
+      giftCount: 1,
+      items: [
+        {
+          cause: "General Fund",
+          program: "Fund for Children",
+          amount: 1250,
+          giftCount: 1,
+          isNew: true
+        },
+        { cause: "Toys & Gifts", amount: 0, recurringOnly: true }
+      ]
+    }
   ]
 };
 
@@ -238,14 +258,38 @@ describe("c-donor-dashboard agent panel", () => {
     expect(refreshApex).toHaveBeenCalledTimes(2); // dashboard + campaign cards
   });
 
-  it("fills People Reached, Programs and Volunteers with live counts", async () => {
+  it("fills People Reached, Communities, Programs and Volunteers with live figures", async () => {
     const el = await mount();
     const values = $$(el, ".impact-value").map((v) => v.textContent);
     const labels = $$(el, ".impact-label").map((v) => v.textContent);
     expect(values[labels.indexOf("Programs")]).toBe("8");
     expect(values[labels.indexOf("People Reached")]).toBe("1,002");
     expect(values[labels.indexOf("Volunteers Engaged")]).toBe("96");
-    expect(values[labels.indexOf("Communities")]).toBe("12");
+    expect(values[labels.indexOf("Communities")]).toBe("2,415");
+  });
+
+  it("shows the impact journey as one card per year", async () => {
+    const el = await mount();
+    const cards = $$(el, '[data-id="journey-year"]');
+    expect(cards).toHaveLength(2);
+    const text = (n) => n.textContent.replace(/\s+/g, " ").trim();
+    expect(text(cards[0].querySelector(".year"))).toBe("2023");
+    expect(cards[0].querySelector(".badge_joined")).not.toBeNull();
+    expect(text(cards[0].querySelector(".year-empty"))).toBe(
+      "Joined ABC Hope as a supporter."
+    );
+    expect(text(cards[1].querySelector(".year-meta"))).toBe(
+      "USD 1,250 · 1 gift"
+    );
+    const items = [...cards[1].querySelectorAll(".year-item")];
+    expect(text(items[0].querySelector(".item-cause"))).toBe("General FundNew");
+    expect(items[0].querySelector(".badge_new")).not.toBeNull();
+    expect(items[1].querySelector(".badge_new")).toBeNull();
+    expect(text(items[0].querySelector(".item-program"))).toBe(
+      "Fund for Children"
+    );
+    expect(text(items[0].querySelector(".item-amount"))).toBe("USD 1,250");
+    expect(text(items[1].querySelector(".item-amount"))).toBe("Recurring gift");
   });
 
   it("campaign cards link to Donate now and View more", async () => {

@@ -132,13 +132,14 @@ and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a b
 New one-time gifts are `Paid`; a new recurring gift adds a Paid first payment today (later instalments Unpaid).
 Payment is still simulated. Tests use `Pending` because of the org's "*ASL Trigger v2" flow.
 
-## Shared impact tiles (2026‑10‑26)
+## Shared impact tiles (2026‑10‑26, D-34)
 
-The dashboard's Shared impact tiles are the `sharedImpact` property with live placeholders, computed org-wide in
-`DonorPortalController.buildDashboard`: `{peopleReached}` = distinct accounts with an In Progress/Completed
-`ProgramEnrollment` (1,002), `{programs}` = active `Program` count (8), `{volunteers}` = distinct accounts with a
-Complete/In Progress `JobPositionAssignment` (96). Communities stays typed (12): no field defines a community.
-The enrolments and assignments are the org's existing demo data, not ABC Hope campaign records.
+The dashboard's Shared impact tiles are the `sharedImpact` property with live placeholders, computed in
+`DonorPortalController.buildDashboard` from **active Programs**: `{peopleReached}`, `{communities}` and
+`{volunteers}` are the sums of the Program fields **People Reached**, **Communities** and **Volunteers Engaged**
+(`People_Reached__c`, `Communities__c`, `Volunteers_Engaged__c`, added by the user and kept up to date by the team);
+`{programs}` is the active Program count. On 2026‑10‑26: 17,172 · 2,415 · 10 · 1,093. To change a tile, edit the
+numbers on the Program records; a blank field counts as 0.
 
 ## Open items
 

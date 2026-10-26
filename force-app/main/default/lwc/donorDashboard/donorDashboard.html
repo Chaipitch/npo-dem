@@ -301,23 +301,48 @@
             <div class="section-head" data-section="journey">
               <h2 class="section-title">Your Impact Journey</h2>
             </div>
-            <ol class="journey">
-              <template for:each={journey} for:item="m">
-                <li key={m.key} class="journey-item">
-                  <span class={m.dotClass}
-                    ><c-abc-hope-icon
-                      name={m.icon}
-                      size="26"
-                      stroke-width="2"
-                    ></c-abc-hope-icon
-                  ></span>
-                  <div class="journey-text">
-                    <p class="journey-year">{m.year}</p>
-                    <p class="journey-label">{m.label}</p>
+            <ol class="years" data-id="journey">
+              <template for:each={journeyYears} for:item="y">
+                <li key={y.key} class="year-card" data-id="journey-year">
+                  <div class="year-head">
+                    <span class={y.dotClass}
+                      ><c-abc-hope-icon
+                        name={y.icon}
+                        size="22"
+                        stroke-width="2"
+                      ></c-abc-hope-icon
+                    ></span>
+                    <div class="year-title">
+                      <p class="year">{y.year}</p>
+                      <p class="year-meta">{y.meta}</p>
+                    </div>
+                    <template lwc:if={y.joined}>
+                      <span class="badge badge_joined">Joined</span>
+                    </template>
                   </div>
-                  <template lwc:if={m.showLine}
-                    ><span class="journey-line" aria-hidden="true"></span
-                  ></template>
+                  <template lwc:if={y.hasItems}>
+                    <ul class="year-items">
+                      <template for:each={y.items} for:item="it">
+                        <li key={it.key} class="year-item">
+                          <div class="item-text">
+                            <p class="item-cause">
+                              {it.cause}
+                              <template lwc:if={it.isNew}>
+                                <span class="badge badge_new">New</span>
+                              </template>
+                            </p>
+                            <template lwc:if={it.program}>
+                              <p class="item-program">{it.program}</p>
+                            </template>
+                          </div>
+                          <p class="item-amount">{it.amountDisplay}</p>
+                        </li>
+                      </template>
+                    </ul>
+                  </template>
+                  <template lwc:else>
+                    <p class="year-empty">Joined ABC Hope as a supporter.</p>
+                  </template>
                 </li>
               </template>
             </ol>
