@@ -115,6 +115,14 @@ preselected). The period is stored on the gift's schedule (`TransactionPeriod`),
 amount ("THB 300 / week") under a "Recurring (Weekly)" label; the dashboard says "N active recurring gifts (types)"
 and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a banner across the top of the card.
 
+## Home carousel, data refresh, paused card (2026‑10‑26)
+
+- Home hero is a carousel: featured Christmas slide, then one slide per open campaign (`getCampaigns`), every 10 s,
+  with arrows, dots and a pause button; pauses on hover/focus. Builder properties: featured campaign, seconds per slide.
+- `c/abcHopeGiftEvents`: a donation, a My Giving change or an assistant reply marks gifts changed, and the dashboard,
+  campaign page and recurring gift list reload instead of showing cached data.
+- Paused recurring gifts: amber card, "Paused until <date>", "No gifts from … to …. Resume any time."
+
 ## Open items
 
 1. In progress: chat window on every page except the dashboard (D-25), then test guest and signed-in chats.
