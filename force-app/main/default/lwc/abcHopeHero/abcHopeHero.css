@@ -15,34 +15,57 @@
   position: relative;
   overflow: hidden;
   min-height: 480px;
-  display: flex;
-  align-items: center;
   border-radius: 20px 20px 0 0;
   background: #2a0909;
   color: #fff;
 }
-.scene,
+/* Slides are stacked; the active one fades in. */
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.6s ease,
+    visibility 0.6s;
+}
+.slide_active {
+  opacity: 1;
+  visibility: visible;
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    transition: none;
+  }
+}
 .photo {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 40% 50%;
+}
+.slide_featured .photo {
+  object-position: 30% 55%;
 }
 .shade {
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    90deg,
-    rgba(30, 7, 6, 0.9) 0%,
-    rgba(30, 7, 6, 0.62) 32%,
-    rgba(30, 7, 6, 0) 54%
+    270deg,
+    rgba(20, 10, 8, 0.88) 0%,
+    rgba(20, 10, 8, 0.6) 34%,
+    rgba(20, 10, 8, 0) 60%
   );
 }
 .hero-inner {
   position: relative;
-  max-width: 540px;
-  padding: 56px 48px;
+  max-width: 560px;
+  padding: 56px 72px 72px 48px;
 }
 .eyebrow {
   display: inline-block;
@@ -62,6 +85,9 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   color: #fff;
+}
+.headline_campaign {
+  font-size: clamp(34px, 4.4vw, 52px);
 }
 .highlight {
   display: block;
@@ -149,19 +175,7 @@
     margin-top: 12px;
   }
   .hero {
-    min-height: 520px;
-    align-items: flex-end;
-  }
-  .shade {
-    background: linear-gradient(
-      0deg,
-      rgba(25, 6, 6, 0.95) 0%,
-      rgba(25, 6, 6, 0.75) 50%,
-      rgba(25, 6, 6, 0.1) 100%
-    );
-  }
-  .hero-inner {
-    padding: 32px 22px;
+    min-height: 540px;
   }
   .body {
     font-size: 16px;
@@ -173,21 +187,6 @@
   }
 }
 
-/* Photo mode: children and tree sit left of centre, so the copy moves right over the fireplace. */
-.hero_photo {
-  justify-content: flex-end;
-}
-.hero_photo .photo {
-  object-position: 30% 55%;
-}
-.hero_photo .shade {
-  background: linear-gradient(
-    270deg,
-    rgba(20, 10, 8, 0.88) 0%,
-    rgba(20, 10, 8, 0.6) 34%,
-    rgba(20, 10, 8, 0) 60%
-  );
-}
 .credit {
   position: absolute;
   left: 14px;
@@ -196,20 +195,93 @@
   color: rgba(255, 255, 255, 0.75);
   z-index: 1;
 }
+
+/* Carousel controls */
+.arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 30px;
+  line-height: 38px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.arrow:hover,
+.arrow:focus-visible {
+  background: rgba(0, 0, 0, 0.6);
+}
+.arrow_prev {
+  left: 14px;
+}
+.arrow_next {
+  right: 14px;
+}
+.controls {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+}
+.dot_active {
+  width: 26px;
+  border-radius: 999px;
+  background: #fff;
+}
+.pause {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 10px;
+  cursor: pointer;
+}
 @media (max-width: 760px) {
-  .hero_photo {
+  .slide {
+    align-items: flex-end;
     justify-content: flex-start;
   }
-  .hero_photo .photo {
+  .photo,
+  .slide_featured .photo {
     object-position: 35% 40%;
   }
-  .hero_photo .shade {
+  .shade {
     background: linear-gradient(
       0deg,
       rgba(20, 10, 8, 0.95) 0%,
       rgba(20, 10, 8, 0.7) 50%,
       rgba(20, 10, 8, 0.05) 100%
     );
+  }
+  .hero-inner {
+    padding: 32px 22px 64px;
+  }
+  .arrow {
+    top: 28%;
+    width: 38px;
+    height: 38px;
   }
   .credit {
     left: auto;
