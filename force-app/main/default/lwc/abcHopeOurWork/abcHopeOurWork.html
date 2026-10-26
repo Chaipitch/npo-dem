@@ -1,0 +1,54 @@
+<template>
+  <section class="page">
+    <header class="head">
+      <h1 class="title">{heading}</h1>
+      <p class="intro">{intro}</p>
+    </header>
+
+    <template lwc:if={isLoading}>
+      <p class="muted" role="status">Loading…</p>
+    </template>
+    <template lwc:elseif={error}>
+      <p class="alert" role="alert">{error}</p>
+    </template>
+    <template lwc:elseif={isEmpty}>
+      <p class="muted" data-id="empty">
+        Our programs will be listed here soon.
+      </p>
+    </template>
+    <template lwc:else>
+      <ul class="grid">
+        <template for:each={cards} for:item="p">
+          <li key={p.key} class="card" data-id="program">
+            <h2 class="name">{p.name}</h2>
+            <template lwc:if={p.summary}>
+              <p class="summary">{p.summary}</p>
+            </template>
+            <template lwc:if={p.hasCampaigns}>
+              <p class="label">Give through</p>
+              <ul class="campaigns">
+                <template for:each={p.campaigns} for:item="c">
+                  <li key={c.key}>
+                    <a class="campaign" href={c.href} data-id="campaign-link"
+                      >{c.label} →</a
+                    >
+                  </li>
+                </template>
+              </ul>
+              <ul class="chips" aria-label="Causes">
+                <template for:each={p.causes} for:item="c">
+                  <li key={c.key} class="chip">{c.label}</li>
+                </template>
+              </ul>
+            </template>
+            <template lwc:else>
+              <p class="muted small" data-id="no-campaign">
+                No open campaign for this program right now.
+              </p>
+            </template>
+          </li>
+        </template>
+      </ul>
+    </template>
+  </section>
+</template>

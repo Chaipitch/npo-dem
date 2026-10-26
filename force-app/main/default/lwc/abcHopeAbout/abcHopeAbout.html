@@ -1,0 +1,26 @@
+<template>
+  <section class="page">
+    <header class="head">
+      <h1 class="title">{heading}</h1>
+      <p class="lead">{lead}</p>
+    </header>
+    <div class="body">
+      <template for:each={paragraphItems} for:item="p">
+        <p key={p.key} class="para">{p.text}</p>
+      </template>
+    </div>
+    <ul class="facts" aria-label="ABC Hope in numbers">
+      <template for:each={factItems} for:item="f">
+        <li key={f.key} class="fact">
+          <span class="fact-value">{f.value}</span>
+          <span class="fact-label">{f.label}</span>
+        </li>
+      </template>
+    </ul>
+    <div class="actions">
+      <a class="btn btn-primary" href={donateHref} data-id="donate">Donate</a>
+      <a class="btn" href={ourWorkHref} data-id="our-work">See our work</a>
+    </div>
+    <p class="note" data-id="demo-note">{demoNote}</p>
+  </section>
+</template>

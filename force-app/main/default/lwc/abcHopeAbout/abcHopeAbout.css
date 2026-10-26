@@ -1,0 +1,101 @@
+:host {
+  --ab-navy: #14185b;
+  --ab-red: #d63131;
+  --ab-muted: #6b7088;
+  --ab-border: #e6e9f2;
+  display: block;
+  color: #2b2f45;
+}
+* {
+  box-sizing: border-box;
+}
+p,
+h1,
+ul {
+  margin: 0;
+}
+ul {
+  padding: 0;
+  list-style: none;
+}
+.page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 24px 56px;
+}
+.title {
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 800;
+  color: var(--ab-navy);
+  margin-bottom: 12px;
+}
+.lead {
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--ab-navy);
+  margin-bottom: 24px;
+}
+.body {
+  display: grid;
+  gap: 14px;
+  font-size: 16px;
+  line-height: 1.65;
+}
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 32px 0;
+}
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px;
+  border: 1px solid var(--ab-border);
+  border-radius: 14px;
+  background: #fff;
+}
+.fact-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--ab-navy);
+}
+.fact-label {
+  color: var(--ab-muted);
+  font-size: 14px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+/* Parent-qualified: the LWR theme styles a:link globally (synthetic shadow, D-11). */
+.actions .btn,
+.actions .btn:link,
+.actions .btn:visited {
+  display: inline-flex;
+  padding: 12px 22px;
+  border: 1.5px solid var(--ab-navy);
+  border-radius: 10px;
+  color: var(--ab-navy);
+  font-weight: 700;
+  text-decoration: none;
+}
+.actions .btn-primary,
+.actions .btn-primary:link,
+.actions .btn-primary:visited {
+  border-color: var(--ab-red);
+  background: var(--ab-red);
+  color: #fff;
+}
+.note {
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--ab-muted);
+}
+@media (max-width: 760px) {
+  .page {
+    padding: 20px 12px 40px;
+  }
+}

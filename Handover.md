@@ -127,5 +127,5 @@ and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a b
 
 1. In progress: chat window on every page except the dashboard (D-25), then test guest and signed-in chats.
 2. Done 2026‑10‑22: campaign cards, story cards and the journey's review/thank-you image use Unsplash photos.
-3. Header nav "Our Work" and "About" point to `/` until those pages exist.
+3. Done 2026‑10‑26: public `/our-work` (programs with funding campaigns and causes, `getPrograms`) and `/about` (placeholder copy, editable in Builder) — header links point there (D-26).
 4. Optional: raise `AbcHopeAgentSupport` coverage (the real MessagingSession path can't be built in tests).

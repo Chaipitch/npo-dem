@@ -70,6 +70,16 @@ describe("c-donor-monthly-gifts", () => {
     expect($(el, '[data-action="resume"]')).toBeNull();
   });
 
+  it("explains that changing the schedule means a new gift", async () => {
+    const el = await mount([{ ...ACTIVE, period: "Weekly" }]);
+    expect(text(el, '[data-id="schedule-note"]')).toBe(
+      "Want a different schedule (weekly, monthly or yearly)? Cancel the gift and start a new one."
+    );
+    click(el, "open-amount");
+    await flush();
+    expect(text(el, ".panel .hint")).toContain("The gift stays weekly.");
+  });
+
   it("shows the schedule period after the amount", async () => {
     const el = await mount([{ ...ACTIVE, amount: 300, period: "Weekly" }]);
     expect(text(el, '[data-id="type"]')).toBe("Recurring (Weekly)");

@@ -77,7 +77,7 @@ deployment was created for the site instead of changing a shared one:
 
 - MessagingChannel `ABC_Hope_Chat` — copy of Donor_Support_Agent with `authMode = UnAuth`; same routing
   (flow `NGO_Donor_Support_MIAW`, queue `Donor_Support`) — no new flow.
-- EmbeddedServiceConfig `ABC_Hope_Chat` — `areGuestUsersAllowed = true`, `site = ABC_Hope1` (must be the
+- (Superseded 2026‑10‑26 by `ABC_Hope_Web_Chat`, D-25/D-26; deleted.) EmbeddedServiceConfig `ABC_Hope_Chat` — `areGuestUsersAllowed = true`, `site = ABC_Hope1` (must be the
   LWR/"Picasso" site record).
 - Site domain already on the CORS allowlist (`https://te1791557923677.my.site.com`, `*.my.site.com`).
 - **Remaining manual step:** drop the _Embedded Messaging_ component (`experience_messaging:embeddedMessaging`)

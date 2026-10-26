@@ -62,6 +62,10 @@ export default class DonorMonthlyGifts extends LightningElement {
   get isEmpty() {
     return this.loaded && !this.loadError && this.gifts.length === 0;
   }
+  /** Text before the link; kept in JS so the space before the link survives template formatting. */
+  get scheduleNoteLead() {
+    return "Want a different schedule (weekly, monthly or yearly)? Cancel the gift and ";
+  }
   get pauseOptions() {
     return PAUSE_MONTHS.map((m) => ({
       value: String(m),
@@ -87,6 +91,7 @@ export default class DonorMonthlyGifts extends LightningElement {
           ? `${this.currencyLabel} ${formatNumber(g.amount)} / ${period.unit}`
           : "Recurring gift",
         amountLabel: `New amount per ${period.unit} (${this.currencyLabel})`,
+        periodWord: period.type.toLowerCase(),
         meta: meta.join(" · "),
         isPaused: g.isPaused,
         cardClass: g.isPaused ? "gift gift_paused" : "gift",

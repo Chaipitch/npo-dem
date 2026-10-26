@@ -418,6 +418,73 @@ public without sharing class DonationIntakeService {
     public String summary;
   }
 
+  /** "Our Work" page (D-26): an active program with the open campaigns and causes that fund it. */
+  public class ProgramCard {
+    @AuraEnabled
+    public String name;
+    @AuraEnabled
+    public String summary;
+    @AuraEnabled
+    public List<String> campaigns = new List<String>();
+    @AuraEnabled
+    public List<String> causes = new List<String>();
+  }
+
+  /**
+   * Active programs (D-21), each with the open campaigns (D-18) and active causes that fund it.
+   * Programs funding an open campaign come first, then the rest, each group by name.
+   */
+  public static List<ProgramCard> getPrograms() {
+    Map<Id, ProgramCard> byId = new Map<Id, ProgramCard>();
+    for (Program p : [
+      SELECT Id, Name, Summary
+      FROM Program
+      WHERE Status = 'Active'
+      ORDER BY Name
+      LIMIT 50
+    ]) {
+      ProgramCard c = new ProgramCard();
+      c.name = p.Name;
+      c.summary = p.Summary;
+      byId.put(p.Id, c);
+    }
+    if (byId.isEmpty()) {
+      return new List<ProgramCard>();
+    }
+    Map<Id, String> openCampaigns = new Map<Id, String>();
+    for (CampaignCard card : getCampaigns()) {
+      openCampaigns.put(card.id, card.name);
+    }
+    for (GiftDefaultDesignation gdd : [
+      SELECT
+        ParentRecordId,
+        GiftDesignation.Name,
+        GiftDesignation.NGOTV_Program__c
+      FROM GiftDefaultDesignation
+      WHERE
+        ParentRecordId IN :openCampaigns.keySet()
+        AND GiftDesignation.IsActive = TRUE
+        AND GiftDesignation.NGOTV_Program__c IN :byId.keySet()
+      ORDER BY AllocatedPercentage DESC
+    ]) {
+      ProgramCard c = byId.get(gdd.GiftDesignation.NGOTV_Program__c);
+      String campaign = openCampaigns.get(gdd.ParentRecordId);
+      if (!c.campaigns.contains(campaign)) {
+        c.campaigns.add(campaign);
+      }
+      if (!c.causes.contains(gdd.GiftDesignation.Name)) {
+        c.causes.add(gdd.GiftDesignation.Name);
+      }
+    }
+    List<ProgramCard> funded = new List<ProgramCard>();
+    List<ProgramCard> others = new List<ProgramCard>();
+    for (ProgramCard c : byId.values()) {
+      (c.campaigns.isEmpty() ? others : funded).add(c);
+    }
+    funded.addAll(others);
+    return funded;
+  }
+
   public class CampaignDetail {
     @AuraEnabled
     public CampaignCard card;
