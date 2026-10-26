@@ -66,3 +66,65 @@ describe("c-abc-hope-portal-layout header question box", () => {
     expect(received).toEqual([]);
   });
 });
+
+describe("c-abc-hope-portal-layout active sidebar item", () => {
+  const { CurrentPageReference } = require("lightning/navigation");
+  const flush = () => Promise.resolve().then(() => Promise.resolve());
+  const activeLabels = (el) =>
+    [...el.shadowRoot.querySelectorAll(".nav-item_on")].map((a) =>
+      a.textContent.trim()
+    );
+  beforeAll(() => {
+    // Run the "after the router has moved" re-read at once.
+    window.requestAnimationFrame = (cb) => {
+      cb();
+      return 0;
+    };
+  });
+  afterEach(() => {
+    while (document.body.firstChild)
+      document.body.removeChild(document.body.firstChild);
+    window.history.replaceState(null, "", "/");
+  });
+  function mountAt(url) {
+    window.history.replaceState(null, "", url);
+    const el = createElement("c-abc-hope-portal-layout", {
+      is: AbcHopePortalLayout
+    });
+    document.body.appendChild(el);
+    return el;
+  }
+
+  it("ignores the query string on first load", async () => {
+    const el = mountAt("/dashboard?t=123");
+    await flush();
+    expect(activeLabels(el)).toEqual(["Home"]);
+  });
+
+  it("follows section links and router navigation", async () => {
+    const el = mountAt("/dashboard");
+    await flush();
+    window.history.pushState(null, "", "/dashboard#campaigns");
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    await flush();
+    expect(activeLabels(el)).toEqual(["Campaigns"]);
+
+    // The LWR router moves without hashchange/popstate; the page reference wire fires instead.
+    window.history.pushState(null, "", "/my-profile");
+    CurrentPageReference.emit({ attributes: { name: "My_Profile__c" } });
+    await flush();
+    expect(activeLabels(el)).toEqual(["My Profile"]);
+  });
+
+  it("highlights the clicked item straight away", async () => {
+    const el = mountAt("/dashboard");
+    await flush();
+    const stories = [...el.shadowRoot.querySelectorAll(".nav-item")].find(
+      (a) => a.textContent.trim() === "Stories"
+    );
+    window.history.pushState(null, "", "/dashboard#stories");
+    stories.dispatchEvent(new CustomEvent("click"));
+    await flush();
+    expect(activeLabels(el)).toEqual(["Stories"]);
+  });
+});
