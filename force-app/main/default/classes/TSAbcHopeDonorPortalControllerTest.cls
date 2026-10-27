@@ -321,6 +321,16 @@ private class TSAbcHopeDonorPortalControllerTest {
       null
     );
     Assert.isFalse(resumed.gifts[0].isPaused, resumed.message);
+
+    // Paused again after a resume: still from today, not from the later open-ended schedule (D-44).
+    TSAbcHopeDonorPortalController.MonthlyGiftsResult again = TSAbcHopeDonorPortalController.manageMonthlyGift(
+      gifts[0].id,
+      'pause',
+      1,
+      null
+    );
+    Assert.isTrue(again.gifts[0].isPaused, again.message);
+    Assert.areEqual(Date.today(), again.gifts[0].pausedFrom);
   }
 
   @IsTest

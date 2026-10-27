@@ -501,3 +501,14 @@ instead of failing when it is already scheduled.
   pause starts today." Checked in the org (rolled back): new monthly gift → Pause 1 month → Paused, next 1 Dec 2026;
   Resume → Active, next 1 Nov 2026. A change of amount still applies from tomorrow.
 - **Portal sidebar:** at 1280px and narrower the sidebar is a hamburger drawer (was 1024px).
+
+### D-44 · Pause the schedule that covers today, not the open-ended one — Accepted (user report, 2026‑10‑27)
+
+- **Bug:** NPC splits schedules on every pause and resume. Resuming a pause that started today turns it back into a
+  bounded CreateTransactions schedule and leaves the open-ended schedule starting after it. The next Pause used the
+  open-ended schedule's start, so it was set for a later date. The gift stayed Active and showed an upcoming pause
+  (e.g. `6gcg7000000OXyvAAG`: Pause, Resume, Pause, Resume, Pause → a pause planned for 27 Feb 2027).
+- **Fix:** `TSAbcHopeMonthlyGiftService.pause` and `TSAbcHopeAgentMonthlyGifts` pause the CreateTransactions
+  schedule covering today (falling back to the open-ended one). NPC accepts a pause on a bounded schedule. Checked
+  in the org (rolled back) on that gift: Resume removes the planned pause, then Pause → "Paused from 10/27/2026 to
+  11/26/2026", Status Paused, next 1 Dec 2026. The portal controller test now pauses again after a resume.
