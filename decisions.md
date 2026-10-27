@@ -489,5 +489,5 @@ instead of failing when it is already scheduled.
   the running user's date (the acting user in the trigger, the scheduling user in the job), skips a gift NPC refuses
   instead of failing the run, and the job runs **hourly at :15** (`scheduleHourly()`, cron `0 15 * * * ?`) so a new
   day is picked up within the hour. Replaces D-40's daily 00:15 run and D-39's America/Los_Angeles.
-- The job runs as the admin who scheduled it; with that user on Los Angeles time a pause turns Paused from 14:00–15:00
-  Bangkok time on its start day. Setting that user's time zone to Bangkok would make it flip just after midnight.
+- The job runs as the admin who scheduled it. That user (Wittawat) was set to Asia/Bangkok on 27 Oct and the job
+  rescheduled, so a pause turns Paused at about 00:15 Bangkok time on its start day.
