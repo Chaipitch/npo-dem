@@ -467,3 +467,15 @@ inserted, updated or deleted: site, agent or Salesforce) and from a daily schedu
 `TS ABC Hope recurring gift pause sync` (`TSAbcHopeCommitmentPauseSync.scheduleDaily()`), so pauses that start or end
 with the calendar are picked up. NPC's resume action already sets Active and recalculates the next date.
 **Scheduled** on 2026‑10‑27 with the org owner's go-ahead (first run 27 Oct 00:15 Los Angeles time; Setup → Scheduled Jobs).
+
+### D-41 · Recurring gifts keep their campaign — Accepted (user, 2026‑10‑27)
+
+NPC's pause, resume and change-amount actions save new `GiftCommitmentSchedule` rows without a campaign, and NPC
+copies the schedule's campaign onto the next instalment, so those instalments dropped out of the campaign's raised
+amount (and were named "No campaign - …"). `TSAbcHopeCommitmentCampaign`, from the before-insert triggers on
+GiftCommitmentSchedule (`TSAbcHopeGiftScheduleSync`) and GiftTransaction (`TSAbcHopeGiftTransactionNaming`), gives a
+new schedule or instalment without a campaign its commitment's campaign; a campaign set on purpose is kept.
+`scripts/apex/fillCommitmentCampaigns.apex` backfilled 5 schedules and 3 instalments on 27 Oct (NPC refuses to change
+the campaign on 3 older schedules that already have transactions; their instalments were fixed directly), then
+`renameGifts.apex` refreshed the 3 names. `TSAbcHopeCommitmentPauseSync.scheduleDaily()` now returns the existing job
+instead of failing when it is already scheduled.

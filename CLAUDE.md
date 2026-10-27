@@ -69,6 +69,7 @@ force-app/main/default/
   classes/TSAbcHopeGiftNaming*    Gift naming rule "Campaign - Cause - Donor - date time", org time zone (D-38, D-39)
   triggers/TSAbcHopeGift*Naming   Name every new gift/commitment; re-name when its cause changes (D-39)
   classes/TSAbcHopeCommitmentPauseSync*, triggers/TSAbcHopeGiftScheduleSync   Status Paused/Active + Next Transaction Date from pause schedules; daily job (D-40)
+  classes/TSAbcHopeCommitmentCampaign*    New schedules/instalments without a campaign take the commitment's (D-41)
   aiAuthoringBundles/ABC_Hope_Donor_Assistant   Agent Script (.agent) for the agent
   flows/ABC_Hope_Chat_Routing    Omni-Channel routing → the agent (the only flow; approved exception)
   messagingChannels/, EmbeddedServiceConfig/    ABC Hope Chat channel + deployment
@@ -97,6 +98,7 @@ sf apex run -o npo-demo -f scripts/apex/seedCampaigns.apex
 sf apex run -o npo-demo -f scripts/apex/seedMayaHistory.apex
 sf apex run -o npo-demo -f scripts/apex/seedPrograms.apex
 sf apex run -o npo-demo -f scripts/apex/seedProgramDelivery.apex
+sf apex run -o npo-demo -f scripts/apex/fillCommitmentCampaigns.apex   # instalments missing a campaign (D-41)
 sf apex run -o npo-demo -f scripts/apex/renameGifts.apex   # gift names: Campaign - Cause - Donor - date (D-38)
 
 # site pages after editing scripts/sitePages.py

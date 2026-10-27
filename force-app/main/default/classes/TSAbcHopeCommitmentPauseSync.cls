@@ -15,8 +15,16 @@ public without sharing class TSAbcHopeCommitmentPauseSync implements Schedulable
   public static final String JOB_NAME = 'TS ABC Hope recurring gift pause sync';
   static final String CRON_DAILY = '0 15 0 * * ?'; // 00:15 every day
 
-  /** Schedules the daily run (once per org); returns the job Id. */
+  /** Schedules the daily run once per org; returns the job Id (the existing one if already scheduled). */
   public static Id scheduleDaily() {
+    for (CronTrigger existing : [
+      SELECT Id
+      FROM CronTrigger
+      WHERE CronJobDetail.Name = :JOB_NAME
+      LIMIT 1
+    ]) {
+      return existing.Id;
+    }
     return System.schedule(
       JOB_NAME,
       CRON_DAILY,
