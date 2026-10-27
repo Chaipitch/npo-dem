@@ -1,9 +1,7 @@
 @IsTest
 private class TSAbcHopeCommitmentPauseSyncTest {
   static Date today() {
-    return Date.valueOf(
-      Datetime.now().format('yyyy-MM-dd', TSAbcHopeGiftNaming.timeZone)
-    );
+    return Date.today(); // the running user's date, as NPC checks it
   }
 
   static GiftCommitmentSchedule schedule(
@@ -134,7 +132,7 @@ private class TSAbcHopeCommitmentPauseSyncTest {
       'weekly from the restart date'
     );
 
-    // The daily run finds nothing left to change.
+    // The hourly run finds nothing left to change.
     TSAbcHopeCommitmentPauseSync.syncDue(t);
     Assert.areEqual('Active', reload(gc.Id).Status);
   }
@@ -166,13 +164,13 @@ private class TSAbcHopeCommitmentPauseSyncTest {
   }
 
   @IsTest
-  static void theDailyJobCanBeScheduledAndRuns() {
+  static void theHourlyJobCanBeScheduledAndRuns() {
     Test.startTest();
-    Id jobId = TSAbcHopeCommitmentPauseSync.scheduleDaily();
+    Id jobId = TSAbcHopeCommitmentPauseSync.scheduleHourly();
     new TSAbcHopeCommitmentPauseSync().execute(null);
     Test.stopTest();
     Assert.areEqual(
-      '0 15 0 * * ?',
+      '0 15 * * * ?',
       [SELECT CronExpression FROM CronTrigger WHERE Id = :jobId].CronExpression
     );
   }

@@ -445,7 +445,7 @@ names, e.g. "Jim Simon - 1000.00 - 2026-10-25". The rule now lives in one class,
 - **The site:** `TSAbcHopeDonationIntakeService` returns the name as saved, so the thank-you reference matches.
 - **`scripts/apex/renameGifts.apex`** for records saved before the triggers (ABC Hope scope only).
 
-Time zone: the **org's default** (Setup → Company Information; America/Los_Angeles), read at run time. Date = the
+Time zone: the **org's default** (Setup → Company Information; America/Los_Angeles until D-42, now Asia/Bangkok), read at run time. Date = the
 gift's own date, or the creation date when the two are within a day of each other (a gift saved "today" by someone in
 another time zone); back-dated history and future instalments keep their own date. A name typed by hand on a new
 record is replaced; renaming an existing record by hand is kept until its cause changes.
@@ -479,3 +479,15 @@ new schedule or instalment without a campaign its commitment's campaign; a campa
 the campaign on 3 older schedules that already have transactions; their instalments were fixed directly), then
 `renameGifts.apex` refreshed the 3 names. `TSAbcHopeCommitmentPauseSync.scheduleDaily()` now returns the existing job
 instead of failing when it is already scheduled.
+
+### D-42 · Org time zone Bangkok; pause sync hourly on the running user's date — Accepted (user, 2026‑10‑27)
+
+- The org's default time zone is **Asia/Bangkok** (was America/Los_Angeles; Setup → Company Information). Gift
+  names use it (D-39), and `renameGifts.apex` re-ran: 8 commitments and 32 gifts now show Bangkok times.
+- NPC checks "today" for Paused/Active in the **running user's** time zone, not the org's: a sync run as an admin on
+  Los Angeles time was refused Paused for a pause that had started in Bangkok. So `TSAbcHopeCommitmentPauseSync` uses
+  the running user's date (the acting user in the trigger, the scheduling user in the job), skips a gift NPC refuses
+  instead of failing the run, and the job runs **hourly at :15** (`scheduleHourly()`, cron `0 15 * * * ?`) so a new
+  day is picked up within the hour. Replaces D-40's daily 00:15 run and D-39's America/Los_Angeles.
+- The job runs as the admin who scheduled it; with that user on Los Angeles time a pause turns Paused from 14:00–15:00
+  Bangkok time on its start day. Setting that user's time zone to Bangkok would make it flip just after midnight.
