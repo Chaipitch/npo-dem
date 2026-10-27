@@ -27,6 +27,7 @@ re-engagement journey for Maya Grande (#2), guest donation journey (#3), 10-item
 | Org Id / instance    | `00Dg700000KmYYXEA3` · `https://te1791557923677.my.salesforce.com`                                                  |
 | API version          | 68.0 (project); classes and LWC at 65.0                                                                             |
 | Person Accounts      | Enabled (`NGO_Fundraising_Supporter` record type for new donors)                                                    |
+| Time zone            | Org default **Asia/Bangkok** (D-42); NPC judges "today" in the acting user's zone                                   |
 | Currency             | USD only; the UI labels amounts **USD** ("USD 1,000"; D-05, changed from THB on 2026‑10‑26)                         |
 | Site URL             | **https://te1791557923677.my.site.com/** (LWR at the domain root; `/vforcesite` is only the Visualforce/login side) |
 | Site metadata        | Network `ABC Hope`, LWR bundle `site/ABC_Hope1`, CustomSite `ABC_Hope`                                              |
@@ -68,7 +69,7 @@ force-app/main/default/
   classes/TSAbcHopeAgent*         Agent actions: CampaignInfo, GivingSummary, MonthlyGifts, UpdateProfile, Support (+ tests)
   classes/TSAbcHopeGiftNaming*    Gift naming rule "Campaign - Cause - Donor - date time", org time zone (D-38, D-39)
   triggers/TSAbcHopeGift*Naming   Name every new gift/commitment; re-name when its cause changes (D-39)
-  classes/TSAbcHopeCommitmentPauseSync*, triggers/TSAbcHopeGiftScheduleSync   Status Paused/Active + Next Transaction Date from pause schedules; daily job (D-40)
+  classes/TSAbcHopeCommitmentPauseSync*, triggers/TSAbcHopeGiftScheduleSync   Status Paused/Active + Next Transaction Date from pause schedules; hourly job (D-40, D-42)
   classes/TSAbcHopeCommitmentCampaign*    New schedules/instalments without a campaign take the commitment's (D-41)
   aiAuthoringBundles/ABC_Hope_Donor_Assistant   Agent Script (.agent) for the agent
   flows/ABC_Hope_Chat_Routing    Omni-Channel routing → the agent (the only flow; approved exception)

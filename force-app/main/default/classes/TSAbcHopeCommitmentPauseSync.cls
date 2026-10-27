@@ -8,15 +8,17 @@
  *  - Paused, no pause today → Status = Active, Next Transaction Date = the next gift from today.
  * Anything else is left to NPC (an upcoming pause already moves the next date past itself).
  *
- * Runs from the trigger on GiftCommitmentSchedule (a pause added, changed or removed) and daily as a scheduled
- * job (pauses start and end with the calendar). "Today" is the org's time zone (TSAbcHopeGiftNaming.timeZone).
+ * Runs from the trigger on GiftCommitmentSchedule (a pause added, changed or removed) and hourly as a scheduled
+ * job (pauses start and end with the calendar). "Today" is the running user's date, because that is the date NPC
+ * checks when it accepts Paused or Active: the acting user for the trigger, the scheduling user for the job. An
+ * hourly run catches the start of a new day within the hour. A gift NPC refuses is skipped, not the whole run.
  */
 public without sharing class TSAbcHopeCommitmentPauseSync implements Schedulable {
   public static final String JOB_NAME = 'TS ABC Hope recurring gift pause sync';
-  static final String CRON_DAILY = '0 15 0 * * ?'; // 00:15 every day
+  static final String CRON_HOURLY = '0 15 * * * ?'; // at :15 every hour
 
-  /** Schedules the daily run once per org; returns the job Id (the existing one if already scheduled). */
-  public static Id scheduleDaily() {
+  /** Schedules the hourly run once per org; returns the job Id (the existing one if already scheduled). */
+  public static Id scheduleHourly() {
     for (CronTrigger existing : [
       SELECT Id
       FROM CronTrigger
@@ -27,13 +29,13 @@ public without sharing class TSAbcHopeCommitmentPauseSync implements Schedulable
     }
     return System.schedule(
       JOB_NAME,
-      CRON_DAILY,
+      CRON_HOURLY,
       new TSAbcHopeCommitmentPauseSync()
     );
   }
 
   public void execute(SchedulableContext context) {
-    syncDue(orgToday());
+    syncDue(Date.today());
   }
 
   /** Commitments whose pause covers today, or that are still Paused. */
@@ -64,7 +66,7 @@ public without sharing class TSAbcHopeCommitmentPauseSync implements Schedulable
   }
 
   public static void sync(Set<Id> commitmentIds) {
-    sync(commitmentIds, orgToday());
+    sync(commitmentIds, Date.today());
   }
 
   public static void sync(Set<Id> commitmentIds, Date today) {
@@ -136,7 +138,17 @@ public without sharing class TSAbcHopeCommitmentPauseSync implements Schedulable
         );
       }
     }
-    update changed;
+    for (Database.SaveResult r : Database.update(changed, false)) {
+      if (!r.isSuccess()) {
+        System.debug(
+          LoggingLevel.WARN,
+          'Pause sync skipped ' +
+            r.getId() +
+            ': ' +
+            r.getErrors()[0].getMessage()
+        );
+      }
+    }
   }
 
   /** The first gift date on or after `fromDate`, on the CreateTransactions schedule that covers it. */
@@ -207,12 +219,6 @@ public without sharing class TSAbcHopeCommitmentPauseSync implements Schedulable
       year,
       month,
       Math.min(day, Date.daysInMonth(year, month))
-    );
-  }
-
-  static Date orgToday() {
-    return Date.valueOf(
-      Datetime.now().format('yyyy-MM-dd', TSAbcHopeGiftNaming.timeZone)
     );
   }
 }
