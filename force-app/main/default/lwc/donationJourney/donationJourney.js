@@ -3,6 +3,7 @@ import { CurrentPageReference } from "lightning/navigation";
 import basePath from "@salesforce/community/basePath";
 import getOptions from "@salesforce/apex/DonationIntakeController.getOptions";
 import submitDonation from "@salesforce/apex/DonationIntakeController.submitDonation";
+import getCampaigns from "@salesforce/apex/DonationIntakeController.getCampaigns";
 import { campaignPhoto } from "c/abcHopeCampaignPhotos";
 import { markGiftsChanged } from "c/abcHopeGiftEvents";
 
@@ -64,6 +65,9 @@ export default class DonationJourney extends LightningElement {
   result;
   // Campaign chosen via ?campaign= (e.g. from a dashboard card); falls back to the configured campaign.
   urlCampaign;
+  // Campaign picked in the Campaign list on step 1 (header Donate / Get Involved arrive without one).
+  pickedCampaign;
+  openCampaigns = [];
   optionsCampaign;
   optionsDesignationNames;
   activeCampaign;
@@ -88,13 +92,24 @@ export default class DonationJourney extends LightningElement {
     this.urlCampaign = state.campaign
       ? String(state.campaign).slice(0, 80)
       : undefined;
-    const useUrl = this.urlCampaign && this.urlCampaign !== this.campaignName;
-    // A different campaign uses its own designations (server picks them); the configured
-    // campaign keeps the admin's designation list.
-    this.optionsCampaign = useUrl ? this.urlCampaign : this.campaignName;
-    this.optionsDesignationNames = useUrl ? "" : this.designationNames;
-    if (useUrl) {
+    this.pickedCampaign = undefined;
+    this.useCampaign(this.urlCampaign || this.campaignName);
+  }
+
+  /** Load a campaign's options: its own causes, or the admin's list for the configured campaign. */
+  useCampaign(name) {
+    const isConfigured = name === this.campaignName;
+    if (name !== this.optionsCampaign) {
       this.designationId = undefined;
+    }
+    this.optionsCampaign = name;
+    this.optionsDesignationNames = isConfigured ? this.designationNames : "";
+  }
+
+  @wire(getCampaigns)
+  wiredCampaigns({ data }) {
+    if (data) {
+      this.openCampaigns = data.map((c) => c.name);
     }
   }
 
@@ -165,7 +180,7 @@ export default class DonationJourney extends LightningElement {
     return campaignPhoto(this.campaignLabel, { width: 1280, height: 400 });
   }
   get subtitleText() {
-    return this.urlCampaign && this.campaignDescription
+    return (this.urlCampaign || this.pickedCampaign) && this.campaignDescription
       ? this.campaignDescription
       : this.subheading;
   }
@@ -284,6 +299,25 @@ export default class DonationJourney extends LightningElement {
     this.otherAmount = event.target.value;
     this.clearError("amount");
   }
+  /** The open campaigns, with the current one selected (kept even if it isn't in the list). */
+  get campaignOptions() {
+    const current = this.campaignLabel;
+    const names = this.openCampaigns.includes(current)
+      ? this.openCampaigns
+      : [current, ...this.openCampaigns];
+    return names.map((n) => ({ value: n, label: n, selected: n === current }));
+  }
+  get showCampaignPicker() {
+    return this.openCampaigns.length > 0;
+  }
+  handleCampaign(event) {
+    const name = event.target.value;
+    if (!name || name === this.campaignLabel) return;
+    this.pickedCampaign = name;
+    this.useCampaign(name);
+    this.clearError("designation");
+  }
+
   handleDesignation(event) {
     this.designationId = event.target.value;
     this.clearError("designation");
