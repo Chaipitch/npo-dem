@@ -2,6 +2,7 @@ import { createElement } from "lwc";
 import DonationJourney, { parseAmounts, formatNumber } from "c/donationJourney";
 import getOptions from "@salesforce/apex/DonationIntakeController.getOptions";
 import submitDonation from "@salesforce/apex/DonationIntakeController.submitDonation";
+import getCampaigns from "@salesforce/apex/DonationIntakeController.getCampaigns";
 import { CurrentPageReference } from "lightning/navigation";
 
 jest.mock(
@@ -11,6 +12,14 @@ jest.mock(
 );
 jest.mock(
   "@salesforce/apex/DonationIntakeController.getOptions",
+  () => {
+    const { createApexTestWireAdapter } = require("@salesforce/sfdx-lwc-jest");
+    return { default: createApexTestWireAdapter(jest.fn()) };
+  },
+  { virtual: true }
+);
+jest.mock(
+  "@salesforce/apex/DonationIntakeController.getCampaigns",
   () => {
     const { createApexTestWireAdapter } = require("@salesforce/sfdx-lwc-jest");
     return { default: createApexTestWireAdapter(jest.fn()) };
@@ -327,6 +336,62 @@ describe("c-donation-journey", () => {
         configurable: true
       });
     }
+  });
+
+  it("lets the donor pick the campaign on step 1", async () => {
+    const el = mount();
+    // Header Donate / Get Involved: /donate with no ?campaign=.
+    CurrentPageReference.emit({ state: {} });
+    getOptions.emit(OPTIONS);
+    getCampaigns.emit([
+      { name: "Christmas Toy Drive 2026" },
+      { name: "Christmas Giving 2026" },
+      { name: "Clean Water for Rural Schools" }
+    ]);
+    await flush();
+    const select = $(el, '[data-id="campaign"]');
+    expect([...select.options].map((o) => o.value)).toEqual([
+      "Christmas Toy Drive 2026",
+      "Christmas Giving 2026",
+      "Clean Water for Rural Schools"
+    ]);
+    expect(select.value).toBe("Christmas Giving 2026");
+    expect(getOptions.getLastConfig()).toEqual({
+      campaignName: "Christmas Giving 2026",
+      designationNames: "School Supplies,Learning Kits,Where Most Needed"
+    });
+
+    select.value = "Christmas Toy Drive 2026";
+    select.dispatchEvent(new CustomEvent("change"));
+    await flush();
+    // Another campaign loads its own causes (no admin list).
+    expect(getOptions.getLastConfig()).toEqual({
+      campaignName: "Christmas Toy Drive 2026",
+      designationNames: ""
+    });
+    getOptions.emit({
+      ...OPTIONS,
+      campaignName: "Christmas Toy Drive 2026",
+      campaignDescription: "A Christmas present for every child.",
+      designations: [
+        { label: "Toys & Gifts", value: "t1" },
+        { label: "Warm Clothes", value: "t2" }
+      ],
+      defaultDesignationId: "t1"
+    });
+    await flush();
+    expect($(el, ".eyebrow").textContent).toBe("Christmas Toy Drive 2026");
+    expect($(el, ".subtitle").textContent).toBe(
+      "A Christmas present for every child."
+    );
+    expect($(el, '[data-id="designation"]').value).toBe("t1");
+  });
+
+  it("hides the campaign picker until open campaigns load", async () => {
+    const el = mount();
+    getOptions.emit(OPTIONS);
+    await flush();
+    expect($(el, '[data-id="campaign"]')).toBeNull();
   });
 
   it("donates to the campaign chosen in the URL", async () => {

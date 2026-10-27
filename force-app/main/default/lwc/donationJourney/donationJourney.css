@@ -629,3 +629,7 @@ p {
   font-weight: 600;
   color: var(--dj-purple);
 }
+/* Campaign picker on step 1 sits above the frequency toggle. */
+.field_campaign {
+  margin-bottom: 18px;
+}

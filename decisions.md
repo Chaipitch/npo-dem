@@ -386,3 +386,11 @@ that year (each once, with its program and amount, largest first; "New" marks th
 active recurring gift with no payment yet shows "Recurring gift"). Built in Apex as `Dashboard.journeyYears` from the
 same counted gifts as Total Contributions, so the year totals add up to it. The old `journey` milestones stay for
 the agent and the chat panel's "journey" answer.
+
+### D-36 · Donors choose the campaign on the donation page — Accepted (user, 2026‑10‑27)
+
+The header's **Get Involved** and **Donate** open `/donate` with no campaign, which used to mean the configured
+campaign (Christmas Giving 2026) only. Step 1 now has a **Campaign** list of every open campaign (`getCampaigns`, the
+same list as the cards and the carousel), with the current one selected: the configured campaign, or `?campaign=` when
+a card or program page sent the donor. Picking another campaign reloads its own causes (the admin's cause list applies
+only to the configured campaign), photo and description. The list stays hidden until the campaigns load.

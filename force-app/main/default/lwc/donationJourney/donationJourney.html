@@ -38,6 +38,32 @@
           <h2 class="title">{heading}</h2>
           <p class="subtitle">{subtitleText}</p>
 
+          <template lwc:if={showCampaignPicker}>
+            <label class="field field_campaign">
+              <span class="field-label">Campaign</span>
+              <span class="select-wrap">
+                <span class="select-icon"
+                  ><c-abc-hope-icon name="gift" size="22"></c-abc-hope-icon
+                ></span>
+                <select
+                  class="input select"
+                  data-id="campaign"
+                  onchange={handleCampaign}
+                >
+                  <template for:each={campaignOptions} for:item="opt">
+                    <option
+                      key={opt.value}
+                      value={opt.value}
+                      selected={opt.selected}
+                    >
+                      {opt.label}
+                    </option>
+                  </template>
+                </select>
+              </span>
+            </label>
+          </template>
+
           <div class="toggle" role="group" aria-label="Donation frequency">
             <button
               type="button"
