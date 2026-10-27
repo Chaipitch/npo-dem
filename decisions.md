@@ -424,5 +424,11 @@ New site gifts (GiftTransaction) and recurring gifts (GiftCommitment, same name 
 **Campaign - Cause - Donor - yyyy-MM-dd HH:mm**, e.g. "Christmas Toy Drive 2026 - Toys & Gifts - Maya Grande -
 2026-10-27 09:15"; the name is also the reference on the thank-you step. Long names: each part is shortened on its own
 to campaign 60, cause 40 and donor 60 characters (ending in "..."), so the date and time are always kept and the
-name stays under 190 of the 255 characters Name holds. The time is in the submitting user's time zone. Gifts saved
-before 27 Oct keep their old "Campaign - Donor - date" names.
+name stays under 190 of the 255 characters Name holds. The time is in the submitting user's time zone. Existing ABC Hope gifts and commitments were renamed too with `scripts/apex/renameGifts.apex`
+(see the D-38 update below).
+
+**D-38 update (2026‑10‑27):** `scripts/apex/renameGifts.apex` renamed 7 commitments and 29 gifts: those on the ABC
+Hope campaigns or by Maya, the site guest user, a portal user or the agent; the org's other demo gifts are untouched.
+Date = the gift's own date (TransactionDate, or the commitment's start date), time = when the record was created, in
+Bangkok time for all of them; the cause is the gift's designation (an instalment takes its commitment's); "No
+campaign" / "No cause" when missing. Idempotent: a second run renames nothing.
