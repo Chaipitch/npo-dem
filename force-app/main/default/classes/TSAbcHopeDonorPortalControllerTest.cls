@@ -301,7 +301,7 @@ private class TSAbcHopeDonorPortalControllerTest {
     Assert.isTrue(paused.message.startsWith('Paused from'), paused.message);
     Assert.isTrue(paused.gifts[0].isPaused);
     Assert.areEqual(
-      Date.today().addDays(1).addMonths(2).addDays(-1),
+      Date.today().addMonths(2).addDays(-1),
       paused.gifts[0].pausedUntil
     );
     TSAbcHopeDonorPortalController.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();

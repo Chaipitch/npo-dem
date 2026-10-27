@@ -491,3 +491,13 @@ instead of failing when it is already scheduled.
   day is picked up within the hour. Replaces D-40's daily 00:15 run and D-39's America/Los_Angeles.
 - The job runs as the admin who scheduled it. That user (Wittawat) was set to Asia/Bangkok on 27 Oct and the job
   rescheduled, so a pause turns Paused at about 00:15 Bangkok time on its start day.
+
+### D-43 · A pause from the portal or the assistant starts today; portal sidebar collapses at 1280px — Accepted (user, 2026‑10‑27)
+
+- **Pause starts today** (was tomorrow) in `TSAbcHopeMonthlyGiftService.pause` and `TSAbcHopeAgentMonthlyGifts`:
+  the start is the donor's today (or the open schedule's start, if later). NPC accepts it, even for a gift created
+  today (it replaces that day's schedule; the Paid first payment stays), and the schedule trigger (D-40) then sets
+  Status **Paused** at once with Next Transaction Date = the first gift after the pause. The My Giving hint reads "The
+  pause starts today." Checked in the org (rolled back): new monthly gift → Pause 1 month → Paused, next 1 Dec 2026;
+  Resume → Active, next 1 Nov 2026. A change of amount still applies from tomorrow.
+- **Portal sidebar:** at 1280px and narrower the sidebar is a hamburger drawer (was 1024px).
