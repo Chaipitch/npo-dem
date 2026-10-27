@@ -424,11 +424,28 @@ New site gifts (GiftTransaction) and recurring gifts (GiftCommitment, same name 
 **Campaign - Cause - Donor - yyyy-MM-dd HH:mm**, e.g. "Christmas Toy Drive 2026 - Toys & Gifts - Maya Grande -
 2026-10-27 09:15"; the name is also the reference on the thank-you step. Long names: each part is shortened on its own
 to campaign 60, cause 40 and donor 60 characters (ending in "..."), so the date and time are always kept and the
-name stays under 190 of the 255 characters Name holds. The time is in the submitting user's time zone. Existing ABC Hope gifts and commitments were renamed too with `scripts/apex/renameGifts.apex`
+name stays under 190 of the 255 characters Name holds. The time zone is the org's default (D-39). Existing ABC Hope gifts and commitments were renamed too with `scripts/apex/renameGifts.apex`
 (see the D-38 update below).
 
 **D-38 update (2026‑10‑27):** `scripts/apex/renameGifts.apex` renamed 7 commitments and 29 gifts: those on the ABC
 Hope campaigns or by Maya, the site guest user, a portal user or the agent; the org's other demo gifts are untouched.
 Date = the gift's own date (TransactionDate, or the commitment's start date), time = when the record was created, in
-Bangkok time for all of them; the cause is the gift's designation (an instalment takes its commitment's); "No
+the org's time zone (D-39); the cause is the gift's designation (an instalment takes its commitment's); "No
 campaign" / "No cause" when missing. Idempotent: a second run renames nothing.
+
+### D-39 · Every new gift follows the naming rule, in the org's time zone — Accepted (user, 2026‑10‑27)
+
+Gifts made outside the site (in Salesforce, Gift Entry, imports, the agent, NPC-generated instalments) used other
+names, e.g. "Jim Simon - 1000.00 - 2026-10-25". The rule now lives in one class, `TSAbcHopeGiftNaming`, used by:
+
+- **Triggers** (records only, no flows): `TSAbcHopeGiftTransactionNaming` and `TSAbcHopeGiftCommitmentNaming`
+  (before insert) name every new gift and commitment; `TSAbcHopeGiftDesignationNaming` and
+  `TSAbcHopeGiftDefaultNaming` (after insert, update, delete) re-name the parent when its cause changes, because the
+  cause is saved just after the gift. An instalment without its own designation takes its commitment's cause.
+- **The site:** `TSAbcHopeDonationIntakeService` returns the name as saved, so the thank-you reference matches.
+- **`scripts/apex/renameGifts.apex`** for records saved before the triggers (ABC Hope scope only).
+
+Time zone: the **org's default** (Setup → Company Information; America/Los_Angeles), read at run time. Date = the
+gift's own date, or the creation date when the two are within a day of each other (a gift saved "today" by someone in
+another time zone); back-dated history and future instalments keep their own date. A name typed by hand on a new
+record is replaced; renaming an existing record by hand is kept until its cause changes.

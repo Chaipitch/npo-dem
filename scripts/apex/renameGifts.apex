@@ -1,12 +1,11 @@
 // Idempotent: renames ABC Hope gifts and recurring gifts to "Campaign - Cause - Donor - yyyy-MM-dd HH:mm" (D-38).
 // Scope: GiftTransaction / GiftCommitment on an ABC Hope campaign, or by Maya, or created by the site guest user,
 // a portal user or the agent. The org's other demo gifts are left alone.
-// Date = the gift's own date (TransactionDate, or the commitment's EffectiveStartDate); time = when it was created,
-// in TIME_ZONE (Bangkok, Maya's and the team's zone), so every renamed record uses one zone.
-// Parts are shortened like TSAbcHopeDonationIntakeService.buildName: campaign 60, cause 40, donor 60 characters.
+// Names come from TSAbcHopeGiftNaming.build (D-39), the same rule the site and the naming triggers use: the gift's
+// own date, the time it was created in the org's time zone, parts shortened to campaign 60, cause 40, donor 60 characters.
+// New records are named by the triggers; this script is for records saved before them.
 // Run: sf apex run -o npo-demo -f scripts/apex/renameGifts.apex
 Boolean DRY_RUN = false; // true: print the first renames and roll back
-String TIME_ZONE = 'Asia/Bangkok';
 
 Set<String> CAMPAIGNS = new Set<String>{
   'Christmas Giving 2026',
@@ -69,14 +68,12 @@ for (GiftTransactionDesignation gtd : [
 
 List<GiftCommitment> commitmentUpdates = new List<GiftCommitment>();
 for (GiftCommitment gc : commitments.values()) {
-  String name = String.join(
-    new List<String>{
-      part(gc.Campaign?.Name, 60, 'No campaign'),
-      part(commitmentCause.get(gc.Id), 40, 'No cause'),
-      part(gc.Donor?.Name, 60, 'Unknown donor'),
-      stamp(gc.EffectiveStartDate, gc.CreatedDate, TIME_ZONE)
-    },
-    ' - '
+  String name = TSAbcHopeGiftNaming.build(
+    gc.Campaign?.Name,
+    commitmentCause.get(gc.Id),
+    gc.Donor?.Name,
+    gc.EffectiveStartDate,
+    gc.CreatedDate
   );
   if (gc.Name != name) {
     commitmentUpdates.add(new GiftCommitment(Id = gc.Id, Name = name));
@@ -88,14 +85,12 @@ for (GiftTransaction gt : gifts.values()) {
   String cause = giftCause.containsKey(gt.Id)
     ? giftCause.get(gt.Id)
     : commitmentCause.get(gt.GiftCommitmentId);
-  String name = String.join(
-    new List<String>{
-      part(gt.Campaign?.Name, 60, 'No campaign'),
-      part(cause, 40, 'No cause'),
-      part(gt.Donor?.Name, 60, 'Unknown donor'),
-      stamp(gt.TransactionDate, gt.CreatedDate, TIME_ZONE)
-    },
-    ' - '
+  String name = TSAbcHopeGiftNaming.build(
+    gt.Campaign?.Name,
+    cause,
+    gt.Donor?.Name,
+    gt.TransactionDate,
+    gt.CreatedDate
   );
   if (gt.Name != name) {
     giftUpdates.add(new GiftTransaction(Id = gt.Id, Name = name));
@@ -130,13 +125,3 @@ for (GiftTransaction gt : giftUpdates) {
 }
 if (DRY_RUN)
   Database.rollback(sp);
-
-String part(String value, Integer maxLength, String fallback) {
-  return String.isBlank(value) ? fallback : value.normalizeSpace().abbreviate(maxLength);
-}
-
-// The gift's own date with the time the record was created, in the given time zone.
-String stamp(Date day, Datetime created, String timeZone) {
-  String dayText = day != null ? String.valueOf(day) : created.format('yyyy-MM-dd', timeZone);
-  return dayText + ' ' + created.format('HH:mm', timeZone);
-}
