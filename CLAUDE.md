@@ -94,6 +94,7 @@ sf apex run -o npo-demo -f scripts/apex/seedCampaigns.apex
 sf apex run -o npo-demo -f scripts/apex/seedMayaHistory.apex
 sf apex run -o npo-demo -f scripts/apex/seedPrograms.apex
 sf apex run -o npo-demo -f scripts/apex/seedProgramDelivery.apex
+sf apex run -o npo-demo -f scripts/apex/renameGifts.apex   # gift names: Campaign - Cause - Donor - date (D-38)
 
 # site pages after editing scripts/sitePages.py
 python3 scripts/sitePages.py && sf project deploy start -o npo-demo -d force-app/main/default/digitalExperiences/site/ABC_Hope1
