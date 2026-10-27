@@ -517,3 +517,11 @@ instead of failing when it is already scheduled.
   If a different amount starts before the pause would end, the donor is told how long the gift can be paused.
 - Checked on that gift (each rolled back): 1, 2, 3, 6 and 12 months all give "Paused from 10/27/2026", Status Paused,
   next gift the 1st after the pause. The portal controller test now pauses 3 months after a resume.
+
+### D-45 · Guests are told how to manage a recurring gift — Accepted (user, 2026‑10‑27)
+
+- Guests can give weekly, monthly or yearly, but only signed-in donors have My Giving (and the assistant's gift
+  actions). The donation journey's recurring hint and the thank-you step now say "To pause or stop it later, sign in
+  or contact the ABC Hope team." for guests, and "You can pause, change or stop it anytime on My Giving." for
+  signed-in donors (was "You can stop anytime." for everyone). One-time gifts show no note.
+- Thank-you step: a gap between the amount and "every month" (it read "USD 1,000every month").

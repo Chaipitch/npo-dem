@@ -130,6 +130,10 @@ describe("c-ts-abc-hope-donation-journey", () => {
     ]);
     expect($(el, ".period-btn_on").textContent.trim()).toBe("Monthly");
     expect($(el, ".hint").textContent).toContain("every month");
+    // Guests have no My Giving page to manage the gift.
+    expect($(el, ".hint").textContent).toContain(
+      "sign in or contact the ABC Hope team"
+    );
 
     click($$(el, ".period-btn")[2]);
     await flush();
@@ -255,6 +259,7 @@ describe("c-ts-abc-hope-donation-journey", () => {
       "Your details have been received"
     );
     expect($(el, ".thanks-amount").textContent).toContain("USD 1,000");
+    expect($(el, '[data-id="manage-note"]')).toBeNull(); // one-time gift
     // Guests have no dashboard: no redirect.
     expect($(el, '[data-id="redirect"]')).toBeNull();
     // Tells the rest of the site to reload totals and campaign progress.

@@ -408,6 +408,11 @@
                 <p class="muted">{result.designationName}</p>
               </div>
             </div>
+            <template lwc:if={resultManageNote}>
+              <p class="muted manage-note" data-id="manage-note">
+                {resultManageNote}
+              </p>
+            </template>
             <p class="ref">Reference: {result.reference}</p>
             <p class="notice notice_green">
               <span class="notice-icon notice-icon_green"

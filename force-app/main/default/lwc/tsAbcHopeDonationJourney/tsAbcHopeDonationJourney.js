@@ -252,7 +252,13 @@ export default class DonationJourney extends LightningElement {
     return this.isRecurring ? `Recurring (${this.period})` : "One-time";
   }
   get recurringHint() {
-    return `${this.currencyLabel} ${formatNumber(this.amount || 0)} will be given every ${this.periodUnit}. You can stop anytime.`;
+    return `${this.currencyLabel} ${formatNumber(this.amount || 0)} will be given every ${this.periodUnit}. ${this.manageNote}`;
+  }
+  /** Guests cannot manage a recurring gift on the site; only signed-in donors have My Giving. */
+  get manageNote() {
+    return this.isSignedIn
+      ? "You can pause, change or stop it anytime on My Giving."
+      : "To pause or stop it later, sign in or contact the ABC Hope team.";
   }
   get designationOptions() {
     return this.designations.map((d) => ({
@@ -526,6 +532,11 @@ export default class DonationJourney extends LightningElement {
   get resultAmountDisplay() {
     return this.result
       ? `${this.currencyLabel} ${formatNumber(this.result.amount)}`
+      : "";
+  }
+  get resultManageNote() {
+    return PERIODS.some((x) => x.value === this.result?.frequency)
+      ? this.manageNote
       : "";
   }
   get resultFrequencyNote() {

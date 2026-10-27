@@ -525,6 +525,16 @@ p {
   font-weight: 800;
   color: var(--dj-navy);
 }
+/* "USD 1,000 every month": the template's line break is not a space, so keep a gap here. */
+.thanks-amount .muted {
+  margin-left: 6px;
+  font-size: 16px;
+}
+.manage-note {
+  margin-top: 12px;
+  font-size: 14px;
+  text-align: center;
+}
 .ref {
   margin-top: 12px;
   font-size: 12px;
