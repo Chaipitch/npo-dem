@@ -417,3 +417,12 @@ AbcHopeAgentSupport, DonationIntakeService, DonorPortalController, DonorAgentCon
 active uses them: the site, the guest profile, both permission sets and agent v13 point only at the TS classes. They
 can be deleted once the old agent versions are removed. Don't re-activate v12 or older: its actions point at the old
 classes, which no permission set grants to the agent user any more.
+
+### D-38 · Gift names include the cause — Accepted (user, 2026‑10‑27)
+
+New site gifts (GiftTransaction) and recurring gifts (GiftCommitment, same name as their first payment) are named
+**Campaign - Cause - Donor - yyyy-MM-dd HH:mm**, e.g. "Christmas Toy Drive 2026 - Toys & Gifts - Maya Grande -
+2026-10-27 09:15"; the name is also the reference on the thank-you step. Long names: each part is shortened on its own
+to campaign 60, cause 40 and donor 60 characters (ending in "..."), so the date and time are always kept and the
+name stays under 190 of the 255 characters Name holds. The time is in the submitting user's time zone. Gifts saved
+before 27 Oct keep their old "Campaign - Donor - date" names.
