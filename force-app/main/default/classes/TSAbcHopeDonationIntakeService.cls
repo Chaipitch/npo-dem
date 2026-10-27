@@ -213,7 +213,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
         ]
       : matchOrCreateDonor(req);
 
-    String giftName = buildName(camp.Name, donor.Name);
+    String giftName = buildName(camp.Name, designation.Name, donor.Name);
     Result res = new Result();
     res.frequency = req.frequency;
     res.amount = req.amount;
@@ -936,14 +936,32 @@ public without sharing class TSAbcHopeDonationIntakeService {
     return users.isEmpty() ? null : users[0].Contact.AccountId;
   }
 
-  static String buildName(String campaignName, String donorName) {
-    String name =
-      campaignName +
-      ' - ' +
-      donorName +
-      ' - ' +
-      Datetime.now().format('yyyy-MM-dd HH:mm');
-    return name.abbreviate(80);
+  /**
+   * "Campaign - Cause - Donor - yyyy-MM-dd HH:mm" for the gift and, if recurring, its commitment (D-38).
+   * Each part is shortened on its own (ending in "...") so the date and time always stay; at most 185
+   * characters, well inside the 255 that Name holds on GiftTransaction and GiftCommitment.
+   */
+  @TestVisible
+  static String buildName(
+    String campaignName,
+    String designationName,
+    String donorName
+  ) {
+    return String.join(
+      new List<String>{
+        namePart(campaignName, 60),
+        namePart(designationName, 40),
+        namePart(donorName, 60),
+        Datetime.now().format('yyyy-MM-dd HH:mm')
+      },
+      ' - '
+    );
+  }
+
+  static String namePart(String value, Integer maxLength) {
+    return String.isBlank(value)
+      ? '-'
+      : value.normalizeSpace().abbreviate(maxLength);
   }
 
   static String description(Request req, Account donor) {

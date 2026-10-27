@@ -116,6 +116,10 @@ private class TSAbcHopeDonationIntakeServiceTest {
     Assert.areEqual(CAMPAIGN, gt.Campaign.Name);
     Assert.areEqual('TEST-XMAS', gt.OutreachSourceCode.SourceCode);
     Assert.areEqual(gt.Name, res.reference);
+    Assert.isTrue(
+      gt.Name.startsWith(CAMPAIGN + ' - Test School Supplies - '),
+      'name = campaign - cause - donor - date (D-38): ' + gt.Name
+    );
     GiftTransactionDesignation gtd = [
       SELECT GiftDesignation.Name, Percent
       FROM GiftTransactionDesignation
@@ -210,6 +214,10 @@ private class TSAbcHopeDonationIntakeServiceTest {
     ];
     Assert.areEqual(CAMPAIGN, gc.Campaign.Name);
     Assert.areEqual(gc.Name, res.reference);
+    Assert.isTrue(
+      gc.Name.startsWith(CAMPAIGN + ' - '),
+      'commitment named like its gifts (D-38): ' + gc.Name
+    );
     GiftCommitmentSchedule gcs = [
       SELECT TransactionAmount, TransactionPeriod, TransactionInterval
       FROM GiftCommitmentSchedule
@@ -699,6 +707,36 @@ private class TSAbcHopeDonationIntakeServiceTest {
       TSAbcHopeDonationIntakeService.getProgramDetail('No Such Program')
     );
     Assert.isNull(TSAbcHopeDonationIntakeService.getProgramDetail(null));
+  }
+
+  @IsTest
+  static void giftNameShortensEachPartAndKeepsTheTime() {
+    // Longest possible inputs: Campaign.Name 80, GiftDesignation.Name 80, Account.Name 255.
+    String name = TSAbcHopeDonationIntakeService.buildName(
+      'C'.repeat(80),
+      'G'.repeat(80),
+      'D'.repeat(255)
+    );
+    List<String> parts = name.split(' - ');
+    Assert.areEqual(4, parts.size(), name);
+    Assert.areEqual(60, parts[0].length());
+    Assert.isTrue(parts[0].endsWith('...'));
+    Assert.areEqual(40, parts[1].length());
+    Assert.areEqual(60, parts[2].length());
+    Assert.isTrue(
+      Pattern.matches('\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}', parts[3]),
+      'date and time kept: ' + name
+    );
+    Assert.isTrue(name.length() <= 185);
+    // Short names are untouched.
+    Assert.isTrue(
+      TSAbcHopeDonationIntakeService.buildName(
+          'Christmas Toy Drive 2026',
+          'Toys & Gifts',
+          'Maya Grande'
+        )
+        .startsWith('Christmas Toy Drive 2026 - Toys & Gifts - Maya Grande - ')
+    );
   }
 
   @IsTest

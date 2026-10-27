@@ -48,7 +48,8 @@ sf data query -o npo-demo -q "SELECT Name, Donor.Name, Status, Campaign.Name FRO
 ```
 
 Expected: Status `Paid` (simulated payment recorded as received, D-27), PaymentMethod `Unknown`, correct campaign and source code, designation 100%,
-one Ann Demo account only.
+one Ann Demo account only. Name = **Campaign - Cause - Donor - date time** (D-38), e.g. "Christmas Giving 2026 - School Supplies - Ann
+Demo - 2026-10-27 09:15", the same text as the thank-you step's Reference; a recurring gift's commitment has the same name.
 
 ## 4. Guest security
 
