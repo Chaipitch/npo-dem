@@ -618,7 +618,8 @@ private class TSAbcHopeDonationIntakeServiceTest {
   static void programFiguresAddUpGiftsEnrollmentsAndDeliveries() {
     Program edu = new Program(
       Name = 'Test Education Access',
-      Status = 'Active'
+      Status = 'Active',
+      People_Reached__c = 1200
     );
     insert edu;
     Id causeId = designationId('Test School Supplies');
@@ -698,7 +699,7 @@ private class TSAbcHopeDonationIntakeServiceTest {
     Assert.areEqual('Test Education Access', c.name);
     Assert.areEqual(300, c.raised);
     Assert.areEqual(1, c.donorCount);
-    Assert.areEqual(1, c.peopleServed);
+    Assert.areEqual(1200, c.peopleReached, 'People_Reached__c, not enrolments');
     Assert.areEqual(1, c.deliveries.size());
     Assert.areEqual('Test Learning kit', c.deliveries[0].benefit);
     Assert.areEqual(3, c.deliveries[0].quantity);

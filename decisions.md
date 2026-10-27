@@ -536,3 +536,14 @@ instead of failing when it is already scheduled.
 - Communities stays a plain total (user): a community served by several programs counts once per program.
 - No cards show until the totals load (no made-up numbers). The `facts` builder property stays, unused, because the
   published page still sets it and Salesforce refuses to remove it.
+
+### D-47 · "People reached" everywhere; delivery labels read naturally — Accepted (user, 2026‑10‑27)
+
+- Our Work cards and the /program page showed "people served", counted from Program Enrollments (a handful of
+  seeded records), while the About page and dashboard show People Reached (People_Reached__c). The user wants one
+  measure: `ProgramCard.peopleServed` is now `peopleReached`, read from the Program's People_Reached__c, and both
+  pages say "people reached". The enrolment count is no longer queried. Deliveries still come from Benefit
+  Disbursements; the /program footnote says so.
+- Delivery labels: one of a plural name reads singular ("1 financial literacy class delivered"), a name ending in a
+  consonant + y pluralises to -ies, and a benefit that is itself a delivery isn't followed by "delivered" ("25 grocery
+  deliveries", was "25 grocery deliverys delivered").

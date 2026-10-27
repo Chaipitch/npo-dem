@@ -11,7 +11,7 @@ let lastLoadedAt = 0;
 
 /**
  * Public program page (/program?name=…, D-33): the program's story, money raised through its causes,
- * people served and what has been delivered, plus the open campaigns that fund it.
+ * people reached and what has been delivered, plus the open campaigns that fund it.
  * Every figure is added up live from gifts, enrollments and benefit deliveries.
  */
 export default class ProgramDetail extends LightningElement {
@@ -74,10 +74,12 @@ export default class ProgramDetail extends LightningElement {
     return n ? `from ${formatNumber(n)} donor${n === 1 ? "" : "s"}` : "";
   }
   get peopleDisplay() {
-    return formatNumber(this.program?.peopleServed || 0);
+    return formatNumber(this.program?.peopleReached || 0);
   }
   get peopleLabel() {
-    return this.program?.peopleServed === 1 ? "person served" : "people served";
+    return this.program?.peopleReached === 1
+      ? "person reached"
+      : "people reached";
   }
   get deliveries() {
     return (this.program?.deliveries || []).map((d, i) => ({
@@ -129,9 +131,19 @@ export function formatNumber(value) {
     : "";
 }
 
-/** "toy parcels delivered" / "holiday meal delivered": the benefit name, plural unless one. */
+/**
+ * "toy parcels delivered" / "holiday meal delivered": the benefit name, plural unless one.
+ * "grocery delivery" → "grocery deliveries" (no "delivered" after it); "classes" → "class" for one.
+ */
 export function deliveryLabel(delivery) {
-  const name = (delivery?.benefit || "").toLowerCase();
-  const plural = Number(delivery?.quantity) === 1 || /s$/.test(name) ? "" : "s";
-  return `${name}${plural} delivered`;
+  let name = (delivery?.benefit || "").toLowerCase().trim();
+  const one = Number(delivery?.quantity) === 1;
+  if (one) {
+    name = name.replace(/(ss)es$/, "$1");
+  } else if (/[^aeiou]y$/.test(name)) {
+    name = name.replace(/y$/, "ies");
+  } else if (!/s$/.test(name)) {
+    name = `${name}s`;
+  }
+  return /deliver(y|ies)$/.test(name) ? name : `${name} delivered`;
 }

@@ -25,7 +25,7 @@ const PROGRAM = {
   summary: "Christmas presents and warm clothes for children.",
   raised: 12534,
   donorCount: 2,
-  peopleServed: 60,
+  peopleReached: 60,
   campaigns: ["Christmas Toy Drive 2026"],
   causes: ["Toys & Gifts", "Warm Clothes"],
   deliveries: [
@@ -53,7 +53,7 @@ describe("c-ts-abc-hope-program-detail", () => {
       document.body.removeChild(document.body.firstChild);
   });
 
-  it("shows raised, people served, deliveries and funding campaigns", async () => {
+  it("shows raised, people reached, deliveries and funding campaigns", async () => {
     const el = mount();
     CurrentPageReference.emit({ state: { name: "Child Wellbeing" } });
     getProgramDetail.emit(PROGRAM);
@@ -107,6 +107,15 @@ describe("helpers", () => {
     );
     expect(deliveryLabel({ benefit: "Classes", quantity: 4 })).toBe(
       "classes delivered"
+    );
+    expect(
+      deliveryLabel({ benefit: "Financial literacy classes", quantity: 1 })
+    ).toBe("financial literacy class delivered");
+    expect(deliveryLabel({ benefit: "Grocery delivery", quantity: 25 })).toBe(
+      "grocery deliveries"
+    );
+    expect(deliveryLabel({ benefit: "Grocery delivery", quantity: 1 })).toBe(
+      "grocery delivery"
     );
   });
   it("formats numbers", () => {

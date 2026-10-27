@@ -474,9 +474,9 @@ public without sharing class TSAbcHopeDonationIntakeService {
     public Decimal raised = 0;
     @AuraEnabled
     public Integer donorCount = 0;
-    /** People enrolled (in progress or completed). */
+    /** The program's People Reached figure (People_Reached__c), as on the About page (D-46, D-47). */
     @AuraEnabled
-    public Integer peopleServed = 0;
+    public Integer peopleReached = 0;
     /** Quantity delivered per benefit, largest first. */
     @AuraEnabled
     public List<Delivery> deliveries = new List<Delivery>();
@@ -509,7 +509,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
   public static List<ProgramCard> getPrograms() {
     Map<Id, ProgramCard> byId = new Map<Id, ProgramCard>();
     for (Program p : [
-      SELECT Id, Name, Summary
+      SELECT Id, Name, Summary, People_Reached__c
       FROM Program
       WHERE Status = 'Active'
       ORDER BY Name
@@ -518,6 +518,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
       ProgramCard c = new ProgramCard();
       c.name = p.Name;
       c.summary = p.Summary;
+      c.peopleReached = wholeNumber(p.People_Reached__c);
       byId.put(p.Id, c);
     }
     if (byId.isEmpty()) {
@@ -581,16 +582,6 @@ public without sharing class TSAbcHopeDonationIntakeService {
       ProgramCard c = byId.get((Id) ar.get('programId'));
       c.raised = (Decimal) ar.get('amount') ?? 0;
       c.donorCount = (Integer) ar.get('donors');
-    }
-    for (AggregateResult ar : [
-      SELECT ProgramId, COUNT_DISTINCT(AccountId) people
-      FROM ProgramEnrollment
-      WHERE ProgramId IN :ids AND Status IN ('In Progress', 'Completed')
-      GROUP BY ProgramId
-    ]) {
-      byId.get((Id) ar.get('ProgramId')).peopleServed = (Integer) ar.get(
-        'people'
-      );
     }
     for (AggregateResult ar : [
       SELECT
