@@ -49,7 +49,8 @@ sf data query -o npo-demo -q "SELECT Name, Donor.Name, Status, Campaign.Name FRO
 
 Expected: Status `Paid` (simulated payment recorded as received, D-27), PaymentMethod `Unknown`, correct campaign and source code, designation 100%,
 one Ann Demo account only. Name = **Campaign - Cause - Donor - date time** (D-38), e.g. "Christmas Giving 2026 - School Supplies - Ann
-Demo - 2026-10-27 09:15", the same text as the thank-you step's Reference; a recurring gift's commitment has the same name.
+Demo - 2026-10-27 09:15", the same text as the thank-you step's Reference; a recurring gift's commitment has the same name. Time = org time zone (D-39). A gift created in Salesforce
+(any name typed) is re-named to the same format once its cause is saved.
 
 ## 4. Guest security
 

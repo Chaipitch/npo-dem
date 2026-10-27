@@ -802,8 +802,17 @@ public without sharing class TSAbcHopeDonationIntakeService {
       return recent.Name;
     }
 
-    insertPaidGift(req, donor, camp, designation, sourceCodeId, giftName, null);
-    return giftName;
+    Id giftId = insertPaidGift(
+      req,
+      donor,
+      camp,
+      designation,
+      sourceCodeId,
+      giftName,
+      null
+    );
+    // The naming triggers have the last word (D-39): return the name as saved.
+    return [SELECT Name FROM GiftTransaction WHERE Id = :giftId].Name;
   }
 
   /**
@@ -811,7 +820,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
    * recorded as received. PaymentMethod stays Unknown (no card or bank details exist). For a recurring gift
    * this is its first payment, linked to the commitment; NPC creates the later instalments as Unpaid.
    */
-  static void insertPaidGift(
+  static Id insertPaidGift(
     Request req,
     Account donor,
     Campaign camp,
@@ -853,6 +862,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
       existing[0].GiftDesignationId = designation.Id;
       update existing[0];
     }
+    return gt.Id;
   }
 
   static String createCommitment(
@@ -913,7 +923,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
       giftName,
       gc.Id
     );
-    return giftName;
+    return [SELECT Name FROM GiftCommitment WHERE Id = :gc.Id].Name;
   }
 
   // ---------------------------------------------------------------- helpers
@@ -936,32 +946,20 @@ public without sharing class TSAbcHopeDonationIntakeService {
     return users.isEmpty() ? null : users[0].Contact.AccountId;
   }
 
-  /**
-   * "Campaign - Cause - Donor - yyyy-MM-dd HH:mm" for the gift and, if recurring, its commitment (D-38).
-   * Each part is shortened on its own (ending in "...") so the date and time always stay; at most 185
-   * characters, well inside the 255 that Name holds on GiftTransaction and GiftCommitment.
-   */
+  /** "Campaign - Cause - Donor - yyyy-MM-dd HH:mm" (D-38): the shared rule in TSAbcHopeGiftNaming (D-39). */
   @TestVisible
   static String buildName(
     String campaignName,
     String designationName,
     String donorName
   ) {
-    return String.join(
-      new List<String>{
-        namePart(campaignName, 60),
-        namePart(designationName, 40),
-        namePart(donorName, 60),
-        Datetime.now().format('yyyy-MM-dd HH:mm')
-      },
-      ' - '
+    return TSAbcHopeGiftNaming.build(
+      campaignName,
+      designationName,
+      donorName,
+      Date.today(),
+      Datetime.now()
     );
-  }
-
-  static String namePart(String value, Integer maxLength) {
-    return String.isBlank(value)
-      ? '-'
-      : value.normalizeSpace().abbreviate(maxLength);
   }
 
   static String description(Request req, Account donor) {

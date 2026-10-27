@@ -146,6 +146,13 @@ numbers on the Program records; a blank field counts as 0.
 LWCs are `tsAbcHope<Usage>`, Apex classes `TSAbcHope<Usage>`. Nine old classes stay in the org, unused, because the
 inactive agent versions v1–v12 reference them (list in D-37); agent **v13** is active and uses the TS classes.
 
+## Gift names (2026‑10‑27, D-38, D-39)
+
+Every new GiftTransaction and GiftCommitment is named **Campaign - Cause - Donor - date time** (org time zone) by the
+`TSAbcHope…Naming` triggers, whatever creates it; existing ABC Hope records were renamed with
+`scripts/apex/renameGifts.apex`. A paused recurring gift keeps Status **Active**: the pause is a
+`PauseTransactions` schedule (D-22).
+
 ## Open items
 
 1. Done 2026‑10‑26: chat window removed from all pages (D-28); the dashboard Ask panel is the only chat. The
