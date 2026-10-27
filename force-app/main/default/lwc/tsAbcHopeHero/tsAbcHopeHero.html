@@ -1,0 +1,154 @@
+<template>
+  <section class="hero-wrap">
+    <div
+      class="hero"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Open campaigns"
+      onmouseenter={handleEnter}
+      onmouseleave={handleLeave}
+      onfocusin={handleEnter}
+      onfocusout={handleLeave}
+    >
+      <template for:each={slides} for:item="s">
+        <div
+          key={s.key}
+          class={s.className}
+          role="group"
+          aria-roledescription="slide"
+          aria-label={s.label}
+          aria-hidden={s.ariaHidden}
+          data-id="slide"
+        >
+          <img class="photo" src={s.photo.url} alt={s.alt} />
+          <span class="credit">{s.photo.credit}</span>
+          <div class="shade" aria-hidden="true"></div>
+          <div class="hero-inner">
+            <p class="eyebrow">{s.eyebrow}</p>
+            <template lwc:if={s.featured}>
+              <h1 class="headline">
+                {s.headline}
+                <span class="highlight">{s.highlight}</span>
+              </h1>
+            </template>
+            <template lwc:else>
+              <h2 class="headline headline_campaign">{s.headline}</h2>
+            </template>
+            <p class="body">{s.body}</p>
+            <div class="actions">
+              <a
+                class="cta"
+                href={s.href}
+                tabindex={s.tabIndex}
+                data-id="donate"
+              >
+                <span>{ctaLabel}</span>
+                <c-ts-abc-hope-icon
+                  name="arrow"
+                  size="20"
+                  stroke-width="2.4"
+                ></c-ts-abc-hope-icon>
+              </a>
+              <template lwc:if={isSignedIn}>
+                <a
+                  class="cta-secondary"
+                  href={dashboardHref}
+                  tabindex={s.tabIndex}
+                  >Go to my dashboard</a
+                >
+              </template>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <template lwc:if={hasMany}>
+        <button
+          type="button"
+          class="arrow arrow_prev"
+          aria-label="Previous campaign"
+          data-id="prev"
+          onclick={handlePrev}
+        >
+          <svg
+            class="arrow-icon"
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            aria-hidden="true"
+          >
+            <polyline
+              points="15 6 9 12 15 18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="arrow arrow_next"
+          aria-label="Next campaign"
+          data-id="next"
+          onclick={handleNext}
+        >
+          <svg
+            class="arrow-icon"
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            aria-hidden="true"
+          >
+            <polyline
+              points="9 6 15 12 9 18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+        <div class="controls">
+          <button
+            type="button"
+            class="pause"
+            aria-label={pauseLabel}
+            title={pauseLabel}
+            data-id="pause"
+            onclick={handlePause}
+          >
+            {pauseIcon}
+          </button>
+          <template for:each={slides} for:item="s">
+            <button
+              key={s.key}
+              type="button"
+              class={s.dotClass}
+              aria-label={s.dotLabel}
+              aria-current={s.active}
+              data-index={s.index}
+              onclick={handleDot}
+            ></button>
+          </template>
+        </div>
+      </template>
+    </div>
+    <ul class="benefits">
+      <template for:each={benefitItems} for:item="b">
+        <li key={b.key} class="benefit">
+          <span class="benefit-icon"
+            ><c-ts-abc-hope-icon
+              name={b.icon}
+              size="22"
+              stroke-width="2"
+            ></c-ts-abc-hope-icon
+          ></span>
+          <span>{b.label}</span>
+        </li>
+      </template>
+    </ul>
+  </section>
+</template>

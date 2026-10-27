@@ -1,0 +1,69 @@
+<template>
+  <div class="page">
+    <header class="header">
+      <div class="header-inner">
+        <a class="brand" href={homeHref} aria-label="ABC Hope home">
+          <svg class="logo" viewBox="0 0 48 40" aria-hidden="true">
+            <path
+              d="M17 36 4.5 23.5A8.6 8.6 0 0 1 17 11.6a8.6 8.6 0 0 1 12.5 11.9Z"
+              fill="#7b5cf0"
+            />
+            <path
+              d="M31 36 18.5 23.5A8.6 8.6 0 0 1 31 11.6a8.6 8.6 0 0 1 12.5 11.9Z"
+              fill="#e5484d"
+              opacity="0.92"
+            />
+            <path
+              d="M24 32.5 18.6 27a4.4 4.4 0 0 1 5.4-6.6 4.4 4.4 0 0 1 5.4 6.6Z"
+              fill="#fff"
+              opacity="0.9"
+            />
+          </svg>
+          <span class="brand-text">
+            <span class="brand-name">ABC Hope</span>
+            <span class="brand-tag">{tagline}</span>
+          </span>
+        </a>
+
+        <button
+          type="button"
+          class="menu-btn"
+          aria-label="Menu"
+          aria-expanded={menuOpen}
+          onclick={toggleMenu}
+        >
+          <c-ts-abc-hope-icon name="menu" size="24"></c-ts-abc-hope-icon>
+        </button>
+
+        <nav class={navClass} aria-label="Main">
+          <template for:each={links} for:item="l">
+            <a key={l.key} class={l.className} href={l.href}>{l.label}</a>
+          </template>
+          <template lwc:if={isGuest}>
+            <a class="nav-link nav-signin" href={signInHref}>Sign in</a>
+          </template>
+          <template lwc:else>
+            <a class="nav-link nav-signin" href={dashboardHref}>My Dashboard</a>
+          </template>
+          <a class="donate-btn" href={donateHref}>{donateLabel}</a>
+        </nav>
+      </div>
+      <slot name="header"></slot>
+    </header>
+
+    <main class="main">
+      <slot></slot>
+    </main>
+
+    <footer class="footer">
+      <slot name="footer"></slot>
+      <div class="footer-inner">
+        <span class="footer-brand">ABC Hope</span>
+        <span
+          >© {year} ABC Hope · Demo concept — no payments are collected on this
+          site.</span
+        >
+      </div>
+    </footer>
+  </div>
+</template>

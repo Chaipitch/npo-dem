@@ -16,8 +16,8 @@ Donors can pick any open campaign from the dashboard. Chat: only the dashboard's
 | Area                                  | State                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Demo data                             | ✅ 4 fundraising campaigns (Christmas Giving 2026, Clean Water for Rural Schools, Girls' Education Scholarships, Green Communities Tree Planting) with goals and default designations; 6 designations; source code `XMAS26-EMAIL`; Maya's 2023–2025 gift history                                                                                                                                                          |
-| Apex                                  | ✅ 45 test methods pass. Coverage: DonationIntakeService 98%, DonationIntakeController 84%, DonorPortalController 96%, MonthlyGiftService 89%, agent actions 64–100%                                                                                                                                                                                                                                                      |
-| LWC                                   | ✅ donationJourney (14 Jest tests), donorMonthlyGifts (9 Jest tests), abcHopeHero, donorDashboard, donorProfile, abcHopeIcon, public + portal theme layouts                                                                                                                                                                                                                                                               |
+| Apex                                  | ✅ 45 test methods pass. Coverage: TSAbcHopeDonationIntakeService 98%, TSAbcHopeDonationIntakeController 84%, TSAbcHopeDonorPortalController 96%, TSAbcHopeMonthlyGiftService 89%, agent actions 64–100%                                                                                                                                                                                                                  |
+| LWC                                   | ✅ tsAbcHopeDonationJourney (14 Jest tests), tsAbcHopeDonorMonthlyGifts (9 Jest tests), tsAbcHopeHero, tsAbcHopeDonorDashboard, tsAbcHopeDonorProfile, tsAbcHopeIcon, public + portal theme layouts                                                                                                                                                                                                                       |
 | Site                                  | ✅ Live. Home + Donate are public; portal pages require login (guests go to login, then back to `/dashboard`)                                                                                                                                                                                                                                                                                                             |
 | Dashboard campaigns                   | ✅ Card grid: raised (real gifts) vs goal (`Campaign.ExpectedRevenue`), days left, designations. A card opens `/donate?campaign=<name>`                                                                                                                                                                                                                                                                                   |
 | Signed-in donor                       | ✅ Maya Grande portal user. Email set to `wchaipitch@terrasky.co.th` and a password-reset email sent; the user chooses the password (none stored anywhere)                                                                                                                                                                                                                                                                |
@@ -78,18 +78,18 @@ How the build compares:
 - **Programs (D-21):** Campaign ─< GiftDefaultDesignation >─ GiftDesignation ─> Program via the existing
   `NGOTV_Program__c` lookup. Seed: `sf apex run -o npo-demo -f scripts/apex/seedPrograms.apex`.
 - **Program figures and page (D-33):** money raised, people served and deliveries are added up live
-  (`DonationIntakeService.addProgramFigures`); Our Work shows them and links to the public `/program?name=…`.
+  (`TSAbcHopeDonationIntakeService.addProgramFigures`); Our Work shows them and links to the public `/program?name=…`.
   Delivery demo data: `scripts/apex/seedProgramDelivery.apex` (benefits, enrollments of existing Food Access
   people, assignments, deliveries).
 - **My Giving → Monthly Gifts (D-22):** pause / resume / change amount / cancel for the signed-in donor;
   the dashboard shows paused gifts separately. Test: `testing-steps.md` §8.
-- **Site outage fixed:** on 2026‑10‑21 ~16:00 UTC the templates of `abcHopePublicLayout`, `abcHopePortalLayout` and
-  `abcHopeHero` were commented out directly in the org (not in git). The next publish blanked the site; the repo
+- **Site outage fixed:** on 2026‑10‑21 ~16:00 UTC the templates of `tsAbcHopePublicLayout`, `tsAbcHopePortalLayout` and
+  `tsAbcHopeHero` were commented out directly in the org (not in git). The next publish blanked the site; the repo
   versions were redeployed and republished on 2026‑10‑22. Before publishing, check the org still matches git.
 
 ## Dashboard agent panel (D-23) — live with the Agent API (2026‑10‑26)
 
-The panel sends every question to the **ABC Hope Donor Assistant** through the Agent API (`DonorAgentController`,
+The panel sends every question to the **ABC Hope Donor Assistant** through the Agent API (`TSAbcHopeDonorAgentController`,
 `USE_AGENT_API = true`), with `verified_account_id` = the signed-in donor's account, so the agent answers personal
 questions from her own data ("You have 1 recurring gift: Recurring (Monthly): USD 1,000 per month…"). Page links the
 dashboard answer would offer (e.g. Manage recurring gifts) stay under the reply. If the agent call fails, the panel
@@ -98,7 +98,7 @@ falls back to the dashboard-data answer.
 Setup that makes it work: External Client App **ABC Hope Agent API** (client credentials, run-as
 `agentapi.abchope@…`), its consumer key/secret on the `AgentApiPrincipal` principal (admin-entered, never in git),
 permission set **ABC Hope Agent API Access** assigned to the run-as user and selected under the app's OAuth policies
-(Permitted Users: admin approved), agent version 12 active (2026‑10‑26: acts on complete requests without a separate "yes", D-29). Portal users reach the principal through
+(Permitted Users: admin approved), agent version 13 active (2026‑10‑27: TS class names, D-37; acts on complete requests without a separate "yes", D-29). Portal users reach the principal through
 `ABC_Hope_Donor_Portal`.
 
 Troubleshooting: `invalid_app_access … not admin approved` = the run-as user's permission set isn't selected on the
@@ -107,10 +107,10 @@ app; a rotated secret must be re-pasted on the principal.
 ## Campaign detail page (2026‑10‑22)
 
 Dashboard campaign cards have **Donate now** (`/donate?campaign=…`) and **View more** (`/campaign?name=…`). The new
-portal page `Campaign` (sign-in required, Portal layout, `c:campaignDetail`) shows the photo, description, raised vs
+portal page `Campaign` (sign-in required, Portal layout, `c:tsAbcHopeCampaignDetail`) shows the photo, description, raised vs
 goal, gifts, time left, dates, the programs the campaign funds and the causes donors can choose, with Donate now.
-Data: `DonationIntakeController.getCampaignDetail` — open fundraising campaigns only (D-18), else "Campaign not found".
-Photos come from the shared `abcHopeCampaignPhotos` module. Route added in `scripts/sitePages.py`.
+Data: `TSAbcHopeDonationIntakeController.getCampaignDetail` — open fundraising campaigns only (D-18), else "Campaign not found".
+Photos come from the shared `tsAbcHopeCampaignPhotos` module. Route added in `scripts/sitePages.py`.
 
 ## Recurring gifts and journey banner (2026‑10‑22, D-24)
 
@@ -123,7 +123,7 @@ and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a b
 
 - Home hero is a carousel: featured Christmas slide, then one slide per open campaign (`getCampaigns`), every 10 s,
   with arrows, dots and a pause button; pauses on hover/focus. Builder properties: featured campaign, seconds per slide.
-- `c/abcHopeGiftEvents`: a donation, a My Giving change or an assistant reply marks gifts changed, and the dashboard,
+- `c/tsAbcHopeGiftEvents`: a donation, a My Giving change or an assistant reply marks gifts changed, and the dashboard,
   campaign page and recurring gift list reload instead of showing cached data.
 - Paused recurring gifts: amber card, "Paused until <date>", "No gifts from … to …. Resume any time."
 
@@ -135,11 +135,16 @@ Payment is still simulated. Tests use `Pending` because of the org's "*ASL Trigg
 ## Shared impact tiles (2026‑10‑26, D-34)
 
 The dashboard's Shared impact tiles are the `sharedImpact` property with live placeholders, computed in
-`DonorPortalController.buildDashboard` from **active Programs**: `{peopleReached}`, `{communities}` and
+`TSAbcHopeDonorPortalController.buildDashboard` from **active Programs**: `{peopleReached}`, `{communities}` and
 `{volunteers}` are the sums of the Program fields **People Reached**, **Communities** and **Volunteers Engaged**
 (`People_Reached__c`, `Communities__c`, `Volunteers_Engaged__c`, added by the user and kept up to date by the team);
 `{programs}` is the active Program count. On 2026‑10‑26: 17,172 · 2,415 · 10 · 1,093. To change a tile, edit the
 numbers on the Program records; a blank field counts as 0.
+
+## Naming (2026‑10‑27, D-37)
+
+LWCs are `tsAbcHope<Usage>`, Apex classes `TSAbcHope<Usage>`. Nine old classes stay in the org, unused, because the
+inactive agent versions v1–v12 reference them (list in D-37); agent **v13** is active and uses the TS classes.
 
 ## Open items
 
@@ -147,6 +152,6 @@ numbers on the Program records; a blank field counts as 0.
    deployment `ABC_Hope_Web_Chat`, channel and routing flow stay in the org, unused.
 2. Done 2026‑10‑22: campaign cards, story cards and the journey's review/thank-you image use Unsplash photos.
 3. Done 2026‑10‑26: public `/our-work` (programs with funding campaigns and causes, `getPrograms`) and `/about` (placeholder copy, editable in Builder) — header links point there (D-26).
-4. Done 2026‑10‑26: `AbcHopeAgentSupportTest` raises coverage to 84% (the verified-messaging-user line needs
+4. Done 2026‑10‑26: `TSAbcHopeAgentSupportTest` raises coverage to 84% (the verified-messaging-user line needs
    `AuthenticatedEndUserId`, which tests can't set).
 5. Done 2026‑10‑26: KPI cards use an icon-above layout at 1386–1600px so values, labels and links stay on one line.

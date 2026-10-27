@@ -30,7 +30,7 @@ re-engagement journey for Maya Grande (#2), guest donation journey (#3), 10-item
 | Currency             | USD only; the UI labels amounts **USD** ("USD 1,000"; D-05, changed from THB on 2026‑10‑26)                         |
 | Site URL             | **https://te1791557923677.my.site.com/** (LWR at the domain root; `/vforcesite` is only the Visualforce/login side) |
 | Site metadata        | Network `ABC Hope`, LWR bundle `site/ABC_Hope1`, CustomSite `ABC_Hope`                                              |
-| Guest user / profile | `ABC Hope Site Guest User` / `ABC Hope Profile` (Apex access: `DonationIntakeController` only)                      |
+| Guest user / profile | `ABC Hope Site Guest User` / `ABC Hope Profile` (Apex access: `TSAbcHopeDonationIntakeController` only)             |
 | Demo donor           | Maya Grande — Person Account `001g70000175AtRAAU`, portal user `maya.grande@abchope.demo.00dg700000kmyyx`           |
 | Agent                | `ABC_Hope_Donor_Assistant` (Agentforce Service Agent), runs as the `ServiceAgent Agentforce` user                   |
 | Git remote           | `git@github.com:Chaipitch/npo-dem.git` (`main`)                                                                     |
@@ -47,21 +47,25 @@ re-engagement journey for Maya Grande (#2), guest donation journey (#3), 10-item
 
 ```
 force-app/main/default/
-  lwc/donationJourney            4-step donation journey; reads ?campaign= and ?src=  (+ Jest tests)
-  lwc/abcHopeHero                Home "Discover" hero (Unsplash photo, SVG fallback)
-  lwc/donorDashboard             view=home: campaign cards, KPIs, impact, stories, causes, journey, agent panel
-                                 view=giving: KPIs + giving history table
-  lwc/donorMonthlyGifts          My Giving → Monthly Gifts: pause / resume / change / cancel (D-22)
-  lwc/campaignDetail             /campaign?name=… detail page: story, progress, programs, causes, Donate now
-  lwc/programDetail              /program?name=… public program page: raised, people served, deliveries (D-33)
-  lwc/abcHopeCampaignPhotos      Shared campaign photo choice (cards, detail page, donation journey)
-  lwc/donorProfile               My Profile / Communication / Giving History tabs
-  lwc/abcHopePublicLayout        Theme layout for public pages (header nav, Donate, footer)
-  lwc/abcHopePortalLayout        Theme layout for portal pages (sidebar, top bar, user menu)
-  lwc/abcHopeIcon                Shared inline-SVG icon set
-  classes/DonationIntake*        Donation API: getOptions, getCampaigns, submitDonation (+ tests)
-  classes/DonorPortalController* Dashboard + profile for the signed-in donor (+ tests)
-  classes/AbcHopeAgent*          Agent actions: CampaignInfo, GivingSummary, MonthlyGifts, UpdateProfile, Support (+ tests)
+  lwc/tsAbcHopeDonationJourney    4-step donation journey; campaign picker, ?campaign= and ?src=  (+ Jest tests)
+  lwc/tsAbcHopeHero               Home carousel (featured slide + open campaigns)
+  lwc/tsAbcHopeDonorDashboard     view=home: campaign cards, KPIs, impact, stories, causes, journey, agent panel
+                                  view=giving: KPIs + giving history table
+  lwc/tsAbcHopeDonorMonthlyGifts  My Giving → Recurring Gifts: pause / resume / change / cancel (D-22)
+  lwc/tsAbcHopeCampaignDetail     /campaign?name=… detail page: story, progress, programs, causes, Donate now
+  lwc/tsAbcHopeProgramDetail      /program?name=… public program page: raised, people served, deliveries (D-33)
+  lwc/tsAbcHopeOurWork, tsAbcHopeAbout   Public Our Work and About pages (D-26)
+  lwc/tsAbcHopeCampaignPhotos     Shared campaign photo choice (cards, detail page, donation journey)
+  lwc/tsAbcHopeGiftEvents         "Gifts changed" signal so cached data reloads after a donation
+  lwc/tsAbcHopeDonorProfile       My Profile / Communication / Giving History tabs
+  lwc/tsAbcHopePublicLayout       Theme layout for public pages (header nav, Donate, footer)
+  lwc/tsAbcHopePortalLayout       Theme layout for portal pages (sidebar, top bar, user menu)
+  lwc/tsAbcHopeIcon               Shared inline-SVG icon set
+  classes/TSAbcHopeDonationIntake*   Donation API: getOptions, getCampaigns, getPrograms, submitDonation (+ tests)
+  classes/TSAbcHopeDonorPortalController*  Dashboard + profile for the signed-in donor (+ tests)
+  classes/TSAbcHopeDonorAgentController*   Dashboard Ask panel → Agent API (+ tests)
+  classes/TSAbcHopeMonthlyGiftService      Recurring gift list and NPC pause/resume/change/cancel actions
+  classes/TSAbcHopeAgent*         Agent actions: CampaignInfo, GivingSummary, MonthlyGifts, UpdateProfile, Support (+ tests)
   aiAuthoringBundles/ABC_Hope_Donor_Assistant   Agent Script (.agent) for the agent
   flows/ABC_Hope_Chat_Routing    Omni-Channel routing → the agent (the only flow; approved exception)
   messagingChannels/, EmbeddedServiceConfig/    ABC Hope Chat channel + deployment
@@ -77,11 +81,11 @@ scripts/apex/seed*.apex          Idempotent demo data (campaigns, designations, 
 
 ```bash
 # deploy + publish (LWR freezes component code at publish — always publish after deploying site LWCs)
-sf project deploy start -o npo-demo -d force-app/main/default/lwc/donationJourney
+sf project deploy start -o npo-demo -d force-app/main/default/lwc/tsAbcHopeDonationJourney
 sf community publish -n "ABC Hope" -o npo-demo
 
 # tests
-sf apex run test -o npo-demo -n DonationIntakeServiceTest,DonationIntakeControllerTest,DonorPortalControllerTest,AbcHopeAgentActionsTest -c -r human -w 15
+sf apex run test -o npo-demo -n TSAbcHopeDonationIntakeServiceTest,TSAbcHopeDonationIntakeControllerTest,TSAbcHopeDonorPortalControllerTest,TSAbcHopeAgentActionsTest -c -r human -w 15
 npm run test:unit
 
 # demo data (idempotent)
@@ -102,6 +106,10 @@ sf agent activate -o npo-demo -n ABC_Hope_Donor_Assistant --version <n>   # with
 ```
 
 ## Conventions & gotchas
+
+- **Naming (D-37):** our LWCs and Apex classes are **TS** (company) + **AbcHope** (project) + usage:
+  LWC `tsAbcHope<Usage>` (markup `c-ts-abc-hope-…`), Apex `TSAbcHope<Usage>`. Apex names stay ≤ 40 characters.
+  The org's other components (sdo…, b2b…, xdo…) are not ours.
 
 - **LWC:** custom CSS with `:host` tokens, mobile-first, native inputs. The site runs **synthetic shadow**,
   so global theme `a:link` styles leak in — use parent-qualified selectors for links (D-11).
