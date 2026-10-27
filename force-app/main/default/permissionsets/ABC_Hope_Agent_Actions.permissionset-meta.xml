@@ -5,19 +5,19 @@
   >Lets the ABC Hope Donor Assistant agent user run its Apex actions. Each action enforces verified-donor scoping itself.</description>
     <hasActivationRequired>false</hasActivationRequired>
     <classAccesses>
-        <apexClass>AbcHopeAgentCampaignInfo</apexClass>
+        <apexClass>TSAbcHopeAgentCampaignInfo</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>AbcHopeAgentGivingSummary</apexClass>
+        <apexClass>TSAbcHopeAgentGivingSummary</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>AbcHopeAgentMonthlyGifts</apexClass>
+        <apexClass>TSAbcHopeAgentMonthlyGifts</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>AbcHopeAgentUpdateProfile</apexClass>
+        <apexClass>TSAbcHopeAgentUpdateProfile</apexClass>
         <enabled>true</enabled>
     </classAccesses>
 </PermissionSet>

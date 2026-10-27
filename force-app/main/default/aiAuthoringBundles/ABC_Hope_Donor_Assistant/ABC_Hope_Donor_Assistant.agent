@@ -76,7 +76,7 @@ subagent campaign_faq:
                     description: "Plain-text facts about the campaigns and how to give"
                 donateUrl: string
                     description: "Link to the donation page"
-            target: "apex://AbcHopeAgentCampaignInfo"
+            target: "apex://TSAbcHopeAgentCampaignInfo"
 
     reasoning:
         instructions: ->
@@ -112,7 +112,7 @@ subagent my_giving:
                     description: "Donor's first name"
                 summary: string
                     description: "Plain-text giving summary, or a note that the user is not signed in"
-            target: "apex://AbcHopeAgentGivingSummary"
+            target: "apex://TSAbcHopeAgentGivingSummary"
 
     reasoning:
         instructions: ->
@@ -162,7 +162,7 @@ subagent monthly_gifts:
                     description: "What happened, to relay to the donor"
                 monthlyGifts: string
                     description: "Numbered list of the donor's recurring gifts, each with its type (Weekly, Monthly or Yearly)"
-            target: "apex://AbcHopeAgentMonthlyGifts"
+            target: "apex://TSAbcHopeAgentMonthlyGifts"
 
     reasoning:
         instructions: ->
@@ -216,7 +216,7 @@ subagent update_profile:
                     description: "Whether the update succeeded"
                 message: string
                     description: "What happened, to relay to the donor"
-            target: "apex://AbcHopeAgentUpdateProfile"
+            target: "apex://TSAbcHopeAgentUpdateProfile"
 
     reasoning:
         instructions: ->

@@ -11,15 +11,15 @@
     <hasActivationRequired>false</hasActivationRequired>
     <license>Customer Community Login</license>
     <classAccesses>
-        <apexClass>DonationIntakeController</apexClass>
+        <apexClass>TSAbcHopeDonationIntakeController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>DonorAgentController</apexClass>
+        <apexClass>TSAbcHopeDonorAgentController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>DonorPortalController</apexClass>
+        <apexClass>TSAbcHopeDonorPortalController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
 </PermissionSet>

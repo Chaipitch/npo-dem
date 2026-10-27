@@ -394,3 +394,26 @@ campaign (Christmas Giving 2026) only. Step 1 now has a **Campaign** list of eve
 same list as the cards and the carousel), with the current one selected: the configured campaign, or `?campaign=` when
 a card or program page sent the donor. Picking another campaign reloads its own causes (the admin's cause list applies
 only to the configured campaign), photo and description. The list stays hidden until the campaigns load.
+
+### D-37 · Company naming: TS + project + usage — Accepted (user, 2026‑10‑27)
+
+All ABC Hope LWCs and Apex classes are renamed to **TS** (company) + **AbcHope** (project) + their usage. Salesforce
+can't rename metadata, so the new names were deployed alongside the old ones, the site, guest profile, both permission
+sets and the agent (v13) were pointed at them, and then the old ones were deleted. Decision entries above D-37 use the
+old names.
+
+| Old                                                                                                                                        | New                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| abcHopeAbout, abcHopeCampaignPhotos, abcHopeGiftEvents, abcHopeHero, abcHopeIcon, abcHopeOurWork, abcHopePortalLayout, abcHopePublicLayout | tsAbcHopeAbout, tsAbcHopeCampaignPhotos, tsAbcHopeGiftEvents, tsAbcHopeHero, tsAbcHopeIcon, tsAbcHopeOurWork, tsAbcHopePortalLayout, tsAbcHopePublicLayout |
+| campaignDetail, donationJourney, donorDashboard, donorMonthlyGifts, donorProfile, programDetail                                            | tsAbcHopeCampaignDetail, tsAbcHopeDonationJourney, tsAbcHopeDonorDashboard, tsAbcHopeDonorMonthlyGifts, tsAbcHopeDonorProfile, tsAbcHopeProgramDetail      |
+| DonationIntakeService, DonationIntakeController (+ Tests)                                                                                  | TSAbcHopeDonationIntakeService, TSAbcHopeDonationIntakeController (+ Tests)                                                                                |
+| DonorPortalController, DonorAgentController (+ Tests), MonthlyGiftService                                                                  | TSAbcHopeDonorPortalController, TSAbcHopeDonorAgentController (+ Tests), TSAbcHopeMonthlyGiftService                                                       |
+| AbcHopeAgentCampaignInfo, …GivingSummary, …MonthlyGifts, …UpdateProfile, …Support (+ SupportTest, ActionsTest)                             | TSAbcHopeAgentCampaignInfo, …GivingSummary, …MonthlyGifts, …UpdateProfile, …Support (+ SupportTest, ActionsTest)                                           |
+
+**Left in the org (not in the repo):** nine old classes that the inactive agent versions v1–v12 still reference
+(Salesforce refuses to delete an Apex class an agent action definition uses): AbcHopeAgentCampaignInfo,
+AbcHopeAgentGivingSummary, AbcHopeAgentMonthlyGifts, AbcHopeAgentUpdateProfile, and what they call —
+AbcHopeAgentSupport, DonationIntakeService, DonorPortalController, DonorAgentController, MonthlyGiftService. Nothing
+active uses them: the site, the guest profile, both permission sets and agent v13 point only at the TS classes. They
+can be deleted once the old agent versions are removed. Don't re-activate v12 or older: its actions point at the old
+classes, which no permission set grants to the agent user any more.

@@ -16,7 +16,7 @@
                 "layoutDirectionTablet": "column",
                 "maxContentWidth": "",
                 "sectionColumnGutterWidth": "",
-                "sectionConfig": "{\"UUID\":\"fd914bef-027f-428b-be2d-4b030509271f\",\"columns\":[{\"UUID\":\"61185e9c-6965-48e3-9563-b53074ad99db\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":null}]}",
+                "sectionConfig": "{\"UUID\":\"ae26aaa0-401f-4606-8537-80e66206f0b0\",\"columns\":[{\"UUID\":\"1887509b-1cdf-4445-b431-023909db4dbb\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":null}]}",
                 "sectionMinHeight": "",
                 "sectionVerticalAlign": "flex-start"
               },
@@ -25,23 +25,23 @@
                   "children": [
                     {
                       "attributes": {},
-                      "definition": "c:campaignDetail",
-                      "id": "25d6d7ec-473c-408e-94bc-0311735f1062",
+                      "definition": "c:tsAbcHopeCampaignDetail",
+                      "id": "41b3db86-e653-4f76-8028-21ffcdda72bb",
                       "type": "component"
                     }
                   ],
-                  "id": "61185e9c-6965-48e3-9563-b53074ad99db",
+                  "id": "1887509b-1cdf-4445-b431-023909db4dbb",
                   "name": "col1",
                   "title": "Column 1",
                   "type": "region"
                 }
               ],
               "definition": "community_layout:section",
-              "id": "fd914bef-027f-428b-be2d-4b030509271f",
+              "id": "ae26aaa0-401f-4606-8537-80e66206f0b0",
               "type": "component"
             }
           ],
-          "id": "43d53cac-256f-4235-94c4-8193a0f7e25b",
+          "id": "77b09a9a-7558-4a03-9f4e-da07066a66f7",
           "name": "content",
           "title": "Content",
           "type": "region"
@@ -56,18 +56,18 @@
                 "recordId": "{!recordId}"
               },
               "definition": "community_builder:seoAssistant",
-              "id": "9721ba79-4937-4d47-b2db-4c25ba379a1d",
+              "id": "f6b88b37-1bbd-463a-aad1-a3442000530e",
               "type": "component"
             }
           ],
-          "id": "68da5a79-5960-4035-b786-9ff9423bba96",
+          "id": "3594ec00-0b00-41de-bb9b-57adcc134dfa",
           "name": "sfdcHiddenRegion",
           "title": "sfdcHiddenRegion",
           "type": "region"
         }
       ],
       "definition": "community_layout:sldsFlexibleLayout",
-      "id": "6701561c-bc89-4be2-8d3a-060c70740980",
+      "id": "ca935275-0154-4c6a-81ba-d098de9a0ff3",
       "type": "component"
     },
     "dataProviders": [],

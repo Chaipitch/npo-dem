@@ -65,18 +65,18 @@ def custom_page(route_api, view_api, title, url, access, components, layout_type
 # Chat lives only in the dashboard's Ask panel (D-28): no Embedded Messaging widget on any page.
 
 # Home = Discover step
-write('sfdc_cms__view', 'home', view('home', 'Home', 'home', [section([("c:abcHopeHero", {})])]))
+write('sfdc_cms__view', 'home', view('home', 'Home', 'home', [section([("c:tsAbcHopeHero", {})])]))
 
-custom_page('Donate__c', 'donate', 'Donate', 'donate', 'Public', [("c:donationJourney", {})])
-custom_page('Dashboard__c', 'dashboard', 'Dashboard', 'dashboard', 'RequiresLogin', [("c:donorDashboard", {"view": "home"})], 'Portal')
-custom_page('My_Giving__c', 'myGiving', 'My Giving', 'my-giving', 'RequiresLogin', [("c:donorDashboard", {"view": "giving"})], 'Portal')
-custom_page('My_Profile__c', 'myProfile', 'My Profile', 'my-profile', 'RequiresLogin', [("c:donorProfile", {})], 'Portal')
-custom_page('Campaign__c', 'campaign', 'Campaign', 'campaign', 'RequiresLogin', [("c:campaignDetail", {})], 'Portal')
+custom_page('Donate__c', 'donate', 'Donate', 'donate', 'Public', [("c:tsAbcHopeDonationJourney", {})])
+custom_page('Dashboard__c', 'dashboard', 'Dashboard', 'dashboard', 'RequiresLogin', [("c:tsAbcHopeDonorDashboard", {"view": "home"})], 'Portal')
+custom_page('My_Giving__c', 'myGiving', 'My Giving', 'my-giving', 'RequiresLogin', [("c:tsAbcHopeDonorDashboard", {"view": "giving"})], 'Portal')
+custom_page('My_Profile__c', 'myProfile', 'My Profile', 'my-profile', 'RequiresLogin', [("c:tsAbcHopeDonorProfile", {})], 'Portal')
+custom_page('Campaign__c', 'campaign', 'Campaign', 'campaign', 'RequiresLogin', [("c:tsAbcHopeCampaignDetail", {})], 'Portal')
 # Public "Our Work" and "About" (D-26), on the public layout.
-custom_page('Our_Work__c', 'ourWork', 'Our Work', 'our-work', 'Public', [("c:abcHopeOurWork", {})])
-custom_page('About__c', 'about', 'About', 'about', 'Public', [("c:abcHopeAbout", {})])
+custom_page('Our_Work__c', 'ourWork', 'Our Work', 'our-work', 'Public', [("c:tsAbcHopeOurWork", {})])
+custom_page('About__c', 'about', 'About', 'about', 'Public', [("c:tsAbcHopeAbout", {})])
 # Program page (D-33): public like Our Work, which links to it.
-custom_page('Program__c', 'program', 'Program', 'program', 'Public', [("c:programDetail", {})])
+custom_page('Program__c', 'program', 'Program', 'program', 'Public', [("c:tsAbcHopeProgramDetail", {})])
 
 # Home must be public too.
 home_route = os.path.join(SITE, 'sfdc_cms__route', 'Home', 'content.json')
@@ -104,8 +104,8 @@ def theme_layout(api, title, definition, url):
         "definition": definition, "id": uid(), "type": "component"}}, "urlName": url},
         open(os.path.join(d, 'content.json'), 'w'), indent=2)
 
-theme_layout('abcPublicLayout', 'ABC Hope Public', 'c:abcHopePublicLayout', 'abc-hope-public')
-theme_layout('abcPortalLayout', 'ABC Hope Portal', 'c:abcHopePortalLayout', 'abc-hope-portal')
+theme_layout('abcPublicLayout', 'ABC Hope Public', 'c:tsAbcHopePublicLayout', 'abc-hope-public')
+theme_layout('abcPortalLayout', 'ABC Hope Portal', 'c:tsAbcHopePortalLayout', 'abc-hope-portal')
 theme_dir = os.path.join(SITE, 'sfdc_cms__theme')
 for name in os.listdir(theme_dir):
     p = os.path.join(theme_dir, name, 'content.json')

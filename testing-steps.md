@@ -16,11 +16,11 @@ All four campaigns and the source code exist (re-run the `scripts/apex/seed*.ape
 ## 1. Automated tests
 
 ```bash
-sf apex run test -o npo-demo -n DonationIntakeServiceTest,DonationIntakeControllerTest,DonorPortalControllerTest,AbcHopeAgentActionsTest -c -r human -w 15
+sf apex run test -o npo-demo -n TSAbcHopeDonationIntakeServiceTest,TSAbcHopeDonationIntakeControllerTest,TSAbcHopeDonorPortalControllerTest,TSAbcHopeAgentActionsTest -c -r human -w 15
 npm run test:unit
 ```
 
-Pass criteria: 55 Apex test methods (add `DonorAgentControllerTest` to the run) and 33 Jest tests pass.
+Pass criteria: 55 Apex test methods (add `TSAbcHopeDonorAgentControllerTest` to the run) and 33 Jest tests pass.
 
 ## 2. Public journey (private window, desktop then 375 px)
 
@@ -53,7 +53,7 @@ one Ann Demo account only.
 ## 4. Guest security
 
 - Private window: `/dashboard` redirects to login; `/donate` works.
-- Guest profile has Apex access to `DonationIntakeController` only; Run Flows off.
+- Guest profile has Apex access to `TSAbcHopeDonationIntakeController` only; Run Flows off.
 - Tampered `designationId` or campaign name is rejected server-side.
 
 ## 5. Signed-in donor (Maya)
@@ -132,7 +132,7 @@ sf data query -o npo-demo -q "SELECT GiftDesignation.Name, GiftDesignation.NGOTV
 | E12 | **Cancel gift** → **Keep my gift**; then **Cancel gift** → **Yes, cancel gift**                 | First time nothing changes; second time notice "The recurring gift has been cancelled…" and the card disappears                                                                                                                                                                                                                     |
 | E13 | Back office                                                                                     | Commitment **Closed**. **Check** the upcoming Unpaid transaction: expected **Canceled** (not confirmed — see G3); the campaign's raised total on its card must not include it                                                                                                                                                       |
 | E14 | `/dashboard`                                                                                    | Monthly line back to the baseline; past gifts and causes stay in My Giving → Giving History                                                                                                                                                                                                                                         |
-| E15 | Security: private window → `/my-giving`                                                         | Redirects to login. (Server side, a gift Id that is not the signed-in donor's is rejected — covered by `DonorPortalControllerTest`)                                                                                                                                                                                                 |
+| E15 | Security: private window → `/my-giving`                                                         | Redirects to login. (Server side, a gift Id that is not the signed-in donor's is rejected — covered by `TSAbcHopeDonorPortalControllerTest`)                                                                                                                                                                                        |
 
 Notes:
 
