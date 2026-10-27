@@ -262,19 +262,11 @@ public without sharing class TSAbcHopeDonorPortalController {
     d.causes.sort();
     d.causesSupported = d.causes.size();
     d.supporterSince = String.valueOf(firstYear);
-    AggregateResult reach = [
-      SELECT
-        COUNT(Id) programs,
-        SUM(People_Reached__c) people,
-        SUM(Communities__c) communities,
-        SUM(Volunteers_Engaged__c) volunteers
-      FROM Program
-      WHERE Status = 'Active'
-    ];
-    d.activePrograms = (Integer) reach.get('programs');
-    d.peopleReached = wholeNumber(reach.get('people'));
-    d.communities = wholeNumber(reach.get('communities'));
-    d.volunteersEngaged = wholeNumber(reach.get('volunteers'));
+    TSAbcHopeDonationIntakeService.Impact reach = TSAbcHopeDonationIntakeService.getImpact();
+    d.activePrograms = reach.programs;
+    d.peopleReached = reach.peopleReached;
+    d.communities = reach.communities;
+    d.volunteersEngaged = reach.volunteers;
 
     Milestone joined = new Milestone();
     joined.year = String.valueOf(firstYear);
@@ -617,10 +609,5 @@ public without sharing class TSAbcHopeDonorPortalController {
     AuraHandledException e = new AuraHandledException(message);
     e.setMessage(message);
     return e;
-  }
-
-  /** A SUM() result as a whole number; 0 when there is nothing to add up. */
-  static Integer wholeNumber(Object value) {
-    return value == null ? 0 : ((Decimal) value).intValue();
   }
 }

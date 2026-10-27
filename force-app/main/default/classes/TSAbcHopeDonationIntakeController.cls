@@ -23,6 +23,12 @@ public without sharing class TSAbcHopeDonationIntakeController {
     return TSAbcHopeDonationIntakeService.getCampaigns();
   }
 
+  /** About page facts: totals over active programs (D-46). */
+  @AuraEnabled(cacheable=true)
+  public static TSAbcHopeDonationIntakeService.Impact getImpact() {
+    return TSAbcHopeDonationIntakeService.getImpact();
+  }
+
   @AuraEnabled(cacheable=true)
   public static List<TSAbcHopeDonationIntakeService.ProgramCard> getPrograms() {
     return TSAbcHopeDonationIntakeService.getPrograms();

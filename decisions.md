@@ -525,3 +525,14 @@ instead of failing when it is already scheduled.
   or contact the ABC Hope team." for guests, and "You can pause, change or stop it anytime on My Giving." for
   signed-in donors (was "You can stop anytime." for everyone). One-time gifts show no note.
 - Thank-you step: a gap between the amount and "every month" (it read "USD 1,000every month").
+
+### D-46 · About page facts are live totals over active Programs — Accepted (user, 2026‑10‑27)
+
+- The About page's four cards were fixed placeholder text (8,400 / 12 / 6 / 125). They now show People reached,
+  Communities, Programs and Volunteers summed over active Programs (People_Reached__c, Communities__c,
+  Volunteers_Engaged__c; D-34), from `TSAbcHopeDonationIntakeService.getImpact` through the guest-accessible
+  `TSAbcHopeDonationIntakeController.getImpact`. Site access is unchanged. The dashboard's shared impact uses the same
+  method, so both pages always match (27 Oct 2026: 17,172 · 2,415 · 10 · 1,093).
+- Communities stays a plain total (user): a community served by several programs counts once per program.
+- No cards show until the totals load (no made-up numbers). The `facts` builder property stays, unused, because the
+  published page still sets it and Salesforce refuses to remove it.

@@ -45,6 +45,35 @@ private class TSAbcHopeDonationIntakeControllerTest {
   }
 
   @IsTest
+  static void getImpactAddsUpActivePrograms() {
+    insert new List<Program>{
+      new Program(
+        Name = 'Test Impact A',
+        Status = 'Active',
+        People_Reached__c = 100,
+        Communities__c = 3,
+        Volunteers_Engaged__c = 7
+      ),
+      new Program(
+        Name = 'Test Impact B',
+        Status = 'Active',
+        People_Reached__c = 50,
+        Communities__c = 2
+      ),
+      new Program(
+        Name = 'Test Impact Closed',
+        Status = 'Completed',
+        People_Reached__c = 999
+      )
+    };
+    TSAbcHopeDonationIntakeService.Impact i = TSAbcHopeDonationIntakeController.getImpact();
+    Assert.areEqual(2, i.programs);
+    Assert.areEqual(150, i.peopleReached);
+    Assert.areEqual(5, i.communities);
+    Assert.areEqual(7, i.volunteers, 'a blank field counts as 0');
+  }
+
+  @IsTest
   static void getOptionsReturnsDesignations() {
     TSAbcHopeDonationIntakeService.Options opts = TSAbcHopeDonationIntakeController.getOptions(
       CAMPAIGN,

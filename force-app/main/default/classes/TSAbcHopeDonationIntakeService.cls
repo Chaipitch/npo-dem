@@ -425,6 +425,40 @@ public without sharing class TSAbcHopeDonationIntakeService {
     public String summary;
   }
 
+  /** Totals over active programs (D-34, D-46): the About page facts and the dashboard's shared impact. */
+  public class Impact {
+    @AuraEnabled
+    public Integer programs = 0;
+    @AuraEnabled
+    public Integer peopleReached = 0;
+    @AuraEnabled
+    public Integer communities = 0; // a plain sum: a community served by two programs counts twice
+    @AuraEnabled
+    public Integer volunteers = 0;
+  }
+
+  public static Impact getImpact() {
+    AggregateResult reach = [
+      SELECT
+        COUNT(Id) programs,
+        SUM(People_Reached__c) people,
+        SUM(Communities__c) communities,
+        SUM(Volunteers_Engaged__c) volunteers
+      FROM Program
+      WHERE Status = 'Active'
+    ];
+    Impact i = new Impact();
+    i.programs = (Integer) reach.get('programs');
+    i.peopleReached = wholeNumber(reach.get('people'));
+    i.communities = wholeNumber(reach.get('communities'));
+    i.volunteers = wholeNumber(reach.get('volunteers'));
+    return i;
+  }
+
+  static Integer wholeNumber(Object value) {
+    return value == null ? 0 : ((Decimal) value).intValue();
+  }
+
   /** "Our Work" page (D-26): an active program with the open campaigns and causes that fund it. */
   public class ProgramCard {
     @AuraEnabled
