@@ -65,7 +65,6 @@ public without sharing class TSAbcHopeAgentMonthlyGifts {
   class Gift {
     GiftCommitment commitment;
     GiftCommitmentSchedule openSchedule; // open-ended CreateTransactions schedule
-    GiftCommitmentSchedule currentSchedule; // CreateTransactions schedule covering today (D-44)
     GiftCommitmentSchedule pauseSchedule; // current or upcoming pause
     String designation;
   }
@@ -171,10 +170,20 @@ public without sharing class TSAbcHopeAgentMonthlyGifts {
       return;
     }
     // A pause starts today (the donor's date, which NPC also checks), so the gift shows Paused at once (D-43).
-    // After a resume the open-ended schedule can start later, so pause the schedule covering today (D-44).
-    GiftCommitmentSchedule target = g.currentSchedule ?? g.openSchedule;
+    GiftCommitmentSchedule target = TSAbcHopeMonthlyGiftService.scheduleToPause(
+      g.commitment.Id,
+      months
+    );
+    if (target == null) {
+      r.message = 'This recurring gift has no active schedule to pause.';
+      return;
+    }
     Date startDate = later(Date.today(), target.StartDate);
     Date endDate = startDate.addMonths(months).addDays(-1);
+    if (target.EndDate != null && target.EndDate < endDate) {
+      r.message = TSAbcHopeMonthlyGiftService.tooLong(target.EndDate);
+      return;
+    }
     Invocable.Action a = Invocable.Action.createStandardAction(
       'pauseGiftCommitmentSchedule'
     );
@@ -315,9 +324,6 @@ public without sharing class TSAbcHopeAgentMonthlyGifts {
         g.pauseSchedule = s;
       } else if (s.Type == 'CreateTransactions' && s.EndDate == null) {
         g.openSchedule = s;
-      }
-      if (s.Type == 'CreateTransactions' && s.StartDate <= today) {
-        g.currentSchedule = s;
       }
     }
     for (GiftDefaultDesignation gdd : [

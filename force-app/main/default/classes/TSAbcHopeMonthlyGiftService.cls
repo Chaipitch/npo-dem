@@ -39,7 +39,6 @@ public without sharing class TSAbcHopeMonthlyGiftService {
 
     public GiftCommitment commitment;
     public GiftCommitmentSchedule openSchedule; // open-ended CreateTransactions schedule
-    public GiftCommitmentSchedule currentSchedule; // CreateTransactions schedule covering today (D-44)
     public GiftCommitmentSchedule pauseSchedule; // current or upcoming pause
   }
 
@@ -111,9 +110,6 @@ public without sharing class TSAbcHopeMonthlyGiftService {
         g.amount = s.TransactionAmount;
         g.period = s.TransactionPeriod;
       }
-      if (s.Type == 'CreateTransactions' && s.StartDate <= today) {
-        g.currentSchedule = s;
-      }
     }
     for (GiftDefaultDesignation gdd : [
       SELECT
@@ -178,10 +174,15 @@ public without sharing class TSAbcHopeMonthlyGiftService {
       );
     }
     // A pause starts today (the donor's date, which NPC also checks), so the gift shows Paused at once (D-43).
-    // After a resume the open-ended schedule can start later, so pause the schedule covering today (D-44).
-    GiftCommitmentSchedule target = g.currentSchedule ?? g.openSchedule;
+    GiftCommitmentSchedule target = scheduleToPause(g.commitment.Id, months);
+    if (target == null) {
+      return new Outcome(false, FAILED);
+    }
     Date startDate = later(Date.today(), target.StartDate);
     Date endDate = startDate.addMonths(months).addDays(-1);
+    if (target.EndDate != null && target.EndDate < endDate) {
+      return new Outcome(false, tooLong(target.EndDate));
+    }
     Invocable.Action a = Invocable.Action.createStandardAction(
       'pauseGiftCommitmentSchedule'
     );
@@ -199,6 +200,110 @@ public without sharing class TSAbcHopeMonthlyGiftService {
         endDate.format() +
         '. Gifts restart automatically after that.'
     );
+  }
+
+  /**
+   * The schedule to pause for `months` from today, or from the gift's first date if it starts later (D-44). NPC pauses one schedule and refuses a pause that runs
+   * past that schedule's end, but every pause and resume splits schedules: after a resume, today is covered by a
+   * schedule that ends soon and the open-ended one starts later. So take the CreateTransactions schedule covering
+   * the start and, if the pause runs past its end, join it with the following pieces that are the same gift (same
+   * amount, period, day, campaign and payment method, no instalments yet): they are deleted and the first piece is
+   * extended. Returns that schedule; its EndDate is still before the pause's end when the pieces differ (e.g. a new
+   * amount starts), so the caller can say how long the gift can be paused. Null when no schedule covers the start.
+   */
+  public static GiftCommitmentSchedule scheduleToPause(
+    Id commitmentId,
+    Integer months
+  ) {
+    Date today = Date.today();
+    List<GiftCommitmentSchedule> pieces = [
+      SELECT
+        Id,
+        Type,
+        StartDate,
+        EndDate,
+        TransactionAmount,
+        TransactionPeriod,
+        TransactionInterval,
+        TransactionDay,
+        CampaignId,
+        PaymentMethod
+      FROM GiftCommitmentSchedule
+      WHERE
+        GiftCommitmentId = :commitmentId
+        AND (EndDate = NULL
+        OR EndDate >= :today)
+      ORDER BY StartDate
+    ];
+    GiftCommitmentSchedule first;
+    Date endDate;
+    List<GiftCommitmentSchedule> toJoin = new List<GiftCommitmentSchedule>();
+    Date joinedEnd;
+    for (GiftCommitmentSchedule s : pieces) {
+      if (first == null) {
+        if (s.Type == 'CreateTransactions') {
+          first = s;
+          joinedEnd = s.EndDate;
+          endDate = later(today, s.StartDate).addMonths(months).addDays(-1);
+        }
+        continue;
+      }
+      if (
+        joinedEnd == null ||
+        joinedEnd >= endDate ||
+        s.StartDate != joinedEnd.addDays(1) ||
+        !sameGift(first, s)
+      ) {
+        break;
+      }
+      toJoin.add(s);
+      joinedEnd = s.EndDate;
+    }
+    if (first == null || toJoin.isEmpty()) {
+      return first;
+    }
+    Savepoint sp = Database.setSavepoint();
+    try {
+      if (
+        [
+          SELECT COUNT()
+          FROM GiftTransaction
+          WHERE GiftCommitmentScheduleId IN :toJoin
+        ] > 0
+      ) {
+        return first;
+      }
+      delete toJoin;
+      update new GiftCommitmentSchedule(Id = first.Id, EndDate = joinedEnd);
+      first.EndDate = joinedEnd;
+    } catch (Exception e) {
+      Database.rollback(sp);
+      System.debug(
+        LoggingLevel.ERROR,
+        'Joining schedules failed: ' + e.getMessage()
+      );
+    }
+    return first;
+  }
+
+  static Boolean sameGift(GiftCommitmentSchedule a, GiftCommitmentSchedule b) {
+    return b.Type == 'CreateTransactions' &&
+      a.TransactionAmount == b.TransactionAmount &&
+      a.TransactionPeriod == b.TransactionPeriod &&
+      a.TransactionInterval == b.TransactionInterval &&
+      a.TransactionDay == b.TransactionDay &&
+      // NPC's resume leaves the piece it reopens without a campaign; the commitment's campaign still applies.
+      (a.CampaignId == b.CampaignId ||
+      a.CampaignId == null ||
+      b.CampaignId == null) &&
+      a.PaymentMethod == b.PaymentMethod;
+  }
+
+  /** The message when a change to the gift (e.g. a new amount) starts before the pause would end. */
+  public static String tooLong(Date lastDay) {
+    return 'This recurring gift changes after ' +
+      lastDay.format() +
+      ', so it can be paused until then at most. Please choose a shorter pause.';
   }
 
   public static Outcome resume(Gift g) {
