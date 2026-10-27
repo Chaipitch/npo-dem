@@ -167,6 +167,50 @@ private class TSAbcHopeAgentActionsTest {
   }
 
   @IsTest
+  static void campaignInfoAsksWhichCampaignForALooseName() {
+    fundraisingCampaign(CAMPAIGN, Date.today().addDays(30), 'School Supplies');
+    fundraisingCampaign(
+      'Christmas Toy Drive 2026',
+      Date.today().addDays(30),
+      'Toys'
+    );
+    fundraisingCampaign(
+      'Test Spring Appeal',
+      Date.today().addDays(30),
+      'Trees'
+    );
+
+    Test.startTest();
+    TSAbcHopeAgentCampaignInfo.Result loose = campaignInfo('Christmas Gift');
+    TSAbcHopeAgentCampaignInfo.Result toys = campaignInfo('toy drive');
+    Test.stopTest();
+
+    Assert.isTrue(
+      loose.summary.startsWith('Several open campaigns match "Christmas Gift"'),
+      loose.summary
+    );
+    Assert.isTrue(
+      loose.summary.contains('/donate?campaign=Christmas%20Giving%202026'),
+      loose.summary
+    );
+    Assert.isTrue(
+      loose.summary.contains('/donate?campaign=Christmas%20Toy%20Drive%202026'),
+      loose.summary
+    );
+    Assert.isFalse(loose.summary.contains('Spring'), loose.summary);
+    Assert.isTrue(
+      toys.donateUrl.endsWith(
+        '/donate?campaign=Christmas%20Toy%20Drive%202026'
+      ),
+      toys.donateUrl
+    );
+    Assert.isTrue(
+      toys.summary.contains('Campaign: Christmas Toy Drive 2026'),
+      toys.summary
+    );
+  }
+
+  @IsTest
   static void campaignInfoNamesTheProgramsACampaignFunds() {
     Program edu = new Program(
       Name = 'Test Education Access',

@@ -1,5 +1,5 @@
 import { createElement } from "lwc";
-import DonorDashboard from "c/tsAbcHopeDonorDashboard";
+import DonorDashboard, { extractLinks } from "c/tsAbcHopeDonorDashboard";
 import getDashboard from "@salesforce/apex/TSAbcHopeDonorPortalController.getDashboard";
 import getCampaigns from "@salesforce/apex/TSAbcHopeDonationIntakeController.getCampaigns";
 import askAgent from "@salesforce/apex/TSAbcHopeDonorAgentController.ask";
@@ -241,6 +241,32 @@ describe("c-ts-abc-hope-donor-dashboard agent panel", () => {
     );
   });
 
+  it("shows the agent's donation links as Donate buttons", async () => {
+    askAgent.mockResolvedValue({
+      sessionId: "s-10",
+      text: "Which one do you mean?\n1. Christmas Giving 2026 — Donate: https://x.my.site.com/donate?campaign=Christmas%20Giving%202026\n2. Christmas Toy Drive 2026 — Donate: https://x.my.site.com/donate?campaign=Christmas%20Toy%20Drive%202026"
+    });
+    const el = await mount();
+    await ask(el, "I want to donate to Christmas Gift");
+    expect(lastReply(el)).not.toContain("https://");
+    expect(lastReply(el)).toContain("1. Christmas Giving 2026");
+    expect(
+      $$(el, ".chat-log a.chat-link").map((a) => [
+        a.textContent,
+        a.getAttribute("href")
+      ])
+    ).toEqual([
+      [
+        "Donate to Christmas Giving 2026",
+        "https://x.my.site.com/donate?campaign=Christmas%20Giving%202026"
+      ],
+      [
+        "Donate to Christmas Toy Drive 2026",
+        "https://x.my.site.com/donate?campaign=Christmas%20Toy%20Drive%202026"
+      ]
+    ]);
+  });
+
   it("with the verified agent, falls back to the dashboard answer when the agent fails", async () => {
     askAgent.mockResolvedValue({
       error: "The assistant could not answer right now. Please try again."
@@ -347,5 +373,108 @@ describe("c-ts-abc-hope-donor-dashboard agent panel", () => {
         configurable: true
       });
     }
+  });
+});
+
+describe("c-ts-abc-hope-donor-dashboard giving history", () => {
+  afterEach(() => {
+    while (document.body.firstChild) {
+      document.body.removeChild(document.body.firstChild);
+    }
+  });
+  function mountGiving(gifts) {
+    const el = createElement("c-ts-abc-hope-donor-dashboard", {
+      is: DonorDashboard
+    });
+    el.view = "giving";
+    document.body.appendChild(el);
+    getDashboard.emit({ ...DASHBOARD, gifts });
+    getCampaigns.emit([]);
+    return el;
+  }
+
+  it("pages the giving history 10 gifts at a time", async () => {
+    const gifts = Array.from({ length: 23 }, (_, i) => ({
+      id: `g${i + 1}`,
+      giftDate: "2025-06-01",
+      amount: 100 + i,
+      status: "Paid",
+      designations: "General Fund"
+    }));
+    const el = mountGiving(gifts);
+    await flush();
+    const rows = () => $$(el, ".table tbody tr");
+    expect(rows()).toHaveLength(10);
+    expect($(el, '[data-id="page-summary"]').textContent).toBe(
+      "Showing 1–10 of 23 gifts"
+    );
+    expect($(el, '[data-id="prev-page"]').disabled).toBe(true);
+    $(el, '[data-id="next-page"]').click();
+    await flush();
+    $(el, '[data-id="next-page"]').click();
+    await flush();
+    expect(rows()).toHaveLength(3);
+    expect($(el, '[data-id="page-summary"]').textContent).toBe(
+      "Showing 21–23 of 23 gifts"
+    );
+    expect($(el, '[data-id="next-page"]').disabled).toBe(true);
+    $(el, '[data-id="prev-page"]').click();
+    await flush();
+    expect($(el, ".pager-label").textContent).toBe("Page 2 of 3");
+  });
+
+  it("shows no pager for 10 gifts or fewer", async () => {
+    const el = mountGiving(DASHBOARD.gifts);
+    await flush();
+    expect($$(el, ".table tbody tr")).toHaveLength(2);
+    expect($(el, ".pager")).toBeNull();
+  });
+});
+
+describe("extractLinks", () => {
+  it("turns markdown and bare links into labelled buttons", () => {
+    const r = extractLinks(
+      "Great choice! [Donate now](https://x.site/donate?campaign=Christmas%20Toy%20Drive%202026). Donate here: https://x.site/donate. See https://x.site/about"
+    );
+    expect(r.links.map((l) => l.label)).toEqual([
+      "Donate to Christmas Toy Drive 2026",
+      "Donate",
+      "Open link"
+    ]);
+    expect(r.text).toBe("Great choice! Donate now. See");
+  });
+  it("rebuilds links Agentforce redacted from the campaign named before them", () => {
+    const r = extractLinks(
+      "Which one?\n\nChristmas Toy Drive 2026 — Toys for children. Donate: URL_Redacted\n\nChristmas Giving 2026 — School supplies. Donate: URL_Redacted\n\nNo payment is collected.",
+      {
+        campaigns: ["Christmas Giving 2026", "Christmas Toy Drive 2026"],
+        donatePath: "/donate"
+      }
+    );
+    expect(r.links).toEqual([
+      {
+        href: "/donate?campaign=Christmas%20Toy%20Drive%202026",
+        label: "Donate to Christmas Toy Drive 2026"
+      },
+      {
+        href: "/donate?campaign=Christmas%20Giving%202026",
+        label: "Donate to Christmas Giving 2026"
+      }
+    ]);
+    expect(r.text).not.toMatch(/redacted/i);
+    const single = extractLinks(
+      "The Christmas Toy Drive 2026 gives toys.\n\nIt takes a minute. Donate here: URL_Redacted",
+      { campaigns: ["Christmas Toy Drive 2026"] }
+    );
+    expect(single.links[0].label).toBe("Donate to Christmas Toy Drive 2026");
+    expect(single.text).toBe(
+      "The Christmas Toy Drive 2026 gives toys.\n\nIt takes a minute."
+    );
+  });
+  it("leaves text without links alone", () => {
+    expect(extractLinks("No links here.")).toEqual({
+      text: "No links here.",
+      links: []
+    });
   });
 });

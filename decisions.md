@@ -547,3 +547,21 @@ instead of failing when it is already scheduled.
 - Delivery labels: one of a plural name reads singular ("1 financial literacy class delivered"), a name ending in a
   consonant + y pluralises to -ies, and a benefit that is itself a delivery isn't followed by "delivered" ("25 grocery
   deliveries", was "25 grocery deliverys delivered").
+
+### D-48 · Feedback round: giving history pages, stacked stories, donate links from the assistant, "Non specified" — Accepted (user, 2026‑10‑27)
+
+- **My Giving pages:** the Giving History table shows 10 gifts a page with Previous / Next and "Showing 1–10 of N
+  gifts" (front end only; the history still loads up to 200 gifts). No pager for 10 or fewer.
+- **Stories at 1281–1600px:** the three cards stay side by side; each card stacks its photo above the text.
+- **Donate links from the assistant:** `TSAbcHopeAgentCampaignInfo` matches loose names: an exact name, else every open
+  campaign containing the phrase, else those sharing the most words (noise words such as gift, giving, donate, campaign
+  ignored). Several matches → it lists them with each donate link and the agent asks which (agent v14, active). The
+  dashboard panel turns links in replies into buttons ("Donate to <campaign>"). Agentforce replaces links to sites
+  that are not Trusted URLs with "URL_Redacted"; the panel rebuilds the donate link from the campaign named before it.
+  Adding the site to Setup → Trusted URLs (so the chat widget shows real links too) is shared org config: asked, not done.
+- **Non specified:** a cause option for campaigns with two or more causes (not the default). The gift is split across
+  the campaign's active default designations by their AllocatedPercentage (scaled to 100; the largest share takes
+  rounding): a one-time gift gets one designation per cause (the Paid gift's automatic 100% designation is re-pointed
+  to the first, D-13), a recurring gift gets the same default designations so every instalment is split. The gift
+  name's cause part is "Non specified" — the naming rule now uses it for any gift or commitment with more than one
+  designation (`TSAbcHopeGiftNaming.SPLIT_CAUSE`). "Where Most Needed" stays a separate single cause.

@@ -6,8 +6,8 @@
  *
  * Date = the gift's own date (TransactionDate, or a commitment's EffectiveStartDate), or the date it was created
  * when the two are within a day of each other; time = when the record was created. Both in the org's default time
- * zone (Setup → Company Information; America/Los_Angeles on 27 Oct 2026). The cause is the designation with the largest share (a gift without one takes its
- * commitment's). Each part is shortened on its own so the date and time always stay.
+ * zone (Setup → Company Information; Asia/Bangkok since 27 Oct 2026). The cause is the gift's designation (a gift
+ * without one takes its commitment's); a gift split across several causes reads "Non specified" (D-48). Each part is shortened on its own so the date and time always stay.
  */
 public without sharing class TSAbcHopeGiftNaming {
   /** The org's default time zone, read once per transaction. */
@@ -21,6 +21,8 @@ public without sharing class TSAbcHopeGiftNaming {
     }
     private set;
   }
+  /** The cause part of a gift split across several causes (D-48). */
+  public static final String SPLIT_CAUSE = 'Non specified';
   static final Integer CAMPAIGN_MAX = 60;
   static final Integer CAUSE_MAX = 40;
   static final Integer DONOR_MAX = 60;
@@ -135,9 +137,12 @@ public without sharing class TSAbcHopeGiftNaming {
       WHERE GiftTransactionId IN :giftIds AND GiftDesignationId != NULL
       ORDER BY Percent DESC NULLS LAST, CreatedDate ASC
     ]) {
-      if (!causes.containsKey(gtd.GiftTransactionId)) {
-        causes.put(gtd.GiftTransactionId, gtd.GiftDesignation.Name);
-      }
+      causes.put(
+        gtd.GiftTransactionId,
+        causes.containsKey(gtd.GiftTransactionId)
+          ? SPLIT_CAUSE
+          : gtd.GiftDesignation.Name
+      );
     }
     Set<Id> commitmentIds = new Set<Id>();
     for (GiftTransaction gt : gifts) {
@@ -219,9 +224,12 @@ public without sharing class TSAbcHopeGiftNaming {
       WHERE ParentRecordId IN :parentIds
       ORDER BY AllocatedPercentage DESC NULLS LAST, CreatedDate ASC
     ]) {
-      if (!causes.containsKey(gdd.ParentRecordId)) {
-        causes.put(gdd.ParentRecordId, gdd.GiftDesignation.Name);
-      }
+      causes.put(
+        gdd.ParentRecordId,
+        causes.containsKey(gdd.ParentRecordId)
+          ? SPLIT_CAUSE
+          : gdd.GiftDesignation.Name
+      );
     }
     return causes;
   }

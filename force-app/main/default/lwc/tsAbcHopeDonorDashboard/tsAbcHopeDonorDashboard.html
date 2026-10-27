@@ -386,7 +386,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <template for:each={gifts} for:item="g">
+                    <template for:each={pagedGifts} for:item="g">
                       <tr key={g.id}>
                         <td data-label="Date">{g.dateDisplay}</td>
                         <td data-label="Campaign">{g.campaignName}</td>
@@ -403,6 +403,36 @@
                   </tbody>
                 </table>
               </div>
+              <template lwc:if={showPager}>
+                <nav class="pager" aria-label="Giving history pages">
+                  <span class="pager-summary muted" data-id="page-summary"
+                    >{pageSummary}</span
+                  >
+                  <span class="pager-buttons">
+                    <button
+                      type="button"
+                      class="pager-btn"
+                      data-id="prev-page"
+                      disabled={isFirstPage}
+                      onclick={previousPage}
+                    >
+                      Previous
+                    </button>
+                    <span class="pager-label" aria-live="polite"
+                      >{pageLabel}</span
+                    >
+                    <button
+                      type="button"
+                      class="pager-btn"
+                      data-id="next-page"
+                      disabled={isLastPage}
+                      onclick={nextPage}
+                    >
+                      Next
+                    </button>
+                  </span>
+                </nav>
+              </template>
             </template>
             <template lwc:else>
               <p class="muted">
@@ -512,9 +542,9 @@
                     </template>
                     <div class={m.bubbleClass}>
                       <p class="chat-text">{m.text}</p>
-                      <template lwc:if={m.link}>
-                        <a class="chat-link" href={m.link.href}
-                          >{m.link.label}</a
+                      <template for:each={m.links} for:item="l">
+                        <a key={l.key} class="chat-link" href={l.href}
+                          >{l.label}</a
                         >
                       </template>
                     </div>

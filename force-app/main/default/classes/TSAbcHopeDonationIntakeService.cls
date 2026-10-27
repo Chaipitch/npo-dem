@@ -46,6 +46,8 @@ public without sharing class TSAbcHopeDonationIntakeService {
     public String frequency;
     public Decimal amount;
     public Id designationId;
+    /** "Non specified" (D-48): no single cause; the gift is split across the campaign's causes. */
+    public Boolean nonSpecified;
     public String donorType;
     public String firstName;
     public String lastName;
@@ -63,6 +65,9 @@ public without sharing class TSAbcHopeDonationIntakeService {
     public Decimal amount;
     @AuraEnabled
     public String designationName;
+    /** For a "Non specified" gift: how it was split, e.g. "Toys 34%, Books 33%, Games 33%". */
+    @AuraEnabled
+    public String splitSummary;
     @AuraEnabled
     public String donorName;
     @AuraEnabled
@@ -103,8 +108,20 @@ public without sharing class TSAbcHopeDonationIntakeService {
     public List<Option> designations = new List<Option>();
     @AuraEnabled
     public String defaultDesignationId;
+    /** How a "Non specified" gift would be split; empty when the campaign has fewer than two causes (D-48). */
+    @AuraEnabled
+    public List<Share> split = new List<Share>();
     @AuraEnabled
     public Donor currentDonor;
+  }
+
+  /** One cause's part of a "Non specified" gift (D-48). */
+  public class Share {
+    @AuraEnabled
+    public String name;
+    @AuraEnabled
+    public Decimal percent;
+    public Id designationId;
   }
 
   // ---------------------------------------------------------------- options
@@ -172,8 +189,78 @@ public without sharing class TSAbcHopeDonationIntakeService {
     if (opts.defaultDesignationId == null && !opts.designations.isEmpty()) {
       opts.defaultDesignationId = opts.designations[0].value;
     }
+    List<Share> split = campaignSplit(camp.Id);
+    if (split.size() > 1) {
+      opts.split = split;
+    }
     opts.currentDonor = getCurrentDonor();
     return opts;
+  }
+
+  public static final String NON_SPECIFIED = TSAbcHopeGiftNaming.SPLIT_CAUSE;
+
+  /**
+   * The campaign's causes (its active default designations) with their shares, for a "Non specified" gift (D-48).
+   * Shares follow the campaign's AllocatedPercentage, scaled so they add up to exactly 100; the largest share takes
+   * any rounding remainder.
+   */
+  public static List<Share> campaignSplit(Id campaignId) {
+    List<Share> shares = new List<Share>();
+    Decimal total = 0;
+    for (GiftDefaultDesignation gdd : [
+      SELECT GiftDesignationId, GiftDesignation.Name, AllocatedPercentage
+      FROM GiftDefaultDesignation
+      WHERE ParentRecordId = :campaignId AND GiftDesignation.IsActive = TRUE
+      ORDER BY AllocatedPercentage DESC, CreatedDate ASC
+    ]) {
+      Share sh = new Share();
+      sh.designationId = gdd.GiftDesignationId;
+      sh.name = gdd.GiftDesignation.Name;
+      sh.percent = gdd.AllocatedPercentage == null
+        ? 0
+        : gdd.AllocatedPercentage;
+      total += sh.percent;
+      shares.add(sh);
+    }
+    if (shares.isEmpty()) {
+      return shares;
+    }
+    Decimal assigned = 0;
+    for (Share sh : shares) {
+      sh.percent = total > 0
+        ? (sh.percent * 100 / total).setScale(2)
+        : (100.0 / shares.size()).setScale(2);
+      assigned += sh.percent;
+    }
+    shares[0].percent += 100 - assigned;
+    return shares;
+  }
+
+  /** "Toys 34%, Books 33%, Games 33%". */
+  public static String splitSummary(List<Share> shares) {
+    List<String> parts = new List<String>();
+    for (Share sh : shares) {
+      parts.add(
+        sh.name + ' ' + sh.percent.stripTrailingZeros().toPlainString() + '%'
+      );
+    }
+    return String.join(parts, ', ');
+  }
+
+  /** Amounts per share in cents-exact parts of `amount`; the first (largest) share takes the remainder. */
+  static List<Decimal> splitAmounts(List<Share> shares, Decimal amount) {
+    List<Decimal> amounts = new List<Decimal>();
+    Decimal assigned = 0;
+    for (Share sh : shares) {
+      Decimal a = (amount *
+        sh.percent /
+        100)
+        .setScale(2, System.RoundingMode.DOWN);
+      amounts.add(a);
+      assigned += a;
+    }
+    amounts[0] += amount - assigned;
+    return amounts;
   }
 
   /** Donor for the signed-in community user, or null for guests/internal users. */
@@ -202,7 +289,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
     validate(req, signedInAccountId != null);
 
     Campaign camp = findCampaign(req.campaignName);
-    GiftDesignation designation = findDesignation(req.designationId);
+    List<Share> shares = sharesFor(req, camp.Id);
     Id sourceCodeId = findSourceCodeId(req.sourceCode);
 
     Account donor = signedInAccountId != null
@@ -213,11 +300,13 @@ public without sharing class TSAbcHopeDonationIntakeService {
         ]
       : matchOrCreateDonor(req);
 
-    String giftName = buildName(camp.Name, designation.Name, donor.Name);
+    String cause = shares.size() == 1 ? shares[0].name : NON_SPECIFIED;
+    String giftName = buildName(camp.Name, cause, donor.Name);
     Result res = new Result();
     res.frequency = req.frequency;
     res.amount = req.amount;
-    res.designationName = designation.Name;
+    res.designationName = cause;
+    res.splitSummary = shares.size() == 1 ? null : splitSummary(shares);
     res.donorName = donor.Name;
     res.donorEmail = donor.IsPersonAccount ? donor.PersonEmail : req.email;
 
@@ -226,7 +315,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
         req,
         donor,
         camp,
-        designation,
+        shares,
         sourceCodeId,
         giftName
       );
@@ -235,7 +324,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
         req,
         donor,
         camp,
-        designation,
+        shares,
         sourceCodeId,
         giftName
       );
@@ -266,7 +355,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
       );
     }
     req.amount = req.amount.setScale(2);
-    if (req.designationId == null) {
+    if (req.designationId == null && req.nonSpecified != true) {
       throw new DonationException(
         'Please choose what you would like to support.'
       );
@@ -703,6 +792,25 @@ public without sharing class TSAbcHopeDonationIntakeService {
     return camps[0];
   }
 
+  /** The chosen cause at 100%, or for "Non specified" the campaign's causes and their shares (D-48). */
+  static List<Share> sharesFor(Request req, Id campaignId) {
+    if (req.nonSpecified == true) {
+      List<Share> shares = campaignSplit(campaignId);
+      if (shares.isEmpty()) {
+        throw new DonationException(
+          'Please choose what you would like to support.'
+        );
+      }
+      return shares;
+    }
+    GiftDesignation gd = findDesignation(req.designationId);
+    Share sh = new Share();
+    sh.designationId = gd.Id;
+    sh.name = gd.Name;
+    sh.percent = 100;
+    return new List<Share>{ sh };
+  }
+
   static GiftDesignation findDesignation(Id designationId) {
     List<GiftDesignation> gds = [
       SELECT Id, Name
@@ -808,7 +916,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
     Request req,
     Account donor,
     Campaign camp,
-    GiftDesignation designation,
+    List<Share> shares,
     Id sourceCodeId,
     String giftName
   ) {
@@ -831,7 +939,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
       req,
       donor,
       camp,
-      designation,
+      shares,
       sourceCodeId,
       giftName,
       null
@@ -849,7 +957,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
     Request req,
     Account donor,
     Campaign camp,
-    GiftDesignation designation,
+    List<Share> shares,
     Id sourceCodeId,
     String giftName,
     Id commitmentId
@@ -869,24 +977,31 @@ public without sharing class TSAbcHopeDonationIntakeService {
       Description = description(req, donor)
     );
     insert gt;
-    // NPC adds a default 100% designation to Paid gifts on insert (D-13); re-point it rather than add a second one.
+    // NPC adds a default 100% designation to Paid gifts on insert (D-13); re-point it to the first share rather
+    // than add a second one, then add the other shares of a "Non specified" gift (D-48).
+    List<Decimal> amounts = splitAmounts(shares, req.amount);
     List<GiftTransactionDesignation> existing = [
       SELECT Id
       FROM GiftTransactionDesignation
       WHERE GiftTransactionId = :gt.Id
       LIMIT 1
     ];
-    if (existing.isEmpty()) {
-      insert new GiftTransactionDesignation(
-        GiftTransactionId = gt.Id,
-        GiftDesignationId = designation.Id,
-        Amount = req.amount,
-        Percent = 100
+    List<GiftTransactionDesignation> toInsert = new List<GiftTransactionDesignation>();
+    for (Integer i = 0; i < shares.size(); i++) {
+      GiftTransactionDesignation gtd = new GiftTransactionDesignation(
+        GiftDesignationId = shares[i].designationId,
+        Amount = amounts[i],
+        Percent = shares[i].percent
       );
-    } else {
-      existing[0].GiftDesignationId = designation.Id;
-      update existing[0];
+      if (i == 0 && !existing.isEmpty()) {
+        gtd.Id = existing[0].Id;
+        update gtd;
+      } else {
+        gtd.GiftTransactionId = gt.Id;
+        toInsert.add(gtd);
+      }
     }
+    insert toInsert;
     return gt.Id;
   }
 
@@ -894,7 +1009,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
     Request req,
     Account donor,
     Campaign camp,
-    GiftDesignation designation,
+    List<Share> shares,
     Id sourceCodeId,
     String giftName
   ) {
@@ -934,20 +1049,18 @@ public without sharing class TSAbcHopeDonationIntakeService {
       CampaignId = camp.Id,
       OutreachSourceCodeId = sourceCodeId
     );
-    insert new GiftDefaultDesignation(
-      ParentRecordId = gc.Id,
-      GiftDesignationId = designation.Id,
-      AllocatedPercentage = 100
-    );
-    insertPaidGift(
-      req,
-      donor,
-      camp,
-      designation,
-      sourceCodeId,
-      giftName,
-      gc.Id
-    );
+    List<GiftDefaultDesignation> defaults = new List<GiftDefaultDesignation>();
+    for (Share sh : shares) {
+      defaults.add(
+        new GiftDefaultDesignation(
+          ParentRecordId = gc.Id,
+          GiftDesignationId = sh.designationId,
+          AllocatedPercentage = sh.percent
+        )
+      );
+    }
+    insert defaults;
+    insertPaidGift(req, donor, camp, shares, sourceCodeId, giftName, gc.Id);
     return [SELECT Name FROM GiftCommitment WHERE Id = :gc.Id].Name;
   }
 

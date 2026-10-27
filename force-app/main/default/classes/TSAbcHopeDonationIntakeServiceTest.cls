@@ -710,6 +710,133 @@ private class TSAbcHopeDonationIntakeServiceTest {
     Assert.isNull(TSAbcHopeDonationIntakeService.getProgramDetail(null));
   }
 
+  /** The campaign's causes become 34 / 33 / 33 (as Christmas Toy Drive 2026). */
+  static void threeCauses() {
+    GiftDesignation toys = new GiftDesignation(
+      Name = 'Test Toys',
+      IsActive = true
+    );
+    insert toys;
+    Id campId = [SELECT Id FROM Campaign WHERE Name = :CAMPAIGN].Id;
+    GiftDefaultDesignation existing = [
+      SELECT Id
+      FROM GiftDefaultDesignation
+      WHERE ParentRecordId = :campId
+    ];
+    existing.AllocatedPercentage = 34;
+    update existing;
+    insert new List<GiftDefaultDesignation>{
+      new GiftDefaultDesignation(
+        ParentRecordId = campId,
+        GiftDesignationId = designationId('Test Learning Kits'),
+        AllocatedPercentage = 33
+      ),
+      new GiftDefaultDesignation(
+        ParentRecordId = campId,
+        GiftDesignationId = toys.Id,
+        AllocatedPercentage = 33
+      )
+    };
+  }
+
+  @IsTest
+  static void nonSpecifiedGiftIsSplitAcrossTheCampaignsCauses() {
+    threeCauses();
+    TSAbcHopeDonationIntakeService.Options opts = TSAbcHopeDonationIntakeService.getOptions(
+      CAMPAIGN,
+      null
+    );
+    Assert.areEqual(3, opts.split.size());
+    Assert.areEqual(34, opts.split[0].percent);
+
+    TSAbcHopeDonationIntakeService.Request req = individual(
+      'split@example.com'
+    );
+    req.designationId = null;
+    req.nonSpecified = true;
+    req.amount = 1000.01;
+    Test.startTest();
+    TSAbcHopeDonationIntakeService.Result res = TSAbcHopeDonationIntakeService.submit(
+      req
+    );
+    Test.stopTest();
+
+    Assert.areEqual('Non specified', res.designationName);
+    Assert.areEqual(
+      'Test School Supplies 34%, Test Learning Kits 33%, Test Toys 33%',
+      res.splitSummary
+    );
+    Assert.isTrue(res.reference.contains(' - Non specified - '), res.reference);
+    List<GiftTransactionDesignation> parts = [
+      SELECT GiftDesignation.Name, Amount, Percent
+      FROM GiftTransactionDesignation
+      WHERE GiftTransaction.Donor.PersonEmail = 'split@example.com'
+      ORDER BY Percent DESC, GiftDesignation.Name DESC
+    ];
+    Assert.areEqual(3, parts.size());
+    Assert.areEqual('Test School Supplies', parts[0].GiftDesignation.Name);
+    Assert.areEqual(
+      340.01,
+      parts[0].Amount,
+      'the largest share takes the remainder'
+    );
+    Assert.areEqual(330, parts[1].Amount);
+    Assert.areEqual(330, parts[2].Amount);
+    Decimal percent = 0;
+    for (GiftTransactionDesignation p : parts) {
+      percent += p.Percent;
+    }
+    Assert.areEqual(100, percent);
+  }
+
+  @IsTest
+  static void nonSpecifiedMonthlyGiftSplitsEveryInstalment() {
+    threeCauses();
+    TSAbcHopeDonationIntakeService.Request req = individual(
+      'split.monthly@example.com'
+    );
+    req.frequency = TSAbcHopeDonationIntakeService.FREQ_MONTHLY;
+    req.designationId = null;
+    req.nonSpecified = true;
+    Test.startTest();
+    TSAbcHopeDonationIntakeService.submit(req);
+    Test.stopTest();
+    GiftCommitment gc = [
+      SELECT Id, Name
+      FROM GiftCommitment
+      WHERE Donor.PersonEmail = 'split.monthly@example.com'
+    ];
+    Assert.areEqual(
+      3,
+      [SELECT COUNT() FROM GiftDefaultDesignation WHERE ParentRecordId = :gc.Id]
+    );
+    Assert.isTrue(gc.Name.contains(' - Non specified - '), gc.Name);
+  }
+
+  @IsTest
+  static void nonSpecifiedNeedsACampaignWithCauses() {
+    Id campId = [SELECT Id FROM Campaign WHERE Name = :CAMPAIGN].Id;
+    delete [
+      SELECT Id
+      FROM GiftDefaultDesignation
+      WHERE ParentRecordId = :campId
+    ];
+    Assert.isTrue(
+      TSAbcHopeDonationIntakeService.getOptions(CAMPAIGN, null).split.isEmpty()
+    );
+    TSAbcHopeDonationIntakeService.Request req = individual(
+      'nosplit@example.com'
+    );
+    req.designationId = null;
+    req.nonSpecified = true;
+    try {
+      TSAbcHopeDonationIntakeService.submit(req);
+      Assert.fail('expected a refusal');
+    } catch (TSAbcHopeDonationIntakeService.DonationException e) {
+      Assert.isTrue(e.getMessage().contains('choose what you would like'));
+    }
+  }
+
   @IsTest
   static void giftNameShortensEachPartAndKeepsTheTime() {
     // Longest possible inputs: Campaign.Name 80, GiftDesignation.Name 80, Account.Name 255.

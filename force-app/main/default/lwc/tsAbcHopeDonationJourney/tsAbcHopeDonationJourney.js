@@ -24,6 +24,8 @@ const PERIODS = [
   { value: "Yearly", unit: "year" }
 ];
 const DEFAULT_PERIOD = "Monthly";
+// "Non specified" (D-48): no single cause; Apex splits the gift across the campaign's causes.
+const NON_SPECIFIED = "non-specified";
 const INDIVIDUAL = "Individual";
 const ORGANIZATION = "Organization";
 const MIN_AMOUNT = 100;
@@ -56,6 +58,7 @@ export default class DonationJourney extends LightningElement {
   sourceCode;
 
   designations = [];
+  split = []; // the campaign's causes and shares for "Non specified"; empty when not offered
   currentDonor;
   loadError;
   isLoading = true;
@@ -122,6 +125,7 @@ export default class DonationJourney extends LightningElement {
       this.activeCampaign = data.campaignName;
       this.campaignDescription = data.campaignDescription;
       this.designations = data.designations || [];
+      this.split = data.split || [];
       this.designationId = this.designationId || data.defaultDesignationId;
       this.currentDonor = data.currentDonor;
       this.loadError = undefined;
@@ -261,14 +265,30 @@ export default class DonationJourney extends LightningElement {
       : "To pause or stop it later, sign in or contact the ABC Hope team.";
   }
   get designationOptions() {
-    return this.designations.map((d) => ({
+    const list = [...this.designations];
+    if (this.split.length > 1) {
+      list.push({ label: "Non specified", value: NON_SPECIFIED });
+    }
+    return list.map((d) => ({
       ...d,
       selected: d.value === this.designationId
     }));
   }
+  get isNonSpecified() {
+    return this.designationId === NON_SPECIFIED && this.split.length > 1;
+  }
   get designationName() {
+    if (this.isNonSpecified) return "Non specified";
     const d = this.designations.find((x) => x.value === this.designationId);
     return d ? d.label : "";
+  }
+  /** "Split across Toys 34%, Books 33%, Games 33%." for a "Non specified" gift. */
+  get splitHint() {
+    if (!this.isNonSpecified) return "";
+    const parts = this.split.map(
+      (x) => `${x.name} ${formatPercent(x.percent)}%`
+    );
+    return `Split across ${parts.join(", ")}.`;
   }
   // Program the chosen designation funds (D-21); empty when it has none.
   get designationProgram() {
@@ -466,7 +486,8 @@ export default class DonationJourney extends LightningElement {
       campaignName: this.activeCampaign || this.campaignName,
       frequency: this.submitFrequency,
       amount: this.amount,
-      designationId: this.designationId,
+      designationId: this.isNonSpecified ? null : this.designationId,
+      nonSpecified: this.isNonSpecified,
       donorType: this.isSignedIn ? null : this.donorType,
       firstName: this.isIndividual ? this.firstName.trim() : null,
       lastName: this.isIndividual ? this.lastName.trim() : null,
@@ -546,6 +567,10 @@ export default class DonationJourney extends LightningElement {
   get submitLabel() {
     return this.isSubmitting ? "Submitting…" : "Submit Donation Details";
   }
+}
+
+function formatPercent(n) {
+  return Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 });
 }
 
 export function parseAmounts(csv) {

@@ -93,8 +93,16 @@ public without sharing class TSAbcHopeAgentCampaignInfo {
     String name,
     List<TSAbcHopeDonationIntakeService.CampaignCard> open
   ) {
+    // Loose names ("Christmas Gift") match open campaigns by their words; several matches → ask which (D-48).
+    List<TSAbcHopeDonationIntakeService.CampaignCard> matches = openMatches(
+      name,
+      open
+    );
+    if (matches.size() > 1) {
+      return chooseOne(name, matches);
+    }
     Result r = new Result();
-    Campaign c = findCampaign(name);
+    Campaign c = findCampaign(matches.size() == 1 ? matches[0].name : name);
     if (c == null) {
       r.donateUrl = TSAbcHopeAgentSupport.siteUrl('/donate');
       List<String> names = new List<String>();
@@ -144,6 +152,105 @@ public without sharing class TSAbcHopeAgentCampaignInfo {
         ? 'This campaign is closed. Ask about the campaigns open for donations instead.'
         : 'Donate here: ' + r.donateUrl
     );
+    r.summary = String.join(lines, '\n');
+    return r;
+  }
+
+  static final Set<String> NOISE_WORDS = new Set<String>{
+    'the',
+    'and',
+    'for',
+    'campaign',
+    'campaigns',
+    'donate',
+    'donation',
+    'give',
+    'giving',
+    'gift',
+    'gifts',
+    'fund',
+    'appeal',
+    'abc',
+    'hope',
+    '2026',
+    '2027'
+  };
+
+  /**
+   * Open campaigns the user's words point to: an exact name wins; else every open campaign whose name contains the
+   * whole phrase; else those sharing the most meaningful words with it ("Christmas Gift" → the Christmas campaigns).
+   */
+  @TestVisible
+  static List<TSAbcHopeDonationIntakeService.CampaignCard> openMatches(
+    String name,
+    List<TSAbcHopeDonationIntakeService.CampaignCard> open
+  ) {
+    String q = name.toLowerCase();
+    List<TSAbcHopeDonationIntakeService.CampaignCard> phrase = new List<TSAbcHopeDonationIntakeService.CampaignCard>();
+    for (TSAbcHopeDonationIntakeService.CampaignCard card : open) {
+      String n = card.name.toLowerCase();
+      if (n == q) {
+        return new List<TSAbcHopeDonationIntakeService.CampaignCard>{ card };
+      }
+      if (n.contains(q)) {
+        phrase.add(card);
+      }
+    }
+    if (!phrase.isEmpty()) {
+      return phrase;
+    }
+    List<String> words = new List<String>();
+    for (String w : q.split('[^a-z0-9]+')) {
+      if (w.length() >= 3 && !NOISE_WORDS.contains(w)) {
+        words.add(w);
+      }
+    }
+    Integer best = 0;
+    List<TSAbcHopeDonationIntakeService.CampaignCard> top = new List<TSAbcHopeDonationIntakeService.CampaignCard>();
+    for (TSAbcHopeDonationIntakeService.CampaignCard card : open) {
+      String n = card.name.toLowerCase();
+      Integer score = 0;
+      for (String w : words) {
+        if (n.contains(w)) {
+          score++;
+        }
+      }
+      if (score > best) {
+        best = score;
+        top.clear();
+      }
+      if (score > 0 && score == best) {
+        top.add(card);
+      }
+    }
+    return top;
+  }
+
+  /** Several open campaigns match: list them with their donate links so the user can pick one. */
+  static Result chooseOne(
+    String name,
+    List<TSAbcHopeDonationIntakeService.CampaignCard> matches
+  ) {
+    Result r = new Result();
+    r.donateUrl = TSAbcHopeAgentSupport.siteUrl('/donate');
+    List<String> lines = new List<String>{
+      'Several open campaigns match "' +
+      name +
+      '". Ask which one the user means, and give each one\'s donate link:'
+    };
+    Integer i = 1;
+    for (TSAbcHopeDonationIntakeService.CampaignCard card : matches) {
+      lines.add(
+        String.valueOf(i++) +
+          '. ' +
+          card.name +
+          ' — ' +
+          purpose(card.description) +
+          ' Donate: ' +
+          donateUrl(card.name)
+      );
+    }
+    lines.add(DEMO_FACTS);
     r.summary = String.join(lines, '\n');
     return r;
   }

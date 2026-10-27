@@ -83,7 +83,9 @@ subagent campaign_faq:
             | Use {!@actions.get_campaign_info} to get campaign facts before answering, then answer only from its summary.
               For questions about which campaigns exist, how many there are, or other campaigns, call it with an empty campaign name and report every campaign it lists.
               For a question about one campaign, pass that campaign's name. If the user has not said which campaign they mean and more than one is open, list them and ask.
-              When the user wants to donate, share the donate link for that campaign from the action and say it takes about a minute.
+              When the user wants to donate to a campaign, call the action with the words they used for it (for example "Christmas Gift"), even if they are not the exact name.
+              If the summary names one campaign, share its donate link from the action, written out in full, and say it takes about a minute.
+              If the summary says several open campaigns match, list them with each one's donate link, written out in full, and ask which one they mean.
               Remind people, when relevant, that this demo site does not collect any payment.
               Never ask for card, bank or payment details.
         actions:

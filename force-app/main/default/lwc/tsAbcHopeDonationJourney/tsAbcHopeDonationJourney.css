@@ -643,3 +643,6 @@ p {
 .field_campaign {
   margin-bottom: 18px;
 }
+.small {
+  font-size: 13px;
+}

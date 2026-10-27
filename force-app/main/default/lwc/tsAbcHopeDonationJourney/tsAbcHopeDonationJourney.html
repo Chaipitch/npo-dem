@@ -188,6 +188,9 @@
               Funds our {designationProgram} program.
             </p>
           </template>
+          <template lwc:if={splitHint}>
+            <p class="hint" data-id="split-hint">{splitHint}</p>
+          </template>
           <template lwc:if={designationError}>
             <p class="field-error" role="alert">{designationError}</p>
           </template>
@@ -322,6 +325,9 @@
                 <p class="review-campaign">{campaignLabel}</p>
                 <p class="review-label">Designation</p>
                 <p class="review-value">{designationName}</p>
+                <template lwc:if={splitHint}>
+                  <p class="muted small" data-id="review-split">{splitHint}</p>
+                </template>
               </div>
             </div>
             <dl class="review-grid">
@@ -406,6 +412,11 @@
                   <span class="muted">{resultFrequencyNote}</span>
                 </p>
                 <p class="muted">{result.designationName}</p>
+                <template lwc:if={result.splitSummary}>
+                  <p class="muted small" data-id="result-split">
+                    Split across {result.splitSummary}
+                  </p>
+                </template>
               </div>
             </div>
             <template lwc:if={resultManageNote}>

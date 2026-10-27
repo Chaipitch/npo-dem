@@ -53,6 +53,9 @@ const JOURNEY_ICONS = ["heart", "sprout", "book", "gift"];
 // When the dashboard last loaded fresh data in this tab (kept across in-site navigation).
 let lastLoadedAt = 0;
 
+/** Gifts per page in the giving history table. */
+const HISTORY_PAGE_SIZE = 10;
+
 export default class DonorDashboard extends LightningElement {
   /** "home" = donor home (mockup #1); "giving" = KPIs + full giving history */
   @api view = "home";
@@ -376,6 +379,45 @@ export default class DonorDashboard extends LightningElement {
     return this.gifts.length > 0;
   }
 
+  // ------------------------------------------------------------ giving history pages
+  historyPage = 1;
+  get pageCount() {
+    return Math.max(1, Math.ceil(this.gifts.length / HISTORY_PAGE_SIZE));
+  }
+  /** The page shown, kept in range when gifts reload (e.g. after a donation). */
+  get currentPage() {
+    return Math.min(Math.max(1, this.historyPage), this.pageCount);
+  }
+  get pagedGifts() {
+    const start = (this.currentPage - 1) * HISTORY_PAGE_SIZE;
+    return this.gifts.slice(start, start + HISTORY_PAGE_SIZE);
+  }
+  get showPager() {
+    return this.gifts.length > HISTORY_PAGE_SIZE;
+  }
+  /** "Showing 11–20 of 37 gifts". */
+  get pageSummary() {
+    const total = this.gifts.length;
+    const start = (this.currentPage - 1) * HISTORY_PAGE_SIZE + 1;
+    const end = Math.min(start + HISTORY_PAGE_SIZE - 1, total);
+    return `Showing ${start}–${end} of ${total} gifts`;
+  }
+  get pageLabel() {
+    return `Page ${this.currentPage} of ${this.pageCount}`;
+  }
+  get isFirstPage() {
+    return this.currentPage <= 1;
+  }
+  get isLastPage() {
+    return this.currentPage >= this.pageCount;
+  }
+  previousPage() {
+    this.historyPage = this.currentPage - 1;
+  }
+  nextPage() {
+    this.historyPage = this.currentPage + 1;
+  }
+
   // ------------------------------------------------------------ campaigns
   get hasCampaigns() {
     return this.campaigns.length > 0;
@@ -498,12 +540,22 @@ export default class DonorDashboard extends LightningElement {
   }
   addChat(role, text, link) {
     this._chatSeq += 1;
+    // Agent replies: links in the text become buttons ("Donate to <campaign>", D-48).
+    const parsed =
+      role === "agent"
+        ? extractLinks(text, {
+            campaigns: (this.campaigns || []).map((c) => c.name),
+            donatePath: this.donateHref
+          })
+        : { text, links: [] };
+    const links = [...parsed.links];
+    if (link && !links.some((l) => l.href === link.href)) links.push(link);
     this.chatMessages = [
       ...this.chatMessages,
       {
         key: `m${this._chatSeq}`,
-        text,
-        link,
+        text: parsed.text,
+        links: links.map((l, i) => ({ ...l, key: `m${this._chatSeq}-l${i}` })),
         isUser: role === "user",
         rowClass: role === "user" ? "msg msg_user" : "msg msg_agent",
         bubbleClass:
@@ -641,4 +693,93 @@ function splitList(value) {
     .split(";")
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+/**
+ * Pulls links out of an agent reply so they show as buttons, not long URLs: a donation link
+ * (/donate?campaign=Name) becomes "Donate to Name", /donate "Donate", anything else "Open link".
+ * Markdown links keep their text; a bare URL and a "Donate here:" lead-in before it are removed.
+ */
+export function extractLinks(
+  raw,
+  { campaigns = [], donatePath = "/donate" } = {}
+) {
+  const links = [];
+  const add = (href) => {
+    const clean = href.replace(/[.,;:!?)]+$/, "");
+    if (!links.some((l) => l.href === clean)) {
+      links.push({ href: clean, label: linkLabel(clean) });
+    }
+    return clean;
+  };
+  let text = String(raw || "").replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    (m, label, href) => {
+      add(href);
+      return label;
+    }
+  );
+  text = text.replace(
+    /(?:\b(?:donate|give)(?: here| now)?\s*:\s*|\bhere\s*:\s*)?(https?:\/\/[^\s]+)/gi,
+    (m, href) => {
+      const clean = add(href);
+      return href.slice(clean.length); // keep a full stop that ended the sentence
+    }
+  );
+  // Agentforce replaces links to sites that are not Trusted URLs with "URL_Redacted": rebuild the donation
+  // link from the campaign named last before it (same paragraph first), else link to the donate page.
+  text = text.replace(
+    /(?:\b(?:donate|give|visit)(?: here| now)?\s*:?\s*|\bhere\s*:\s*)?\[?url[_ ]redacted\]?/gi,
+    (m, offset, whole) => {
+      const before = whole.slice(0, offset);
+      const paragraph = before.slice(before.lastIndexOf("\n\n") + 1);
+      const campaign =
+        lastMentioned(paragraph, campaigns) || lastMentioned(before, campaigns);
+      const href = campaign
+        ? `${donatePath}?campaign=${encodeURIComponent(campaign)}`
+        : donatePath;
+      if (!links.some((l) => l.href === href)) {
+        links.push({
+          href,
+          label: campaign ? `Donate to ${campaign}` : "Donate"
+        });
+      }
+      return "";
+    }
+  );
+  text = text
+    .replace(/[ \t]+([.,;:])/g, "$1")
+    .replace(/([.!?])\.+/g, "$1")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/(^|\n)\s*[.,;:]\s*(?=\n|$)/g, "$1")
+    .trim();
+  return { text, links };
+}
+
+function lastMentioned(text, names) {
+  const lower = text.toLowerCase();
+  let best;
+  let at = -1;
+  for (const n of names) {
+    const i = lower.lastIndexOf(String(n).toLowerCase());
+    if (i > at) {
+      at = i;
+      best = n;
+    }
+  }
+  return best;
+}
+
+function linkLabel(href) {
+  try {
+    const url = new URL(href);
+    if (/\/donate\/?$/.test(url.pathname)) {
+      const campaign = url.searchParams.get("campaign");
+      return campaign ? `Donate to ${campaign}` : "Donate";
+    }
+  } catch {
+    // not a URL we can read: generic label
+  }
+  return "Open link";
 }

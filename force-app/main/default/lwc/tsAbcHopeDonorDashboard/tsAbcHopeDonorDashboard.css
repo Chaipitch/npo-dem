@@ -481,6 +481,44 @@ ol {
   text-decoration: none;
   box-shadow: 0 6px 14px rgba(214, 49, 49, 0.3);
 }
+/* Giving history pages */
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+}
+.pager-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pager-label {
+  font-size: 14px;
+  color: var(--dd-navy);
+  font-weight: 600;
+}
+.pager-btn {
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid var(--dd-border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--dd-blue);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.pager-btn:hover:not([disabled]) {
+  border-color: var(--dd-blue);
+}
+.pager-btn[disabled] {
+  color: var(--dd-muted);
+  cursor: default;
+  opacity: 0.6;
+}
 .table-wrap {
   overflow-x: auto;
   border: 1px solid var(--dd-border);
@@ -915,6 +953,19 @@ ol {
   }
 }
 
+/* Medium screens: three story cards are too narrow for photo-beside-text; stack each card vertically
+   (photo on top, text below) while keeping the three cards side by side. */
+@media (min-width: 1281px) and (max-width: 1600px) {
+  .story {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  .story-art img {
+    height: 160px;
+    min-height: 0;
+  }
+}
+
 /* Below ~1385px the main column (next to the agent panel, or full width on tablets/phones)
    cannot fit three KPI cards side by side: stack them, full width, no sideways scroll. */
 @media (max-width: 1385px) {
@@ -1002,7 +1053,8 @@ ol {
 }
 .chat-log a.chat-link,
 .chat-log a.chat-link:visited {
-  display: inline-block;
+  display: block;
+  width: fit-content;
   margin-top: 8px;
   color: var(--dd-purple);
   font-weight: 700;
