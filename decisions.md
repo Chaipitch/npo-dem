@@ -466,4 +466,4 @@ schedule start. "Today" = the org's time zone. It runs from the trigger `TSAbcHo
 inserted, updated or deleted: site, agent or Salesforce) and from a daily scheduled job at 00:15,
 `TS ABC Hope recurring gift pause sync` (`TSAbcHopeCommitmentPauseSync.scheduleDaily()`), so pauses that start or end
 with the calendar are picked up. NPC's resume action already sets Active and recalculates the next date.
-**Open:** the daily job is not scheduled yet; it needs the org owner's go-ahead (a recurring job in a shared org).
+**Scheduled** on 2026‑10‑27 with the org owner's go-ahead (first run 27 Oct 00:15 Los Angeles time; Setup → Scheduled Jobs).
