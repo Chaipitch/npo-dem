@@ -169,14 +169,27 @@ public without sharing class TSAbcHopeAgentMonthlyGifts {
       r.message = 'This recurring gift has no active schedule to pause.';
       return;
     }
-    Date startDate = later(Date.today().addDays(1), g.openSchedule.StartDate);
+    // A pause starts today (the donor's date, which NPC also checks), so the gift shows Paused at once (D-43).
+    GiftCommitmentSchedule target = TSAbcHopeMonthlyGiftService.scheduleToPause(
+      g.commitment.Id,
+      months
+    );
+    if (target == null) {
+      r.message = 'This recurring gift has no active schedule to pause.';
+      return;
+    }
+    Date startDate = later(Date.today(), target.StartDate);
     Date endDate = startDate.addMonths(months).addDays(-1);
+    if (target.EndDate != null && target.EndDate < endDate) {
+      r.message = TSAbcHopeMonthlyGiftService.tooLong(target.EndDate);
+      return;
+    }
     Invocable.Action a = Invocable.Action.createStandardAction(
       'pauseGiftCommitmentSchedule'
     );
     a.setInvocationParameter(
       'giftCommitmentScheduleId',
-      String.valueOf(g.openSchedule.Id)
+      String.valueOf(target.Id)
     );
     a.setInvocationParameter('startDate', startDate);
     a.setInvocationParameter('endDate', endDate);

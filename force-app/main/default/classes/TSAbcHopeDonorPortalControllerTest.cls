@@ -301,7 +301,7 @@ private class TSAbcHopeDonorPortalControllerTest {
     Assert.isTrue(paused.message.startsWith('Paused from'), paused.message);
     Assert.isTrue(paused.gifts[0].isPaused);
     Assert.areEqual(
-      Date.today().addDays(1).addMonths(2).addDays(-1),
+      Date.today().addMonths(2).addDays(-1),
       paused.gifts[0].pausedUntil
     );
     TSAbcHopeDonorPortalController.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();
@@ -321,6 +321,20 @@ private class TSAbcHopeDonorPortalControllerTest {
       null
     );
     Assert.isFalse(resumed.gifts[0].isPaused, resumed.message);
+
+    // Paused again after a resume: from today, and for longer than the piece of schedule the resume left (D-44).
+    TSAbcHopeDonorPortalController.MonthlyGiftsResult again = TSAbcHopeDonorPortalController.manageMonthlyGift(
+      gifts[0].id,
+      'pause',
+      3,
+      null
+    );
+    Assert.isTrue(again.gifts[0].isPaused, again.message);
+    Assert.areEqual(Date.today(), again.gifts[0].pausedFrom);
+    Assert.areEqual(
+      Date.today().addMonths(3).addDays(-1),
+      again.gifts[0].pausedUntil
+    );
   }
 
   @IsTest
