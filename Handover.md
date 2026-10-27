@@ -150,8 +150,8 @@ inactive agent versions v1–v12 reference them (list in D-37); agent **v13** is
 
 Every new GiftTransaction and GiftCommitment is named **Campaign - Cause - Donor - date time** (org time zone) by the
 `TSAbcHope…Naming` triggers, whatever creates it; existing ABC Hope records were renamed with
-`scripts/apex/renameGifts.apex`. A paused recurring gift keeps Status **Active**: the pause is a
-`PauseTransactions` schedule (D-22).
+`scripts/apex/renameGifts.apex`. A paused recurring gift shows Status **Paused** while its pause covers today, with Next Transaction Date set to the
+first gift after it (D-40, trigger on GiftCommitmentSchedule + daily job). The daily job `TS ABC Hope recurring gift pause sync` runs at 00:15 org time (Setup → Scheduled Jobs).
 
 ## Open items
 

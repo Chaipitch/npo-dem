@@ -68,6 +68,7 @@ force-app/main/default/
   classes/TSAbcHopeAgent*         Agent actions: CampaignInfo, GivingSummary, MonthlyGifts, UpdateProfile, Support (+ tests)
   classes/TSAbcHopeGiftNaming*    Gift naming rule "Campaign - Cause - Donor - date time", org time zone (D-38, D-39)
   triggers/TSAbcHopeGift*Naming   Name every new gift/commitment; re-name when its cause changes (D-39)
+  classes/TSAbcHopeCommitmentPauseSync*, triggers/TSAbcHopeGiftScheduleSync   Status Paused/Active + Next Transaction Date from pause schedules; daily job (D-40)
   aiAuthoringBundles/ABC_Hope_Donor_Assistant   Agent Script (.agent) for the agent
   flows/ABC_Hope_Chat_Routing    Omni-Channel routing → the agent (the only flow; approved exception)
   messagingChannels/, EmbeddedServiceConfig/    ABC Hope Chat channel + deployment

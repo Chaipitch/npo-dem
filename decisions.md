@@ -449,3 +449,21 @@ Time zone: the **org's default** (Setup → Company Information; America/Los_Ang
 gift's own date, or the creation date when the two are within a day of each other (a gift saved "today" by someone in
 another time zone); back-dated history and future instalments keep their own date. A name typed by hand on a new
 record is replaced; renaming an existing record by hand is kept until its cause changes.
+
+### D-40 · Paused gifts show Status Paused and the right Next Transaction Date — Accepted (user, 2026‑10‑27)
+
+NPC's pause action only adds a `PauseTransactions` schedule: the commitment stays **Active** and nothing marks it
+Paused when the pause starts or Active again when it runs out. NPC itself allows Status **Paused** only while a pause
+schedule covers today, and **Active** only while a `CreateTransactions` schedule does. `TSAbcHopeCommitmentPauseSync`:
+
+- a pause covers today → **Paused**, Next Transaction Date = the first gift after the pause;
+- still Paused, no pause today and a schedule giving today → **Active**, Next Transaction Date = the next gift from
+  today (until a schedule covers today it stays Paused, which NPC requires);
+- an upcoming pause → left to NPC (it already moves the next date past the pause; e.g. Books for Kids, 1 Jan 2027).
+
+Gift dates: monthly on the schedule's TransactionDay (NPC's rule, day 1 by default), weekly and yearly stepping from the
+schedule start. "Today" = the org's time zone. It runs from the trigger `TSAbcHopeGiftScheduleSync` (after a schedule is
+inserted, updated or deleted: site, agent or Salesforce) and from a daily scheduled job at 00:15,
+`TS ABC Hope recurring gift pause sync` (`TSAbcHopeCommitmentPauseSync.scheduleDaily()`), so pauses that start or end
+with the calendar are picked up. NPC's resume action already sets Active and recalculates the next date.
+**Scheduled** on 2026‑10‑27 with the org owner's go-ahead (first run 27 Oct 00:15 Los Angeles time; Setup → Scheduled Jobs).
