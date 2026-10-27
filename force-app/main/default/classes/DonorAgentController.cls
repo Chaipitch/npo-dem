@@ -103,6 +103,26 @@ public with sharing class DonorAgentController {
     }
     r.sessionId = sid;
     r.text = sendMessage(sid, text);
+    // The platform's prompt guard sometimes flags an ordinary message (often a short reply such as
+    // "yes") as reverse engineering; the agent then refuses that and every later message in the
+    // session. Retry once in a fresh session for this donor (D-29).
+    if (isGuardRefusal(r.text)) {
+      Id accountId = new Directory().currentAccountId();
+      if (accountId != null) {
+        sid = startSession(accountId);
+        r.sessionId = sid;
+        r.text = sendMessage(sid, text);
+      }
+    }
+  }
+
+  /** The agent's reply to a message the platform's prompt guard flagged. */
+  @TestVisible
+  static Boolean isGuardRefusal(String reply) {
+    return reply != null &&
+      reply.trim()
+        .replace('\u2019', '\'')
+        .startsWithIgnoreCase('Sorry, I can\'t assist');
   }
 
   /** Starts an Agent API session for this donor; returns the session Id. */

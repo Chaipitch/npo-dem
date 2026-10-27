@@ -5,6 +5,11 @@ import submitDonation from "@salesforce/apex/DonationIntakeController.submitDona
 import { CurrentPageReference } from "lightning/navigation";
 
 jest.mock(
+  "@salesforce/community/basePath",
+  () => ({ __esModule: true, default: "" }),
+  { virtual: true }
+);
+jest.mock(
   "@salesforce/apex/DonationIntakeController.getOptions",
   () => {
     const { createApexTestWireAdapter } = require("@salesforce/sfdx-lwc-jest");
@@ -236,6 +241,8 @@ describe("c-donation-journey", () => {
       "Your details have been received"
     );
     expect($(el, ".thanks-amount").textContent).toContain("USD 1,000");
+    // Guests have no dashboard: no redirect.
+    expect($(el, '[data-id="redirect"]')).toBeNull();
     // Tells the rest of the site to reload totals and campaign progress.
     expect(sessionStorage.getItem("abchope:giftsChangedAt")).not.toBeNull();
   });
@@ -274,6 +281,54 @@ describe("c-donation-journey", () => {
     expect($(el, ".welcome-name").textContent).toBe("Maya Grande");
     expect($(el, '[data-field="email"]')).toBeNull();
   });
+  it("takes a signed-in donor to the dashboard 5 seconds after donating", async () => {
+    submitDonation.mockResolvedValue({
+      reference: "XMAS-2",
+      amount: 1000,
+      frequency: "One-time",
+      designationName: "School Supplies"
+    });
+    const assign = jest.fn();
+    const realLocation = window.location;
+    Object.defineProperty(window, "location", {
+      value: { ...realLocation, assign },
+      configurable: true
+    });
+    try {
+      const el = mount();
+      getOptions.emit({
+        ...OPTIONS,
+        currentDonor: { name: "Maya Grande", email: "maya@email.com" }
+      });
+      await flush();
+      click($(el, '[data-id="next"]'));
+      await flush();
+      click($(el, '[data-id="next"]'));
+      await flush();
+      jest.useFakeTimers();
+      click($(el, '[data-id="submit"]'));
+      await flush();
+      await flush();
+      expect($(el, '[data-id="redirect"]').textContent).toContain(
+        "dashboard in 5 seconds"
+      );
+      jest.advanceTimersByTime(4000);
+      await flush();
+      expect($(el, '[data-id="redirect"]').textContent).toContain(
+        "in 1 second…"
+      );
+      expect(assign).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(1000);
+      expect(assign).toHaveBeenCalledWith("/dashboard");
+    } finally {
+      jest.useRealTimers();
+      Object.defineProperty(window, "location", {
+        value: realLocation,
+        configurable: true
+      });
+    }
+  });
+
   it("donates to the campaign chosen in the URL", async () => {
     submitDonation.mockResolvedValue({
       reference: "CW-1",

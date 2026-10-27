@@ -141,6 +141,17 @@ dd {
   font-weight: 700;
   color: var(--cd-navy);
 }
+/* Parent-qualified: the site theme's a:link colours leak in under synthetic shadow (D-11). */
+.program a.program-link,
+.program a.program-link:visited {
+  color: var(--cd-navy);
+  text-decoration: underline;
+  text-decoration-color: #c9cfe4;
+  text-underline-offset: 3px;
+}
+.program a.program-link:hover {
+  color: var(--cd-blue);
+}
 .cause {
   padding: 14px 16px;
   border-radius: 14px;
@@ -169,6 +180,10 @@ dd {
 }
 .raised {
   font-size: 18px;
+}
+/* The template compiler drops the space before "raised of": keep the gap here. */
+.raised .muted {
+  margin-left: 0.3em;
 }
 .progress {
   height: 10px;

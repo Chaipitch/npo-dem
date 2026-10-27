@@ -98,6 +98,19 @@ private class DonorPortalControllerTest {
     Assert.areEqual('Joined as a supporter', d.journey[0].label);
     Assert.areEqual('Supported Test Clean Water', d.journey[1].label);
     Assert.areEqual('2025', d.journey[2].year);
+    // One card per year, oldest first, with the year's causes and totals (D-35).
+    Assert.areEqual(2, d.journeyYears.size());
+    DonorPortalController.JourneyYear y2024 = d.journeyYears[0];
+    Assert.areEqual('2024', y2024.year);
+    Assert.isTrue(y2024.joined);
+    Assert.areEqual(200, y2024.total);
+    Assert.areEqual(1, y2024.giftCount);
+    Assert.areEqual('Test Clean Water', y2024.items[0].cause);
+    Assert.isTrue(y2024.items[0].isNew);
+    DonorPortalController.JourneyYear y2025 = d.journeyYears[1];
+    Assert.isFalse(y2025.joined);
+    Assert.areEqual(250, y2025.total, 'canceled gift left out');
+    Assert.areEqual('Test Education Access', y2025.items[0].program);
     Assert.areEqual('Maya', d.firstName);
   }
 
@@ -393,47 +406,30 @@ private class DonorPortalControllerTest {
   }
 
   @IsTest
-  static void dashboardCountsPeopleReachedAndVolunteers() {
-    Program p = new Program(Name = 'Test Reach Program', Status = 'Active');
-    insert p;
-    Account a1 = new Account(Name = 'Reach One Org');
-    Account a2 = new Account(Name = 'Reach Two Org');
-    insert new List<Account>{ a1, a2 };
-    insert new List<ProgramEnrollment>{
-      new ProgramEnrollment(
-        Name = 'E1',
-        ProgramId = p.Id,
-        AccountId = a1.Id,
-        Status = 'In Progress'
+  static void dashboardAddsUpReachFromActivePrograms() {
+    AggregateResult before = [
+      SELECT
+        SUM(People_Reached__c) people,
+        SUM(Communities__c) communities,
+        SUM(Volunteers_Engaged__c) volunteers
+      FROM Program
+      WHERE Status = 'Active'
+    ];
+    insert new List<Program>{
+      new Program(
+        Name = 'Test Reach Program',
+        Status = 'Active',
+        People_Reached__c = 120,
+        Communities__c = 7,
+        Volunteers_Engaged__c = 15
       ),
-      new ProgramEnrollment(
-        Name = 'E2',
-        ProgramId = p.Id,
-        AccountId = a1.Id,
-        Status = 'Completed'
-      ),
-      new ProgramEnrollment(
-        Name = 'E3',
-        ProgramId = p.Id,
-        AccountId = a2.Id,
-        Status = 'Applied'
-      )
-    };
-    JobPosition job = new JobPosition(
-      Name = 'Test Shift Lead',
-      Title = 'Shift Lead'
-    );
-    insert job;
-    insert new List<JobPositionAssignment>{
-      new JobPositionAssignment(
-        JobPositionId = job.Id,
-        AssignedAccountId = a1.Id,
-        Status = 'Complete'
-      ),
-      new JobPositionAssignment(
-        JobPositionId = job.Id,
-        AssignedAccountId = a2.Id,
-        Status = 'Canceled'
+      new Program(Name = 'Test Empty Program', Status = 'Active'),
+      new Program(
+        Name = 'Test Closed Reach Program',
+        Status = 'Completed',
+        People_Reached__c = 999,
+        Communities__c = 99,
+        Volunteers_Engaged__c = 99
       )
     };
     DonorPortalController.accountIdOverride = createDonor().Id;
@@ -441,14 +437,15 @@ private class DonorPortalControllerTest {
     DonorPortalController.Dashboard d = DonorPortalController.getDashboard();
     Test.stopTest();
     Assert.areEqual(
-      1,
+      sum(before.get('people')) + 120,
       d.peopleReached,
-      'distinct accounts, active or completed enrollments only'
+      'active programs only; blank counts as 0'
     );
-    Assert.areEqual(
-      1,
-      d.volunteersEngaged,
-      'distinct accounts, completed or ongoing assignments only'
-    );
+    Assert.areEqual(sum(before.get('communities')) + 7, d.communities);
+    Assert.areEqual(sum(before.get('volunteers')) + 15, d.volunteersEngaged);
+  }
+
+  static Integer sum(Object value) {
+    return value == null ? 0 : ((Decimal) value).intValue();
   }
 }

@@ -42,6 +42,35 @@ public without sharing class DonorPortalController {
     public String kind;
   }
 
+  /** One year of the donor's impact journey: what they gave, cause by cause (D-35). */
+  public class JourneyYear {
+    @AuraEnabled
+    public String year;
+    @AuraEnabled
+    public Decimal total = 0;
+    @AuraEnabled
+    public Integer giftCount = 0;
+    @AuraEnabled
+    public Boolean joined = false; // the year they became a supporter
+    @AuraEnabled
+    public List<JourneyItem> items = new List<JourneyItem>();
+  }
+
+  public class JourneyItem {
+    @AuraEnabled
+    public String cause;
+    @AuraEnabled
+    public String program;
+    @AuraEnabled
+    public Decimal amount = 0;
+    @AuraEnabled
+    public Integer giftCount = 0;
+    @AuraEnabled
+    public Boolean isNew = false; // first year they supported this cause
+    @AuraEnabled
+    public Boolean recurringOnly = false; // an active recurring gift with no payment yet
+  }
+
   public class Dashboard {
     @AuraEnabled
     public String donorName;
@@ -57,13 +86,16 @@ public without sharing class DonorPortalController {
     public Integer activeMonthlyGifts = 0; // open and not paused
     @AuraEnabled
     public Integer pausedMonthlyGifts = 0; // current or upcoming pause (D-22)
-    // Org-wide figures for the Shared impact tiles ("{programs}", "{peopleReached}", "{volunteers}").
+    // Org-wide figures for the Shared impact tiles ("{programs}", "{peopleReached}", "{communities}",
+    // "{volunteers}"). Reach figures are the sums of the Program fields the team keeps up to date (D-34).
     @AuraEnabled
     public Integer activePrograms = 0; // active Programs
     @AuraEnabled
-    public Integer peopleReached = 0; // distinct accounts with an In Progress/Completed program enrollment
+    public Integer peopleReached = 0; // sum of People_Reached__c on active Programs
     @AuraEnabled
-    public Integer volunteersEngaged = 0; // distinct accounts with a Complete/In Progress volunteer assignment
+    public Integer communities = 0; // sum of Communities__c on active Programs
+    @AuraEnabled
+    public Integer volunteersEngaged = 0; // sum of Volunteers_Engaged__c on active Programs
     @AuraEnabled
     public Date pausedUntil; // earliest pause end among paused gifts
     @AuraEnabled
@@ -74,6 +106,9 @@ public without sharing class DonorPortalController {
     public List<Gift> gifts = new List<Gift>();
     @AuraEnabled
     public List<Milestone> journey = new List<Milestone>();
+    /** The journey as one card per year, oldest first. */
+    @AuraEnabled
+    public List<JourneyYear> journeyYears = new List<JourneyYear>();
   }
 
   public class Profile {
@@ -115,9 +150,11 @@ public without sharing class DonorPortalController {
     Map<Id, List<String>> programsByTxn = new Map<Id, List<String>>();
     // Year a cause was first supported, for the impact journey.
     Map<String, Integer> firstYearByCause = new Map<String, Integer>();
+    JourneyBuilder journey = new JourneyBuilder();
     for (GiftTransactionDesignation gtd : [
       SELECT
         GiftTransactionId,
+        Amount,
         GiftDesignation.Name,
         GiftDesignation.NGOTV_Program__r.Name
       FROM GiftTransactionDesignation
@@ -133,7 +170,15 @@ public without sharing class DonorPortalController {
         gtd.GiftTransactionId,
         gtd.GiftDesignation.NGOTV_Program__r?.Name
       );
-      Integer year = giftYear(txns.get(gtd.GiftTransactionId));
+      GiftTransaction gt = txns.get(gtd.GiftTransactionId);
+      Integer year = giftYear(gt);
+      journey.add(
+        year,
+        cause,
+        gtd.GiftDesignation.NGOTV_Program__r?.Name,
+        gtd.Amount != null ? gtd.Amount : gt.OriginalAmount,
+        gt.Id
+      );
       if (
         !firstYearByCause.containsKey(cause) ||
         year < firstYearByCause.get(cause)
@@ -165,7 +210,10 @@ public without sharing class DonorPortalController {
       }
     }
     for (GiftDefaultDesignation gdd : [
-      SELECT GiftDesignation.Name, ParentRecordId
+      SELECT
+        GiftDesignation.Name,
+        GiftDesignation.NGOTV_Program__r.Name,
+        ParentRecordId
       FROM GiftDefaultDesignation
       WHERE
         ParentRecordId IN (
@@ -176,6 +224,11 @@ public without sharing class DonorPortalController {
     ]) {
       if (!firstYearByCause.containsKey(gdd.GiftDesignation.Name)) {
         firstYearByCause.put(gdd.GiftDesignation.Name, Date.today().year());
+        journey.addRecurring(
+          Date.today().year(),
+          gdd.GiftDesignation.Name,
+          gdd.GiftDesignation.NGOTV_Program__r?.Name
+        );
       }
     }
     // NPC keeps paused commitments Active, so count pauses from their schedules (D-22).
@@ -205,19 +258,19 @@ public without sharing class DonorPortalController {
     d.causes.sort();
     d.causesSupported = d.causes.size();
     d.supporterSince = String.valueOf(firstYear);
-    d.activePrograms = [SELECT COUNT() FROM Program WHERE Status = 'Active'];
-    d.peopleReached = (Integer) [
-        SELECT COUNT_DISTINCT(AccountId) n
-        FROM ProgramEnrollment
-        WHERE Status IN ('In Progress', 'Completed')
-      ][0]
-      .get('n');
-    d.volunteersEngaged = (Integer) [
-        SELECT COUNT_DISTINCT(AssignedAccountId) n
-        FROM JobPositionAssignment
-        WHERE Status IN ('Complete', 'In Progress')
-      ][0]
-      .get('n');
+    AggregateResult reach = [
+      SELECT
+        COUNT(Id) programs,
+        SUM(People_Reached__c) people,
+        SUM(Communities__c) communities,
+        SUM(Volunteers_Engaged__c) volunteers
+      FROM Program
+      WHERE Status = 'Active'
+    ];
+    d.activePrograms = (Integer) reach.get('programs');
+    d.peopleReached = wholeNumber(reach.get('people'));
+    d.communities = wholeNumber(reach.get('communities'));
+    d.volunteersEngaged = wholeNumber(reach.get('volunteers'));
 
     Milestone joined = new Milestone();
     joined.year = String.valueOf(firstYear);
@@ -236,6 +289,7 @@ public without sharing class DonorPortalController {
       m.kind = 'cause';
       d.journey.add(m);
     }
+    d.journeyYears = journey.build(firstYear, firstYearByCause);
     return d;
   }
 
@@ -358,6 +412,104 @@ public without sharing class DonorPortalController {
 
   // ---------------------------------------------------------------- helpers
 
+  /** Collects gift designations into one card per year, each cause once per year with its total. */
+  class JourneyBuilder {
+    Map<Integer, Map<String, JourneyItem>> byYear = new Map<Integer, Map<String, JourneyItem>>();
+    Map<Integer, Set<Id>> giftsByYear = new Map<Integer, Set<Id>>();
+    Map<String, Set<Id>> giftsByYearCause = new Map<String, Set<Id>>();
+
+    void add(
+      Integer year,
+      String cause,
+      String program,
+      Decimal amount,
+      Id giftId
+    ) {
+      JourneyItem item = item(year, cause, program);
+      item.amount += amount == null ? 0 : amount;
+      item.recurringOnly = false;
+      String key = year + '|' + cause;
+      if (!giftsByYearCause.containsKey(key)) {
+        giftsByYearCause.put(key, new Set<Id>());
+      }
+      giftsByYearCause.get(key).add(giftId);
+      item.giftCount = giftsByYearCause.get(key).size();
+      if (!giftsByYear.containsKey(year)) {
+        giftsByYear.put(year, new Set<Id>());
+      }
+      giftsByYear.get(year).add(giftId);
+    }
+
+    void addRecurring(Integer year, String cause, String program) {
+      JourneyItem item = item(year, cause, program);
+      if (item.giftCount == 0) {
+        item.recurringOnly = true;
+      }
+    }
+
+    JourneyItem item(Integer year, String cause, String program) {
+      if (!byYear.containsKey(year)) {
+        byYear.put(year, new Map<String, JourneyItem>());
+      }
+      Map<String, JourneyItem> items = byYear.get(year);
+      if (!items.containsKey(cause)) {
+        JourneyItem item = new JourneyItem();
+        item.cause = cause;
+        item.program = program;
+        items.put(cause, item);
+      }
+      return items.get(cause);
+    }
+
+    /** Oldest year first (the joined year always has a card); causes by amount, largest first. */
+    List<JourneyYear> build(
+      Integer joinedYear,
+      Map<String, Integer> firstYearByCause
+    ) {
+      Set<Integer> years = new Set<Integer>(byYear.keySet());
+      years.add(joinedYear);
+      List<Integer> ordered = new List<Integer>(years);
+      ordered.sort();
+      List<JourneyYear> result = new List<JourneyYear>();
+      for (Integer y : ordered) {
+        JourneyYear jy = new JourneyYear();
+        jy.year = String.valueOf(y);
+        jy.joined = y == joinedYear;
+        jy.giftCount = giftsByYear.containsKey(y)
+          ? giftsByYear.get(y).size()
+          : 0;
+        List<ItemByAmount> sorted = new List<ItemByAmount>();
+        if (byYear.containsKey(y)) {
+          for (JourneyItem item : byYear.get(y).values()) {
+            item.isNew = firstYearByCause.get(item.cause) == y;
+            jy.total += item.amount;
+            sorted.add(new ItemByAmount(item));
+          }
+        }
+        sorted.sort();
+        for (ItemByAmount s : sorted) {
+          jy.items.add(s.item);
+        }
+        result.add(jy);
+      }
+      return result;
+    }
+  }
+
+  class ItemByAmount implements Comparable {
+    JourneyItem item;
+    ItemByAmount(JourneyItem item) {
+      this.item = item;
+    }
+    public Integer compareTo(Object other) {
+      JourneyItem o = ((ItemByAmount) other).item;
+      if (item.amount != o.amount) {
+        return item.amount > o.amount ? -1 : 1;
+      }
+      return item.cause.compareTo(o.cause);
+    }
+  }
+
   class CauseYear implements Comparable {
     String cause;
     Integer year;
@@ -458,5 +610,10 @@ public without sharing class DonorPortalController {
     AuraHandledException e = new AuraHandledException(message);
     e.setMessage(message);
     return e;
+  }
+
+  /** A SUM() result as a whole number; 0 when there is nothing to add up. */
+  static Integer wholeNumber(Object value) {
+    return value == null ? 0 : ((Decimal) value).intValue();
   }
 }

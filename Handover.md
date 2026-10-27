@@ -6,27 +6,26 @@ _Last updated: 2026‑10‑22_
 
 The public donation journey, the signed-in donor portal and the Agentforce agent are built, deployed
 and published on the ABC Hope LWR site. Donations create real NPC records (payment simulated).
-Donors can pick any open campaign from the dashboard. Chat: the dashboard's Ask panel (Agent API, verified donor,
-D-23) and, per D-25, the Embedded Messaging chat window on every other page (being placed).
+Donors can pick any open campaign from the dashboard. Chat: only the dashboard's Ask panel (Agent API, verified donor, D-23, D-28).
 
 **Site:** https://te1791557923677.my.site.com/ —
 `/` campaign home · `/donate` (`?campaign=…`, `?src=…`) · `/dashboard` · `/my-giving` · `/my-profile`
 
 ## Status
 
-| Area                                  | State                                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Demo data                             | ✅ 4 fundraising campaigns (Christmas Giving 2026, Clean Water for Rural Schools, Girls' Education Scholarships, Green Communities Tree Planting) with goals and default designations; 6 designations; source code `XMAS26-EMAIL`; Maya's 2023–2025 gift history                                                                                              |
-| Apex                                  | ✅ 45 test methods pass. Coverage: DonationIntakeService 98%, DonationIntakeController 84%, DonorPortalController 96%, MonthlyGiftService 89%, agent actions 64–100%                                                                                                                                                                                          |
-| LWC                                   | ✅ donationJourney (14 Jest tests), donorMonthlyGifts (9 Jest tests), abcHopeHero, donorDashboard, donorProfile, abcHopeIcon, public + portal theme layouts                                                                                                                                                                                                   |
-| Site                                  | ✅ Live. Home + Donate are public; portal pages require login (guests go to login, then back to `/dashboard`)                                                                                                                                                                                                                                                 |
-| Dashboard campaigns                   | ✅ Card grid: raised (real gifts) vs goal (`Campaign.ExpectedRevenue`), days left, designations. A card opens `/donate?campaign=<name>`                                                                                                                                                                                                                       |
-| Signed-in donor                       | ✅ Maya Grande portal user. Email set to `wchaipitch@terrasky.co.th` and a password-reset email sent; the user chooses the password (none stored anywhere)                                                                                                                                                                                                    |
-| Agent                                 | ✅ ABC Hope Donor Assistant active (new version with D-20: lists every open campaign); routing flow `ABC_Hope_Chat_Routing`; channel + deployment `ABC_Hope_Chat` (Auth, guests allowed)                                                                                                                                                                      |
-| Chat on site                          | 🟨 Dashboard Ask panel live; chat window on every other page (D-25) in progress                                                                                                                                                                                                                                                                               |
-| Photos                                | ✅ Unsplash (free licence): hero (Christian Bowen), banner (Ben Kupke), sidebar (septian akbar); campaign cards — water (Lisa Marie Theck), education (Yogendra Singh), environment (Kate Cullen), other (Larm Rmah); stories (Andrew Itaga, Yannis H, Elly M); the donation journey's review/thank-you photo follows the campaign. Credits shown or on hover |
-| Git                                   | ✅ `git@github.com:Chaipitch/npo-dem.git`, `main`                                                                                                                                                                                                                                                                                                             |
-| Flows / VRs / custom objects / fields | Only `ABC_Hope_Chat_Routing` (approved exception). Nothing else.                                                                                                                                                                                                                                                                                              |
+| Area                                  | State                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Demo data                             | ✅ 4 fundraising campaigns (Christmas Giving 2026, Clean Water for Rural Schools, Girls' Education Scholarships, Green Communities Tree Planting) with goals and default designations; 6 designations; source code `XMAS26-EMAIL`; Maya's 2023–2025 gift history                                                                                                                                                          |
+| Apex                                  | ✅ 45 test methods pass. Coverage: DonationIntakeService 98%, DonationIntakeController 84%, DonorPortalController 96%, MonthlyGiftService 89%, agent actions 64–100%                                                                                                                                                                                                                                                      |
+| LWC                                   | ✅ donationJourney (14 Jest tests), donorMonthlyGifts (9 Jest tests), abcHopeHero, donorDashboard, donorProfile, abcHopeIcon, public + portal theme layouts                                                                                                                                                                                                                                                               |
+| Site                                  | ✅ Live. Home + Donate are public; portal pages require login (guests go to login, then back to `/dashboard`)                                                                                                                                                                                                                                                                                                             |
+| Dashboard campaigns                   | ✅ Card grid: raised (real gifts) vs goal (`Campaign.ExpectedRevenue`), days left, designations. A card opens `/donate?campaign=<name>`                                                                                                                                                                                                                                                                                   |
+| Signed-in donor                       | ✅ Maya Grande portal user. Email set to `wchaipitch@terrasky.co.th` and a password-reset email sent; the user chooses the password (none stored anywhere)                                                                                                                                                                                                                                                                |
+| Agent                                 | ✅ ABC Hope Donor Assistant active (new version with D-20: lists every open campaign); routing flow `ABC_Hope_Chat_Routing`; channel + deployment `ABC_Hope_Chat` (Auth, guests allowed)                                                                                                                                                                                                                                  |
+| Chat on site                          | ✅ Dashboard Ask panel only (D-28); no chat widget on the site                                                                                                                                                                                                                                                                                                                                                            |
+| Photos                                | ✅ Unsplash (free licence): hero (Christian Bowen), banner (Ben Kupke), sidebar (septian akbar); campaign cards — water (Lisa Marie Theck), education (Yogendra Singh), environment (Kate Cullen), toy drive (Yevhen Buzuk), Christmas meals (Anthony Cantin), other (Larm Rmah); stories (Andrew Itaga, Yannis H, Elly M); the donation journey's review/thank-you photo follows the campaign. Credits shown or on hover |
+| Git                                   | ✅ `git@github.com:Chaipitch/npo-dem.git`, `main`                                                                                                                                                                                                                                                                                                                                                                         |
+| Flows / VRs / custom objects / fields | Only `ABC_Hope_Chat_Routing` (approved exception). Nothing else.                                                                                                                                                                                                                                                                                                                                                          |
 
 ## How to sign in as Maya
 
@@ -47,8 +46,9 @@ D-23) and, per D-25, the Embedded Messaging chat window on every other page (bei
 - Re-run `scripts/sitePages.py` rather than hand-editing route/view JSON.
 - Synthetic shadow leaks theme `a:link` styles (D-11); SVG `url(#id)` breaks (D-14).
 - Paid gifts get an automatic designation (D-13). NPC standard actions want String Ids.
-- The dashboard also lists the org's pre-existing _Non Profit Event_ and _Capital Campaign_ because they
-  are active and have default designations (D-18). Deactivate them to hide them.
+- The dashboard also lists the org's pre-existing _Capital Campaign_ because it is active and has default
+  designations (D-18); deactivate it to hide it. The old _Non Profit Event_ is now _Christmas Meals for
+  Families 2026_ (D-30).
 - The org is USD-only and the UI labels amounts USD (D-05, changed from THB 2026‑10‑26).
 
 ## Target object schema (user, 2026‑10‑22) — in progress
@@ -77,6 +77,10 @@ How the build compares:
 
 - **Programs (D-21):** Campaign ─< GiftDefaultDesignation >─ GiftDesignation ─> Program via the existing
   `NGOTV_Program__c` lookup. Seed: `sf apex run -o npo-demo -f scripts/apex/seedPrograms.apex`.
+- **Program figures and page (D-33):** money raised, people served and deliveries are added up live
+  (`DonationIntakeService.addProgramFigures`); Our Work shows them and links to the public `/program?name=…`.
+  Delivery demo data: `scripts/apex/seedProgramDelivery.apex` (benefits, enrollments of existing Food Access
+  people, assignments, deliveries).
 - **My Giving → Monthly Gifts (D-22):** pause / resume / change amount / cancel for the signed-in donor;
   the dashboard shows paused gifts separately. Test: `testing-steps.md` §8.
 - **Site outage fixed:** on 2026‑10‑21 ~16:00 UTC the templates of `abcHopePublicLayout`, `abcHopePortalLayout` and
@@ -94,7 +98,7 @@ falls back to the dashboard-data answer.
 Setup that makes it work: External Client App **ABC Hope Agent API** (client credentials, run-as
 `agentapi.abchope@…`), its consumer key/secret on the `AgentApiPrincipal` principal (admin-entered, never in git),
 permission set **ABC Hope Agent API Access** assigned to the run-as user and selected under the app's OAuth policies
-(Permitted Users: admin approved), agent version 6 active (2026‑10‑26: causes vs programs wording). Portal users reach the principal through
+(Permitted Users: admin approved), agent version 12 active (2026‑10‑26: acts on complete requests without a separate "yes", D-29). Portal users reach the principal through
 `ABC_Hope_Donor_Portal`.
 
 Troubleshooting: `invalid_app_access … not admin approved` = the run-as user's permission set isn't selected on the
@@ -128,22 +132,19 @@ and the section is "Recurring Gifts". Steps 1–2 show the campaign photo as a b
 New one-time gifts are `Paid`; a new recurring gift adds a Paid first payment today (later instalments Unpaid).
 Payment is still simulated. Tests use `Pending` because of the org's "*ASL Trigger v2" flow.
 
-## Shared impact tiles (2026‑10‑26)
+## Shared impact tiles (2026‑10‑26, D-34)
 
-The dashboard's Shared impact tiles are the `sharedImpact` property with live placeholders, computed org-wide in
-`DonorPortalController.buildDashboard`: `{peopleReached}` = distinct accounts with an In Progress/Completed
-`ProgramEnrollment` (1,002), `{programs}` = active `Program` count (8), `{volunteers}` = distinct accounts with a
-Complete/In Progress `JobPositionAssignment` (96). Communities stays typed (12): no field defines a community.
-The enrolments and assignments are the org's existing demo data, not ABC Hope campaign records.
+The dashboard's Shared impact tiles are the `sharedImpact` property with live placeholders, computed in
+`DonorPortalController.buildDashboard` from **active Programs**: `{peopleReached}`, `{communities}` and
+`{volunteers}` are the sums of the Program fields **People Reached**, **Communities** and **Volunteers Engaged**
+(`People_Reached__c`, `Communities__c`, `Volunteers_Engaged__c`, added by the user and kept up to date by the team);
+`{programs}` is the active Program count. On 2026‑10‑26: 17,172 · 2,415 · 10 · 1,093. To change a tile, edit the
+numbers on the Program records; a blank field counts as 0.
 
 ## Open items
 
-1. **Chat window (D-25):** the button, verified sessions (Maya is `AuthenticatedEndUserId`) and the routing to the
-   agent work on every page except the dashboard, but the agent does not run its actions there: no Apex runs as the
-   agent user and it answers "please sign in" / "please wait". The same actions work through the dashboard panel
-   (Agent API), and `AbcHopeAgentSupport.verifiedAccountId(<session Id>)` returns Maya's account when called directly.
-   Next step: open the agent in Agentforce Builder → Conversation Preview / event logs (or Testing Center) with a
-   messaging session to see why the planner skips or fails the action call.
+1. Done 2026‑10‑26: chat window removed from all pages (D-28); the dashboard Ask panel is the only chat. The
+   deployment `ABC_Hope_Web_Chat`, channel and routing flow stay in the org, unused.
 2. Done 2026‑10‑22: campaign cards, story cards and the journey's review/thank-you image use Unsplash photos.
 3. Done 2026‑10‑26: public `/our-work` (programs with funding campaigns and causes, `getPrograms`) and `/about` (placeholder copy, editable in Builder) — header links point there (D-26).
 4. Done 2026‑10‑26: `AbcHopeAgentSupportTest` raises coverage to 84% (the verified-messaging-user line needs

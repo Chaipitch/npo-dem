@@ -270,7 +270,7 @@ The ABC Hope Donor Assistant is reachable in two ways, never both on one page:
   a new gift.
 - **Old deployment `ABC_Hope_Chat`** (hosted on the LWR site, never worked) is removed from the repo and deleted in the
   org; the messaging channel `ABC_Hope_Chat` stays (used by `ABC_Hope_Web_Chat`).
-- **"Non Profit Event"** stays on the site as is.
+- **"Non Profit Event"** stays on the site as is. _(Superseded by D-30: it is now Christmas Meals for Families 2026.)_
 
 ### D-27 · Site gifts are saved as Paid — Accepted (user, 2026‑10‑26)
 
@@ -282,3 +282,107 @@ designation on Paid gifts is re-pointed to the chosen cause (D-13). So a new rec
 once. Apex tests save `Pending` instead (`DonationIntakeService.giftStatus`): the org's managed "*ASL Trigger v2"
 flow fails on Paid gifts in a test context only; real Paid inserts were verified in the org. Existing gifts keep
 their status.
+
+### D-28 · Chat window removed; the dashboard Ask panel is the only chat — Accepted (user, 2026‑10‑26)
+
+Supersedes D-25's chat window. The Embedded Messaging component is removed from every page (`scripts/sitePages.py`);
+the ABC Hope Donor Assistant is reached only through the dashboard's **Ask About Your Journey** panel (plus the header
+box and "Ask Our AI", which send their question there), on the Agent API with the donor's verified account (D-23).
+This also retires the open issue that the agent didn't run its actions in the chat window. The deployment
+`ABC_Hope_Web_Chat`, its ESW site, the messaging channel `ABC_Hope_Chat` and the routing flow `ABC_Hope_Chat_Routing`
+stay in the org, unused, so the widget can be put back without Setup work; `AbcHopeAgentSupport` keeps the
+messaging-session path.
+
+### D-29 · Agent acts on complete requests; one retry after a false prompt-guard flag — Accepted (2026‑10‑26)
+
+Problem: after the agent asked "Please confirm…", the reply "yes, please go ahead" got "Sorry, I can't assist with
+that…". The planner trace (`sf agent preview` on the published agent, `.sfdx/agents/…/traces`) showed Salesforce's
+built-in prompt guard replacing the user's turn with a "reverse engineering" redaction and switching to its
+`Reverse_Engineering` topic before our router ran, and telling the model to deny every later message in the session.
+It flags short replies ("yes", "confirm", "Yes, resume it") often and full requests now and then; the draft preview
+(authoring bundle) doesn't run it, and the org has no setting for it. Router changes (a follow-up rule, a remembered
+last topic) can't help, because the message is replaced before routing.
+
+Decision:
+
+- **Agent (v12):** in `monthly_gifts` and `update_profile`, a request that already names the gift and the change
+  (months to pause, new amount, new contact details) is carried out in the same turn; the donor's own request is the
+  confirmation. The agent asks only for a missing detail, and for cancel only makes sure which gift. Pause, resume
+  and amount changes are reversible from My Giving; payment stays simulated.
+- **Panel (`DonorAgentController`):** when a reply is the guard's refusal ("Sorry, I can't assist…"), the message is
+  sent once more in a fresh Agent API session for the same donor, so one false flag doesn't block the rest of the chat.
+  A genuine off-topic question just gets its refusal after one extra call.
+
+Verified live as Maya: pause and resume each run in one turn; her gift is active again afterwards.
+
+### D-30 · Two more Christmas campaigns; Non Profit Event becomes Christmas Meals — Accepted (user, 2026‑10‑26)
+
+- **Christmas Toy Drive 2026** (new): toys, books and warm clothes for children in shelters and foster care,
+  1 Nov – 24 Dec 2026, goal USD 150,000, cause **Toys & Gifts** → new program **Child Wellbeing**.
+- **Christmas Meals for Families 2026**: the org's original _Non Profit Event_ record, renamed and repurposed in
+  place so its gifts stay (the raised total carries over). Holiday food boxes, 19 Oct – 31 Dec 2026, goal
+  USD 100,000. Its default causes (General Fund 50% / Job Training Fund 50%) are replaced by **Holiday Meals**
+  100% → new program **Family Support**; existing gifts keep their own designations.
+- Records only, in `seedCampaigns.apex` (rename; causes as in D-32) and `seedPrograms.apex`; both stay idempotent.
+- Photos (Unsplash License), chosen by the user: presents by Yevhen Buzuk (`toy|present`), Christmas table by
+  Anthony Cantin (`meal|food`), in `abcHopeCampaignPhotos`.
+
+### D-31 · Signed-in donors go to the dashboard 5 seconds after donating — Accepted (user, 2026‑10‑26)
+
+The thank-you step shows "Taking you to your dashboard in 5 seconds…" with a **Go now** link, then opens
+`/dashboard`, where the new gift shows (gift events, D-27). **Make another donation** cancels it. Guests have no
+dashboard, so they stay on the thank-you step.
+
+### D-32 · Several causes per campaign; whole-card click; thin highlight borders — Accepted (user, 2026‑10‑26)
+
+- **Causes:** a campaign's causes are its `GiftDefaultDesignation` rows; shares add up to 100%.
+  Christmas Toy Drive: Toys & Gifts 34 / Warm Clothes 33 / Books for Kids 33. Christmas Meals: Holiday Meals 50 /
+  Grocery Vouchers 50. Christmas Giving: School Supplies 50 / Learning Kits 50. Clean Water: Clean Water 50 /
+  Handwashing Stations 50. New causes are linked to programs (Warm Clothes → Child Wellbeing, Books for Kids →
+  Education Access, Grocery Vouchers → Family Support, Handwashing Stations → Clean Water).
+  `seedCampaigns.apex` makes each listed campaign's causes match the script exactly; it removes and shrinks shares
+  before adding, so no campaign goes over 100%.
+- The donor still picks **one** cause, and the whole gift goes to it. Splitting one gift across causes isn't built.
+  Cause lists sort by share, then by creation date, so the original cause comes first and is pre-selected on a tie.
+- **Dashboard campaign cards:** a click anywhere on the card opens `/campaign?name=…`; Donate now and View more keep
+  their own links.
+- **Highlights:** the active sidebar item and the paused recurring-gift card have a thin 1px border instead of a
+  thick left bar.
+
+### D-33 · Program figures, delivery data and a program page — Accepted (user, 2026‑10‑26)
+
+- **Money raised per program:** Paid gift designations added up through cause → program
+  (`GiftTransactionDesignation.Amount`, `GiftDesignation.NGOTV_Program__c`), with the number of distinct donors.
+  Nothing is stored on Program: the figures are added up live (`DonationIntakeService.addProgramFigures`), so a new
+  Paid gift shows at once.
+- **Delivery data** for our five programs, with standard Program Management objects only:
+  Benefit (with new Benefit Types "Goods Distribution" (Items) and "Meal Distribution" (Meals), and a new "Items"
+  unit) → ProgramEnrollment → BenefitAssignment → BenefitDisbursement (`DisbursedQuantity`). 260 enrollments reuse
+  people already enrolled in the org's Food Access program, so no new accounts and the People Reached tile is
+  unchanged. 450 deliveries over the last 120 days. `scripts/apex/seedProgramDelivery.apex` skips any program that
+  already has enrollments.
+- **People served** = distinct accounts enrolled (In Progress or Completed); **deliveries** = quantity per benefit
+  for disbursements that are Disbursed or Completed.
+- **Program page** `/program?name=…` (public, `c/programDetail`): photo, summary, "Impact so far", the open
+  campaigns that fund it (Donate →), its causes, the amount raised and Donate now (to the first funding campaign, or
+  plain `/donate`). Our Work names link to it and its cards show raised · people served · the largest delivery;
+  program names on the campaign page link to it. Program photos reuse the campaign themes (Child Wellbeing →
+  presents, Family Support → meal).
+
+### D-34 · Shared impact tiles add up Program reach fields — Accepted (user, 2026‑10‑26)
+
+The user added three Number fields on Program: **People Reached** (`People_Reached__c`), **Communities**
+(`Communities__c`) and **Volunteers Engaged** (`Volunteers_Engaged__c`). They are the user's own exception to the
+"no custom fields" guardrail; they're retrieved into `objects/Program/fields/` so the repo deploys. The tiles now show
+the sums over **active** Programs (blank = 0) instead of counting enrollments and volunteer assignments, and
+Communities is live too (it was typed as 12). `{programs}` is still the active Program count. The program page's
+"people served" (D-33) still counts enrollments, which is a different measure.
+
+### D-35 · Impact Journey as one card per year — Accepted (user, 2026‑10‑26)
+
+The zigzag timeline ("2026 · Supported X" for each cause) was hard to read. The dashboard now shows one card per year, stacked in one column,
+oldest first: the year, "USD total · N gifts", a "Joined" badge on the supporter-since year, and the causes given to
+that year (each once, with its program and amount, largest first; "New" marks the first year for that cause; an
+active recurring gift with no payment yet shows "Recurring gift"). Built in Apex as `Dashboard.journeyYears` from the
+same counted gifts as Total Contributions, so the year totals add up to it. The old `journey` milestones stay for
+the agent and the chat panel's "journey" answer.

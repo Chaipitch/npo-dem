@@ -62,29 +62,21 @@ def custom_page(route_api, view_api, title, url, access, components, layout_type
         "urlName": url})
     write('sfdc_cms__view', view_api, view(view_api, title, f"custom-{url}", [section(components)], layout_type))
 
-# Chat window (Embedded Messaging, D-25) on every page except the dashboard, which has the Ask panel.
-# Deployment ABC_Hope_Web_Chat is hosted on its own ESW site (created in Setup); site authentication verifies
-# signed-in donors, guests chat unverified.
-CHAT = ("experience_messaging:embeddedMessaging", {
-    "clientVersion": "WebV1",
-    "deploymentName": "ABC_Hope_Web_Chat",
-    "hideChatButtonOnLoad": "Visible",
-    "isExpSiteAuthMode": True,
-    "scrtUrl": "https://te1791557923677.my.salesforce-scrt.com",
-    "siteEndpoint": "https://te1791557923677.my.site.com/ESWABCHopeWebC1792985313558",
-})
+# Chat lives only in the dashboard's Ask panel (D-28): no Embedded Messaging widget on any page.
 
 # Home = Discover step
-write('sfdc_cms__view', 'home', view('home', 'Home', 'home', [section([("c:abcHopeHero", {}), CHAT])]))
+write('sfdc_cms__view', 'home', view('home', 'Home', 'home', [section([("c:abcHopeHero", {})])]))
 
-custom_page('Donate__c', 'donate', 'Donate', 'donate', 'Public', [("c:donationJourney", {}), CHAT])
+custom_page('Donate__c', 'donate', 'Donate', 'donate', 'Public', [("c:donationJourney", {})])
 custom_page('Dashboard__c', 'dashboard', 'Dashboard', 'dashboard', 'RequiresLogin', [("c:donorDashboard", {"view": "home"})], 'Portal')
-custom_page('My_Giving__c', 'myGiving', 'My Giving', 'my-giving', 'RequiresLogin', [("c:donorDashboard", {"view": "giving"}), CHAT], 'Portal')
-custom_page('My_Profile__c', 'myProfile', 'My Profile', 'my-profile', 'RequiresLogin', [("c:donorProfile", {}), CHAT], 'Portal')
-custom_page('Campaign__c', 'campaign', 'Campaign', 'campaign', 'RequiresLogin', [("c:campaignDetail", {}), CHAT], 'Portal')
+custom_page('My_Giving__c', 'myGiving', 'My Giving', 'my-giving', 'RequiresLogin', [("c:donorDashboard", {"view": "giving"})], 'Portal')
+custom_page('My_Profile__c', 'myProfile', 'My Profile', 'my-profile', 'RequiresLogin', [("c:donorProfile", {})], 'Portal')
+custom_page('Campaign__c', 'campaign', 'Campaign', 'campaign', 'RequiresLogin', [("c:campaignDetail", {})], 'Portal')
 # Public "Our Work" and "About" (D-26), on the public layout.
-custom_page('Our_Work__c', 'ourWork', 'Our Work', 'our-work', 'Public', [("c:abcHopeOurWork", {}), CHAT])
-custom_page('About__c', 'about', 'About', 'about', 'Public', [("c:abcHopeAbout", {}), CHAT])
+custom_page('Our_Work__c', 'ourWork', 'Our Work', 'our-work', 'Public', [("c:abcHopeOurWork", {})])
+custom_page('About__c', 'about', 'About', 'about', 'Public', [("c:abcHopeAbout", {})])
+# Program page (D-33): public like Our Work, which links to it.
+custom_page('Program__c', 'program', 'Program', 'program', 'Public', [("c:programDetail", {})])
 
 # Home must be public too.
 home_route = os.path.join(SITE, 'sfdc_cms__route', 'Home', 'content.json')

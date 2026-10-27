@@ -188,7 +188,7 @@ public without sharing class AbcHopeAgentCampaignInfo {
         SELECT GiftDesignation.Name
         FROM GiftDefaultDesignation
         WHERE ParentRecordId = :c.Id AND GiftDesignation.IsActive = TRUE
-        ORDER BY AllocatedPercentage DESC
+        ORDER BY AllocatedPercentage DESC, CreatedDate ASC
       ]) {
         wanted.add(gdd.GiftDesignation.Name);
       }

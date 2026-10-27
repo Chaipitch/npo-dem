@@ -1,0 +1,12 @@
+{
+  "type": "sfdc_cms__route",
+  "title": "Program",
+  "contentBody": {
+    "activeViewId": "program",
+    "configurationTags": [],
+    "pageAccess": "Public",
+    "routeType": "custom-program",
+    "urlPrefix": "program"
+  },
+  "urlName": "program"
+}

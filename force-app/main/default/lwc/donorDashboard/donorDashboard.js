@@ -16,6 +16,7 @@ import { campaignPhoto } from "c/abcHopeCampaignPhotos";
 const IMPACT_FIELDS = {
   programs: "activePrograms",
   peopleReached: "peopleReached",
+  communities: "communities",
   volunteers: "volunteersEngaged"
 };
 
@@ -59,12 +60,12 @@ export default class DonorDashboard extends LightningElement {
   @api bannerTitle = "See What We’ve Achieved Together";
   @api bannerSubtitle = "Your support is part of something bigger.";
   /**
-   * "value|label" pairs separated by ";". Live placeholders: {peopleReached} (people with an active or completed
-   * program enrollment), {programs} (active Programs), {volunteers} (people with a completed or ongoing
-   * volunteer assignment). Anything else is shown as typed.
+   * "value|label" pairs separated by ";". Live placeholders: {programs} (active Programs) and {peopleReached},
+   * {communities}, {volunteers}: the sums of People Reached, Communities and Volunteers Engaged on active
+   * Programs (D-34). Anything else is shown as typed.
    */
   @api sharedImpact =
-    "{peopleReached}|People Reached;12|Communities;{programs}|Programs;{volunteers}|Volunteers Engaged";
+    "{peopleReached}|People Reached;{communities}|Communities;{programs}|Programs;{volunteers}|Volunteers Engaged";
   /** "tag|title|summary" triples separated by ";" */
   @api stories =
     "Clean Water|Clean Water Brings New Opportunities|See how improved access to clean water is changing lives in rural communities.;" +
@@ -278,6 +279,12 @@ export default class DonorDashboard extends LightningElement {
   get journeyHref() {
     return `${basePath || ""}/dashboard#journey`;
   }
+  /** A click anywhere on a campaign card opens its detail page; links inside it keep their own target. */
+  handleCampaignClick(event) {
+    if (event.target.closest && event.target.closest("a, button")) return;
+    const href = event.currentTarget.dataset.href;
+    if (href) window.location.assign(href);
+  }
   get donateHref() {
     return `${basePath || ""}${this.donatePath}`;
   }
@@ -318,15 +325,31 @@ export default class DonorDashboard extends LightningElement {
       };
     });
   }
-  get journey() {
-    const items = this.data?.journey || [];
-    return items.map((m, i) => ({
-      ...m,
-      key: `j${i}`,
-      icon: JOURNEY_ICONS[i % JOURNEY_ICONS.length],
-      dotClass: `journey-dot ${JOURNEY_TONES[i % JOURNEY_TONES.length]}`,
-      showLine: i < items.length - 1
-    }));
+  /** One card per year (D-35): the year's total and gifts, then each cause with its amount. */
+  get journeyYears() {
+    return (this.data?.journeyYears || []).map((y, i) => {
+      const gifts = y.giftCount || 0;
+      const meta = gifts
+        ? `${this.money(y.total)} · ${gifts} gift${gifts === 1 ? "" : "s"}`
+        : y.joined
+          ? "Became a supporter"
+          : "";
+      return {
+        ...y,
+        key: `y${y.year}`,
+        meta,
+        icon: JOURNEY_ICONS[i % JOURNEY_ICONS.length],
+        dotClass: `year-dot ${JOURNEY_TONES[i % JOURNEY_TONES.length]}`,
+        hasItems: (y.items || []).length > 0,
+        items: (y.items || []).map((it) => ({
+          ...it,
+          key: `${y.year}-${it.cause}`,
+          amountDisplay: it.recurringOnly
+            ? "Recurring gift"
+            : this.money(it.amount)
+        }))
+      };
+    });
   }
   get causes() {
     return (this.data?.causes || []).map((c, i) => ({

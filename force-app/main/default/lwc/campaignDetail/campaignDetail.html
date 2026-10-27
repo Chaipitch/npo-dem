@@ -47,7 +47,9 @@
                     ><c-abc-hope-icon name="sprout" size="22"></c-abc-hope-icon
                   ></span>
                   <div>
-                    <p class="program-name">{p.name}</p>
+                    <p class="program-name">
+                      <a class="program-link" href={p.href}>{p.name}</a>
+                    </p>
                     <p class="muted small">{p.summary}</p>
                   </div>
                 </li>

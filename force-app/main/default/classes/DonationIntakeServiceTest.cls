@@ -587,6 +587,99 @@ private class DonationIntakeServiceTest {
   }
 
   @IsTest
+  static void programFiguresAddUpGiftsEnrollmentsAndDeliveries() {
+    Program edu = new Program(
+      Name = 'Test Education Access',
+      Status = 'Active'
+    );
+    insert edu;
+    Id causeId = designationId('Test School Supplies');
+    update new GiftDesignation(Id = causeId, NGOTV_Program__c = edu.Id);
+    Account donor = new Account(Name = 'Test Donor Org');
+    Account child = new Account(Name = 'Test Family');
+    insert new List<Account>{ donor, child };
+    GiftTransaction gift = new GiftTransaction(
+      Name = 'Test gift',
+      DonorId = donor.Id,
+      OriginalAmount = 300,
+      TransactionDate = Date.today(),
+      Status = 'Pending',
+      PaymentMethod = 'Unknown'
+    );
+    insert gift;
+    insert new GiftTransactionDesignation(
+      GiftTransactionId = gift.Id,
+      GiftDesignationId = causeId,
+      Amount = 300,
+      Percent = 100
+    );
+    UnitOfMeasure unit = new UnitOfMeasure(
+      Name = 'Test Items',
+      UnitCode = 'titem',
+      Type = 'Custom'
+    );
+    insert unit;
+    BenefitType type = new BenefitType(
+      Name = 'Test Goods',
+      ProcessType = 'ProgramManagement',
+      Type = 'Goods',
+      UnitofMeasureId = unit.Id
+    );
+    insert type;
+    Benefit kit = new Benefit(
+      Name = 'Test Learning kit',
+      ProgramId = edu.Id,
+      BenefitTypeId = type.Id,
+      UnitId = unit.Id,
+      IsActive = true,
+      BenefitStatus = 'Active',
+      StartDateTime = Datetime.now().addDays(-30)
+    );
+    insert kit;
+    ProgramEnrollment pe = new ProgramEnrollment(
+      Name = 'Test enrollment',
+      ProgramId = edu.Id,
+      AccountId = child.Id,
+      Status = 'In Progress'
+    );
+    insert pe;
+    BenefitAssignment ba = new BenefitAssignment(
+      BenefitId = kit.Id,
+      ParentRecordId = pe.Id,
+      ProgramEnrollmentId = pe.Id,
+      EnrolleeId = child.Id,
+      Status = 'Active'
+    );
+    insert ba;
+    insert new BenefitDisbursement(
+      BenefitAssignmentId = ba.Id,
+      ProgramEnrollmentId = pe.Id,
+      RecipientId = child.Id,
+      ActualCompletionDate = Datetime.now().addDays(-1),
+      DisbursedQuantity = 3,
+      DisbursementStatus = 'Disbursed'
+    );
+    DonationIntakeService.raisedStatus = 'Pending';
+
+    Test.startTest();
+    DonationIntakeService.ProgramCard c = DonationIntakeController.getProgramDetail(
+      ' test education access '
+    );
+    Test.stopTest();
+
+    Assert.areEqual('Test Education Access', c.name);
+    Assert.areEqual(300, c.raised);
+    Assert.areEqual(1, c.donorCount);
+    Assert.areEqual(1, c.peopleServed);
+    Assert.areEqual(1, c.deliveries.size());
+    Assert.areEqual('Test Learning kit', c.deliveries[0].benefit);
+    Assert.areEqual(3, c.deliveries[0].quantity);
+    Assert.areEqual('Test Items', c.deliveries[0].unit);
+    Assert.isNull(DonationIntakeService.getProgramDetail('No Such Program'));
+    Assert.isNull(DonationIntakeService.getProgramDetail(null));
+  }
+
+  @IsTest
   static void siteGiftStatusIsPendingInTestsAndPaidIsValid() {
     // Tests save Pending (the org's "*ASL Trigger v2" flow fails on Paid in tests); the org saves Paid.
     Assert.areEqual('Pending', DonationIntakeService.giftStatus);

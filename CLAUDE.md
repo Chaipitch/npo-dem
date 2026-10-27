@@ -53,6 +53,7 @@ force-app/main/default/
                                  view=giving: KPIs + giving history table
   lwc/donorMonthlyGifts          My Giving → Monthly Gifts: pause / resume / change / cancel (D-22)
   lwc/campaignDetail             /campaign?name=… detail page: story, progress, programs, causes, Donate now
+  lwc/programDetail              /program?name=… public program page: raised, people served, deliveries (D-33)
   lwc/abcHopeCampaignPhotos      Shared campaign photo choice (cards, detail page, donation journey)
   lwc/donorProfile               My Profile / Communication / Giving History tabs
   lwc/abcHopePublicLayout        Theme layout for public pages (header nav, Donate, footer)
@@ -69,7 +70,7 @@ force-app/main/default/
   digitalExperiences/site/ABC_Hope1/            LWR routes, views, theme, theme layouts
   networks/, sites/, profiles/   Site settings and guest profile
 scripts/sitePages.py             Regenerates routes/views/theme layouts — use instead of hand-editing JSON
-scripts/apex/seed*.apex          Idempotent demo data (campaigns, designations, source code, Maya history)
+scripts/apex/seed*.apex          Idempotent demo data (campaigns, designations, programs, program delivery, source code, Maya history)
 ```
 
 ## Commands
@@ -87,6 +88,8 @@ npm run test:unit
 sf apex run -o npo-demo -f scripts/apex/seedChristmasGiving.apex
 sf apex run -o npo-demo -f scripts/apex/seedCampaigns.apex
 sf apex run -o npo-demo -f scripts/apex/seedMayaHistory.apex
+sf apex run -o npo-demo -f scripts/apex/seedPrograms.apex
+sf apex run -o npo-demo -f scripts/apex/seedProgramDelivery.apex
 
 # site pages after editing scripts/sitePages.py
 python3 scripts/sitePages.py && sf project deploy start -o npo-demo -d force-app/main/default/digitalExperiences/site/ABC_Hope1

@@ -1,10 +1,12 @@
 import { LightningElement, api, wire } from "lwc";
 import basePath from "@salesforce/community/basePath";
 import getPrograms from "@salesforce/apex/DonationIntakeController.getPrograms";
+import { formatNumber, deliveryLabel } from "c/programDetail";
 
 /**
  * Public "Our Work" page (D-26): ABC Hope's active programs, each with the open campaigns and causes
  * that fund it (Program ← GiftDesignation.NGOTV_Program__c ← campaign default designations, D-21).
+ * Each card shows live figures (raised, people served, the largest delivery) and links to /program (D-33).
  */
 export default class AbcHopeOurWork extends LightningElement {
   @api heading = "Our Work";
@@ -38,6 +40,8 @@ export default class AbcHopeOurWork extends LightningElement {
     return this.programs.map((p, i) => ({
       key: `p${i}`,
       name: p.name,
+      href: `${base}/program?name=${encodeURIComponent(p.name)}`,
+      figures: figures(p),
       summary: p.summary || "",
       causes: (p.causes || []).map((c) => ({
         key: `${p.name}-${c}`,
@@ -51,4 +55,23 @@ export default class AbcHopeOurWork extends LightningElement {
       hasCampaigns: (p.campaigns || []).length > 0
     }));
   }
+}
+
+/** Raised, people served and the largest delivery, leaving out what is zero. */
+function figures(p) {
+  const list = [];
+  if (Number(p.raised) > 0) {
+    list.push({ value: `USD ${formatNumber(p.raised)}`, label: "raised" });
+  }
+  if (Number(p.peopleServed) > 0) {
+    list.push({
+      value: formatNumber(p.peopleServed),
+      label: p.peopleServed === 1 ? "person served" : "people served"
+    });
+  }
+  const top = (p.deliveries || [])[0];
+  if (top) {
+    list.push({ value: formatNumber(top.quantity), label: deliveryLabel(top) });
+  }
+  return list.map((f, i) => ({ ...f, key: `${p.name}-f${i}` }));
 }

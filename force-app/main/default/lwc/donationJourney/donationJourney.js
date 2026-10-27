@@ -1,5 +1,6 @@
 import { LightningElement, api, wire } from "lwc";
 import { CurrentPageReference } from "lightning/navigation";
+import basePath from "@salesforce/community/basePath";
 import getOptions from "@salesforce/apex/DonationIntakeController.getOptions";
 import submitDonation from "@salesforce/apex/DonationIntakeController.submitDonation";
 import { campaignPhoto } from "c/abcHopeCampaignPhotos";
@@ -12,6 +13,8 @@ const STEPS = [
   { key: "thanks", label: "Thank You" }
 ];
 const ONE_TIME = "One-time";
+/** Seconds on the thank-you step before a signed-in donor goes to the dashboard. */
+const REDIRECT_SECONDS = 5;
 const RECURRING = "Recurring";
 // Recurring periods; the chosen one is sent to Apex as the frequency (D-24).
 const PERIODS = [
@@ -66,8 +69,14 @@ export default class DonationJourney extends LightningElement {
   activeCampaign;
   campaignDescription;
 
+  /** Seconds left before the signed-in donor is taken to the dashboard (null = no redirect). */
+  redirectIn = null;
+
   connectedCallback() {
     this.selectedAmount = Number(this.defaultAmount) || null;
+  }
+  disconnectedCallback() {
+    this.stopRedirect();
   }
 
   @wire(CurrentPageReference)
@@ -432,6 +441,8 @@ export default class DonationJourney extends LightningElement {
       // Totals, campaign progress and recurring gifts elsewhere on the site reload with this gift.
       markGiftsChanged();
       this.goTo(3);
+      // Guests have no dashboard; signed-in donors see their updated giving there.
+      if (this.isSignedIn) this.startRedirect();
     } catch (error) {
       this.submitError = reduceError(error);
     } finally {
@@ -439,7 +450,36 @@ export default class DonationJourney extends LightningElement {
     }
   }
 
+  startRedirect() {
+    this.stopRedirect();
+    this.redirectIn = REDIRECT_SECONDS;
+    // eslint-disable-next-line @lwc/lwc/no-async-operation
+    this._redirectTimer = setInterval(() => {
+      this.redirectIn -= 1;
+      if (this.redirectIn <= 0) {
+        this.stopRedirect();
+        window.location.assign(this.dashboardHref);
+      }
+    }, 1000);
+  }
+  stopRedirect() {
+    clearInterval(this._redirectTimer);
+    this._redirectTimer = null;
+    this.redirectIn = null;
+  }
+  get showRedirect() {
+    return this.redirectIn !== null;
+  }
+  get redirectNote() {
+    const n = this.redirectIn;
+    return `Taking you to your dashboard in ${n} second${n === 1 ? "" : "s"}…`;
+  }
+  get dashboardHref() {
+    return `${basePath || ""}/dashboard`;
+  }
+
   handleRestart() {
+    this.stopRedirect();
     this.result = undefined;
     this.isOther = false;
     this.otherAmount = undefined;

@@ -1,0 +1,114 @@
+<template>
+  <div class="page">
+    <a class="back" href={backHref} data-id="back">
+      <c-abc-hope-icon
+        name="arrow-left"
+        size="18"
+        stroke-width="2.2"
+      ></c-abc-hope-icon>
+      Back to Our Work
+    </a>
+
+    <template lwc:if={isLoading}>
+      <p class="state muted" role="status">Loading program…</p>
+    </template>
+
+    <template lwc:if={error}>
+      <p class="state error" role="alert">{error}</p>
+    </template>
+
+    <template lwc:if={notFound}>
+      <div class="state empty" data-id="not-found">
+        <h1 class="title">Program not found</h1>
+        <p class="muted">
+          This program isn’t active right now. See all of our work on the Our
+          Work page.
+        </p>
+      </div>
+    </template>
+
+    <template lwc:if={hasProgram}>
+      <section class="hero">
+        <img class="hero-img" src={photo.url} alt="" />
+        <span class="credit">{photo.credit}</span>
+      </section>
+
+      <div class="layout">
+        <div class="main">
+          <p class="eyebrow">Program</p>
+          <h1 class="title" data-id="title">{program.name}</h1>
+          <template lwc:if={program.summary}>
+            <p class="desc">{program.summary}</p>
+          </template>
+
+          <h2 class="section-title">Impact so far</h2>
+          <ul class="impact" data-id="impact">
+            <li class="tile tile_people">
+              <span class="tile-value" data-id="people">{peopleDisplay}</span>
+              <span class="tile-label">{peopleLabel}</span>
+            </li>
+            <template for:each={deliveries} for:item="d">
+              <li key={d.key} class="tile" data-id="delivery">
+                <span class="tile-value">{d.value}</span>
+                <span class="tile-label">{d.label}</span>
+              </li>
+            </template>
+          </ul>
+          <template lwc:if={hasDeliveries}>
+            <p class="muted small note">
+              Counted from the people enrolled in this program and what has been
+              delivered to them.
+            </p>
+          </template>
+
+          <template lwc:if={hasCampaigns}>
+            <h2 class="section-title">Campaigns funding this program</h2>
+            <ul class="campaigns">
+              <template for:each={campaigns} for:item="c">
+                <li key={c.key} class="campaign" data-id="campaign">
+                  <img class="campaign-img" src={c.photo} alt="" />
+                  <p class="campaign-name">{c.name}</p>
+                  <a
+                    class="campaign-link"
+                    href={c.donateHref}
+                    data-id="campaign-donate"
+                    >Donate →</a
+                  >
+                </li>
+              </template>
+            </ul>
+          </template>
+
+          <template lwc:if={hasCauses}>
+            <h2 class="section-title">Causes in this program</h2>
+            <ul class="chips" aria-label="Causes">
+              <template for:each={causes} for:item="k">
+                <li key={k.key} class="chip">{k.label}</li>
+              </template>
+            </ul>
+          </template>
+        </div>
+
+        <aside class="side">
+          <div class="stats">
+            <p class="label">Raised for this program</p>
+            <p class="raised strong" data-id="raised">{raisedDisplay}</p>
+            <template lwc:if={donorsDisplay}>
+              <p class="muted small">{donorsDisplay}</p>
+            </template>
+            <a class="donate" href={donateHref} data-id="donate"
+              >Donate now
+              <c-abc-hope-icon
+                name="arrow"
+                size="18"
+                stroke-width="2.4"
+              ></c-abc-hope-icon
+            ></a>
+            <p class="muted small center">{donateNote}</p>
+            <p class="muted small center sim">Payment simulation only.</p>
+          </div>
+        </aside>
+      </div>
+    </template>
+  </div>
+</template>
