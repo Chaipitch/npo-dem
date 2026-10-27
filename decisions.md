@@ -565,3 +565,5 @@ instead of failing when it is already scheduled.
   to the first, D-13), a recurring gift gets the same default designations so every instalment is split. The gift
   name's cause part is "Non specified" — the naming rule now uses it for any gift or commitment with more than one
   designation (`TSAbcHopeGiftNaming.SPLIT_CAUSE`). "Where Most Needed" stays a separate single cause.
+- **Impact Journey year cards:** a year with more than 5 causes keeps the card short: about five rows show and the
+  rest scroll inside the card (thin scrollbar; the list takes keyboard focus so it can be scrolled with the keys).

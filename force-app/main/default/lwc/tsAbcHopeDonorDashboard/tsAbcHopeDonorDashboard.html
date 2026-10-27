@@ -324,7 +324,11 @@
                     </template>
                   </div>
                   <template lwc:if={y.hasItems}>
-                    <ul class="year-items">
+                    <ul
+                      class={y.itemsClass}
+                      tabindex={y.tabIndex}
+                      aria-label={y.listLabel}
+                    >
                       <template for:each={y.items} for:item="it">
                         <li key={it.key} class="year-item">
                           <div class="item-text">

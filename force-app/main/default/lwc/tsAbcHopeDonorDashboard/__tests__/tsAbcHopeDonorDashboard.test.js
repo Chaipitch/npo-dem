@@ -478,3 +478,40 @@ describe("extractLinks", () => {
     });
   });
 });
+
+describe("c-ts-abc-hope-donor-dashboard impact journey", () => {
+  afterEach(() => {
+    while (document.body.firstChild) {
+      document.body.removeChild(document.body.firstChild);
+    }
+  });
+
+  it("scrolls a year's causes when there are more than 5", async () => {
+    const items = (n) =>
+      Array.from({ length: n }, (_, i) => ({
+        cause: `Cause ${i + 1}`,
+        amount: 100,
+        giftCount: 1
+      }));
+    const el = createElement("c-ts-abc-hope-donor-dashboard", {
+      is: DonorDashboard
+    });
+    document.body.appendChild(el);
+    getDashboard.emit({
+      ...DASHBOARD,
+      journeyYears: [
+        { year: "2025", total: 500, giftCount: 5, items: items(5) },
+        { year: "2026", total: 1100, giftCount: 11, items: items(11) }
+      ]
+    });
+    getCampaigns.emit([]);
+    await flush();
+    const lists = $$(el, ".year-items");
+    expect(lists).toHaveLength(2);
+    expect(lists[0].classList.contains("year-items_scroll")).toBe(false);
+    expect(lists[0].getAttribute("tabindex")).toBeNull();
+    expect(lists[1].classList.contains("year-items_scroll")).toBe(true);
+    expect(lists[1].getAttribute("tabindex")).toBe("0");
+    expect(lists[1].querySelectorAll(".year-item")).toHaveLength(11);
+  });
+});

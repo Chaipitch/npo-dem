@@ -428,6 +428,21 @@ ol {
   list-style: none;
   border-top: 1px solid var(--dd-border);
 }
+/* More than 5 causes: about five rows show and the rest scroll inside the card. */
+.year-items_scroll {
+  max-height: 318px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 8px;
+  scrollbar-gutter: stable;
+}
+.year-items_scroll:focus-visible {
+  outline: 2px solid var(--dd-purple);
+  outline-offset: 2px;
+}
+.year-items_scroll .year-item:last-child {
+  padding-bottom: 10px;
+}
 .year-item {
   display: flex;
   align-items: flex-start;

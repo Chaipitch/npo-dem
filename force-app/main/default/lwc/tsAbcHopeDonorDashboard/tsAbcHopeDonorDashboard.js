@@ -55,6 +55,8 @@ let lastLoadedAt = 0;
 
 /** Gifts per page in the giving history table. */
 const HISTORY_PAGE_SIZE = 10;
+/** Causes shown in a journey year card before its list scrolls. */
+const JOURNEY_VISIBLE_ITEMS = 5;
 
 export default class DonorDashboard extends LightningElement {
   /** "home" = donor home (mockup #1); "giving" = KPIs + full giving history */
@@ -344,6 +346,14 @@ export default class DonorDashboard extends LightningElement {
         icon: JOURNEY_ICONS[i % JOURNEY_ICONS.length],
         dotClass: `year-dot ${JOURNEY_TONES[i % JOURNEY_TONES.length]}`,
         hasItems: (y.items || []).length > 0,
+        // More than JOURNEY_VISIBLE_ITEMS causes: the list scrolls inside the card instead of growing it.
+        itemsClass:
+          (y.items || []).length > JOURNEY_VISIBLE_ITEMS
+            ? "year-items year-items_scroll"
+            : "year-items",
+        // A scrolling list is focusable so keyboard users can scroll it.
+        tabIndex: (y.items || []).length > JOURNEY_VISIBLE_ITEMS ? "0" : null,
+        listLabel: `Causes supported in ${y.year}`,
         items: (y.items || []).map((it) => ({
           ...it,
           key: `${y.year}-${it.cause}`,
