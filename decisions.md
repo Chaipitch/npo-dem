@@ -591,3 +591,28 @@ instead of failing when it is already scheduled.
   paused; after Pause the Paused tab opens on the gift, after Resume Active does; if a reload empties the open tab
   (e.g. the assistant paused the only active gift) it switches to the other. Tabs follow the ARIA tab pattern
   (role tab/tablist/tabpanel, Left/Right/Home/End). The two-card scroll (D-49) applies within each tab.
+
+### D-51 · Refactor: dashboard split into section components; Apex in controller / service / DTO layers — Accepted (user, 2026‑10‑28)
+
+- **LWC.** `tsAbcHopeDonorDashboard` is now the container: it loads the summary and open campaigns, switches
+  `view=home|giving`, lays out the page and section headings (they keep the `data-section` anchors), reloads after
+  a gift changes and scrolls to `#section`. Each section is its own internal component (not exposed in Experience
+  Builder, so no site page changed): `tsAbcHopeDashboardBanner`, `…Kpis`, `…Campaigns`, `…Impact`, `…Stories`,
+  `…Causes`, `…Journey`, `…History` (loads its own pages, reloads on "gifts changed") and `…Assistant` (Ask panel,
+  header questions and `?ask=`). Shared formatting, campaign card models and agent-reply link parsing are in
+  `tsAbcHopeDashboardUtils`. Styles were split with each section; colours stay the dashboard's `--dd-*` tokens
+  (inherited). The assistant's host element is the sticky grid item. Builder properties are unchanged. Tests moved
+  with their sections (93 Jest tests).
+- **Apex.** Controllers hold only `@AuraEnabled` entry points (input parsing, error → AuraHandledException);
+  services hold logic and queries; DTO classes hold the data shapes:
+  - Donor portal: `TSAbcHopeDonorPortalController` → `TSAbcHopeDonorPortalService` (throws `PortalException`) +
+    `TSAbcHopeDonorPortalDto`.
+  - Donation journey: `TSAbcHopeDonationIntakeController` → `TSAbcHopeDonationIntakeService` +
+    `TSAbcHopeDonationIntakeDto`; the read side (campaign cards and detail, programs, About totals) moved out of the
+    1,130-line intake service into `TSAbcHopeCampaignService` + `TSAbcHopeCampaignDto`.
+  - Ask panel: `TSAbcHopeDonorAgentController` (checks the user and message) → `TSAbcHopeDonorAgentService`
+    (Agent API) + `TSAbcHopeDonorAgentDto`.
+  - Recurring gifts: `TSAbcHopeMonthlyGiftService` + `TSAbcHopeMonthlyGiftDto`; the agent's
+    `TSAbcHopeAgentMonthlyGifts` now uses this service instead of its own copy of pause / resume / change / cancel.
+- Controller names, the guest profile's class access, permission sets and the agent action classes (names,
+  inputs, outputs) are unchanged, so no site-access change and no agent republish. 89 Apex tests pass.

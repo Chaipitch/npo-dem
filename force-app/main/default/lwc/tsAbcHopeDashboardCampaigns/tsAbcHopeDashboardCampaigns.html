@@ -1,0 +1,66 @@
+<template>
+  <div class="campaigns">
+    <template for:each={campaignCards} for:item="c">
+      <article
+        key={c.key}
+        class="campaign"
+        data-id="campaign-card"
+        data-href={c.detailHref}
+        onclick={handleCampaignClick}
+      >
+        <div class="campaign-art" aria-hidden="true">
+          <img src={c.imageUrl} alt="" title={c.imageCredit} loading="lazy" />
+        </div>
+        <div class="campaign-body">
+          <h3 class="campaign-name">{c.name}</h3>
+          <p class="campaign-desc">{c.description}</p>
+          <div class="progress" aria-hidden="true">
+            <span class="progress-bar" style={c.barStyle}></span>
+          </div>
+          <p class="campaign-stats">
+            <span class="strong">{c.raisedDisplay}</span>
+            <template lwc:if={c.hasGoal}
+              ><span class="muted"> raised of {c.goalDisplay}</span></template
+            >
+          </p>
+          <p class="campaign-meta">
+            <span>{c.giftsDisplay}</span
+            ><template lwc:if={c.timing}><span>· {c.timing}</span></template>
+          </p>
+          <template lwc:if={c.programsDisplay}>
+            <p class="campaign-program">
+              <span class="muted">Funds</span>
+              {c.programsDisplay}
+            </p>
+          </template>
+          <div class="campaign-chips">
+            <template for:each={c.chips} for:item="d">
+              <span key={d.key} class="campaign-chip">{d.label}</span>
+            </template>
+          </div>
+          <div class="campaign-actions">
+            <a
+              class="campaign-cta"
+              href={c.href}
+              aria-label={c.donateLabel}
+              data-id="campaign-donate"
+              >Donate now
+              <c-ts-abc-hope-icon
+                name="arrow"
+                size="16"
+                stroke-width="2.4"
+              ></c-ts-abc-hope-icon
+            ></a>
+            <a
+              class="campaign-more"
+              href={c.detailHref}
+              aria-label={c.detailLabel}
+              data-id="campaign-more"
+              >View more</a
+            >
+          </div>
+        </div>
+      </article>
+    </template>
+  </div>
+</template>

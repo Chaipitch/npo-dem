@@ -1,0 +1,171 @@
+/* Colours come from the dashboard's --dd-* tokens (inherited); see tsAbcHopeDonorDashboard. */
+:host {
+  display: block;
+  color: #2b2f45;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+p,
+h1,
+h2,
+h3,
+ul,
+ol {
+  margin: 0;
+}
+
+.muted {
+  color: var(--dd-muted);
+}
+
+.small {
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.strong {
+  font-weight: 700;
+  color: var(--dd-navy);
+}
+
+/* KPIs */
+.kpis {
+  /* One row that scrolls sideways when the column is too narrow for all cards. */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(210px, 1fr);
+  gap: 16px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  /* room for the card shadows inside the scroll area */
+  margin: -6px -6px -12px;
+  padding: 6px 6px 12px;
+}
+
+.kpi {
+  scroll-snap-align: start;
+  min-width: 0;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding: 22px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--dd-border);
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(20, 24, 91, 0.05);
+}
+
+.kpi-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.kpi-red {
+  background: #fde6e8;
+  color: #e5484d;
+}
+
+.kpi-green {
+  background: #e3f5e8;
+  color: #2f8a4a;
+}
+
+.kpi-purple {
+  background: #efe9ff;
+  color: #7b5cf0;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--dd-navy);
+  line-height: 1.15;
+}
+
+.kpi-label {
+  color: var(--dd-muted);
+  font-size: 15px;
+  margin: 4px 0 10px;
+}
+
+:host .kpi-link,
+:host .kpi-link:link,
+:host .kpi-link:visited {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dd-blue);
+  text-decoration: none;
+}
+
+.monthly {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dd-purple);
+}
+
+.monthly a.monthly-manage,
+.monthly a.monthly-manage:visited {
+  margin-left: 6px;
+  color: var(--dd-blue);
+  text-decoration: underline;
+}
+
+/* 1386–1600px: three cards fit in a row but each is only ~210–270px wide, so the icon sits above
+   the text (smaller) and the number, label and link each stay on one line. */
+@media (min-width: 1386px) and (max-width: 1600px) {
+  .kpi {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 18px;
+  }
+  .kpi-icon {
+    width: 48px;
+    height: 48px;
+  }
+  .kpi-value {
+    font-size: 26px;
+    white-space: nowrap;
+  }
+  .kpi-label {
+    margin: 2px 0 8px;
+    white-space: nowrap;
+  }
+  :host .kpi-link,
+  :host .kpi-link:link,
+  :host .kpi-link:visited {
+    white-space: nowrap;
+  }
+}
+
+/* Below ~1385px the main column (next to the agent panel, or full width on tablets/phones)
+   cannot fit three KPI cards side by side: stack them, full width, no sideways scroll. */
+@media (max-width: 1385px) {
+  .kpis {
+    grid-auto-flow: row;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+  .kpi {
+    padding: 16px 18px;
+  }
+}

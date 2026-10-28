@@ -1,68 +1,21 @@
 import { LightningElement, api, wire } from "lwc";
 import { refreshApex } from "@salesforce/apex";
-import {
-  giftsChangedAt,
-  markGiftsChanged,
-  GIFTS_CHANGED
-} from "c/tsAbcHopeGiftEvents";
-import basePath from "@salesforce/community/basePath";
+import { giftsChangedAt, GIFTS_CHANGED } from "c/tsAbcHopeGiftEvents";
 import getDashboard from "@salesforce/apex/TSAbcHopeDonorPortalController.getDashboard";
-import getGivingPage from "@salesforce/apex/TSAbcHopeDonorPortalController.getGivingPage";
 import getCampaigns from "@salesforce/apex/TSAbcHopeDonationIntakeController.getCampaigns";
-import askAgent from "@salesforce/apex/TSAbcHopeDonorAgentController.ask";
-import usesVerifiedAgent from "@salesforce/apex/TSAbcHopeDonorAgentController.usesVerifiedAgent";
-import { campaignPhoto } from "c/tsAbcHopeCampaignPhotos";
-
-/** Shared impact placeholders → Dashboard fields. */
-const IMPACT_FIELDS = {
-  programs: "activePrograms",
-  peopleReached: "peopleReached",
-  communities: "communities",
-  volunteers: "volunteersEngaged"
-};
-
-const IMPACT_STYLE = [
-  { icon: "users", tone: "tone-blue" },
-  { icon: "home", tone: "tone-indigo" },
-  { icon: "sprout", tone: "tone-green" },
-  { icon: "heart-fill", tone: "tone-red" }
-];
-const STORY_ART = ["water", "school", "sprout"];
-/** Sent by the portal layout's header question box and "Ask Our AI" (c-ts-abc-hope-portal-layout). */
-const ASK_EVENT = "abchope:ask";
-
-// Free Unsplash photos (Unsplash License) used when no image is configured for a campaign or story.
-const unsplash = (id, w) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=75`;
-const STORY_PHOTOS = {
-  water: {
-    url: unsplash("photo-1760873059715-7c7cfbe2a2c6", 600),
-    credit: "Photo: Andrew Itaga / Unsplash"
-  },
-  school: {
-    url: unsplash("photo-1542810634-71277d95dcbb", 600),
-    credit: "Photo: Yannis H / Unsplash"
-  },
-  sprout: {
-    url: unsplash("photo-1779085031158-a2519daf9747", 600),
-    credit: "Photo: Elly M / Unsplash"
-  }
-};
-const JOURNEY_TONES = ["jt-red", "jt-green", "jt-amber", "jt-purple"];
-const JOURNEY_ICONS = ["heart", "sprout", "book", "gift"];
+import { sitePath } from "c/tsAbcHopeDashboardUtils";
 
 // When the dashboard last loaded fresh data in this tab (kept across in-site navigation).
 let lastLoadedAt = 0;
 
-/** Causes shown in a journey year card before its list scrolls. */
-const JOURNEY_VISIBLE_ITEMS = 5;
-
-/** A question about campaigns or giving: the reply's campaigns show as cards (D-49). */
-const CAMPAIGN_QUESTION =
-  /campaign|donat|\bgive\b|giving|appeal|drive|fund|christmas|support/i;
-
+/**
+ * Signed-in donor dashboard (view=home) and My Giving (view=giving). Loads the dashboard summary and the open
+ * campaigns, lays out the page and passes the data to its sections (D-51): c-ts-abc-hope-dashboard-banner, -kpis,
+ * -campaigns, -impact, -stories, -causes, -journey, -history and -assistant, plus the recurring gifts
+ * (c-ts-abc-hope-donor-monthly-gifts). Reloads after a gift changes and scrolls to the #section in the URL.
+ */
 export default class DonorDashboard extends LightningElement {
-  /** "home" = donor home (mockup #1); "giving" = KPIs + full giving history */
+  /** "home" = donor home (mockup #1); "giving" = KPIs + recurring gifts + giving history */
   @api view = "home";
   @api currencyLabel = "USD";
   @api bannerTitle = "See What We’ve Achieved Together";
@@ -85,7 +38,6 @@ export default class DonorDashboard extends LightningElement {
   @api bannerImageCredit = "Photo: Ben Kupke / Unsplash";
   @api agentSuggestions =
     "Explore my causes;View giving history;Show next milestones";
-
   /** "Campaign name|image URL|credit" entries separated by ";" — other campaigns get a themed Unsplash photo */
   @api campaignImages =
     "Christmas Giving 2026|https://images.unsplash.com/photo-1606916693216-69bd7e1cf2fa?auto=format&fit=crop&w=900&q=75|Photo: Christian Bowen / Unsplash";
@@ -93,13 +45,7 @@ export default class DonorDashboard extends LightningElement {
   data;
   error;
   campaigns = [];
-
-  /** True when the panel's agent calls carry the donor's verified identity (Agent API, D-23). */
-  verifiedAgent = false;
-  @wire(usesVerifiedAgent)
-  wiredVerifiedAgent({ data }) {
-    this.verifiedAgent = data === true;
-  }
+  _scrolledTo;
 
   _wiredCampaigns;
   @wire(getCampaigns)
@@ -109,27 +55,8 @@ export default class DonorDashboard extends LightningElement {
       this.campaigns = result.data;
     }
   }
-  _scrolledTo;
-
-  // Giving history (view=giving): one page at a time from the server (D-49); not loaded on the home view.
-  givingPageParam; // page number to load; undefined (no call) outside view=giving
-  givingPage;
-  givingPageError;
-  _wiredGivingPage;
-  @wire(getGivingPage, { page: "$givingPageParam" })
-  wiredGivingPage(result) {
-    this._wiredGivingPage = result;
-    if (result.data) {
-      this.givingPage = result.data;
-      this.givingPageError = undefined;
-    } else if (result.error) {
-      this.givingPageError =
-        result.error.body?.message || "We could not load your giving history.";
-    }
-  }
 
   _wiredDashboard;
-
   @wire(getDashboard)
   wiredDashboard(result) {
     this._wiredDashboard = result;
@@ -141,7 +68,6 @@ export default class DonorDashboard extends LightningElement {
     if (data) {
       this.data = data;
       this.error = undefined;
-      this.flushPendingAsk();
     } else if (error) {
       this.error =
         error.body?.message || "We could not load your giving summary.";
@@ -150,90 +76,30 @@ export default class DonorDashboard extends LightningElement {
   }
 
   connectedCallback() {
-    if (this.isGiving) this.givingPageParam = 1;
     this._onHash = () => {
       this._scrolledTo = undefined;
       this.scrollToHash();
     };
     window.addEventListener("hashchange", this._onHash);
-    this._onAsk = (event) => this.handleAskEvent(event);
-    window.addEventListener(ASK_EVENT, this._onAsk);
     this._onGiftsChanged = () => this.refreshData();
     window.addEventListener(GIFTS_CHANGED, this._onGiftsChanged);
-    this.readAskFromUrl();
   }
   disconnectedCallback() {
     window.removeEventListener("hashchange", this._onHash);
-    window.removeEventListener(ASK_EVENT, this._onAsk);
     window.removeEventListener(GIFTS_CHANGED, this._onGiftsChanged);
   }
+  renderedCallback() {
+    this.scrollToHash();
+  }
 
-  /** Reload the KPIs, gift list and campaign cards (both are cacheable Apex). */
+  /** Reload the summary and the campaign cards (both are cacheable Apex); the history reloads itself. */
   refreshData() {
     lastLoadedAt = Date.now();
     if (this._wiredDashboard) refreshApex(this._wiredDashboard);
     if (this._wiredCampaigns) refreshApex(this._wiredCampaigns);
-    if (this.isGiving && this._wiredGivingPage)
-      refreshApex(this._wiredGivingPage);
   }
-
-  // ------------------------------------------------------------ questions from the header
-  /** The header box or "Ask Our AI" on this page: answer in the panel (home view only). */
-  handleAskEvent(event) {
-    if (!this.isHome || !event.detail) return;
-    event.detail.handled = true;
-    this.focusAgent(event.detail.question);
-  }
-  /** Arriving from another page with /dashboard?ask=…#agent. */
-  readAskFromUrl() {
-    if (!this.isHome || typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const question = params.get("ask");
-    if (question === null) return;
-    params.delete("ask");
-    const query = params.toString();
-    window.history.replaceState(
-      window.history.state,
-      "",
-      `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`
-    );
-    this.focusAgent(question);
-  }
-  focusAgent(question) {
-    const text = (question || "").trim();
-    if (text) {
-      // Personal answers need the dashboard data; wait for it if it is still loading.
-      this._pendingAsk = text;
-      this.flushPendingAsk();
-    }
-    // eslint-disable-next-line @lwc/lwc/no-async-operation
-    requestAnimationFrame(() => {
-      const panel = this.template.querySelector('[data-section="agent"]');
-      if (panel?.scrollIntoView) {
-        panel.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-      if (!text) {
-        this.template.querySelector('[data-id="chat-input"]')?.focus();
-      }
-    });
-  }
-  flushPendingAsk() {
-    if (!this._pendingAsk || !this.data) return;
-    const text = this._pendingAsk;
-    this._pendingAsk = undefined;
-    this.sendChat(text);
-  }
-  renderedCallback() {
-    this.scrollToHash();
-    this.scrollChatToEnd();
-  }
-  /** Keep the newest chat message in view inside the panel's scroll area. */
-  scrollChatToEnd() {
-    const count = this.chatMessages.length + (this.chatBusy ? 1 : 0);
-    if (count === this._chatScrolledCount) return;
-    this._chatScrolledCount = count;
-    const body = this.template.querySelector('[data-id="agent-body"]');
-    if (body && count > 0) body.scrollTop = body.scrollHeight;
+  handleGiftsChange() {
+    this.refreshData();
   }
   scrollToHash() {
     const hash = (window.location.hash || "").replace("#", "");
@@ -245,7 +111,6 @@ export default class DonorDashboard extends LightningElement {
     }
   }
 
-  // ------------------------------------------------------------ view state
   get isHome() {
     return this.view !== "giving";
   }
@@ -263,606 +128,16 @@ export default class DonorDashboard extends LightningElement {
       ? "Every gift you’ve made, where it went, and its status."
       : this.bannerSubtitle;
   }
-
-  // ------------------------------------------------------------ KPIs
-  get totalDisplay() {
-    return this.money(this.data?.totalContributions || 0);
-  }
-  get causesDisplay() {
-    return this.data?.causesSupported ?? 0;
-  }
-  get sinceDisplay() {
-    return this.data ? `Since ${this.data.supporterSince}` : "";
-  }
-  get monthlyNote() {
-    const n = this.data?.activeMonthlyGifts || 0;
-    const p = this.data?.pausedMonthlyGifts || 0;
-    const parts = [];
-    if (n > 0) {
-      const types = (this.data.activeRecurringTypes || []).join(", ");
-      parts.push(
-        `${n} active recurring gift${n === 1 ? "" : "s"}${types ? ` (${types})` : ""}`
-      );
-    }
-    if (p > 0) {
-      const until = this.data.pausedUntil
-        ? ` until ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(`${this.data.pausedUntil}T00:00:00Z`))}`
-        : "";
-      parts.push(`${p} paused${until}`);
-    }
-    return parts.join(" · ");
-  }
-  get manageMonthlyHref() {
-    return `${basePath || ""}/my-giving#monthly`;
-  }
-  handleGiftsChange() {
-    this.refreshData();
-  }
-  get givingHref() {
-    return `${basePath || ""}/my-giving`;
-  }
-  get causesHref() {
-    return `${basePath || ""}/dashboard#causes`;
-  }
-  get journeyHref() {
-    return `${basePath || ""}/dashboard#journey`;
-  }
-  /** A click anywhere on a campaign card opens its detail page; links inside it keep their own target. */
-  handleCampaignClick(event) {
-    if (event.target.closest && event.target.closest("a, button")) return;
-    const href = event.currentTarget.dataset.href;
-    if (href) window.location.assign(href);
-  }
-  get donateHref() {
-    return `${basePath || ""}${this.donatePath}`;
-  }
-
-  // ------------------------------------------------------------ content
-  get impactTiles() {
-    return splitList(this.sharedImpact).map((item, i) => {
-      const [raw, label] = item.split("|").map((x) => (x || "").trim());
-      const value = raw.replace(/\{(\w+)\}/g, (token, name) => {
-        const field = IMPACT_FIELDS[name];
-        if (!field) return token;
-        return this.data ? formatCount(this.data[field]) : "…";
-      });
-      const style = IMPACT_STYLE[i % IMPACT_STYLE.length];
-      return {
-        key: `i${i}`,
-        value,
-        label,
-        icon: style.icon,
-        className: `impact-tile ${style.tone}`
-      };
-    });
-  }
-  get storyCards() {
-    return splitList(this.stories).map((item, i) => {
-      const [tag, title, summary] = item
-        .split("|")
-        .map((x) => (x || "").trim());
-      const art = STORY_ART[i % STORY_ART.length];
-      return {
-        key: `s${i}`,
-        tag,
-        title,
-        summary,
-        tagClass: `tag tag-${i % 3}`,
-        imageUrl: STORY_PHOTOS[art].url,
-        imageCredit: STORY_PHOTOS[art].credit
-      };
-    });
-  }
-  /** One card per year (D-35): the year's total and gifts, then each cause with its amount. */
-  get journeyYears() {
-    return (this.data?.journeyYears || []).map((y, i) => {
-      const gifts = y.giftCount || 0;
-      const meta = gifts
-        ? `${this.money(y.total)} · ${gifts} gift${gifts === 1 ? "" : "s"}`
-        : y.joined
-          ? "Became a supporter"
-          : "";
-      return {
-        ...y,
-        key: `y${y.year}`,
-        meta,
-        icon: JOURNEY_ICONS[i % JOURNEY_ICONS.length],
-        dotClass: `year-dot ${JOURNEY_TONES[i % JOURNEY_TONES.length]}`,
-        hasItems: (y.items || []).length > 0,
-        // More than JOURNEY_VISIBLE_ITEMS causes: the list scrolls inside the card instead of growing it.
-        itemsClass:
-          (y.items || []).length > JOURNEY_VISIBLE_ITEMS
-            ? "year-items year-items_scroll"
-            : "year-items",
-        // A scrolling list is focusable so keyboard users can scroll it.
-        tabIndex: (y.items || []).length > JOURNEY_VISIBLE_ITEMS ? "0" : null,
-        listLabel: `Causes supported in ${y.year}`,
-        items: (y.items || []).map((it) => ({
-          ...it,
-          key: `${y.year}-${it.cause}`,
-          amountDisplay: it.recurringOnly
-            ? "Recurring gift"
-            : this.money(it.amount)
-        }))
-      };
-    });
-  }
-  get causes() {
-    return (this.data?.causes || []).map((c, i) => ({
-      key: `c${i}`,
-      label: c
-    }));
-  }
-  get hasCauses() {
-    return this.causes.length > 0;
-  }
-  /** The giving history page on show (5 gifts, D-49). */
-  get gifts() {
-    return (this.givingPage?.gifts || []).map((g) => ({
-      ...g,
-      amountDisplay: this.money(g.amount),
-      dateDisplay: g.giftDate
-        ? new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(
-            new Date(g.giftDate)
-          )
-        : "",
-      statusClass: `status status-${(g.status || "").toLowerCase()}`
-    }));
-  }
-  get hasGifts() {
-    return this.gifts.length > 0;
-  }
-  get historyLoading() {
-    return !this.givingPage && !this.givingPageError;
-  }
-  get historyTotal() {
-    return this.givingPage?.total || 0;
-  }
-  get historyPageSize() {
-    return this.givingPage?.pageSize || 5;
-  }
-  get pageCount() {
-    return Math.max(1, Math.ceil(this.historyTotal / this.historyPageSize));
-  }
-  /** The page the server returned (it keeps the page in range, e.g. after a gift is cancelled). */
-  get currentPage() {
-    return this.givingPage?.page || 1;
-  }
-  get showPager() {
-    return this.historyTotal > this.historyPageSize;
-  }
-  /** "Showing 6–10 of 37 gifts". */
-  get pageSummary() {
-    const start = (this.currentPage - 1) * this.historyPageSize + 1;
-    const end = Math.min(start + this.gifts.length - 1, this.historyTotal);
-    return `Showing ${start}–${end} of ${this.historyTotal} gifts`;
-  }
-  get pageLabel() {
-    return `Page ${this.currentPage} of ${this.pageCount}`;
-  }
-  get isFirstPage() {
-    return this.currentPage <= 1;
-  }
-  get isLastPage() {
-    return this.currentPage >= this.pageCount;
-  }
-  previousPage() {
-    this.givingPageParam = this.currentPage - 1;
-  }
-  nextPage() {
-    this.givingPageParam = this.currentPage + 1;
-  }
-
-  // ------------------------------------------------------------ campaigns
   get hasCampaigns() {
     return this.campaigns.length > 0;
   }
-  get campaignCards() {
-    const images = new Map(
-      splitList(this.campaignImages).map((entry) => {
-        const [name, url, credit] = entry
-          .split("|")
-          .map((x) => (x || "").trim());
-        return [name, { url, credit: credit || "Photo: Unsplash" }];
-      })
-    );
-    const base = basePath || "";
-    return this.campaigns.map((c, i) => {
-      const goal = Number(c.goal) || 0;
-      const raised = Number(c.raised) || 0;
-      const pct =
-        goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
-      let timing = "";
-      if (c.daysLeft !== null && c.daysLeft !== undefined) {
-        timing =
-          c.daysLeft === 0
-            ? "Ends today"
-            : `${c.daysLeft} day${c.daysLeft === 1 ? "" : "s"} left`;
-      }
-      return {
-        key: c.id || `c${i}`,
-        name: c.name,
-        description: c.description,
-        href: `${base}/donate?campaign=${encodeURIComponent(c.name)}`,
-        detailHref: `${base}/campaign?name=${encodeURIComponent(c.name)}`,
-        donateLabel: `Donate now to ${c.name}`,
-        detailLabel: `View more about ${c.name}`,
-        imageUrl: (images.get(c.name) || campaignPhoto(c.name)).url,
-        imageCredit: (images.get(c.name) || campaignPhoto(c.name)).credit,
-        raisedDisplay: this.money(raised),
-        goalDisplay: goal > 0 ? this.money(goal) : "",
-        hasGoal: goal > 0,
-        barStyle: `width: ${pct}%`,
-        pctDisplay: `${pct}%`,
-        giftsDisplay: c.giftCount
-          ? `${c.giftCount} gift${c.giftCount === 1 ? "" : "s"}`
-          : "Be the first to give",
-        timing,
-        programsDisplay: (c.programs || []).join(", "),
-        chips: (c.designations || []).map((d, j) => ({
-          key: `d${j}`,
-          label: d
-        }))
-      };
-    });
+  get causes() {
+    return this.data?.causes || [];
   }
-
-  // ------------------------------------------------------------ agent panel
-  get initial() {
-    return (this.data?.firstName || "D").charAt(0).toUpperCase();
+  get journeyYears() {
+    return this.data?.journeyYears || [];
   }
-  get agentIntro() {
-    const n = this.data?.causesSupported || 0;
-    return n
-      ? `You’ve supported ${n} cause${n === 1 ? "" : "s"}. Here’s where your giving went:`
-      : "You haven’t made a gift yet — here’s how you can start:";
-  }
-  get agentCauses() {
-    // All years of the impact journey, not just the recent gifts the dashboard carries (D-49).
-    const totals = new Map();
-    for (const y of this.data?.journeyYears || []) {
-      for (const it of y.items || []) {
-        totals.set(it.cause, (totals.get(it.cause) || 0) + (it.amount || 0));
-      }
-    }
-    return [...totals.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([label, amount], i) => ({
-        key: `a${i}`,
-        label,
-        amount: this.money(amount),
-        artClass: `agent-art art-${i % 3}`
-      }));
-  }
-  get suggestions() {
-    return splitList(this.agentSuggestions).map((label, i) => ({
-      key: `q${i}`,
-      label
-    }));
-  }
-  // ------------------------------------------------------------ inline agent chat
-  // Personal questions are answered here from the dashboard data (the agent cannot verify
-  // the donor from this panel yet, D-23); everything else goes to the Donor Assistant.
-  chatMessages = [];
-  chatDraft = "";
-  chatBusy = false;
-  chatSessionId;
-  _chatSeq = 0;
-
-  get chatHasMessages() {
-    return this.chatMessages.length > 0;
-  }
-  get chatSendDisabled() {
-    return this.chatBusy || !this.chatDraft.trim();
-  }
-  handleChatInput(event) {
-    this.chatDraft = event.target.value;
-  }
-  handleChatKeydown(event) {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      this.sendChat(this.chatDraft);
-    }
-  }
-  handleChatSend() {
-    this.sendChat(this.chatDraft);
-  }
-  handleSuggestion(event) {
-    this.sendChat(event.currentTarget.dataset.text);
-  }
-  addChat(role, text, link) {
-    this._chatSeq += 1;
-    // Agent replies: links in the text become buttons ("Donate to <campaign>", D-48).
-    const parsed =
-      role === "agent"
-        ? extractLinks(text, {
-            campaigns: (this.campaigns || []).map((c) => c.name),
-            donatePath: this.donateHref
-          })
-        : { text, links: [] };
-    let links = [...parsed.links];
-    if (link && !links.some((l) => l.href === link.href)) links.push(link);
-    // Campaign answers show a card per campaign (D-49); its Donate button replaces the plain link.
-    const cards =
-      role === "agent" ? this.chatCampaignCards(parsed.text, links) : [];
-    const shown = new Set(cards.map((c) => c.name.toLowerCase()));
-    links = links.filter((l) => !shown.has(linkCampaign(l.href)));
-    this.chatMessages = [
-      ...this.chatMessages,
-      {
-        key: `m${this._chatSeq}`,
-        text: parsed.text,
-        links: links.map((l, i) => ({ ...l, key: `m${this._chatSeq}-l${i}` })),
-        cards: cards.map((c) => ({ ...c, key: `m${this._chatSeq}-${c.key}` })),
-        hasCards: cards.length > 0,
-        isUser: role === "user",
-        rowClass: role === "user" ? "msg msg_user" : "msg msg_agent",
-        bubbleClass:
-          role === "user"
-            ? "bubble"
-            : role === "error"
-              ? "bubble bubble_agent bubble_error"
-              : "bubble bubble_agent"
-      }
-    ];
-  }
-  /**
-   * Cards for the campaigns an agent reply is about: those it links to, plus those it names when the
-   * question was about campaigns or giving (e.g. "Which campaigns are open?").
-   */
-  chatCampaignCards(text, links) {
-    const linked = new Set(links.map((l) => linkCampaign(l.href)));
-    const aboutCampaigns = CAMPAIGN_QUESTION.test(this._lastQuestion || "");
-    const lower = (text || "").toLowerCase();
-    return this.campaignCards
-      .filter(
-        (c) =>
-          linked.has(c.name.toLowerCase()) ||
-          (aboutCampaigns && lower.includes(c.name.toLowerCase()))
-      )
-      .map((c) => ({
-        key: c.key,
-        name: c.name,
-        href: c.href,
-        detailHref: c.detailHref,
-        donateLabel: c.donateLabel,
-        detailLabel: c.detailLabel,
-        imageUrl: c.imageUrl,
-        raisedDisplay: c.raisedDisplay,
-        goalDisplay: c.goalDisplay,
-        hasGoal: c.hasGoal,
-        barStyle: c.barStyle,
-        pctDisplay: c.pctDisplay,
-        timing: c.timing
-      }));
-  }
-
-  async sendChat(raw) {
-    const text = (raw || "").trim();
-    if (!text || this.chatBusy) return;
-    this._lastQuestion = text;
-    this.addChat("user", text);
-    this.chatDraft = "";
-    const local = this.localAnswer(text);
-    // Without a verified agent session, personal questions are answered here from the dashboard data.
-    if (local && !this.verifiedAgent) {
-      this.addChat("agent", local.text, local.link);
-      return;
-    }
-    this.chatBusy = true;
-    let reply;
-    try {
-      reply = await askAgent({
-        message: text,
-        sessionId: this.chatSessionId || null
-      });
-    } catch {
-      reply = { error: "The assistant could not answer right now." };
-    }
-    if (reply.sessionId) this.chatSessionId = reply.sessionId;
-    if (!reply.error) {
-      // Keep the page link the local answer would have offered (e.g. Manage recurring gifts).
-      this.addChat("agent", reply.text, local?.link);
-      // The agent may have paused, resumed, changed or cancelled a gift: show the current state.
-      if (this.verifiedAgent) markGiftsChanged();
-    } else if (local) {
-      this.addChat("agent", local.text, local.link);
-    } else {
-      this.addChat("error", reply.error);
-    }
-    this.chatBusy = false;
-  }
-
-  /** Answers about the donor's own giving, from the dashboard data; null = ask the agent. */
-  localAnswer(raw) {
-    const d = this.data;
-    if (!d) return null;
-    const q = raw.toLowerCase();
-    const base = basePath || "";
-    if (/monthly|weekly|yearly|recurring|pause|resume|cancel/.test(q)) {
-      return {
-        text: this.monthlyNote
-          ? `You have ${this.monthlyNote}. You can pause, resume, change or cancel them on My Giving.`
-          : "You don’t have a recurring gift at the moment. You can start a weekly, monthly or yearly gift from any campaign.",
-        link: this.monthlyNote
-          ? {
-              href: `${base}/my-giving#monthly`,
-              label: "Manage recurring gifts"
-            }
-          : { href: this.donateHref, label: "Start a recurring gift" }
-      };
-    }
-    if (/history|recent gifts?|past gifts?|last gifts?|receipt/.test(q)) {
-      const recent = (d.gifts || []).slice(0, 3).map((g) => {
-        const cause = g.designations ? ` to ${g.designations}` : "";
-        return `• ${this.formatGiftDate(g.giftDate)}: ${this.money(g.amount)}${cause}`;
-      });
-      return {
-        text: recent.length
-          ? `Your most recent gifts:\n${recent.join("\n")}`
-          : "You haven’t made a gift yet.",
-        link: { href: `${base}/my-giving`, label: "See all my giving" }
-      };
-    }
-    if (/milestone|journey|next step/.test(q)) {
-      const steps = (d.journey || []).map((m) => `• ${m.year} — ${m.label}`);
-      return {
-        text: steps.length
-          ? `Your impact journey so far:\n${steps.join("\n")}\nYour next milestone is your next gift.`
-          : "Your impact journey starts with your first gift.",
-        link: { href: this.journeyHref, label: "View my journey" }
-      };
-    }
-    if (
-      /\b(cause|causes|supported|programs? i)\b|where .*(giving|gift|money)/.test(
-        q
-      )
-    ) {
-      const top = this.agentCauses.map(
-        (c) => `• ${c.label} — you gave ${c.amount}`
-      );
-      return {
-        text: top.length
-          ? `${this.agentIntro}\n${top.join("\n")}`
-          : "You haven’t supported a cause yet.",
-        link: { href: this.causesHref, label: "Explore my causes" }
-      };
-    }
-    if (
-      /how much|total|i('ve| have) (given|donated)|my (giving|gifts|donations)/.test(
-        q
-      )
-    ) {
-      return {
-        text: `You’ve given ${this.totalDisplay} in total since ${d.supporterSince}, supporting ${d.causesSupported} cause${d.causesSupported === 1 ? "" : "s"}.`,
-        link: { href: `${base}/my-giving`, label: "See my giving history" }
-      };
-    }
-    return null;
-  }
-  formatGiftDate(value) {
-    return value
-      ? new Intl.DateTimeFormat("en-GB", {
-          dateStyle: "medium",
-          timeZone: "UTC"
-        }).format(new Date(`${value}T00:00:00Z`))
-      : "";
-  }
-
-  money(value) {
-    const n = Number(value);
-    return `${this.currencyLabel} ${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Number.isFinite(n) ? n : 0)}`;
-  }
-}
-
-function formatCount(n) {
-  return Number(n || 0).toLocaleString("en-US");
-}
-
-function splitList(value) {
-  return String(value || "")
-    .split(";")
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
-
-/**
- * Pulls links out of an agent reply so they show as buttons, not long URLs: a donation link
- * (/donate?campaign=Name) becomes "Donate to Name", /donate "Donate", anything else "Open link".
- * Markdown links keep their text; a bare URL and a "Donate here:" lead-in before it are removed.
- */
-export function extractLinks(
-  raw,
-  { campaigns = [], donatePath = "/donate" } = {}
-) {
-  const links = [];
-  const add = (href) => {
-    const clean = href.replace(/[.,;:!?)]+$/, "");
-    if (!links.some((l) => l.href === clean)) {
-      links.push({ href: clean, label: linkLabel(clean) });
-    }
-    return clean;
-  };
-  let text = String(raw || "").replace(
-    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-    (m, label, href) => {
-      add(href);
-      return label;
-    }
-  );
-  text = text.replace(
-    /(?:\b(?:donate|give)(?: here| now)?\s*:\s*|\bhere\s*:\s*)?(https?:\/\/[^\s]+)/gi,
-    (m, href) => {
-      const clean = add(href);
-      return href.slice(clean.length); // keep a full stop that ended the sentence
-    }
-  );
-  // Agentforce replaces links to sites that are not Trusted URLs with "URL_Redacted": rebuild the donation
-  // link from the campaign named last before it (same paragraph first), else link to the donate page.
-  text = text.replace(
-    /(?:\b(?:donate|give|visit)(?: here| now)?\s*:?\s*|\bhere\s*:\s*)?\[?url[_ ]redacted\]?/gi,
-    (m, offset, whole) => {
-      const before = whole.slice(0, offset);
-      const paragraph = before.slice(before.lastIndexOf("\n\n") + 1);
-      const campaign =
-        lastMentioned(paragraph, campaigns) || lastMentioned(before, campaigns);
-      const href = campaign
-        ? `${donatePath}?campaign=${encodeURIComponent(campaign)}`
-        : donatePath;
-      if (!links.some((l) => l.href === href)) {
-        links.push({
-          href,
-          label: campaign ? `Donate to ${campaign}` : "Donate"
-        });
-      }
-      return "";
-    }
-  );
-  text = text
-    .replace(/[ \t]+([.,;:])/g, "$1")
-    .replace(/([.!?])\.+/g, "$1")
-    .replace(/[ \t]{2,}/g, " ")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/(^|\n)\s*[.,;:]\s*(?=\n|$)/g, "$1")
-    .trim();
-  return { text, links };
-}
-
-function lastMentioned(text, names) {
-  const lower = text.toLowerCase();
-  let best;
-  let at = -1;
-  for (const n of names) {
-    const i = lower.lastIndexOf(String(n).toLowerCase());
-    if (i > at) {
-      at = i;
-      best = n;
-    }
-  }
-  return best;
-}
-
-function linkLabel(href) {
-  try {
-    const url = new URL(href);
-    if (/\/donate\/?$/.test(url.pathname)) {
-      const campaign = url.searchParams.get("campaign");
-      return campaign ? `Donate to ${campaign}` : "Donate";
-    }
-  } catch {
-    // not a URL we can read: generic label
-  }
-  return "Open link";
-}
-
-/** The campaign a /donate?campaign= link points to, lower case; "" for any other link. */
-function linkCampaign(href) {
-  try {
-    return (
-      new URL(href, "https://x.invalid").searchParams.get("campaign") || ""
-    ).toLowerCase();
-  } catch {
-    return "";
+  get donateHref() {
+    return sitePath(this.donatePath);
   }
 }

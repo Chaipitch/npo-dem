@@ -1,0 +1,52 @@
+/* Colours come from the dashboard's --dd-* tokens (inherited); see tsAbcHopeDonorDashboard. */
+:host {
+  display: block;
+  color: #2b2f45;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+p,
+h1,
+h2,
+h3,
+ul,
+ol {
+  margin: 0;
+}
+
+.muted {
+  color: var(--dd-muted);
+}
+
+.small {
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.strong {
+  font-weight: 700;
+  color: var(--dd-navy);
+}
+
+/* Causes */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #e4dcff;
+  color: var(--dd-purple);
+  font-weight: 600;
+  font-size: 14px;
+}

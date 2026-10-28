@@ -1,0 +1,195 @@
+<template>
+  <aside class="agent" data-section="agent">
+    <div class="agent-head">
+      <span class="agent-icon"
+        ><c-ts-abc-hope-icon
+          name="sparkle"
+          size="26"
+          stroke-width="2"
+        ></c-ts-abc-hope-icon
+      ></span>
+      <div>
+        <h2 class="agent-title">Ask About Your Journey</h2>
+        <p class="agent-sub">
+          Get personalized answers based on the programs and information
+          available to you.
+        </p>
+      </div>
+      <span class="agent-powered"
+        >Powered<br />by <strong>Agentforce</strong></span
+      >
+    </div>
+
+    <div class="agent-body" data-id="agent-body">
+      <div class="msg msg_user">
+        <span class="msg-avatar">{initial}</span>
+        <p class="bubble">How are the programs I supported doing?</p>
+      </div>
+      <div class="msg msg_agent">
+        <span class="msg-avatar msg-avatar_agent"
+          ><c-ts-abc-hope-icon
+            name="sparkle"
+            size="20"
+            stroke-width="2"
+          ></c-ts-abc-hope-icon
+        ></span>
+        <div class="bubble bubble_agent">
+          <p class="agent-intro">{agentIntro}</p>
+          <ul class="agent-list">
+            <template for:each={agentCauses} for:item="a">
+              <li key={a.key} class="agent-row">
+                <span class={a.artClass}
+                  ><c-ts-abc-hope-icon
+                    name="heart"
+                    size="22"
+                    stroke-width="2"
+                  ></c-ts-abc-hope-icon
+                ></span>
+                <span class="agent-row-text">
+                  <span class="agent-row-title">{a.label}</span>
+                  <span class="agent-row-sub">You gave {a.amount}</span>
+                </span>
+                <span class="agent-trend"
+                  ><c-ts-abc-hope-icon
+                    name="trend"
+                    size="16"
+                    stroke-width="2.2"
+                  ></c-ts-abc-hope-icon
+                ></span>
+              </li>
+            </template>
+          </ul>
+          <p class="agent-outro">
+            Your next chance to help: Christmas Giving 2026 — school supplies
+            for children.
+          </p>
+        </div>
+      </div>
+
+      <div class="agent-chips">
+        <template for:each={suggestions} for:item="q">
+          <button
+            key={q.key}
+            type="button"
+            class="agent-chip"
+            data-text={q.label}
+            disabled={chatBusy}
+            onclick={handleSuggestion}
+          >
+            {q.label}
+          </button>
+        </template>
+      </div>
+      <template lwc:if={chatHasMessages}>
+        <div class="chat-log" aria-live="polite">
+          <template for:each={chatMessages} for:item="m">
+            <div key={m.key} class={m.rowClass}>
+              <template lwc:if={m.isUser}>
+                <span class="msg-avatar">{initial}</span>
+              </template>
+              <template lwc:else>
+                <span class="msg-avatar msg-avatar_agent"
+                  ><c-ts-abc-hope-icon
+                    name="sparkle"
+                    size="20"
+                    stroke-width="2"
+                  ></c-ts-abc-hope-icon
+                ></span>
+              </template>
+              <div class={m.bubbleClass}>
+                <p class="chat-text">{m.text}</p>
+                <template for:each={m.links} for:item="l">
+                  <a key={l.key} class="chat-link" href={l.href}>{l.label}</a>
+                </template>
+                <template lwc:if={m.hasCards}>
+                  <ul class="chat-cards" data-id="chat-cards">
+                    <template for:each={m.cards} for:item="c">
+                      <li key={c.key} class="chat-card">
+                        <img
+                          class="chat-card-img"
+                          src={c.imageUrl}
+                          alt=""
+                          loading="lazy"
+                        />
+                        <div class="chat-card-body">
+                          <p class="chat-card-name">{c.name}</p>
+                          <template lwc:if={c.hasGoal}>
+                            <div
+                              class="chat-card-bar"
+                              role="progressbar"
+                              aria-label={c.pctDisplay}
+                            >
+                              <span style={c.barStyle}></span>
+                            </div>
+                            <p class="chat-card-meta">
+                              {c.raisedDisplay} raised of {c.goalDisplay}
+                            </p>
+                          </template>
+                          <template lwc:else>
+                            <p class="chat-card-meta">
+                              {c.raisedDisplay} raised
+                            </p>
+                          </template>
+                          <template lwc:if={c.timing}>
+                            <p class="chat-card-meta">{c.timing}</p>
+                          </template>
+                          <div class="chat-card-actions">
+                            <a
+                              class="chat-card-donate"
+                              href={c.href}
+                              aria-label={c.donateLabel}
+                              >Donate now</a
+                            >
+                            <a
+                              class="chat-card-more"
+                              href={c.detailHref}
+                              aria-label={c.detailLabel}
+                              >View more</a
+                            >
+                          </div>
+                        </div>
+                      </li>
+                    </template>
+                  </ul>
+                </template>
+              </div>
+            </div>
+          </template>
+          <template lwc:if={chatBusy}>
+            <p class="chat-typing muted small" data-id="typing">
+              Assistant is typing…
+            </p>
+          </template>
+        </div>
+      </template>
+    </div>
+    <div class="agent-input">
+      <input
+        class="agent-input-field"
+        type="text"
+        maxlength="1000"
+        placeholder="Ask another question about your impact…"
+        aria-label="Ask the ABC Hope assistant"
+        value={chatDraft}
+        disabled={chatBusy}
+        oninput={handleChatInput}
+        onkeydown={handleChatKeydown}
+        data-id="chat-input"
+      />
+      <button
+        type="button"
+        class="agent-send"
+        aria-label="Send"
+        disabled={chatSendDisabled}
+        onclick={handleChatSend}
+        data-id="chat-send"
+      >
+        <c-ts-abc-hope-icon
+          name="send"
+          size="18"
+          stroke-width="2.4"
+        ></c-ts-abc-hope-icon>
+      </button>
+    </div>
+  </aside>
+</template>

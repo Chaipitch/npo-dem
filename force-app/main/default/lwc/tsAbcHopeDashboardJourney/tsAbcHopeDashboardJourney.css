@@ -1,0 +1,196 @@
+/* Colours come from the dashboard's --dd-* tokens (inherited); see tsAbcHopeDonorDashboard. */
+:host {
+  display: block;
+  color: #2b2f45;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+p,
+h1,
+h2,
+h3,
+ul,
+ol {
+  margin: 0;
+}
+
+.muted {
+  color: var(--dd-muted);
+}
+
+.small {
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.strong {
+  font-weight: 700;
+  color: var(--dd-navy);
+}
+
+/* Journey: one card per year (D-35) */
+.years {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.year-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid var(--dd-border);
+}
+
+.year-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.year-dot {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.jt-red {
+  background: #fde6e8;
+  color: #e5484d;
+}
+
+.jt-green {
+  background: #e3f5e8;
+  color: #2f8a4a;
+}
+
+.jt-amber {
+  background: #fff1d6;
+  color: #c27b00;
+}
+
+.jt-purple {
+  background: #efe9ff;
+  color: #7b5cf0;
+}
+
+.year-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.year {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--dd-navy);
+  line-height: 1.1;
+}
+
+.year-meta {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--dd-muted);
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.badge_joined {
+  background: #fde6e8;
+  color: #c2353a;
+}
+
+.badge_new {
+  margin-left: 6px;
+  background: #e3f5e8;
+  color: #2f8a4a;
+}
+
+.year-items {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--dd-border);
+}
+
+/* More than 5 causes: about five rows show and the rest scroll inside the card. */
+.year-items_scroll {
+  max-height: 318px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 8px;
+  scrollbar-gutter: stable;
+}
+
+.year-items_scroll:focus-visible {
+  outline: 2px solid var(--dd-purple);
+  outline-offset: 2px;
+}
+
+.year-items_scroll .year-item:last-child {
+  padding-bottom: 10px;
+}
+
+.year-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f2f7;
+}
+
+.year-item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.item-text {
+  min-width: 0;
+}
+
+.item-cause {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dd-navy);
+}
+
+.item-program {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--dd-muted);
+}
+
+.item-amount {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dd-navy);
+  white-space: nowrap;
+}
+
+.year-empty {
+  padding-top: 12px;
+  border-top: 1px solid var(--dd-border);
+  font-size: 14px;
+  color: var(--dd-muted);
+}
