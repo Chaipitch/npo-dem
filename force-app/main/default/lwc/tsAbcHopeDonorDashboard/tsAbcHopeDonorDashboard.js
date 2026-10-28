@@ -7,6 +7,7 @@ import {
 } from "c/tsAbcHopeGiftEvents";
 import basePath from "@salesforce/community/basePath";
 import getDashboard from "@salesforce/apex/TSAbcHopeDonorPortalController.getDashboard";
+import getGivingPage from "@salesforce/apex/TSAbcHopeDonorPortalController.getGivingPage";
 import getCampaigns from "@salesforce/apex/TSAbcHopeDonationIntakeController.getCampaigns";
 import askAgent from "@salesforce/apex/TSAbcHopeDonorAgentController.ask";
 import usesVerifiedAgent from "@salesforce/apex/TSAbcHopeDonorAgentController.usesVerifiedAgent";
@@ -53,10 +54,12 @@ const JOURNEY_ICONS = ["heart", "sprout", "book", "gift"];
 // When the dashboard last loaded fresh data in this tab (kept across in-site navigation).
 let lastLoadedAt = 0;
 
-/** Gifts per page in the giving history table. */
-const HISTORY_PAGE_SIZE = 10;
 /** Causes shown in a journey year card before its list scrolls. */
 const JOURNEY_VISIBLE_ITEMS = 5;
+
+/** A question about campaigns or giving: the reply's campaigns show as cards (D-49). */
+const CAMPAIGN_QUESTION =
+  /campaign|donat|\bgive\b|giving|appeal|drive|fund|christmas|support/i;
 
 export default class DonorDashboard extends LightningElement {
   /** "home" = donor home (mockup #1); "giving" = KPIs + full giving history */
@@ -108,6 +111,23 @@ export default class DonorDashboard extends LightningElement {
   }
   _scrolledTo;
 
+  // Giving history (view=giving): one page at a time from the server (D-49); not loaded on the home view.
+  givingPageParam; // page number to load; undefined (no call) outside view=giving
+  givingPage;
+  givingPageError;
+  _wiredGivingPage;
+  @wire(getGivingPage, { page: "$givingPageParam" })
+  wiredGivingPage(result) {
+    this._wiredGivingPage = result;
+    if (result.data) {
+      this.givingPage = result.data;
+      this.givingPageError = undefined;
+    } else if (result.error) {
+      this.givingPageError =
+        result.error.body?.message || "We could not load your giving history.";
+    }
+  }
+
   _wiredDashboard;
 
   @wire(getDashboard)
@@ -130,6 +150,7 @@ export default class DonorDashboard extends LightningElement {
   }
 
   connectedCallback() {
+    if (this.isGiving) this.givingPageParam = 1;
     this._onHash = () => {
       this._scrolledTo = undefined;
       this.scrollToHash();
@@ -152,6 +173,8 @@ export default class DonorDashboard extends LightningElement {
     lastLoadedAt = Date.now();
     if (this._wiredDashboard) refreshApex(this._wiredDashboard);
     if (this._wiredCampaigns) refreshApex(this._wiredCampaigns);
+    if (this.isGiving && this._wiredGivingPage)
+      refreshApex(this._wiredGivingPage);
   }
 
   // ------------------------------------------------------------ questions from the header
@@ -373,8 +396,9 @@ export default class DonorDashboard extends LightningElement {
   get hasCauses() {
     return this.causes.length > 0;
   }
+  /** The giving history page on show (5 gifts, D-49). */
   get gifts() {
-    return (this.data?.gifts || []).map((g) => ({
+    return (this.givingPage?.gifts || []).map((g) => ({
       ...g,
       amountDisplay: this.money(g.amount),
       dateDisplay: g.giftDate
@@ -388,29 +412,30 @@ export default class DonorDashboard extends LightningElement {
   get hasGifts() {
     return this.gifts.length > 0;
   }
-
-  // ------------------------------------------------------------ giving history pages
-  historyPage = 1;
+  get historyLoading() {
+    return !this.givingPage && !this.givingPageError;
+  }
+  get historyTotal() {
+    return this.givingPage?.total || 0;
+  }
+  get historyPageSize() {
+    return this.givingPage?.pageSize || 5;
+  }
   get pageCount() {
-    return Math.max(1, Math.ceil(this.gifts.length / HISTORY_PAGE_SIZE));
+    return Math.max(1, Math.ceil(this.historyTotal / this.historyPageSize));
   }
-  /** The page shown, kept in range when gifts reload (e.g. after a donation). */
+  /** The page the server returned (it keeps the page in range, e.g. after a gift is cancelled). */
   get currentPage() {
-    return Math.min(Math.max(1, this.historyPage), this.pageCount);
-  }
-  get pagedGifts() {
-    const start = (this.currentPage - 1) * HISTORY_PAGE_SIZE;
-    return this.gifts.slice(start, start + HISTORY_PAGE_SIZE);
+    return this.givingPage?.page || 1;
   }
   get showPager() {
-    return this.gifts.length > HISTORY_PAGE_SIZE;
+    return this.historyTotal > this.historyPageSize;
   }
-  /** "Showing 11–20 of 37 gifts". */
+  /** "Showing 6–10 of 37 gifts". */
   get pageSummary() {
-    const total = this.gifts.length;
-    const start = (this.currentPage - 1) * HISTORY_PAGE_SIZE + 1;
-    const end = Math.min(start + HISTORY_PAGE_SIZE - 1, total);
-    return `Showing ${start}–${end} of ${total} gifts`;
+    const start = (this.currentPage - 1) * this.historyPageSize + 1;
+    const end = Math.min(start + this.gifts.length - 1, this.historyTotal);
+    return `Showing ${start}–${end} of ${this.historyTotal} gifts`;
   }
   get pageLabel() {
     return `Page ${this.currentPage} of ${this.pageCount}`;
@@ -422,10 +447,10 @@ export default class DonorDashboard extends LightningElement {
     return this.currentPage >= this.pageCount;
   }
   previousPage() {
-    this.historyPage = this.currentPage - 1;
+    this.givingPageParam = this.currentPage - 1;
   }
   nextPage() {
-    this.historyPage = this.currentPage + 1;
+    this.givingPageParam = this.currentPage + 1;
   }
 
   // ------------------------------------------------------------ campaigns
@@ -493,14 +518,12 @@ export default class DonorDashboard extends LightningElement {
       : "You haven’t made a gift yet — here’s how you can start:";
   }
   get agentCauses() {
+    // All years of the impact journey, not just the recent gifts the dashboard carries (D-49).
     const totals = new Map();
-    for (const g of this.data?.gifts || []) {
-      const names = (g.designations || "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-      const share = names.length ? (g.amount || 0) / names.length : 0;
-      for (const n of names) totals.set(n, (totals.get(n) || 0) + share);
+    for (const y of this.data?.journeyYears || []) {
+      for (const it of y.items || []) {
+        totals.set(it.cause, (totals.get(it.cause) || 0) + (it.amount || 0));
+      }
     }
     return [...totals.entries()]
       .sort((a, b) => b[1] - a[1])
@@ -558,14 +581,21 @@ export default class DonorDashboard extends LightningElement {
             donatePath: this.donateHref
           })
         : { text, links: [] };
-    const links = [...parsed.links];
+    let links = [...parsed.links];
     if (link && !links.some((l) => l.href === link.href)) links.push(link);
+    // Campaign answers show a card per campaign (D-49); its Donate button replaces the plain link.
+    const cards =
+      role === "agent" ? this.chatCampaignCards(parsed.text, links) : [];
+    const shown = new Set(cards.map((c) => c.name.toLowerCase()));
+    links = links.filter((l) => !shown.has(linkCampaign(l.href)));
     this.chatMessages = [
       ...this.chatMessages,
       {
         key: `m${this._chatSeq}`,
         text: parsed.text,
         links: links.map((l, i) => ({ ...l, key: `m${this._chatSeq}-l${i}` })),
+        cards: cards.map((c) => ({ ...c, key: `m${this._chatSeq}-${c.key}` })),
+        hasCards: cards.length > 0,
         isUser: role === "user",
         rowClass: role === "user" ? "msg msg_user" : "msg msg_agent",
         bubbleClass:
@@ -577,9 +607,41 @@ export default class DonorDashboard extends LightningElement {
       }
     ];
   }
+  /**
+   * Cards for the campaigns an agent reply is about: those it links to, plus those it names when the
+   * question was about campaigns or giving (e.g. "Which campaigns are open?").
+   */
+  chatCampaignCards(text, links) {
+    const linked = new Set(links.map((l) => linkCampaign(l.href)));
+    const aboutCampaigns = CAMPAIGN_QUESTION.test(this._lastQuestion || "");
+    const lower = (text || "").toLowerCase();
+    return this.campaignCards
+      .filter(
+        (c) =>
+          linked.has(c.name.toLowerCase()) ||
+          (aboutCampaigns && lower.includes(c.name.toLowerCase()))
+      )
+      .map((c) => ({
+        key: c.key,
+        name: c.name,
+        href: c.href,
+        detailHref: c.detailHref,
+        donateLabel: c.donateLabel,
+        detailLabel: c.detailLabel,
+        imageUrl: c.imageUrl,
+        raisedDisplay: c.raisedDisplay,
+        goalDisplay: c.goalDisplay,
+        hasGoal: c.hasGoal,
+        barStyle: c.barStyle,
+        pctDisplay: c.pctDisplay,
+        timing: c.timing
+      }));
+  }
+
   async sendChat(raw) {
     const text = (raw || "").trim();
     if (!text || this.chatBusy) return;
+    this._lastQuestion = text;
     this.addChat("user", text);
     this.chatDraft = "";
     const local = this.localAnswer(text);
@@ -792,4 +854,15 @@ function linkLabel(href) {
     // not a URL we can read: generic label
   }
   return "Open link";
+}
+
+/** The campaign a /donate?campaign= link points to, lower case; "" for any other link. */
+function linkCampaign(href) {
+  try {
+    return (
+      new URL(href, "https://x.invalid").searchParams.get("campaign") || ""
+    ).toLowerCase();
+  } catch {
+    return "";
+  }
 }

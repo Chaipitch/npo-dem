@@ -567,3 +567,19 @@ instead of failing when it is already scheduled.
   designation (`TSAbcHopeGiftNaming.SPLIT_CAUSE`). "Where Most Needed" stays a separate single cause.
 - **Impact Journey year cards:** a year with more than 5 causes keeps the card short: about five rows show and the
   rest scroll inside the card (thin scrollbar; the list takes keyboard focus so it can be scrolled with the keys).
+
+### D-49 · Feedback round 2: paged history from the server, recurring gifts scroll, Trusted URL, campaign cards in chat — Accepted (user, 2026‑10‑28)
+
+- **My Giving history: 5 per page, fetched per page.** `TSAbcHopeDonorPortalController.getGivingPage(page)` returns
+  COUNT() plus that page's 5 gifts (LIMIT/OFFSET) and their designations; a page past the end returns the last page.
+  The dashboard no longer ships a long gift list: `Dashboard.gifts` holds the 5 most recent (panel answers, agent
+  summary), with `giftCount`, `programs` and `causeWithoutProgram` for the totals the agent used to count from it. The
+  panel's cause tiles add up the impact journey instead. The KPI summary still reads up to 200 gifts server-side.
+- **Recurring Gifts scroll:** more than two cards → the list scrolls, sized in the browser to the first two cards as
+  they are (cards grow when a panel opens); an opened card is scrolled into view.
+- **Trusted URL:** `cspTrustedSites/ABC_Hope_Site` (https://te1791557923677.my.site.com, context All; connect-src and
+  img-src — the site's own domain). Agentforce stops redacting links to it: the assistant's replies carry real donate
+  links in every channel (checked in the published agent's preview). User-approved shared org config.
+- **Campaign cards in the chat:** when a question is about campaigns or giving, the panel shows a card for each campaign
+  the reply names or links to (photo, progress, days left, Donate now, View more), in a sideways-scrolling row; their
+  Donate buttons replace the plain links.

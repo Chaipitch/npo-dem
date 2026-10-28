@@ -39,6 +39,57 @@ private class TSAbcHopeDonorPortalControllerTest {
     );
   }
 
+  @IsTest
+  static void givingHistoryIsPagedFiveAtATime() {
+    Account maya = createDonor();
+    Campaign camp = new Campaign(Name = 'Test Paging', IsActive = true);
+    insert camp;
+    GiftDesignation gd = new GiftDesignation(
+      Name = 'Test Paging Cause',
+      IsActive = true
+    );
+    insert gd;
+    for (Integer i = 1; i <= 7; i++) {
+      createGift(
+        maya,
+        camp,
+        gd,
+        100 + i,
+        Date.newInstance(2025, 1, i),
+        'Pending'
+      );
+    }
+    createGift(maya, camp, gd, 999, Date.newInstance(2025, 2, 1), 'Canceled');
+    TSAbcHopeDonorPortalController.accountIdOverride = maya.Id;
+
+    Test.startTest();
+    TSAbcHopeDonorPortalController.GivingPage first = TSAbcHopeDonorPortalController.getGivingPage(
+      1
+    );
+    TSAbcHopeDonorPortalController.GivingPage second = TSAbcHopeDonorPortalController.getGivingPage(
+      2
+    );
+    TSAbcHopeDonorPortalController.GivingPage beyond = TSAbcHopeDonorPortalController.getGivingPage(
+      9
+    );
+    TSAbcHopeDonorPortalController.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();
+    Test.stopTest();
+
+    Assert.areEqual(7, first.total, 'cancelled gifts are not counted');
+    Assert.areEqual(5, first.gifts.size());
+    Assert.areEqual(107, first.gifts[0].amount, 'newest first');
+    Assert.areEqual('Test Paging Cause', first.gifts[0].designations);
+    Assert.areEqual(2, second.gifts.size());
+    Assert.areEqual(101, second.gifts[1].amount);
+    Assert.areEqual(2, beyond.page, 'a page past the end shows the last page');
+    Assert.areEqual(
+      5,
+      d.gifts.size(),
+      'the dashboard carries only recent gifts'
+    );
+    Assert.areEqual(7, d.giftCount);
+  }
+
   // Gifts use Unpaid/Pending: the org's "*ASL Trigger v2" flow fails on Paid gifts in a test context.
   @IsTest
   static void dashboardAggregatesOnlyTheDonorsOwnGifts() {

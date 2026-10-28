@@ -18,6 +18,9 @@ const MAX_AMOUNT = 1000000;
  * weekly, monthly or yearly gifts (D-22, D-24). The server checks every gift belongs to the running user.
  * Fires "giftschange" after a change so the dashboard can refresh its counts.
  */
+/** Recurring gift cards shown before the list scrolls. */
+const VISIBLE_CARDS = 2;
+
 export default class DonorMonthlyGifts extends LightningElement {
   @api currencyLabel = "USD";
   @api donateHref = "/donate";
@@ -58,6 +61,32 @@ export default class DonorMonthlyGifts extends LightningElement {
   // ------------------------------------------------------------ view model
   get hasGifts() {
     return this.gifts.length > 0;
+  }
+  /** More than two gifts: the list scrolls, showing two cards at a time (D-49). */
+  get scrolls() {
+    return this.gifts.length > VISIBLE_CARDS;
+  }
+  get listClass() {
+    return this.scrolls ? "gift-list gift-list_scroll" : "gift-list";
+  }
+  get listTabIndex() {
+    return this.scrolls ? "0" : null;
+  }
+
+  /** Size the scrolling list to the first two cards as they are now (cards grow when a panel opens). */
+  renderedCallback() {
+    const list = this.refs?.giftList;
+    if (!list) return;
+    const cards = list.querySelectorAll(".gift");
+    if (!this.scrolls || cards.length <= VISIBLE_CARDS) {
+      list.style.maxHeight = "";
+      return;
+    }
+    const top = list.getBoundingClientRect().top;
+    const bottom = cards[VISIBLE_CARDS - 1].getBoundingClientRect().bottom;
+    if (bottom > top) {
+      list.style.maxHeight = `${Math.ceil(bottom - top) + 2}px`;
+    }
   }
   get isEmpty() {
     return this.loaded && !this.loadError && this.gifts.length === 0;
@@ -121,6 +150,12 @@ export default class DonorMonthlyGifts extends LightningElement {
   openFor(event) {
     const { id, panel } = event.currentTarget.dataset;
     this.openPanel = `${id}:${panel}`;
+    // Keep the card whose panel just opened in view inside the scrolling list.
+    const card = event.currentTarget.closest(".gift");
+    // eslint-disable-next-line @lwc/lwc/no-async-operation
+    requestAnimationFrame(() =>
+      card?.scrollIntoView?.({ block: "nearest", behavior: "smooth" })
+    );
     this.pauseMonths = "1";
     this.newAmount = undefined;
     this.error = undefined;

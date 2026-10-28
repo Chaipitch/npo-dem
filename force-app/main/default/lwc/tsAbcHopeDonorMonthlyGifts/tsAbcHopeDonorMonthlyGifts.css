@@ -57,6 +57,17 @@ ul {
   padding: 0;
   list-style: none;
 }
+.gift-list_scroll {
+  max-height: 520px; /* until the first two cards are measured */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 8px;
+  scrollbar-gutter: stable;
+}
+.gift-list_scroll:focus-visible {
+  outline: 2px solid #6a3fd6;
+  outline-offset: 2px;
+}
 .gift {
   padding: 16px 18px;
   border: 1px solid var(--mg-border);

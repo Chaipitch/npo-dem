@@ -33,6 +33,22 @@ public without sharing class TSAbcHopeDonorPortalController {
     public String programs; // what the designations fund (D-21)
   }
 
+  /** One page of the giving history (D-49): fetched a page at a time, newest first. */
+  public class GivingPage {
+    @AuraEnabled
+    public List<Gift> gifts = new List<Gift>();
+    @AuraEnabled
+    public Integer total = 0;
+    @AuraEnabled
+    public Integer page = 1;
+    @AuraEnabled
+    public Integer pageSize = GIVING_PAGE_SIZE;
+  }
+
+  public static final Integer GIVING_PAGE_SIZE = 5;
+  /** Gifts sent with the dashboard: the most recent few, for the panel and the agent (D-49). */
+  static final Integer RECENT_GIFTS = 5;
+
   public class Milestone {
     @AuraEnabled
     public String year;
@@ -102,8 +118,17 @@ public without sharing class TSAbcHopeDonorPortalController {
     public List<String> activeRecurringTypes = new List<String>(); // e.g. Weekly, Monthly (D-24)
     @AuraEnabled
     public List<String> causes = new List<String>();
+    /** The most recent counted gifts only (RECENT_GIFTS); the full history is paged by getGivingPage. */
     @AuraEnabled
     public List<Gift> gifts = new List<Gift>();
+    /** Number of counted gifts (up to the 200 the summary reads). */
+    @AuraEnabled
+    public Integer giftCount = 0;
+    /** Programs the donor's counted gifts fund, A–Z. */
+    @AuraEnabled
+    public List<String> programs = new List<String>();
+    /** True when a counted gift has a cause that funds no program (for the agent's summary). */
+    public Boolean causeWithoutProgram = false;
     @AuraEnabled
     public List<Milestone> journey = new List<Milestone>();
     /** The journey as one card per year, oldest first. */
@@ -190,25 +215,23 @@ public without sharing class TSAbcHopeDonorPortalController {
     Integer firstYear = supporterSinceYear(acc, txns.values());
     for (GiftTransaction gt : txns.values()) {
       d.totalContributions += gt.OriginalAmount == null ? 0 : gt.OriginalAmount;
-      if (d.gifts.size() < 50) {
-        Gift g = new Gift();
-        g.id = gt.Id;
-        g.name = gt.Name;
-        g.giftDate = gt.TransactionDate != null
-          ? gt.TransactionDate
-          : gt.CreatedDate.date();
-        g.amount = gt.OriginalAmount;
-        g.status = gt.Status;
-        g.campaignName = gt.Campaign?.Name;
-        g.designations = designationsByTxn.containsKey(gt.Id)
-          ? String.join(designationsByTxn.get(gt.Id), ', ')
-          : '';
-        g.programs = programsByTxn.containsKey(gt.Id)
-          ? String.join(programsByTxn.get(gt.Id), ', ')
-          : '';
-        d.gifts.add(g);
+      if (d.gifts.size() < RECENT_GIFTS) {
+        d.gifts.add(toGift(gt, designationsByTxn, programsByTxn));
+      }
+      if (
+        designationsByTxn.containsKey(gt.Id) &&
+        !programsByTxn.containsKey(gt.Id)
+      ) {
+        d.causeWithoutProgram = true;
       }
     }
+    d.giftCount = txns.size();
+    Set<String> programNames = new Set<String>();
+    for (List<String> names : programsByTxn.values()) {
+      programNames.addAll(names);
+    }
+    d.programs = new List<String>(programNames);
+    d.programs.sort();
     for (GiftDefaultDesignation gdd : [
       SELECT
         GiftDesignation.Name,
@@ -523,6 +546,90 @@ public without sharing class TSAbcHopeDonorPortalController {
       }
       return cause.compareTo(o.cause);
     }
+  }
+
+  /**
+   * One page of the signed-in donor's giving history (D-49): COUNT() plus that page's gifts and their designations,
+   * so the page never loads the whole history. Pages past the end show the last page.
+   */
+  @AuraEnabled(cacheable=true)
+  public static GivingPage getGivingPage(Integer page) {
+    Id accountId = currentAccount().Id;
+    GivingPage p = new GivingPage();
+    p.total = [
+      SELECT COUNT()
+      FROM GiftTransaction
+      WHERE DonorId = :accountId AND Status NOT IN :EXCLUDED_STATUSES
+    ];
+    Integer pages = Math.max(
+      1,
+      (Integer) Math.ceil(p.total / (Decimal) GIVING_PAGE_SIZE)
+    );
+    p.page = Math.min(Math.max(page == null ? 1 : page, 1), pages);
+    Integer offset = Math.min((p.page - 1) * GIVING_PAGE_SIZE, 2000); // SOQL OFFSET limit
+    List<GiftTransaction> rows = [
+      SELECT
+        Id,
+        Name,
+        TransactionDate,
+        CreatedDate,
+        OriginalAmount,
+        Status,
+        Campaign.Name
+      FROM GiftTransaction
+      WHERE DonorId = :accountId AND Status NOT IN :EXCLUDED_STATUSES
+      ORDER BY TransactionDate DESC NULLS LAST, CreatedDate DESC
+      LIMIT :GIVING_PAGE_SIZE
+      OFFSET :offset
+    ];
+    Map<Id, List<String>> designationsByTxn = new Map<Id, List<String>>();
+    Map<Id, List<String>> programsByTxn = new Map<Id, List<String>>();
+    for (GiftTransactionDesignation gtd : [
+      SELECT
+        GiftTransactionId,
+        GiftDesignation.Name,
+        GiftDesignation.NGOTV_Program__r.Name
+      FROM GiftTransactionDesignation
+      WHERE GiftTransactionId IN :rows AND GiftDesignationId != NULL
+    ]) {
+      if (!designationsByTxn.containsKey(gtd.GiftTransactionId)) {
+        designationsByTxn.put(gtd.GiftTransactionId, new List<String>());
+      }
+      designationsByTxn.get(gtd.GiftTransactionId)
+        .add(gtd.GiftDesignation.Name);
+      TSAbcHopeDonationIntakeService.addProgram(
+        programsByTxn,
+        gtd.GiftTransactionId,
+        gtd.GiftDesignation.NGOTV_Program__r?.Name
+      );
+    }
+    for (GiftTransaction gt : rows) {
+      p.gifts.add(toGift(gt, designationsByTxn, programsByTxn));
+    }
+    return p;
+  }
+
+  static Gift toGift(
+    GiftTransaction gt,
+    Map<Id, List<String>> designationsByTxn,
+    Map<Id, List<String>> programsByTxn
+  ) {
+    Gift g = new Gift();
+    g.id = gt.Id;
+    g.name = gt.Name;
+    g.giftDate = gt.TransactionDate != null
+      ? gt.TransactionDate
+      : gt.CreatedDate.date();
+    g.amount = gt.OriginalAmount;
+    g.status = gt.Status;
+    g.campaignName = gt.Campaign?.Name;
+    g.designations = designationsByTxn.containsKey(gt.Id)
+      ? String.join(designationsByTxn.get(gt.Id), ', ')
+      : '';
+    g.programs = programsByTxn.containsKey(gt.Id)
+      ? String.join(programsByTxn.get(gt.Id), ', ')
+      : '';
+    return g;
   }
 
   /** The donor's gifts that count (not cancelled, failed, refunded or written off), newest first. */

@@ -18,7 +18,12 @@
     </template>
 
     <template lwc:if={hasGifts}>
-      <ul class="gift-list">
+      <ul
+        class={listClass}
+        lwc:ref="giftList"
+        tabindex={listTabIndex}
+        aria-label="Your recurring gifts"
+      >
         <template for:each={cards} for:item="g">
           <li key={g.id} class={g.cardClass} data-gift={g.id}>
             <div class="gift-main">

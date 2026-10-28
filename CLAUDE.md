@@ -75,7 +75,7 @@ force-app/main/default/
   flows/ABC_Hope_Chat_Routing    Omni-Channel routing → the agent (the only flow; approved exception)
   messagingChannels/, EmbeddedServiceConfig/    ABC Hope Chat channel + deployment
   permissionsets/                ABC_Hope_Donor_Portal (portal users), ABC_Hope_Agent_Actions (agent user)
-  cspTrustedSites/               Unsplash_Images (img-src for the site)
+  cspTrustedSites/               Unsplash_Images (img-src for the site); ABC_Hope_Site (agent links not redacted, D-49)
   digitalExperiences/site/ABC_Hope1/            LWR routes, views, theme, theme layouts
   networks/, sites/, profiles/   Site settings and guest profile
 scripts/sitePages.py             Regenerates routes/views/theme layouts — use instead of hand-editing JSON

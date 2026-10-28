@@ -56,7 +56,7 @@ public without sharing class TSAbcHopeAgentGivingSummary {
         'Total contributions: ' +
         TSAbcHopeAgentSupport.money(d.totalContributions) +
         ' across ' +
-        d.gifts.size() +
+        d.giftCount +
         ' gift(s)',
         'Causes supported (' +
         d.causesSupported +
@@ -113,16 +113,9 @@ public without sharing class TSAbcHopeAgentGivingSummary {
     TSAbcHopeDonorPortalController.Dashboard d
   ) {
     Set<String> programs = new Set<String>();
-    Boolean causeWithoutProgram = false;
-    for (TSAbcHopeDonorPortalController.Gift g : d.gifts) {
-      if (String.isNotBlank(g.programs)) {
-        for (String p : g.programs.split(',')) {
-          programs.add(p.trim());
-        }
-      } else if (String.isNotBlank(g.designations)) {
-        causeWithoutProgram = true;
-      }
-    }
+    // Across all counted gifts, not just the recent ones the dashboard sends (D-49).
+    programs.addAll(d.programs);
+    Boolean causeWithoutProgram = d.causeWithoutProgram;
     for (
       TSAbcHopeMonthlyGiftService.Gift mg : TSAbcHopeMonthlyGiftService.load(
         accountId

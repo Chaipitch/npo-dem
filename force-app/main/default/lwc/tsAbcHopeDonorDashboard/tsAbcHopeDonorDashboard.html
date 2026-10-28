@@ -376,7 +376,13 @@
                 ></c-ts-abc-hope-icon
               ></a>
             </div>
-            <template lwc:if={hasGifts}>
+            <template lwc:if={historyLoading}>
+              <p class="muted" role="status">Loading your gifts…</p>
+            </template>
+            <template lwc:elseif={givingPageError}>
+              <p class="muted" role="alert">{givingPageError}</p>
+            </template>
+            <template lwc:elseif={hasGifts}>
               <div class="table-wrap">
                 <table class="table">
                   <thead>
@@ -390,7 +396,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <template for:each={pagedGifts} for:item="g">
+                    <template for:each={gifts} for:item="g">
                       <tr key={g.id}>
                         <td data-label="Date">{g.dateDisplay}</td>
                         <td data-label="Campaign">{g.campaignName}</td>
@@ -550,6 +556,57 @@
                         <a key={l.key} class="chat-link" href={l.href}
                           >{l.label}</a
                         >
+                      </template>
+                      <template lwc:if={m.hasCards}>
+                        <ul class="chat-cards" data-id="chat-cards">
+                          <template for:each={m.cards} for:item="c">
+                            <li key={c.key} class="chat-card">
+                              <img
+                                class="chat-card-img"
+                                src={c.imageUrl}
+                                alt=""
+                                loading="lazy"
+                              />
+                              <div class="chat-card-body">
+                                <p class="chat-card-name">{c.name}</p>
+                                <template lwc:if={c.hasGoal}>
+                                  <div
+                                    class="chat-card-bar"
+                                    role="progressbar"
+                                    aria-label={c.pctDisplay}
+                                  >
+                                    <span style={c.barStyle}></span>
+                                  </div>
+                                  <p class="chat-card-meta">
+                                    {c.raisedDisplay} raised of {c.goalDisplay}
+                                  </p>
+                                </template>
+                                <template lwc:else>
+                                  <p class="chat-card-meta">
+                                    {c.raisedDisplay} raised
+                                  </p>
+                                </template>
+                                <template lwc:if={c.timing}>
+                                  <p class="chat-card-meta">{c.timing}</p>
+                                </template>
+                                <div class="chat-card-actions">
+                                  <a
+                                    class="chat-card-donate"
+                                    href={c.href}
+                                    aria-label={c.donateLabel}
+                                    >Donate now</a
+                                  >
+                                  <a
+                                    class="chat-card-more"
+                                    href={c.detailHref}
+                                    aria-label={c.detailLabel}
+                                    >View more</a
+                                  >
+                                </div>
+                              </div>
+                            </li>
+                          </template>
+                        </ul>
                       </template>
                     </div>
                   </div>

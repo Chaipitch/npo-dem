@@ -223,4 +223,21 @@ describe("c-ts-abc-hope-donor-monthly-gifts", () => {
     expect(formatDate("2026-12-31")).toBe("31 Dec 2026");
     expect(formatDate(null)).toBe("");
   });
+
+  it("scrolls the list when there are more than two gifts", async () => {
+    const two = await mount([ACTIVE, { ...ACTIVE, id: "a2" }]);
+    expect($(two, ".gift-list").classList.contains("gift-list_scroll")).toBe(
+      false
+    );
+    document.body.removeChild(two);
+    const three = await mount([
+      ACTIVE,
+      { ...ACTIVE, id: "a2" },
+      { ...ACTIVE, id: "a3" }
+    ]);
+    const list = $(three, ".gift-list");
+    expect(list.classList.contains("gift-list_scroll")).toBe(true);
+    expect(list.getAttribute("tabindex")).toBe("0");
+    expect(list.querySelectorAll(".gift")).toHaveLength(3);
+  });
 });

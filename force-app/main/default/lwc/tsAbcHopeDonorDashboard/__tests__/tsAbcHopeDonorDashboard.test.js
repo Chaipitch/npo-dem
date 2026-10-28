@@ -2,11 +2,20 @@ import { createElement } from "lwc";
 import DonorDashboard, { extractLinks } from "c/tsAbcHopeDonorDashboard";
 import getDashboard from "@salesforce/apex/TSAbcHopeDonorPortalController.getDashboard";
 import getCampaigns from "@salesforce/apex/TSAbcHopeDonationIntakeController.getCampaigns";
+import getGivingPage from "@salesforce/apex/TSAbcHopeDonorPortalController.getGivingPage";
 import askAgent from "@salesforce/apex/TSAbcHopeDonorAgentController.ask";
 import usesVerifiedAgent from "@salesforce/apex/TSAbcHopeDonorAgentController.usesVerifiedAgent";
 
 jest.mock(
   "@salesforce/apex/TSAbcHopeDonorPortalController.getDashboard",
+  () => {
+    const { createApexTestWireAdapter } = require("@salesforce/sfdx-lwc-jest");
+    return { default: createApexTestWireAdapter(jest.fn()) };
+  },
+  { virtual: true }
+);
+jest.mock(
+  "@salesforce/apex/TSAbcHopeDonorPortalController.getGivingPage",
   () => {
     const { createApexTestWireAdapter } = require("@salesforce/sfdx-lwc-jest");
     return { default: createApexTestWireAdapter(jest.fn()) };
@@ -267,6 +276,57 @@ describe("c-ts-abc-hope-donor-dashboard agent panel", () => {
     ]);
   });
 
+  it("shows campaign cards when the assistant answers about campaigns", async () => {
+    askAgent.mockResolvedValue({
+      sessionId: "s-11",
+      text: "Two campaigns are open: Christmas Toy Drive 2026 and Clean Water. Donate: https://x.my.site.com/donate?campaign=Clean%20Water"
+    });
+    const el = createElement("c-ts-abc-hope-donor-dashboard", {
+      is: DonorDashboard
+    });
+    document.body.appendChild(el);
+    getDashboard.emit(DASHBOARD);
+    getCampaigns.emit([
+      {
+        id: "c1",
+        name: "Christmas Toy Drive 2026",
+        raised: 2500,
+        goal: 10000,
+        daysLeft: 60
+      },
+      { id: "c2", name: "Clean Water", raised: 1000, goal: 0 },
+      { id: "c3", name: "Green Communities", raised: 0, goal: 5000 }
+    ]);
+    await flush();
+    await ask(el, "Which campaigns are open?");
+    const cards = $$(el, '[data-id="chat-cards"] .chat-card');
+    expect(
+      cards.map((c) => c.querySelector(".chat-card-name").textContent)
+    ).toEqual(["Christmas Toy Drive 2026", "Clean Water"]);
+    expect(cards[0].textContent).toContain("USD 2,500 raised of USD 10,000");
+    expect(
+      cards[0].querySelector(".chat-card-donate").getAttribute("href")
+    ).toBe("/donate?campaign=Christmas%20Toy%20Drive%202026");
+    // The card's Donate button replaces the plain link for that campaign.
+    expect($$(el, ".chat-log a.chat-link")).toHaveLength(0);
+  });
+
+  it("shows no campaign cards for personal questions", async () => {
+    askAgent.mockResolvedValue({
+      sessionId: "s-12",
+      text: "Your last gift went to Clean Water."
+    });
+    const el = createElement("c-ts-abc-hope-donor-dashboard", {
+      is: DonorDashboard
+    });
+    document.body.appendChild(el);
+    getDashboard.emit(DASHBOARD);
+    getCampaigns.emit([{ id: "c2", name: "Clean Water", raised: 1000 }]);
+    await flush();
+    await ask(el, "What was my last gift?");
+    expect($(el, '[data-id="chat-cards"]')).toBeNull();
+  });
+
   it("with the verified agent, falls back to the dashboard answer when the agent fails", async () => {
     askAgent.mockResolvedValue({
       error: "The assistant could not answer right now. Please try again."
@@ -382,49 +442,67 @@ describe("c-ts-abc-hope-donor-dashboard giving history", () => {
       document.body.removeChild(document.body.firstChild);
     }
   });
-  function mountGiving(gifts) {
+  const gift = (n) => ({
+    id: `g${n}`,
+    giftDate: "2025-06-01",
+    amount: 100 + n,
+    status: "Paid",
+    designations: "General Fund"
+  });
+  function mountGiving() {
     const el = createElement("c-ts-abc-hope-donor-dashboard", {
       is: DonorDashboard
     });
     el.view = "giving";
     document.body.appendChild(el);
-    getDashboard.emit({ ...DASHBOARD, gifts });
+    getDashboard.emit(DASHBOARD);
     getCampaigns.emit([]);
     return el;
   }
 
-  it("pages the giving history 10 gifts at a time", async () => {
-    const gifts = Array.from({ length: 23 }, (_, i) => ({
-      id: `g${i + 1}`,
-      giftDate: "2025-06-01",
-      amount: 100 + i,
-      status: "Paid",
-      designations: "General Fund"
-    }));
-    const el = mountGiving(gifts);
+  it("loads the history one page of 5 at a time", async () => {
+    const el = mountGiving();
     await flush();
-    const rows = () => $$(el, ".table tbody tr");
-    expect(rows()).toHaveLength(10);
+    expect($(el, ".table")).toBeNull(); // nothing until the first page arrives
+    expect(getGivingPage.getLastConfig()).toEqual({ page: 1 });
+    getGivingPage.emit({
+      gifts: [1, 2, 3, 4, 5].map(gift),
+      total: 12,
+      page: 1,
+      pageSize: 5
+    });
+    await flush();
+    expect($$(el, ".table tbody tr")).toHaveLength(5);
     expect($(el, '[data-id="page-summary"]').textContent).toBe(
-      "Showing 1–10 of 23 gifts"
+      "Showing 1–5 of 12 gifts"
     );
     expect($(el, '[data-id="prev-page"]').disabled).toBe(true);
     $(el, '[data-id="next-page"]').click();
     await flush();
-    $(el, '[data-id="next-page"]').click();
+    expect(getGivingPage.getLastConfig()).toEqual({ page: 2 });
+    getGivingPage.emit({
+      gifts: [11, 12].map(gift),
+      total: 12,
+      page: 3,
+      pageSize: 5
+    });
     await flush();
-    expect(rows()).toHaveLength(3);
+    expect($$(el, ".table tbody tr")).toHaveLength(2);
     expect($(el, '[data-id="page-summary"]').textContent).toBe(
-      "Showing 21–23 of 23 gifts"
+      "Showing 11–12 of 12 gifts"
     );
+    expect($(el, ".pager-label").textContent).toBe("Page 3 of 3");
     expect($(el, '[data-id="next-page"]').disabled).toBe(true);
-    $(el, '[data-id="prev-page"]').click();
-    await flush();
-    expect($(el, ".pager-label").textContent).toBe("Page 2 of 3");
   });
 
-  it("shows no pager for 10 gifts or fewer", async () => {
-    const el = mountGiving(DASHBOARD.gifts);
+  it("shows no pager for 5 gifts or fewer", async () => {
+    const el = mountGiving();
+    getGivingPage.emit({
+      gifts: [1, 2].map(gift),
+      total: 2,
+      page: 1,
+      pageSize: 5
+    });
     await flush();
     expect($$(el, ".table tbody tr")).toHaveLength(2);
     expect($(el, ".pager")).toBeNull();
