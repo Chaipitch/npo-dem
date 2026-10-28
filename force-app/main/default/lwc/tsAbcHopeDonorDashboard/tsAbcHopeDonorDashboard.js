@@ -27,11 +27,11 @@ export default class DonorDashboard extends LightningElement {
    */
   @api sharedImpact =
     "{peopleReached}|People Reached;{communities}|Communities;{programs}|Programs;{volunteers}|Volunteers Engaged";
-  /** "tag|title|summary" triples separated by ";" */
+  /** "tag|title|summary|program" entries separated by ";"; the photo is the program's Image URL (D-57). */
   @api stories =
-    "Clean Water|Clean Water Brings New Opportunities|See how improved access to clean water is changing lives in rural communities.;" +
-    "Education|More Girls in School|Your support helps provide scholarships and learning resources for girls in underserved areas.;" +
-    "Environment|Greener Communities for Generations|Tree planting and conservation efforts are creating healthier communities.";
+    "Clean Water|Clean Water Brings New Opportunities|See how improved access to clean water is changing lives in rural communities.|Clean Water;" +
+    "Education|More Girls in School|Your support helps provide scholarships and learning resources for girls in underserved areas.|Education Access;" +
+    "Environment|Greener Communities for Generations|Tree planting and conservation efforts are creating healthier communities.|Green Communities";
   @api donatePath = "/donate";
   @api bannerImageUrl =
     "https://images.unsplash.com/photo-1761415451904-0a0a2c630ea9?auto=format&fit=crop&w=2000&q=80";

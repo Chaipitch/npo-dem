@@ -667,3 +667,18 @@ instead of failing when it is already scheduled.
 - **Data:** `scripts/apex/seedCampaignImages.apex` filled the 8 fundraising campaigns with the photos they already
   showed, so nothing changed visually. Live check: switching Girls' Education Scholarships' field to another photo
   changed its donate page photo at once (then put back).
+
+### D-57 · Program photo in a custom field, Program.Image_URL__c; stories use it — Accepted (user, 2026‑10‑28; exception to the no-custom-fields rule)
+
+- The dashboard stories had three fixed photos chosen by position (1st water, 2nd classroom, 3rd seedling), not
+  linked to the story or any record. The user chose to keep the photo on the Program (option 2).
+- **Field:** `Program.Image_URL__c` (URL, help text), on the "Program Layout" page layout (org only, not in the repo);
+  edit access added to the permission set, now labelled **ABC Hope Site Images** (`ABC_Hope_Campaign_Images`).
+- **Stories:** each entry is now `tag|title|summary|program`; the photo is that program's Image URL (from
+  `getPrograms`, `TSAbcHopeCampaignDto.ProgramCard.imageUrl`), else a photo chosen from the program or tag name.
+  Without a program name, the program matching the tag is used ("Clean Water", or "Education" → Education Access).
+  The default stories name Clean Water, Education Access and Green Communities.
+- **Program page:** the `/program?name=` photo also uses the program's Image URL.
+- **Data:** `scripts/apex/seedProgramImages.apex` filled all 10 programs: the three story programs with the photos
+  the stories already showed (so the dashboard looks the same; their program pages now show those photos too), the
+  others with the photo their program page already showed. Live: /program?name=Clean Water shows its record's photo.

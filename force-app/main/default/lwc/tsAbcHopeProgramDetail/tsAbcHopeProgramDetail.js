@@ -60,7 +60,11 @@ export default class ProgramDetail extends LightningElement {
     return !!this.program;
   }
   get photo() {
-    return campaignPhoto(this.program?.name, { width: 1400, height: 520 });
+    return campaignPhoto(this.program?.name, {
+      width: 1400,
+      height: 520,
+      imageUrl: this.program?.imageUrl // Program.Image_URL__c (D-57)
+    });
   }
   get backHref() {
     return `${basePath || ""}/our-work`;

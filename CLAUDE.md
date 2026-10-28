@@ -39,7 +39,7 @@ re-engagement journey for Maya Grande (#2), guest donation journey (#3), 10-item
 ## Hard guardrails (from the user)
 
 - **No Flows, Validation Rules, Custom Objects or Custom Fields** — except the approved routing
-  flow `ABC_Hope_Chat_Routing` (D-16) and the field `Campaign.Image_URL__c` (D-56). Plan anything else; don't build it without asking.
+  flow `ABC_Hope_Chat_Routing` (D-16) and the fields `Campaign.Image_URL__c` (D-56) and `Program.Image_URL__c` (D-57). Plan anything else; don't build it without asking.
 - Never collect or store payment data. Every payment surface says "Payment simulation only".
 - Never set, store or commit passwords. Users get passwords through Salesforce's reset email.
 - Ask before changes that affect site access or shared org config (other agents, deployments).
@@ -78,9 +78,9 @@ force-app/main/default/
   aiAuthoringBundles/ABC_Hope_Donor_Assistant   Agent Script (.agent) for the agent
   flows/ABC_Hope_Chat_Routing    Omni-Channel routing → the agent (the only flow; approved exception)
   messagingChannels/, EmbeddedServiceConfig/    ABC Hope Chat channel + deployment
-  objects/Campaign/fields/Image_URL__c   Campaign photo link shown on the site (D-56)
+  objects/{Campaign,Program}/fields/Image_URL__c   Photo links shown on the site (D-56, D-57)
   permissionsets/                ABC_Hope_Donor_Portal (portal users), ABC_Hope_Agent_Actions (agent user),
-                                  ABC_Hope_Campaign_Images (staff: edit Image URL)
+                                  ABC_Hope_Campaign_Images ("ABC Hope Site Images": staff edit Image URLs)
   cspTrustedSites/               Unsplash_Images (img-src for the site); ABC_Hope_Site (agent links not redacted, D-49)
   digitalExperiences/site/ABC_Hope1/            LWR routes, views, theme, theme layouts
   networks/, sites/, profiles/   Site settings and guest profile
@@ -108,6 +108,7 @@ sf apex run -o npo-demo -f scripts/apex/seedProgramDelivery.apex
 sf apex run -o npo-demo -f scripts/apex/fillCommitmentCampaigns.apex   # instalments missing a campaign (D-41)
 sf apex run -o npo-demo -f scripts/apex/renameGifts.apex   # gift names: Campaign - Cause - Donor - date (D-38)
 sf apex run -o npo-demo -f scripts/apex/seedCampaignImages.apex   # Image URL for campaigns that have none (D-56)
+sf apex run -o npo-demo -f scripts/apex/seedProgramImages.apex    # Image URL for programs that have none (D-57)
 
 # site pages after editing scripts/sitePages.py
 python3 scripts/sitePages.py && sf project deploy start -o npo-demo -d force-app/main/default/digitalExperiences/site/ABC_Hope1
