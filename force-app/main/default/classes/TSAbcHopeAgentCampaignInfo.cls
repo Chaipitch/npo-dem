@@ -296,7 +296,10 @@ public without sharing class TSAbcHopeAgentCampaignInfo {
       ]) {
         wanted.add(gdd.GiftDesignation.Name);
       }
-      wanted.add(TSAbcHopeDonationIntakeService.GENERAL_DESIGNATION);
+      // Same rule as the donation page: "Where Most Needed" only when there is more than one cause (D-52).
+      if (wanted.size() > 1) {
+        wanted.add(TSAbcHopeDonationIntakeService.GENERAL_DESIGNATION);
+      }
     }
     Map<String, GiftDesignation> byName = new Map<String, GiftDesignation>();
     for (GiftDesignation gd : [

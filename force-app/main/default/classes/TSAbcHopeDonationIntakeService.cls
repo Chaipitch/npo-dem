@@ -55,7 +55,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
     opts.campaignDescription = camp.Description;
 
     // Designations: the admin-configured list if given; otherwise the campaign's own
-    // default designations plus "Where Most Needed"; otherwise every active designation.
+    // default designations, plus "Where Most Needed" when it has two or more; otherwise every active designation.
     List<String> wanted = splitNames(designationNames);
     if (wanted.isEmpty()) {
       for (GiftDefaultDesignation gdd : [
@@ -66,7 +66,8 @@ public without sharing class TSAbcHopeDonationIntakeService {
       ]) {
         wanted.add(gdd.GiftDesignation.Name);
       }
-      if (!wanted.isEmpty()) {
+      // "Where Most Needed" only when there is a choice to make: with one cause it adds nothing (D-52).
+      if (wanted.size() > 1) {
         wanted.add(GENERAL_DESIGNATION);
       }
     }
