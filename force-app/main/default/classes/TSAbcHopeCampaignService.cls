@@ -44,7 +44,7 @@ public without sharing class TSAbcHopeCampaignService {
       );
     }
     for (Campaign c : [
-      SELECT Id, Name, Description, EndDate, ExpectedRevenue
+      SELECT Id, Name, Description, Image_URL__c, EndDate, ExpectedRevenue
       FROM Campaign
       WHERE Id IN :withDefaults
       ORDER BY EndDate ASC NULLS LAST, Name
@@ -54,6 +54,7 @@ public without sharing class TSAbcHopeCampaignService {
       card.id = c.Id;
       card.name = c.Name;
       card.description = c.Description;
+      card.imageUrl = c.Image_URL__c;
       card.endDate = c.EndDate;
       card.daysLeft = c.EndDate == null ? null : today.daysBetween(c.EndDate);
       card.goal = c.ExpectedRevenue;
@@ -127,7 +128,7 @@ public without sharing class TSAbcHopeCampaignService {
   public static List<TSAbcHopeCampaignDto.ProgramCard> getPrograms() {
     Map<Id, TSAbcHopeCampaignDto.ProgramCard> byId = new Map<Id, TSAbcHopeCampaignDto.ProgramCard>();
     for (Program p : [
-      SELECT Id, Name, Summary, People_Reached__c
+      SELECT Id, Name, Summary, Image_URL__c, People_Reached__c
       FROM Program
       WHERE Status = 'Active'
       ORDER BY Name
@@ -136,6 +137,7 @@ public without sharing class TSAbcHopeCampaignService {
       TSAbcHopeCampaignDto.ProgramCard c = new TSAbcHopeCampaignDto.ProgramCard();
       c.name = p.Name;
       c.summary = p.Summary;
+      c.imageUrl = p.Image_URL__c;
       c.peopleReached = wholeNumber(p.People_Reached__c);
       byId.put(p.Id, c);
     }

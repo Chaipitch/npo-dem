@@ -49,6 +49,39 @@ private class TSAbcHopeDonationIntakeServiceTest {
   }
 
   @IsTest
+  static void programImageUrlReachesTheSite() {
+    insert new Program(
+      Name = 'Test Pictured Program',
+      Status = 'Active',
+      Image_URL__c = 'https://cdn.example.org/program.jpg'
+    );
+    Test.startTest();
+    List<TSAbcHopeCampaignDto.ProgramCard> programs = TSAbcHopeCampaignService.getPrograms();
+    Test.stopTest();
+    Assert.areEqual(1, programs.size());
+    Assert.areEqual(
+      'https://cdn.example.org/program.jpg',
+      programs[0].imageUrl
+    );
+  }
+
+  @IsTest
+  static void campaignImageUrlReachesTheSite() {
+    Campaign camp = [SELECT Id FROM Campaign WHERE Name = :CAMPAIGN];
+    camp.Image_URL__c = 'https://cdn.example.org/xmas.jpg';
+    update camp;
+    Test.startTest();
+    TSAbcHopeDonationIntakeDto.Options opts = TSAbcHopeDonationIntakeService.getOptions(
+      CAMPAIGN,
+      null
+    );
+    List<TSAbcHopeCampaignDto.CampaignCard> cards = TSAbcHopeCampaignService.getCampaigns();
+    Test.stopTest();
+    Assert.areEqual('https://cdn.example.org/xmas.jpg', opts.campaignImageUrl);
+    Assert.areEqual('https://cdn.example.org/xmas.jpg', cards[0].imageUrl);
+  }
+
+  @IsTest
   static void getOptionsReturnsConfiguredDesignationsInOrderWithCampaignDefault() {
     Test.startTest();
     TSAbcHopeDonationIntakeDto.Options opts = TSAbcHopeDonationIntakeService.getOptions(

@@ -63,7 +63,11 @@ export default class CampaignDetail extends LightningElement {
     return this.detail?.card || {};
   }
   get photo() {
-    return campaignPhoto(this.card.name, { width: 1400, height: 520 });
+    return campaignPhoto(this.card.name, {
+      width: 1400,
+      height: 520,
+      imageUrl: this.card.imageUrl
+    });
   }
   get backHref() {
     return `${basePath || ""}/dashboard#campaigns`;

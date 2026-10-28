@@ -10,6 +10,9 @@ public with sharing class TSAbcHopeCampaignDto {
     public String name;
     @AuraEnabled
     public String description;
+    /** Campaign.Image_URL__c; blank = the site picks a photo from the name (D-56). */
+    @AuraEnabled
+    public String imageUrl;
     @AuraEnabled
     public Date endDate;
     @AuraEnabled
@@ -60,6 +63,9 @@ public with sharing class TSAbcHopeCampaignDto {
     public String name;
     @AuraEnabled
     public String summary;
+    /** Program.Image_URL__c; blank = the site picks a photo from the name (D-57). */
+    @AuraEnabled
+    public String imageUrl;
     @AuraEnabled
     public List<String> campaigns = new List<String>();
     @AuraEnabled

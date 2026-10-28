@@ -60,6 +60,25 @@ describe("tsAbcHopeDashboardUtils", () => {
     });
   });
 
+  it("a campaign's own Image URL wins over the dashboard setting and the theme photo", () => {
+    const [own, configured] = campaignCards(
+      [
+        {
+          id: "c1",
+          name: "Christmas Toy Drive 2026",
+          imageUrl: "https://cdn.test/toys.jpg"
+        },
+        { id: "c2", name: "Clean Water" }
+      ],
+      {
+        campaignImages:
+          "Christmas Toy Drive 2026|https://img.test/old.jpg|Photo: Old;Clean Water|https://img.test/water.jpg|Photo: W"
+      }
+    );
+    expect(own.imageUrl).toBe("https://cdn.test/toys.jpg");
+    expect(configured.imageUrl).toBe("https://img.test/water.jpg");
+  });
+
   it("turns markdown and bare links into labelled buttons", () => {
     const r = extractLinks(
       "Great choice! [Donate now](https://x.site/donate?campaign=Christmas%20Toy%20Drive%202026). Donate here: https://x.site/donate. See https://x.site/about"

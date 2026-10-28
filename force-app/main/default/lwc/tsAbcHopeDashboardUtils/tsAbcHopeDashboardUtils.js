@@ -83,7 +83,10 @@ export function campaignCards(
           ? "Ends today"
           : `${c.daysLeft} day${c.daysLeft === 1 ? "" : "s"} left`;
     }
-    const photo = images.get(c.name) || campaignPhoto(c.name);
+    // The campaign's own photo (Image URL, D-56), else the dashboard's campaignImages entry, else its theme photo.
+    const photo = c.imageUrl
+      ? campaignPhoto(c.name, { imageUrl: c.imageUrl })
+      : images.get(c.name) || campaignPhoto(c.name);
     return {
       key: c.id || `c${i}`,
       name: c.name,

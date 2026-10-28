@@ -69,6 +69,22 @@ export default class AbcHopeHero extends LightningElement {
     return `${basePath || ""}${path}${params.length ? `?${params.join("&")}` : ""}`;
   }
 
+  /** The featured campaign's own photo (Image URL, D-56), else the admin-set background, else its theme photo. */
+  get featuredPhoto() {
+    const own = (this.campaigns || []).find(
+      (c) => c.name === this.featuredCampaign
+    )?.imageUrl;
+    if (own) {
+      return campaignPhoto(this.featuredCampaign, {
+        width: 2000,
+        imageUrl: own
+      });
+    }
+    return this.backgroundImageUrl
+      ? { url: this.backgroundImageUrl, credit: this.imageCredit }
+      : campaignPhoto(this.featuredCampaign, { width: 2000 });
+  }
+
   get slideData() {
     const featured = {
       key: "featured",
@@ -76,9 +92,7 @@ export default class AbcHopeHero extends LightningElement {
       headline: this.headlineStart,
       highlight: this.headlineHighlight,
       body: this.body,
-      photo: this.backgroundImageUrl
-        ? { url: this.backgroundImageUrl, credit: this.imageCredit }
-        : campaignPhoto(this.featuredCampaign, { width: 2000 }),
+      photo: this.featuredPhoto,
       alt: "Two children in Christmas pyjamas sitting by a decorated tree",
       href: this.donateHref(null),
       featured: true
@@ -92,7 +106,7 @@ export default class AbcHopeHero extends LightningElement {
         headline: c.name,
         highlight: "",
         body: abbreviate(c.description, MAX_BODY),
-        photo: campaignPhoto(c.name, { width: 2000 }),
+        photo: campaignPhoto(c.name, { width: 2000, imageUrl: c.imageUrl }),
         alt: "",
         href: this.donateHref(c.name),
         featured: false

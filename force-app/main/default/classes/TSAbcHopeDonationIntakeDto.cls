@@ -66,6 +66,9 @@ public with sharing class TSAbcHopeDonationIntakeDto {
     public String campaignName;
     @AuraEnabled
     public String campaignDescription;
+    /** Campaign.Image_URL__c; blank = the site picks a photo from the name (D-56). */
+    @AuraEnabled
+    public String campaignImageUrl;
     @AuraEnabled
     public List<Option> designations = new List<Option>();
     @AuraEnabled

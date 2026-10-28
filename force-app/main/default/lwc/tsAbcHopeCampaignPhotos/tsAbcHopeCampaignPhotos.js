@@ -51,12 +51,49 @@ export function campaignTheme(name) {
   return "gift";
 }
 
-/** { url, credit } for a campaign; size the crop with width (and optional height). */
-export function campaignPhoto(name, { width = 900, height } = {}) {
-  const photo = PHOTOS[campaignTheme(name)];
+/**
+ * { url, credit } for a campaign; size the crop with width (and optional height).
+ * imageUrl: the campaign's own photo (Campaign.Image_URL__c, D-56) — used when set, else a photo is chosen from the
+ * name. An Unsplash link is re-sized like the theme photos and keeps its credit when it is one of ours; any other
+ * link is used as is, without a credit.
+ */
+export function campaignPhoto(name, { width = 900, height, imageUrl } = {}) {
   const size = `w=${width}${height ? `&h=${height}` : ""}`;
+  const own = (imageUrl || "").trim();
+  if (own) {
+    return { url: sized(own, width, height), credit: creditFor(own) };
+  }
+  const photo = PHOTOS[campaignTheme(name)];
   return {
     url: `https://images.unsplash.com/${photo.id}?auto=format&fit=crop${photo.focus ? `&${photo.focus}` : ""}&${size}&q=75`,
     credit: photo.credit
   };
+}
+
+/** The Unsplash photo URL for a theme, as stored in Campaign.Image_URL__c by the seed script. */
+export function themePhotoUrl(theme) {
+  const photo = PHOTOS[theme];
+  return photo
+    ? `https://images.unsplash.com/${photo.id}?auto=format&fit=crop${photo.focus ? `&${photo.focus}` : ""}&q=75`
+    : "";
+}
+
+function sized(url, width, height) {
+  try {
+    const u = new URL(url);
+    if (u.hostname !== "images.unsplash.com") return url;
+    u.searchParams.set("w", String(width));
+    if (height) u.searchParams.set("h", String(height));
+    else u.searchParams.delete("h");
+    if (!u.searchParams.has("fit")) u.searchParams.set("fit", "crop");
+    if (!u.searchParams.has("auto")) u.searchParams.set("auto", "format");
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
+function creditFor(url) {
+  const known = Object.values(PHOTOS).find((p) => url.includes(p.id));
+  return known ? known.credit : "";
 }
