@@ -288,7 +288,7 @@ describe("c-ts-abc-hope-donation-journey", () => {
     );
   });
 
-  it("offers Non specified and splits the gift across the campaign's causes", async () => {
+  it("defaults to Non specified for several causes and splits the gift across them", async () => {
     submitDonation.mockResolvedValue({
       reference: "XMAS-3",
       amount: 1000,
@@ -306,13 +306,14 @@ describe("c-ts-abc-hope-donation-journey", () => {
       currentDonor: { name: "Maya Grande", email: "maya@email.com" }
     });
     await flush();
-    const select = $(el, '[data-id="designation"]');
-    expect(
-      $$(el, '[data-id="designation"] option').map((o) => o.textContent.trim())
-    ).toEqual(["School Supplies", "Learning Kits", "Non specified"]);
-    select.value = "non-specified";
-    select.dispatchEvent(new CustomEvent("change"));
-    await flush();
+    // Several causes: Non specified comes first and is chosen by default (D-53).
+    const options = $$(el, '[data-id="designation"] option');
+    expect(options.map((o) => o.textContent.trim())).toEqual([
+      "Non specified",
+      "School Supplies",
+      "Learning Kits"
+    ]);
+    expect(options[0].selected).toBe(true);
     expect($(el, '[data-id="split-hint"]').textContent).toBe(
       "Split across School Supplies 50%, Learning Kits 50%."
     );
@@ -330,6 +331,22 @@ describe("c-ts-abc-hope-donation-journey", () => {
       "School Supplies 50%, Learning Kits 50%"
     );
   });
+  it("a donor can still pick one cause instead of Non specified", async () => {
+    const el = mount();
+    getOptions.emit({
+      ...OPTIONS,
+      split: [
+        { name: "School Supplies", percent: 50 },
+        { name: "Learning Kits", percent: 50 }
+      ]
+    });
+    await flush();
+    const select = $(el, '[data-id="designation"]');
+    select.value = "a02";
+    select.dispatchEvent(new CustomEvent("change"));
+    await flush();
+    expect($(el, '[data-id="split-hint"]')).toBeNull();
+  });
   it("does not offer Non specified when the campaign has one cause", async () => {
     const el = mount();
     getOptions.emit({ ...OPTIONS, split: [] });
@@ -337,6 +354,9 @@ describe("c-ts-abc-hope-donation-journey", () => {
     expect(
       $$(el, '[data-id="designation"] option').map((o) => o.textContent.trim())
     ).not.toContain("Non specified");
+    // One cause: the campaign's own cause stays the default.
+    expect($(el, '[data-id="designation"] option').selected).toBe(true);
+    expect($(el, '[data-id="designation"] option').value).toBe("a01");
   });
   it("uses the signed-in donor and skips the details form", async () => {
     const el = mount();
