@@ -1,0 +1,76 @@
+<template>
+  <div class="kpis">
+    <div class="kpi">
+      <span class="kpi-icon kpi-red"
+        ><c-ts-abc-hope-icon
+          name="heart"
+          size="30"
+          stroke-width="2"
+        ></c-ts-abc-hope-icon
+      ></span>
+      <div>
+        <p class="kpi-value">{totalDisplay}</p>
+        <p class="kpi-label">Total Contributions</p>
+        <a class="kpi-link" href={givingHref}
+          >View Giving History
+          <c-ts-abc-hope-icon
+            name="arrow"
+            size="16"
+            stroke-width="2.2"
+          ></c-ts-abc-hope-icon
+        ></a>
+      </div>
+    </div>
+    <div class="kpi">
+      <span class="kpi-icon kpi-green"
+        ><c-ts-abc-hope-icon
+          name="community"
+          size="30"
+          stroke-width="2"
+        ></c-ts-abc-hope-icon
+      ></span>
+      <div>
+        <p class="kpi-value">{causesDisplay}</p>
+        <p class="kpi-label">Causes Supported</p>
+        <a class="kpi-link" href={causesHref}
+          >See My Causes
+          <c-ts-abc-hope-icon
+            name="arrow"
+            size="16"
+            stroke-width="2.2"
+          ></c-ts-abc-hope-icon
+        ></a>
+      </div>
+    </div>
+    <div class="kpi">
+      <span class="kpi-icon kpi-purple"
+        ><c-ts-abc-hope-icon
+          name="calendar"
+          size="30"
+          stroke-width="2"
+        ></c-ts-abc-hope-icon
+      ></span>
+      <div>
+        <p class="kpi-value">{sinceDisplay}</p>
+        <p class="kpi-label">Supporter Since</p>
+        <a class="kpi-link" href={journeyHref}
+          >View My Journey
+          <c-ts-abc-hope-icon
+            name="arrow"
+            size="16"
+            stroke-width="2.2"
+          ></c-ts-abc-hope-icon
+        ></a>
+      </div>
+    </div>
+  </div>
+  <template lwc:if={monthlyNote}>
+    <p class="monthly">
+      <c-ts-abc-hope-icon name="repeat" size="16"></c-ts-abc-hope-icon>
+      {monthlyNote}
+      <template lwc:if={showManage}>
+        <a class="monthly-manage" href={manageMonthlyHref}>Manage</a>
+      </template>
+    </p>
+  </template>
+</template>

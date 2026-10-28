@@ -1,0 +1,19 @@
+<template>
+  <div class="impact">
+    <template for:each={impactTiles} for:item="t">
+      <div key={t.key} class={t.className}>
+        <span class="impact-icon"
+          ><c-ts-abc-hope-icon
+            name={t.icon}
+            size="34"
+            stroke-width="2"
+          ></c-ts-abc-hope-icon
+        ></span>
+        <div>
+          <p class="impact-value">{t.value}</p>
+          <p class="impact-label">{t.label}</p>
+        </div>
+      </div>
+    </template>
+  </div>
+</template>

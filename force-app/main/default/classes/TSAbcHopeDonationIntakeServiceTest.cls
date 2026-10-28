@@ -35,8 +35,8 @@ private class TSAbcHopeDonationIntakeServiceTest {
     return [SELECT Id FROM GiftDesignation WHERE Name = :name].Id;
   }
 
-  static TSAbcHopeDonationIntakeService.Request individual(String email) {
-    TSAbcHopeDonationIntakeService.Request req = new TSAbcHopeDonationIntakeService.Request();
+  static TSAbcHopeDonationIntakeDto.Request individual(String email) {
+    TSAbcHopeDonationIntakeDto.Request req = new TSAbcHopeDonationIntakeDto.Request();
     req.campaignName = CAMPAIGN;
     req.frequency = TSAbcHopeDonationIntakeService.FREQ_ONE_TIME;
     req.amount = 1000;
@@ -51,7 +51,7 @@ private class TSAbcHopeDonationIntakeServiceTest {
   @IsTest
   static void getOptionsReturnsConfiguredDesignationsInOrderWithCampaignDefault() {
     Test.startTest();
-    TSAbcHopeDonationIntakeService.Options opts = TSAbcHopeDonationIntakeService.getOptions(
+    TSAbcHopeDonationIntakeDto.Options opts = TSAbcHopeDonationIntakeService.getOptions(
       CAMPAIGN,
       'Test Learning Kits, Test School Supplies, Test Retired Fund'
     );
@@ -76,13 +76,11 @@ private class TSAbcHopeDonationIntakeServiceTest {
 
   @IsTest
   static void oneTimeGiftCreatesPersonAccountTransactionAndDesignation() {
-    TSAbcHopeDonationIntakeService.Request req = individual(
-      'Ann.Demo@Example.com'
-    );
+    TSAbcHopeDonationIntakeDto.Request req = individual('Ann.Demo@Example.com');
     req.sourceCode = 'TEST-XMAS';
 
     Test.startTest();
-    TSAbcHopeDonationIntakeService.Result res = TSAbcHopeDonationIntakeService.submit(
+    TSAbcHopeDonationIntakeDto.Result res = TSAbcHopeDonationIntakeService.submit(
       req
     );
     Test.stopTest();
@@ -141,7 +139,7 @@ private class TSAbcHopeDonationIntakeServiceTest {
         .getRecordTypeId()
     );
     insert existing;
-    TSAbcHopeDonationIntakeService.Request req = individual(
+    TSAbcHopeDonationIntakeDto.Request req = individual(
       'MAYA.TEST@example.com'
     );
     req.firstName = 'Different';
@@ -162,9 +160,7 @@ private class TSAbcHopeDonationIntakeServiceTest {
 
   @IsTest
   static void organizationGiftCreatesBusinessAccountOnceAndIsOrganizational() {
-    TSAbcHopeDonationIntakeService.Request req = individual(
-      'csr@acme.example.com'
-    );
+    TSAbcHopeDonationIntakeDto.Request req = individual('csr@acme.example.com');
     req.donorType = TSAbcHopeDonationIntakeService.TYPE_ORGANIZATION;
     req.organizationName = 'Acme Test Co';
     req.firstName = null;
@@ -194,15 +190,13 @@ private class TSAbcHopeDonationIntakeServiceTest {
 
   @IsTest
   static void monthlyGiftCreatesCommitmentScheduleAndDefaultDesignation() {
-    TSAbcHopeDonationIntakeService.Request req = individual(
-      'monthly@example.com'
-    );
+    TSAbcHopeDonationIntakeDto.Request req = individual('monthly@example.com');
     req.frequency = TSAbcHopeDonationIntakeService.FREQ_MONTHLY;
     req.amount = 500;
     req.designationId = designationId('Test Learning Kits');
 
     Test.startTest();
-    TSAbcHopeDonationIntakeService.Result res = TSAbcHopeDonationIntakeService.submit(
+    TSAbcHopeDonationIntakeDto.Result res = TSAbcHopeDonationIntakeService.submit(
       req
     );
     Test.stopTest();
@@ -253,19 +247,19 @@ private class TSAbcHopeDonationIntakeServiceTest {
 
   @IsTest
   static void weeklyAndYearlyGiftsUseTheirSchedulePeriod() {
-    TSAbcHopeDonationIntakeService.Request weekly = individual(
+    TSAbcHopeDonationIntakeDto.Request weekly = individual(
       'weekly@example.com'
     );
     weekly.frequency = TSAbcHopeDonationIntakeService.FREQ_WEEKLY;
     weekly.amount = 300;
-    TSAbcHopeDonationIntakeService.Request yearly = individual(
+    TSAbcHopeDonationIntakeDto.Request yearly = individual(
       'yearly@example.com'
     );
     yearly.frequency = TSAbcHopeDonationIntakeService.FREQ_YEARLY;
     yearly.amount = 5000;
 
     Test.startTest();
-    TSAbcHopeDonationIntakeService.Result weeklyRes = TSAbcHopeDonationIntakeService.submit(
+    TSAbcHopeDonationIntakeDto.Result weeklyRes = TSAbcHopeDonationIntakeService.submit(
       weekly
     );
     TSAbcHopeDonationIntakeService.submit(yearly);
@@ -295,10 +289,10 @@ private class TSAbcHopeDonationIntakeServiceTest {
   @IsTest
   static void doubleSubmitReturnsSameGift() {
     Test.startTest();
-    TSAbcHopeDonationIntakeService.Result first = TSAbcHopeDonationIntakeService.submit(
+    TSAbcHopeDonationIntakeDto.Result first = TSAbcHopeDonationIntakeService.submit(
       individual('double@example.com')
     );
-    TSAbcHopeDonationIntakeService.Result second = TSAbcHopeDonationIntakeService.submit(
+    TSAbcHopeDonationIntakeDto.Result second = TSAbcHopeDonationIntakeService.submit(
       individual('double@example.com')
     );
     Test.stopTest();
@@ -325,12 +319,12 @@ private class TSAbcHopeDonationIntakeServiceTest {
     );
     insert maya;
     TSAbcHopeDonationIntakeService.accountIdOverride = maya.Id;
-    TSAbcHopeDonationIntakeService.Request req = individual(null); // no email needed when signed in
+    TSAbcHopeDonationIntakeDto.Request req = individual(null); // no email needed when signed in
     req.donorType = null;
 
     Test.startTest();
-    TSAbcHopeDonationIntakeService.Donor donor = TSAbcHopeDonationIntakeService.getCurrentDonor();
-    TSAbcHopeDonationIntakeService.Result res = TSAbcHopeDonationIntakeService.submit(
+    TSAbcHopeDonationIntakeDto.Donor donor = TSAbcHopeDonationIntakeService.getCurrentDonor();
+    TSAbcHopeDonationIntakeDto.Result res = TSAbcHopeDonationIntakeService.submit(
       req
     );
     Test.stopTest();
@@ -346,9 +340,7 @@ private class TSAbcHopeDonationIntakeServiceTest {
 
   @IsTest
   static void unknownSourceCodeIsIgnored() {
-    TSAbcHopeDonationIntakeService.Request req = individual(
-      'nosrc@example.com'
-    );
+    TSAbcHopeDonationIntakeDto.Request req = individual('nosrc@example.com');
     req.sourceCode = 'NOT-A-CODE';
     Test.startTest();
     TSAbcHopeDonationIntakeService.submit(req);
@@ -365,8 +357,8 @@ private class TSAbcHopeDonationIntakeServiceTest {
 
   @IsTest
   static void invalidRequestsAreRejected() {
-    Map<String, TSAbcHopeDonationIntakeService.Request> bad = new Map<String, TSAbcHopeDonationIntakeService.Request>();
-    TSAbcHopeDonationIntakeService.Request r;
+    Map<String, TSAbcHopeDonationIntakeDto.Request> bad = new Map<String, TSAbcHopeDonationIntakeDto.Request>();
+    TSAbcHopeDonationIntakeDto.Request r;
 
     r = individual('a@example.com');
     r.amount = 0;
@@ -420,7 +412,7 @@ private class TSAbcHopeDonationIntakeServiceTest {
 
   @IsTest
   static void htmlIsStrippedFromNames() {
-    TSAbcHopeDonationIntakeService.Request req = individual('xss@example.com');
+    TSAbcHopeDonationIntakeDto.Request req = individual('xss@example.com');
     req.firstName = '<b>Ann</b>';
     Test.startTest();
     TSAbcHopeDonationIntakeService.submit(req);
@@ -449,11 +441,11 @@ private class TSAbcHopeDonationIntakeServiceTest {
     TSAbcHopeDonationIntakeService.submit(individual('raised@example.com'));
 
     Test.startTest();
-    List<TSAbcHopeDonationIntakeService.CampaignCard> cards = TSAbcHopeDonationIntakeService.getCampaigns();
+    List<TSAbcHopeCampaignDto.CampaignCard> cards = TSAbcHopeCampaignService.getCampaigns();
     Test.stopTest();
 
-    TSAbcHopeDonationIntakeService.CampaignCard card;
-    for (TSAbcHopeDonationIntakeService.CampaignCard c : cards) {
+    TSAbcHopeCampaignDto.CampaignCard card;
+    for (TSAbcHopeCampaignDto.CampaignCard c : cards) {
       Assert.areNotEqual(
         'Test No Designation Campaign',
         c.name,
@@ -478,7 +470,7 @@ private class TSAbcHopeDonationIntakeServiceTest {
       IsActive = true
     );
     Test.startTest();
-    TSAbcHopeDonationIntakeService.Options opts = TSAbcHopeDonationIntakeService.getOptions(
+    TSAbcHopeDonationIntakeDto.Options opts = TSAbcHopeDonationIntakeService.getOptions(
       CAMPAIGN,
       null
     );
@@ -517,15 +509,15 @@ private class TSAbcHopeDonationIntakeServiceTest {
     );
 
     Test.startTest();
-    TSAbcHopeDonationIntakeService.CampaignCard card;
+    TSAbcHopeCampaignDto.CampaignCard card;
     for (
-      TSAbcHopeDonationIntakeService.CampaignCard c : TSAbcHopeDonationIntakeService.getCampaigns()
+      TSAbcHopeCampaignDto.CampaignCard c : TSAbcHopeCampaignService.getCampaigns()
     ) {
       if (c.name == CAMPAIGN) {
         card = c;
       }
     }
-    TSAbcHopeDonationIntakeService.Options opts = TSAbcHopeDonationIntakeService.getOptions(
+    TSAbcHopeDonationIntakeDto.Options opts = TSAbcHopeDonationIntakeService.getOptions(
       CAMPAIGN,
       'Test School Supplies, Test Learning Kits'
     );
@@ -555,13 +547,13 @@ private class TSAbcHopeDonationIntakeServiceTest {
     );
 
     Test.startTest();
-    TSAbcHopeDonationIntakeService.CampaignDetail d = TSAbcHopeDonationIntakeService.getCampaignDetail(
+    TSAbcHopeCampaignDto.CampaignDetail d = TSAbcHopeCampaignService.getCampaignDetail(
       CAMPAIGN
     );
-    TSAbcHopeDonationIntakeService.CampaignDetail unknown = TSAbcHopeDonationIntakeService.getCampaignDetail(
+    TSAbcHopeCampaignDto.CampaignDetail unknown = TSAbcHopeCampaignService.getCampaignDetail(
       'No Such Campaign'
     );
-    TSAbcHopeDonationIntakeService.CampaignDetail blank = TSAbcHopeDonationIntakeService.getCampaignDetail(
+    TSAbcHopeCampaignDto.CampaignDetail blank = TSAbcHopeCampaignService.getCampaignDetail(
       ' '
     );
     Test.stopTest();
@@ -592,12 +584,12 @@ private class TSAbcHopeDonationIntakeServiceTest {
     );
 
     Test.startTest();
-    List<TSAbcHopeDonationIntakeService.ProgramCard> programs = TSAbcHopeDonationIntakeController.getPrograms();
+    List<TSAbcHopeCampaignDto.ProgramCard> programs = TSAbcHopeDonationIntakeController.getPrograms();
     Test.stopTest();
 
-    TSAbcHopeDonationIntakeService.ProgramCard first;
-    TSAbcHopeDonationIntakeService.ProgramCard idleCard;
-    for (TSAbcHopeDonationIntakeService.ProgramCard c : programs) {
+    TSAbcHopeCampaignDto.ProgramCard first;
+    TSAbcHopeCampaignDto.ProgramCard idleCard;
+    for (TSAbcHopeCampaignDto.ProgramCard c : programs) {
       if (c.name == 'Test Education Access')
         first = c;
       if (c.name == 'Test Idle Program')
@@ -618,7 +610,8 @@ private class TSAbcHopeDonationIntakeServiceTest {
   static void programFiguresAddUpGiftsEnrollmentsAndDeliveries() {
     Program edu = new Program(
       Name = 'Test Education Access',
-      Status = 'Active'
+      Status = 'Active',
+      People_Reached__c = 1200
     );
     insert edu;
     Id causeId = designationId('Test School Supplies');
@@ -687,10 +680,10 @@ private class TSAbcHopeDonationIntakeServiceTest {
       DisbursedQuantity = 3,
       DisbursementStatus = 'Disbursed'
     );
-    TSAbcHopeDonationIntakeService.raisedStatus = 'Pending';
+    TSAbcHopeCampaignService.raisedStatus = 'Pending';
 
     Test.startTest();
-    TSAbcHopeDonationIntakeService.ProgramCard c = TSAbcHopeDonationIntakeController.getProgramDetail(
+    TSAbcHopeCampaignDto.ProgramCard c = TSAbcHopeDonationIntakeController.getProgramDetail(
       ' test education access '
     );
     Test.stopTest();
@@ -698,15 +691,136 @@ private class TSAbcHopeDonationIntakeServiceTest {
     Assert.areEqual('Test Education Access', c.name);
     Assert.areEqual(300, c.raised);
     Assert.areEqual(1, c.donorCount);
-    Assert.areEqual(1, c.peopleServed);
+    Assert.areEqual(1200, c.peopleReached, 'People_Reached__c, not enrolments');
     Assert.areEqual(1, c.deliveries.size());
     Assert.areEqual('Test Learning kit', c.deliveries[0].benefit);
     Assert.areEqual(3, c.deliveries[0].quantity);
     Assert.areEqual('Test Items', c.deliveries[0].unit);
-    Assert.isNull(
-      TSAbcHopeDonationIntakeService.getProgramDetail('No Such Program')
+    Assert.isNull(TSAbcHopeCampaignService.getProgramDetail('No Such Program'));
+    Assert.isNull(TSAbcHopeCampaignService.getProgramDetail(null));
+  }
+
+  /** The campaign's causes become 34 / 33 / 33 (as Christmas Toy Drive 2026). */
+  static void threeCauses() {
+    GiftDesignation toys = new GiftDesignation(
+      Name = 'Test Toys',
+      IsActive = true
     );
-    Assert.isNull(TSAbcHopeDonationIntakeService.getProgramDetail(null));
+    insert toys;
+    Id campId = [SELECT Id FROM Campaign WHERE Name = :CAMPAIGN].Id;
+    GiftDefaultDesignation existing = [
+      SELECT Id
+      FROM GiftDefaultDesignation
+      WHERE ParentRecordId = :campId
+    ];
+    existing.AllocatedPercentage = 34;
+    update existing;
+    insert new List<GiftDefaultDesignation>{
+      new GiftDefaultDesignation(
+        ParentRecordId = campId,
+        GiftDesignationId = designationId('Test Learning Kits'),
+        AllocatedPercentage = 33
+      ),
+      new GiftDefaultDesignation(
+        ParentRecordId = campId,
+        GiftDesignationId = toys.Id,
+        AllocatedPercentage = 33
+      )
+    };
+  }
+
+  @IsTest
+  static void nonSpecifiedGiftIsSplitAcrossTheCampaignsCauses() {
+    threeCauses();
+    TSAbcHopeDonationIntakeDto.Options opts = TSAbcHopeDonationIntakeService.getOptions(
+      CAMPAIGN,
+      null
+    );
+    Assert.areEqual(3, opts.split.size());
+    Assert.areEqual(34, opts.split[0].percent);
+
+    TSAbcHopeDonationIntakeDto.Request req = individual('split@example.com');
+    req.designationId = null;
+    req.nonSpecified = true;
+    req.amount = 1000.01;
+    Test.startTest();
+    TSAbcHopeDonationIntakeDto.Result res = TSAbcHopeDonationIntakeService.submit(
+      req
+    );
+    Test.stopTest();
+
+    Assert.areEqual('Non specified', res.designationName);
+    Assert.areEqual(
+      'Test School Supplies 34%, Test Learning Kits 33%, Test Toys 33%',
+      res.splitSummary
+    );
+    Assert.isTrue(res.reference.contains(' - Non specified - '), res.reference);
+    List<GiftTransactionDesignation> parts = [
+      SELECT GiftDesignation.Name, Amount, Percent
+      FROM GiftTransactionDesignation
+      WHERE GiftTransaction.Donor.PersonEmail = 'split@example.com'
+      ORDER BY Percent DESC, GiftDesignation.Name DESC
+    ];
+    Assert.areEqual(3, parts.size());
+    Assert.areEqual('Test School Supplies', parts[0].GiftDesignation.Name);
+    Assert.areEqual(
+      340.01,
+      parts[0].Amount,
+      'the largest share takes the remainder'
+    );
+    Assert.areEqual(330, parts[1].Amount);
+    Assert.areEqual(330, parts[2].Amount);
+    Decimal percent = 0;
+    for (GiftTransactionDesignation p : parts) {
+      percent += p.Percent;
+    }
+    Assert.areEqual(100, percent);
+  }
+
+  @IsTest
+  static void nonSpecifiedMonthlyGiftSplitsEveryInstalment() {
+    threeCauses();
+    TSAbcHopeDonationIntakeDto.Request req = individual(
+      'split.monthly@example.com'
+    );
+    req.frequency = TSAbcHopeDonationIntakeService.FREQ_MONTHLY;
+    req.designationId = null;
+    req.nonSpecified = true;
+    Test.startTest();
+    TSAbcHopeDonationIntakeService.submit(req);
+    Test.stopTest();
+    GiftCommitment gc = [
+      SELECT Id, Name
+      FROM GiftCommitment
+      WHERE Donor.PersonEmail = 'split.monthly@example.com'
+    ];
+    Assert.areEqual(
+      3,
+      [SELECT COUNT() FROM GiftDefaultDesignation WHERE ParentRecordId = :gc.Id]
+    );
+    Assert.isTrue(gc.Name.contains(' - Non specified - '), gc.Name);
+  }
+
+  @IsTest
+  static void nonSpecifiedNeedsACampaignWithCauses() {
+    Id campId = [SELECT Id FROM Campaign WHERE Name = :CAMPAIGN].Id;
+    delete [
+      SELECT Id
+      FROM GiftDefaultDesignation
+      WHERE ParentRecordId = :campId
+    ];
+    Assert.isTrue(
+      TSAbcHopeDonationIntakeService.getOptions(CAMPAIGN, null).split.isEmpty()
+    );
+    TSAbcHopeDonationIntakeDto.Request req = individual('nosplit@example.com');
+    req.designationId = null;
+    req.nonSpecified = true;
+    try {
+      TSAbcHopeDonationIntakeService.submit(req);
+      Assert.fail('expected a refusal');
+    } catch (TSAbcHopeDonationIntakeService.DonationException e) {
+      Assert.isTrue(e.getMessage().contains('choose what you would like'));
+    }
   }
 
   @IsTest

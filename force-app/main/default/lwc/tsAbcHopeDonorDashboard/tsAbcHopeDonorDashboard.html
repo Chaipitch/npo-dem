@@ -1,56 +1,11 @@
 <template>
   <div class="dash">
-    <!-- Banner -->
-    <section class="banner">
-      <template lwc:if={bannerImageUrl}>
-        <img class="banner-art" src={bannerImageUrl} alt="" />
-        <span class="banner-credit">{bannerImageCredit}</span>
-      </template>
-      <template lwc:else>
-        <svg
-          class="banner-art"
-          viewBox="0 0 1200 260"
-          preserveAspectRatio="xMidYMid slice"
-          aria-hidden="true"
-        >
-          <path
-            d="M0 120 120 70 230 110 360 50 500 100 640 40 780 95 900 55 1040 100 1200 60V260H0Z"
-            fill="#7d9fb8"
-            opacity=".55"
-          />
-          <path
-            d="M0 150 140 100 260 140 420 85 560 130 700 80 840 125 980 90 1200 130V260H0Z"
-            fill="#5f8a6a"
-          />
-          <path
-            d="M0 185 160 140 320 175 480 130 640 170 820 135 1000 165 1200 140V260H0Z"
-            fill="#3f6f45"
-          />
-          <path
-            d="M560 260c40-40 120-50 180-70 70-22 130-20 200-40 60-17 110-12 160-30v30c-50 16-100 16-160 32-70 18-130 20-200 42-60 18-120 26-150 36Z"
-            fill="#b7d8ee"
-            opacity=".9"
-          />
-          <g fill="#24492b">
-            <path d="M40 260 62 196 84 260Z" />
-            <path d="M80 260 106 180 132 260Z" />
-            <path d="M128 260 148 206 168 260Z" />
-            <path d="M980 260 1004 190 1028 260Z" />
-            <path d="M1030 260 1060 170 1090 260Z" />
-            <path d="M1090 260 1112 200 1134 260Z" />
-            <path d="M1140 260 1166 184 1192 260Z" />
-          </g>
-        </svg>
-      </template>
-      <div class="banner-shade" aria-hidden="true"></div>
-      <div class="banner-text">
-        <h1 class="banner-title">{title}</h1>
-        <p class="banner-sub">{subtitle}</p>
-      </div>
-      <p class="banner-script" aria-hidden="true">
-        People<br />Communities<br />Brighter Futures.
-      </p>
-    </section>
+    <c-ts-abc-hope-dashboard-banner
+      heading={title}
+      subtitle={subtitle}
+      image-url={bannerImageUrl}
+      image-credit={bannerImageCredit}
+    ></c-ts-abc-hope-dashboard-banner>
 
     <template lwc:if={isLoading}>
       <p class="muted pad" role="status">Loading your giving summary…</p>
@@ -61,166 +16,24 @@
     <template lwc:else>
       <div class="layout">
         <div class="main">
-          <!-- KPI cards -->
-          <div class="kpis">
-            <div class="kpi">
-              <span class="kpi-icon kpi-red"
-                ><c-ts-abc-hope-icon
-                  name="heart"
-                  size="30"
-                  stroke-width="2"
-                ></c-ts-abc-hope-icon
-              ></span>
-              <div>
-                <p class="kpi-value">{totalDisplay}</p>
-                <p class="kpi-label">Total Contributions</p>
-                <a class="kpi-link" href={givingHref}
-                  >View Giving History
-                  <c-ts-abc-hope-icon
-                    name="arrow"
-                    size="16"
-                    stroke-width="2.2"
-                  ></c-ts-abc-hope-icon
-                ></a>
-              </div>
-            </div>
-            <div class="kpi">
-              <span class="kpi-icon kpi-green"
-                ><c-ts-abc-hope-icon
-                  name="community"
-                  size="30"
-                  stroke-width="2"
-                ></c-ts-abc-hope-icon
-              ></span>
-              <div>
-                <p class="kpi-value">{causesDisplay}</p>
-                <p class="kpi-label">Causes Supported</p>
-                <a class="kpi-link" href={causesHref}
-                  >See My Causes
-                  <c-ts-abc-hope-icon
-                    name="arrow"
-                    size="16"
-                    stroke-width="2.2"
-                  ></c-ts-abc-hope-icon
-                ></a>
-              </div>
-            </div>
-            <div class="kpi">
-              <span class="kpi-icon kpi-purple"
-                ><c-ts-abc-hope-icon
-                  name="calendar"
-                  size="30"
-                  stroke-width="2"
-                ></c-ts-abc-hope-icon
-              ></span>
-              <div>
-                <p class="kpi-value">{sinceDisplay}</p>
-                <p class="kpi-label">Supporter Since</p>
-                <a class="kpi-link" href={journeyHref}
-                  >View My Journey
-                  <c-ts-abc-hope-icon
-                    name="arrow"
-                    size="16"
-                    stroke-width="2.2"
-                  ></c-ts-abc-hope-icon
-                ></a>
-              </div>
-            </div>
-          </div>
-          <template lwc:if={monthlyNote}>
-            <p class="monthly">
-              <c-ts-abc-hope-icon name="repeat" size="16"></c-ts-abc-hope-icon>
-              {monthlyNote}
-              <template lwc:if={isHome}>
-                <a class="monthly-manage" href={manageMonthlyHref}>Manage</a>
-              </template>
-            </p>
-          </template>
+          <c-ts-abc-hope-dashboard-kpis
+            data={data}
+            currency-label={currencyLabel}
+            show-manage={isHome}
+          ></c-ts-abc-hope-dashboard-kpis>
 
           <template lwc:if={isHome}>
-            <!-- Campaigns -->
             <template lwc:if={hasCampaigns}>
               <div class="section-head" data-section="campaigns">
                 <h2 class="section-title">Campaigns You Can Support</h2>
               </div>
-              <div class="campaigns">
-                <template for:each={campaignCards} for:item="c">
-                  <article
-                    key={c.key}
-                    class="campaign"
-                    data-id="campaign-card"
-                    data-href={c.detailHref}
-                    onclick={handleCampaignClick}
-                  >
-                    <div class="campaign-art" aria-hidden="true">
-                      <img
-                        src={c.imageUrl}
-                        alt=""
-                        title={c.imageCredit}
-                        loading="lazy"
-                      />
-                    </div>
-                    <div class="campaign-body">
-                      <h3 class="campaign-name">{c.name}</h3>
-                      <p class="campaign-desc">{c.description}</p>
-                      <div class="progress" aria-hidden="true">
-                        <span class="progress-bar" style={c.barStyle}></span>
-                      </div>
-                      <p class="campaign-stats">
-                        <span class="strong">{c.raisedDisplay}</span>
-                        <template lwc:if={c.hasGoal}
-                          ><span class="muted">
-                            raised of {c.goalDisplay}</span
-                          ></template
-                        >
-                      </p>
-                      <p class="campaign-meta">
-                        <span>{c.giftsDisplay}</span
-                        ><template lwc:if={c.timing}
-                          ><span>· {c.timing}</span></template
-                        >
-                      </p>
-                      <template lwc:if={c.programsDisplay}>
-                        <p class="campaign-program">
-                          <span class="muted">Funds</span>
-                          {c.programsDisplay}
-                        </p>
-                      </template>
-                      <div class="campaign-chips">
-                        <template for:each={c.chips} for:item="d">
-                          <span key={d.key} class="campaign-chip"
-                            >{d.label}</span
-                          >
-                        </template>
-                      </div>
-                      <div class="campaign-actions">
-                        <a
-                          class="campaign-cta"
-                          href={c.href}
-                          aria-label={c.donateLabel}
-                          data-id="campaign-donate"
-                          >Donate now
-                          <c-ts-abc-hope-icon
-                            name="arrow"
-                            size="16"
-                            stroke-width="2.4"
-                          ></c-ts-abc-hope-icon
-                        ></a>
-                        <a
-                          class="campaign-more"
-                          href={c.detailHref}
-                          aria-label={c.detailLabel}
-                          data-id="campaign-more"
-                          >View more</a
-                        >
-                      </div>
-                    </div>
-                  </article>
-                </template>
-              </div>
+              <c-ts-abc-hope-dashboard-campaigns
+                campaigns={campaigns}
+                campaign-images={campaignImages}
+                currency-label={currencyLabel}
+              ></c-ts-abc-hope-dashboard-campaigns>
             </template>
 
-            <!-- Shared impact -->
             <div class="section-head">
               <h2 class="section-title">
                 Our Shared Impact
@@ -232,123 +45,34 @@
                 ></span>
               </h2>
             </div>
-            <div class="impact">
-              <template for:each={impactTiles} for:item="t">
-                <div key={t.key} class={t.className}>
-                  <span class="impact-icon"
-                    ><c-ts-abc-hope-icon
-                      name={t.icon}
-                      size="34"
-                      stroke-width="2"
-                    ></c-ts-abc-hope-icon
-                  ></span>
-                  <div>
-                    <p class="impact-value">{t.value}</p>
-                    <p class="impact-label">{t.label}</p>
-                  </div>
-                </div>
-              </template>
-            </div>
+            <c-ts-abc-hope-dashboard-impact
+              data={data}
+              config={sharedImpact}
+            ></c-ts-abc-hope-dashboard-impact>
 
-            <!-- Stories -->
             <div class="section-head" data-section="stories">
               <h2 class="section-title">
                 Stories From the Programs You Support
               </h2>
             </div>
-            <div class="stories">
-              <template for:each={storyCards} for:item="s">
-                <article key={s.key} class="story">
-                  <div class="story-art" aria-hidden="true">
-                    <img
-                      src={s.imageUrl}
-                      alt=""
-                      title={s.imageCredit}
-                      loading="lazy"
-                    />
-                  </div>
-                  <div class="story-body">
-                    <span class={s.tagClass}>{s.tag}</span>
-                    <h3 class="story-title">{s.title}</h3>
-                    <p class="story-text">{s.summary}</p>
-                  </div>
-                </article>
-              </template>
-            </div>
+            <c-ts-abc-hope-dashboard-stories
+              config={stories}
+            ></c-ts-abc-hope-dashboard-stories>
 
-            <!-- Causes -->
             <div class="section-head" data-section="causes">
               <h2 class="section-title">Causes I Support</h2>
             </div>
-            <template lwc:if={hasCauses}>
-              <div class="chips">
-                <template for:each={causes} for:item="c">
-                  <span key={c.key} class="chip"
-                    ><c-ts-abc-hope-icon
-                      name="heart"
-                      size="16"
-                      stroke-width="2.2"
-                    ></c-ts-abc-hope-icon
-                    >{c.label}</span
-                  >
-                </template>
-              </div>
-            </template>
-            <template lwc:else>
-              <p class="muted">
-                Your causes will appear here after your first gift.
-              </p>
-            </template>
+            <c-ts-abc-hope-dashboard-causes
+              items={causes}
+            ></c-ts-abc-hope-dashboard-causes>
 
-            <!-- Journey -->
             <div class="section-head" data-section="journey">
               <h2 class="section-title">Your Impact Journey</h2>
             </div>
-            <ol class="years" data-id="journey">
-              <template for:each={journeyYears} for:item="y">
-                <li key={y.key} class="year-card" data-id="journey-year">
-                  <div class="year-head">
-                    <span class={y.dotClass}
-                      ><c-ts-abc-hope-icon
-                        name={y.icon}
-                        size="22"
-                        stroke-width="2"
-                      ></c-ts-abc-hope-icon
-                    ></span>
-                    <div class="year-title">
-                      <p class="year">{y.year}</p>
-                      <p class="year-meta">{y.meta}</p>
-                    </div>
-                    <template lwc:if={y.joined}>
-                      <span class="badge badge_joined">Joined</span>
-                    </template>
-                  </div>
-                  <template lwc:if={y.hasItems}>
-                    <ul class="year-items">
-                      <template for:each={y.items} for:item="it">
-                        <li key={it.key} class="year-item">
-                          <div class="item-text">
-                            <p class="item-cause">
-                              {it.cause}
-                              <template lwc:if={it.isNew}>
-                                <span class="badge badge_new">New</span>
-                              </template>
-                            </p>
-                            <template lwc:if={it.program}>
-                              <p class="item-program">{it.program}</p>
-                            </template>
-                          </div>
-                          <p class="item-amount">{it.amountDisplay}</p>
-                        </li>
-                      </template>
-                    </ul>
-                  </template>
-                  <template lwc:else>
-                    <p class="year-empty">Joined ABC Hope as a supporter.</p>
-                  </template>
-                </li>
-              </template>
-            </ol>
+            <c-ts-abc-hope-dashboard-journey
+              years={journeyYears}
+              currency-label={currencyLabel}
+            ></c-ts-abc-hope-dashboard-journey>
           </template>
 
           <template lwc:if={isGiving}>
@@ -372,191 +96,23 @@
                 ></c-ts-abc-hope-icon
               ></a>
             </div>
-            <template lwc:if={hasGifts}>
-              <div class="table-wrap">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Date</th>
-                      <th scope="col">Campaign</th>
-                      <th scope="col">Designation</th>
-                      <th scope="col">Program</th>
-                      <th scope="col" class="num">Amount</th>
-                      <th scope="col">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <template for:each={gifts} for:item="g">
-                      <tr key={g.id}>
-                        <td data-label="Date">{g.dateDisplay}</td>
-                        <td data-label="Campaign">{g.campaignName}</td>
-                        <td data-label="Designation">{g.designations}</td>
-                        <td data-label="Program">{g.programs}</td>
-                        <td data-label="Amount" class="num strong">
-                          {g.amountDisplay}
-                        </td>
-                        <td data-label="Status">
-                          <span class={g.statusClass}>{g.status}</span>
-                        </td>
-                      </tr>
-                    </template>
-                  </tbody>
-                </table>
-              </div>
-            </template>
-            <template lwc:else>
-              <p class="muted">
-                No gifts yet — your first one will appear here.
-              </p>
-            </template>
+            <c-ts-abc-hope-dashboard-history
+              currency-label={currencyLabel}
+            ></c-ts-abc-hope-dashboard-history>
           </template>
         </div>
 
-        <!-- Agent panel -->
-        <aside class="agent" data-section="agent">
-          <div class="agent-head">
-            <span class="agent-icon"
-              ><c-ts-abc-hope-icon
-                name="sparkle"
-                size="26"
-                stroke-width="2"
-              ></c-ts-abc-hope-icon
-            ></span>
-            <div>
-              <h2 class="agent-title">Ask About Your Journey</h2>
-              <p class="agent-sub">
-                Get personalized answers based on the programs and information
-                available to you.
-              </p>
-            </div>
-            <span class="agent-powered"
-              >Powered<br />by <strong>Agentforce</strong></span
-            >
-          </div>
-
-          <div class="agent-body" data-id="agent-body">
-            <div class="msg msg_user">
-              <span class="msg-avatar">{initial}</span>
-              <p class="bubble">How are the programs I supported doing?</p>
-            </div>
-            <div class="msg msg_agent">
-              <span class="msg-avatar msg-avatar_agent"
-                ><c-ts-abc-hope-icon
-                  name="sparkle"
-                  size="20"
-                  stroke-width="2"
-                ></c-ts-abc-hope-icon
-              ></span>
-              <div class="bubble bubble_agent">
-                <p class="agent-intro">{agentIntro}</p>
-                <ul class="agent-list">
-                  <template for:each={agentCauses} for:item="a">
-                    <li key={a.key} class="agent-row">
-                      <span class={a.artClass}
-                        ><c-ts-abc-hope-icon
-                          name="heart"
-                          size="22"
-                          stroke-width="2"
-                        ></c-ts-abc-hope-icon
-                      ></span>
-                      <span class="agent-row-text">
-                        <span class="agent-row-title">{a.label}</span>
-                        <span class="agent-row-sub">You gave {a.amount}</span>
-                      </span>
-                      <span class="agent-trend"
-                        ><c-ts-abc-hope-icon
-                          name="trend"
-                          size="16"
-                          stroke-width="2.2"
-                        ></c-ts-abc-hope-icon
-                      ></span>
-                    </li>
-                  </template>
-                </ul>
-                <p class="agent-outro">
-                  Your next chance to help: Christmas Giving 2026 — school
-                  supplies for children.
-                </p>
-              </div>
-            </div>
-
-            <div class="agent-chips">
-              <template for:each={suggestions} for:item="q">
-                <button
-                  key={q.key}
-                  type="button"
-                  class="agent-chip"
-                  data-text={q.label}
-                  disabled={chatBusy}
-                  onclick={handleSuggestion}
-                >
-                  {q.label}
-                </button>
-              </template>
-            </div>
-            <template lwc:if={chatHasMessages}>
-              <div class="chat-log" aria-live="polite">
-                <template for:each={chatMessages} for:item="m">
-                  <div key={m.key} class={m.rowClass}>
-                    <template lwc:if={m.isUser}>
-                      <span class="msg-avatar">{initial}</span>
-                    </template>
-                    <template lwc:else>
-                      <span class="msg-avatar msg-avatar_agent"
-                        ><c-ts-abc-hope-icon
-                          name="sparkle"
-                          size="20"
-                          stroke-width="2"
-                        ></c-ts-abc-hope-icon
-                      ></span>
-                    </template>
-                    <div class={m.bubbleClass}>
-                      <p class="chat-text">{m.text}</p>
-                      <template lwc:if={m.link}>
-                        <a class="chat-link" href={m.link.href}
-                          >{m.link.label}</a
-                        >
-                      </template>
-                    </div>
-                  </div>
-                </template>
-                <template lwc:if={chatBusy}>
-                  <p class="chat-typing muted small" data-id="typing">
-                    Assistant is typing…
-                  </p>
-                </template>
-              </div>
-            </template>
-          </div>
-          <div class="agent-input">
-            <input
-              class="agent-input-field"
-              type="text"
-              maxlength="1000"
-              placeholder="Ask another question about your impact…"
-              aria-label="Ask the ABC Hope assistant"
-              value={chatDraft}
-              disabled={chatBusy}
-              oninput={handleChatInput}
-              onkeydown={handleChatKeydown}
-              data-id="chat-input"
-            />
-            <button
-              type="button"
-              class="agent-send"
-              aria-label="Send"
-              disabled={chatSendDisabled}
-              onclick={handleChatSend}
-              data-id="chat-send"
-            >
-              <c-ts-abc-hope-icon
-                name="send"
-                size="18"
-                stroke-width="2.4"
-              ></c-ts-abc-hope-icon>
-            </button>
-          </div>
-        </aside>
+        <c-ts-abc-hope-dashboard-assistant
+          class="agent-slot"
+          data-section="agent"
+          data={data}
+          campaigns={campaigns}
+          campaign-images={campaignImages}
+          currency-label={currencyLabel}
+          donate-path={donatePath}
+          suggestions-config={agentSuggestions}
+          accepts-questions={isHome}
+        ></c-ts-abc-hope-dashboard-assistant>
       </div>
     </template>
   </div>

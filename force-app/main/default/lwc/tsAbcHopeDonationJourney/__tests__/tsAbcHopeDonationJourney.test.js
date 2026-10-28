@@ -130,6 +130,10 @@ describe("c-ts-abc-hope-donation-journey", () => {
     ]);
     expect($(el, ".period-btn_on").textContent.trim()).toBe("Monthly");
     expect($(el, ".hint").textContent).toContain("every month");
+    // Guests have no My Giving page to manage the gift.
+    expect($(el, ".hint").textContent).toContain(
+      "sign in or contact the ABC Hope team"
+    );
 
     click($$(el, ".period-btn")[2]);
     await flush();
@@ -255,6 +259,7 @@ describe("c-ts-abc-hope-donation-journey", () => {
       "Your details have been received"
     );
     expect($(el, ".thanks-amount").textContent).toContain("USD 1,000");
+    expect($(el, '[data-id="manage-note"]')).toBeNull(); // one-time gift
     // Guests have no dashboard: no redirect.
     expect($(el, '[data-id="redirect"]')).toBeNull();
     // Tells the rest of the site to reload totals and campaign progress.
@@ -283,6 +288,56 @@ describe("c-ts-abc-hope-donation-journey", () => {
     );
   });
 
+  it("offers Non specified and splits the gift across the campaign's causes", async () => {
+    submitDonation.mockResolvedValue({
+      reference: "XMAS-3",
+      amount: 1000,
+      frequency: "One-time",
+      designationName: "Non specified",
+      splitSummary: "School Supplies 50%, Learning Kits 50%"
+    });
+    const el = mount();
+    getOptions.emit({
+      ...OPTIONS,
+      split: [
+        { name: "School Supplies", percent: 50 },
+        { name: "Learning Kits", percent: 50 }
+      ],
+      currentDonor: { name: "Maya Grande", email: "maya@email.com" }
+    });
+    await flush();
+    const select = $(el, '[data-id="designation"]');
+    expect(
+      $$(el, '[data-id="designation"] option').map((o) => o.textContent.trim())
+    ).toEqual(["School Supplies", "Learning Kits", "Non specified"]);
+    select.value = "non-specified";
+    select.dispatchEvent(new CustomEvent("change"));
+    await flush();
+    expect($(el, '[data-id="split-hint"]').textContent).toBe(
+      "Split across School Supplies 50%, Learning Kits 50%."
+    );
+    click($(el, '[data-id="next"]'));
+    await flush();
+    click($(el, '[data-id="next"]'));
+    await flush();
+    expect($(el, ".review-value").textContent).toBe("Non specified");
+    click($(el, '[data-id="submit"]'));
+    await flush();
+    await flush();
+    const sent = JSON.parse(submitDonation.mock.calls[0][0].requestJson);
+    expect(sent).toMatchObject({ designationId: null, nonSpecified: true });
+    expect($(el, '[data-id="result-split"]').textContent).toContain(
+      "School Supplies 50%, Learning Kits 50%"
+    );
+  });
+  it("does not offer Non specified when the campaign has one cause", async () => {
+    const el = mount();
+    getOptions.emit({ ...OPTIONS, split: [] });
+    await flush();
+    expect(
+      $$(el, '[data-id="designation"] option').map((o) => o.textContent.trim())
+    ).not.toContain("Non specified");
+  });
   it("uses the signed-in donor and skips the details form", async () => {
     const el = mount();
     getOptions.emit({

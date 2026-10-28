@@ -38,15 +38,15 @@ private class TSAbcHopeDonorAgentControllerTest {
 
   @IsTest
   static void usesVerifiedAgentReflectsTheSwitch() {
-    TSAbcHopeDonorAgentController.USE_AGENT_API = false;
+    TSAbcHopeDonorAgentService.USE_AGENT_API = false;
     Assert.isFalse(TSAbcHopeDonorAgentController.usesVerifiedAgent());
-    TSAbcHopeDonorAgentController.USE_AGENT_API = true;
+    TSAbcHopeDonorAgentService.USE_AGENT_API = true;
     Assert.isTrue(TSAbcHopeDonorAgentController.usesVerifiedAgent());
   }
 
   @IsTest
   static void blankMessageIsRejectedBeforeCallingTheAgent() {
-    TSAbcHopeDonorAgentController.Reply r = TSAbcHopeDonorAgentController.ask(
+    TSAbcHopeDonorAgentDto.Reply r = TSAbcHopeDonorAgentController.ask(
       '   ',
       null
     );
@@ -56,9 +56,9 @@ private class TSAbcHopeDonorAgentControllerTest {
 
   @IsTest
   static void invocablePathFailsGracefullyInTests() {
-    TSAbcHopeDonorAgentController.USE_AGENT_API = false;
+    TSAbcHopeDonorAgentService.USE_AGENT_API = false;
     // The agent cannot run in a test context, so this exercises the failure path.
-    TSAbcHopeDonorAgentController.Reply r = TSAbcHopeDonorAgentController.ask(
+    TSAbcHopeDonorAgentDto.Reply r = TSAbcHopeDonorAgentController.ask(
       'Which campaigns are open?',
       null
     );
@@ -68,13 +68,13 @@ private class TSAbcHopeDonorAgentControllerTest {
   @IsTest
   static void agentApiStartsAVerifiedSessionForTheDonor() {
     Id accountId = donorAccount();
-    TSAbcHopeDonorAgentController.USE_AGENT_API = true;
-    TSAbcHopeDonorAgentController.accountIdOverride = accountId;
+    TSAbcHopeDonorAgentService.USE_AGENT_API = true;
+    TSAbcHopeDonorAgentService.accountIdOverride = accountId;
     AgentApiMock mock = new AgentApiMock();
     Test.setMock(HttpCalloutMock.class, mock);
 
     Test.startTest();
-    TSAbcHopeDonorAgentController.Reply r = TSAbcHopeDonorAgentController.ask(
+    TSAbcHopeDonorAgentDto.Reply r = TSAbcHopeDonorAgentController.ask(
       'How much have I given?',
       null
     );
@@ -107,13 +107,13 @@ private class TSAbcHopeDonorAgentControllerTest {
 
   @IsTest
   static void agentApiReusesAnExistingSession() {
-    TSAbcHopeDonorAgentController.USE_AGENT_API = true;
-    TSAbcHopeDonorAgentController.accountIdOverride = donorAccount();
+    TSAbcHopeDonorAgentService.USE_AGENT_API = true;
+    TSAbcHopeDonorAgentService.accountIdOverride = donorAccount();
     AgentApiMock mock = new AgentApiMock();
     Test.setMock(HttpCalloutMock.class, mock);
 
     Test.startTest();
-    TSAbcHopeDonorAgentController.Reply r = TSAbcHopeDonorAgentController.ask(
+    TSAbcHopeDonorAgentDto.Reply r = TSAbcHopeDonorAgentController.ask(
       'And my monthly gifts?',
       'sess-1'
     );
@@ -125,14 +125,14 @@ private class TSAbcHopeDonorAgentControllerTest {
 
   @IsTest
   static void guardRefusalIsRetriedOnceInAFreshSession() {
-    TSAbcHopeDonorAgentController.USE_AGENT_API = true;
-    TSAbcHopeDonorAgentController.accountIdOverride = donorAccount();
+    TSAbcHopeDonorAgentService.USE_AGENT_API = true;
+    TSAbcHopeDonorAgentService.accountIdOverride = donorAccount();
     AgentApiMock mock = new AgentApiMock();
     mock.refusals = 1;
     Test.setMock(HttpCalloutMock.class, mock);
 
     Test.startTest();
-    TSAbcHopeDonorAgentController.Reply r = TSAbcHopeDonorAgentController.ask(
+    TSAbcHopeDonorAgentDto.Reply r = TSAbcHopeDonorAgentController.ask(
       'Pause gift 2 for 2 months',
       'sess-old'
     );
@@ -146,14 +146,14 @@ private class TSAbcHopeDonorAgentControllerTest {
 
   @IsTest
   static void guardRefusalIsNotRetriedTwice() {
-    TSAbcHopeDonorAgentController.USE_AGENT_API = true;
-    TSAbcHopeDonorAgentController.accountIdOverride = donorAccount();
+    TSAbcHopeDonorAgentService.USE_AGENT_API = true;
+    TSAbcHopeDonorAgentService.accountIdOverride = donorAccount();
     AgentApiMock mock = new AgentApiMock();
     mock.refusals = 2;
     Test.setMock(HttpCalloutMock.class, mock);
 
     Test.startTest();
-    TSAbcHopeDonorAgentController.Reply r = TSAbcHopeDonorAgentController.ask(
+    TSAbcHopeDonorAgentDto.Reply r = TSAbcHopeDonorAgentController.ask(
       'Hello',
       'sess-old'
     );
@@ -166,26 +166,26 @@ private class TSAbcHopeDonorAgentControllerTest {
   @IsTest
   static void isGuardRefusalMatchesOnlyTheRefusal() {
     Assert.isTrue(
-      TSAbcHopeDonorAgentController.isGuardRefusal(
+      TSAbcHopeDonorAgentService.isGuardRefusal(
         'Sorry, I can\u2019t assist with that.'
       )
     );
     Assert.isFalse(
-      TSAbcHopeDonorAgentController.isGuardRefusal('Sorry, that gift is ended.')
+      TSAbcHopeDonorAgentService.isGuardRefusal('Sorry, that gift is ended.')
     );
-    Assert.isFalse(TSAbcHopeDonorAgentController.isGuardRefusal(null));
+    Assert.isFalse(TSAbcHopeDonorAgentService.isGuardRefusal(null));
   }
 
   @IsTest
   static void agentApiErrorsAreFriendlyAndHideDetails() {
-    TSAbcHopeDonorAgentController.USE_AGENT_API = true;
-    TSAbcHopeDonorAgentController.accountIdOverride = donorAccount();
+    TSAbcHopeDonorAgentService.USE_AGENT_API = true;
+    TSAbcHopeDonorAgentService.accountIdOverride = donorAccount();
     AgentApiMock mock = new AgentApiMock();
     mock.status = 500;
     Test.setMock(HttpCalloutMock.class, mock);
 
     Test.startTest();
-    TSAbcHopeDonorAgentController.Reply r = TSAbcHopeDonorAgentController.ask(
+    TSAbcHopeDonorAgentDto.Reply r = TSAbcHopeDonorAgentController.ask(
       'Hello',
       null
     );
@@ -202,9 +202,9 @@ private class TSAbcHopeDonorAgentControllerTest {
   static void replyTextReadsTheAgentJson() {
     Assert.areEqual(
       'Hello',
-      TSAbcHopeDonorAgentController.replyText('{"type":"Text","value":"Hello"}')
+      TSAbcHopeDonorAgentService.replyText('{"type":"Text","value":"Hello"}')
     );
-    Assert.areEqual('plain', TSAbcHopeDonorAgentController.replyText('plain'));
-    Assert.areEqual('', TSAbcHopeDonorAgentController.replyText(null));
+    Assert.areEqual('plain', TSAbcHopeDonorAgentService.replyText('plain'));
+    Assert.areEqual('', TSAbcHopeDonorAgentService.replyText(null));
   }
 }

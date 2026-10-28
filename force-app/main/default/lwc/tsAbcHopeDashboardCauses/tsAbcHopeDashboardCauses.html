@@ -1,0 +1,19 @@
+<template>
+  <template lwc:if={hasCauses}>
+    <div class="chips">
+      <template for:each={causes} for:item="c">
+        <span key={c.key} class="chip"
+          ><c-ts-abc-hope-icon
+            name="heart"
+            size="16"
+            stroke-width="2.2"
+          ></c-ts-abc-hope-icon
+          >{c.label}</span
+        >
+      </template>
+    </div>
+  </template>
+  <template lwc:else>
+    <p class="muted">Your causes will appear here after your first gift.</p>
+  </template>
+</template>

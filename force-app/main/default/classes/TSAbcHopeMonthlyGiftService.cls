@@ -12,45 +12,6 @@ public without sharing class TSAbcHopeMonthlyGiftService {
   public static final Integer MAX_PAUSE_MONTHS = 12;
   public static final String FAILED = 'We could not make this change right now. Please try again later or contact the ABC Hope team.';
 
-  public class Gift {
-    @AuraEnabled
-    public String id;
-    @AuraEnabled
-    public String name;
-    @AuraEnabled
-    public Decimal amount;
-    /** Schedule period: Weekly, Monthly or Yearly (D-24); older schedules may say Custom. */
-    @AuraEnabled
-    public String period;
-    @AuraEnabled
-    public String designation;
-    @AuraEnabled
-    public String program;
-    @AuraEnabled
-    public String campaignName;
-    @AuraEnabled
-    public Boolean isPaused = false;
-    @AuraEnabled
-    public Date pausedFrom;
-    @AuraEnabled
-    public Date pausedUntil;
-    @AuraEnabled
-    public Date nextGiftDate;
-
-    public GiftCommitment commitment;
-    public GiftCommitmentSchedule openSchedule; // open-ended CreateTransactions schedule
-    public GiftCommitmentSchedule pauseSchedule; // current or upcoming pause
-  }
-
-  public class Outcome {
-    public Boolean success = false;
-    public String message;
-    Outcome(Boolean success, String message) {
-      this.success = success;
-      this.message = message;
-    }
-  }
-
   /** "Weekly" | "Monthly" | "Yearly" for a schedule period; anything else (e.g. Custom) reads as Monthly. */
   public static String typeLabel(String period) {
     return period == 'Weekly' || period == 'Yearly' ? period : 'Monthly';
@@ -63,8 +24,8 @@ public without sharing class TSAbcHopeMonthlyGiftService {
   }
 
   /** The donor's open recurring gifts, oldest first. */
-  public static List<Gift> load(Id accountId) {
-    Map<Id, Gift> byId = new Map<Id, Gift>();
+  public static List<TSAbcHopeMonthlyGiftDto.Gift> load(Id accountId) {
+    Map<Id, TSAbcHopeMonthlyGiftDto.Gift> byId = new Map<Id, TSAbcHopeMonthlyGiftDto.Gift>();
     for (GiftCommitment gc : [
       SELECT Id, Name, Status, Campaign.Name, CreatedDate
       FROM GiftCommitment
@@ -72,7 +33,7 @@ public without sharing class TSAbcHopeMonthlyGiftService {
       ORDER BY CreatedDate
       LIMIT 20
     ]) {
-      Gift g = new Gift();
+      TSAbcHopeMonthlyGiftDto.Gift g = new TSAbcHopeMonthlyGiftDto.Gift();
       g.commitment = gc;
       g.id = gc.Id;
       g.name = gc.Name;
@@ -80,7 +41,7 @@ public without sharing class TSAbcHopeMonthlyGiftService {
       byId.put(gc.Id, g);
     }
     if (byId.isEmpty()) {
-      return new List<Gift>();
+      return new List<TSAbcHopeMonthlyGiftDto.Gift>();
     }
     Date today = Date.today();
     for (GiftCommitmentSchedule s : [
@@ -99,7 +60,7 @@ public without sharing class TSAbcHopeMonthlyGiftService {
         OR EndDate >= :today)
       ORDER BY StartDate
     ]) {
-      Gift g = byId.get(s.GiftCommitmentId);
+      TSAbcHopeMonthlyGiftDto.Gift g = byId.get(s.GiftCommitmentId);
       if (s.Type == 'PauseTransactions' && g.pauseSchedule == null) {
         g.pauseSchedule = s;
         g.isPaused = true;
@@ -120,7 +81,7 @@ public without sharing class TSAbcHopeMonthlyGiftService {
       WHERE ParentRecordId IN :byId.keySet()
       ORDER BY AllocatedPercentage DESC, CreatedDate ASC
     ]) {
-      Gift g = byId.get(gdd.ParentRecordId);
+      TSAbcHopeMonthlyGiftDto.Gift g = byId.get(gdd.ParentRecordId);
       if (g.designation == null) {
         g.designation = gdd.GiftDesignation.Name;
         g.program = gdd.GiftDesignation.NGOTV_Program__r?.Name;
@@ -141,8 +102,8 @@ public without sharing class TSAbcHopeMonthlyGiftService {
   }
 
   /** The donor's gift with this Id, or null when it is not one of theirs. */
-  public static Gift find(Id accountId, String giftId) {
-    for (Gift g : load(accountId)) {
+  public static TSAbcHopeMonthlyGiftDto.Gift find(Id accountId, String giftId) {
+    for (TSAbcHopeMonthlyGiftDto.Gift g : load(accountId)) {
       if (g.id == giftId) {
         return g;
       }
@@ -150,9 +111,12 @@ public without sharing class TSAbcHopeMonthlyGiftService {
     return null;
   }
 
-  public static Outcome pause(Gift g, Integer months) {
+  public static TSAbcHopeMonthlyGiftDto.Outcome pause(
+    TSAbcHopeMonthlyGiftDto.Gift g,
+    Integer months
+  ) {
     if (g.pauseSchedule != null) {
-      return new Outcome(
+      return new TSAbcHopeMonthlyGiftDto.Outcome(
         false,
         'This recurring gift is already paused until ' +
           (g.pauseSchedule.EndDate == null
@@ -162,13 +126,13 @@ public without sharing class TSAbcHopeMonthlyGiftService {
       );
     }
     if (months == null || months < 1 || months > MAX_PAUSE_MONTHS) {
-      return new Outcome(
+      return new TSAbcHopeMonthlyGiftDto.Outcome(
         false,
         'Please choose how many months to pause (1 to 12).'
       );
     }
     if (g.openSchedule == null) {
-      return new Outcome(
+      return new TSAbcHopeMonthlyGiftDto.Outcome(
         false,
         'This recurring gift has no active schedule to pause.'
       );
@@ -176,12 +140,15 @@ public without sharing class TSAbcHopeMonthlyGiftService {
     // A pause starts today (the donor's date, which NPC also checks), so the gift shows Paused at once (D-43).
     GiftCommitmentSchedule target = scheduleToPause(g.commitment.Id, months);
     if (target == null) {
-      return new Outcome(false, FAILED);
+      return new TSAbcHopeMonthlyGiftDto.Outcome(false, FAILED);
     }
     Date startDate = later(Date.today(), target.StartDate);
     Date endDate = startDate.addMonths(months).addDays(-1);
     if (target.EndDate != null && target.EndDate < endDate) {
-      return new Outcome(false, tooLong(target.EndDate));
+      return new TSAbcHopeMonthlyGiftDto.Outcome(
+        false,
+        tooLong(target.EndDate)
+      );
     }
     Invocable.Action a = Invocable.Action.createStandardAction(
       'pauseGiftCommitmentSchedule'
@@ -306,9 +273,14 @@ public without sharing class TSAbcHopeMonthlyGiftService {
       ', so it can be paused until then at most. Please choose a shorter pause.';
   }
 
-  public static Outcome resume(Gift g) {
+  public static TSAbcHopeMonthlyGiftDto.Outcome resume(
+    TSAbcHopeMonthlyGiftDto.Gift g
+  ) {
     if (g.pauseSchedule == null) {
-      return new Outcome(false, 'This recurring gift is not paused.');
+      return new TSAbcHopeMonthlyGiftDto.Outcome(
+        false,
+        'This recurring gift is not paused.'
+      );
     }
     Invocable.Action a = Invocable.Action.createStandardAction(
       'resumeGiftCommitmentSchedule'
@@ -320,19 +292,22 @@ public without sharing class TSAbcHopeMonthlyGiftService {
     return apply(a, 'The recurring gift has been resumed.');
   }
 
-  public static Outcome changeAmount(Gift g, Decimal amount) {
+  public static TSAbcHopeMonthlyGiftDto.Outcome changeAmount(
+    TSAbcHopeMonthlyGiftDto.Gift g,
+    Decimal amount
+  ) {
     if (
       amount == null ||
       amount < TSAbcHopeDonationIntakeService.MIN_AMOUNT ||
       amount > TSAbcHopeDonationIntakeService.MAX_AMOUNT
     ) {
-      return new Outcome(
+      return new TSAbcHopeMonthlyGiftDto.Outcome(
         false,
         'Please enter an amount between USD 100 and USD 1,000,000.'
       );
     }
     if (g.openSchedule == null) {
-      return new Outcome(
+      return new TSAbcHopeMonthlyGiftDto.Outcome(
         false,
         'This recurring gift has no active schedule to change.'
       );
@@ -361,7 +336,9 @@ public without sharing class TSAbcHopeMonthlyGiftService {
     );
   }
 
-  public static Outcome cancel(Gift g) {
+  public static TSAbcHopeMonthlyGiftDto.Outcome cancel(
+    TSAbcHopeMonthlyGiftDto.Gift g
+  ) {
     Invocable.Action a = Invocable.Action.createStandardAction(
       'closeGiftCommitment'
     );
@@ -375,11 +352,14 @@ public without sharing class TSAbcHopeMonthlyGiftService {
     );
   }
 
-  static Outcome apply(Invocable.Action a, String successMessage) {
+  static TSAbcHopeMonthlyGiftDto.Outcome apply(
+    Invocable.Action a,
+    String successMessage
+  ) {
     try {
       List<Invocable.Action.Result> out = a.invoke();
       if (!out.isEmpty() && out[0].isSuccess()) {
-        return new Outcome(true, successMessage);
+        return new TSAbcHopeMonthlyGiftDto.Outcome(true, successMessage);
       }
       System.debug(
         LoggingLevel.ERROR,
@@ -391,7 +371,7 @@ public without sharing class TSAbcHopeMonthlyGiftService {
         'Standard action threw: ' + e.getMessage()
       );
     }
-    return new Outcome(false, FAILED);
+    return new TSAbcHopeMonthlyGiftDto.Outcome(false, FAILED);
   }
 
   static Date later(Date a, Date b) {

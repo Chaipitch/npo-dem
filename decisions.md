@@ -517,3 +517,102 @@ instead of failing when it is already scheduled.
   If a different amount starts before the pause would end, the donor is told how long the gift can be paused.
 - Checked on that gift (each rolled back): 1, 2, 3, 6 and 12 months all give "Paused from 10/27/2026", Status Paused,
   next gift the 1st after the pause. The portal controller test now pauses 3 months after a resume.
+
+### D-45 · Guests are told how to manage a recurring gift — Accepted (user, 2026‑10‑27)
+
+- Guests can give weekly, monthly or yearly, but only signed-in donors have My Giving (and the assistant's gift
+  actions). The donation journey's recurring hint and the thank-you step now say "To pause or stop it later, sign in
+  or contact the ABC Hope team." for guests, and "You can pause, change or stop it anytime on My Giving." for
+  signed-in donors (was "You can stop anytime." for everyone). One-time gifts show no note.
+- Thank-you step: a gap between the amount and "every month" (it read "USD 1,000every month").
+
+### D-46 · About page facts are live totals over active Programs — Accepted (user, 2026‑10‑27)
+
+- The About page's four cards were fixed placeholder text (8,400 / 12 / 6 / 125). They now show People reached,
+  Communities, Programs and Volunteers summed over active Programs (People_Reached__c, Communities__c,
+  Volunteers_Engaged__c; D-34), from `TSAbcHopeDonationIntakeService.getImpact` through the guest-accessible
+  `TSAbcHopeDonationIntakeController.getImpact`. Site access is unchanged. The dashboard's shared impact uses the same
+  method, so both pages always match (27 Oct 2026: 17,172 · 2,415 · 10 · 1,093).
+- Communities stays a plain total (user): a community served by several programs counts once per program.
+- No cards show until the totals load (no made-up numbers). The `facts` builder property stays, unused, because the
+  published page still sets it and Salesforce refuses to remove it.
+
+### D-47 · "People reached" everywhere; delivery labels read naturally — Accepted (user, 2026‑10‑27)
+
+- Our Work cards and the /program page showed "people served", counted from Program Enrollments (a handful of
+  seeded records), while the About page and dashboard show People Reached (People_Reached__c). The user wants one
+  measure: `ProgramCard.peopleServed` is now `peopleReached`, read from the Program's People_Reached__c, and both
+  pages say "people reached". The enrolment count is no longer queried. Deliveries still come from Benefit
+  Disbursements; the /program footnote says so.
+- Delivery labels: one of a plural name reads singular ("1 financial literacy class delivered"), a name ending in a
+  consonant + y pluralises to -ies, and a benefit that is itself a delivery isn't followed by "delivered" ("25 grocery
+  deliveries", was "25 grocery deliverys delivered").
+
+### D-48 · Feedback round: giving history pages, stacked stories, donate links from the assistant, "Non specified" — Accepted (user, 2026‑10‑27)
+
+- **My Giving pages:** the Giving History table shows 10 gifts a page with Previous / Next and "Showing 1–10 of N
+  gifts" (front end only; the history still loads up to 200 gifts). No pager for 10 or fewer.
+- **Stories at 1281–1600px:** the three cards stay side by side; each card stacks its photo above the text.
+- **Donate links from the assistant:** `TSAbcHopeAgentCampaignInfo` matches loose names: an exact name, else every open
+  campaign containing the phrase, else those sharing the most words (noise words such as gift, giving, donate, campaign
+  ignored). Several matches → it lists them with each donate link and the agent asks which (agent v14, active). The
+  dashboard panel turns links in replies into buttons ("Donate to <campaign>"). Agentforce replaces links to sites
+  that are not Trusted URLs with "URL_Redacted"; the panel rebuilds the donate link from the campaign named before it.
+  Adding the site to Setup → Trusted URLs (so the chat widget shows real links too) is shared org config: asked, not done.
+- **Non specified:** a cause option for campaigns with two or more causes (not the default). The gift is split across
+  the campaign's active default designations by their AllocatedPercentage (scaled to 100; the largest share takes
+  rounding): a one-time gift gets one designation per cause (the Paid gift's automatic 100% designation is re-pointed
+  to the first, D-13), a recurring gift gets the same default designations so every instalment is split. The gift
+  name's cause part is "Non specified" — the naming rule now uses it for any gift or commitment with more than one
+  designation (`TSAbcHopeGiftNaming.SPLIT_CAUSE`). "Where Most Needed" stays a separate single cause.
+- **Impact Journey year cards:** a year with more than 5 causes keeps the card short: about five rows show and the
+  rest scroll inside the card (thin scrollbar; the list takes keyboard focus so it can be scrolled with the keys).
+
+### D-49 · Feedback round 2: paged history from the server, recurring gifts scroll, Trusted URL, campaign cards in chat — Accepted (user, 2026‑10‑28)
+
+- **My Giving history: 5 per page, fetched per page.** `TSAbcHopeDonorPortalController.getGivingPage(page)` returns
+  COUNT() plus that page's 5 gifts (LIMIT/OFFSET) and their designations; a page past the end returns the last page.
+  The dashboard no longer ships a long gift list: `Dashboard.gifts` holds the 5 most recent (panel answers, agent
+  summary), with `giftCount`, `programs` and `causeWithoutProgram` for the totals the agent used to count from it. The
+  panel's cause tiles add up the impact journey instead. The KPI summary still reads up to 200 gifts server-side.
+- **Recurring Gifts scroll:** more than two cards → the list scrolls, sized in the browser to the first two cards as
+  they are (cards grow when a panel opens); an opened card is scrolled into view.
+- **Trusted URL:** `cspTrustedSites/ABC_Hope_Site` (https://te1791557923677.my.site.com, context All; connect-src and
+  img-src — the site's own domain). Agentforce stops redacting links to it: the assistant's replies carry real donate
+  links in every channel (checked in the published agent's preview). User-approved shared org config.
+- **Campaign cards in the chat:** when a question is about campaigns or giving, the panel shows a card for each campaign
+  the reply names or links to (photo, progress, days left, Donate now, View more), in a sideways-scrolling row; their
+  Donate buttons replace the plain links.
+
+### D-50 · Recurring Gifts split into Active and Paused tabs — Accepted (user, 2026‑10‑28)
+
+- `tsAbcHopeDonorMonthlyGifts` shows a tab list, **Active** and **Paused**, each with its count; "Paused" includes a
+  gift with an upcoming pause (the same rule as the card's status). The first load opens Active unless every gift is
+  paused; after Pause the Paused tab opens on the gift, after Resume Active does; if a reload empties the open tab
+  (e.g. the assistant paused the only active gift) it switches to the other. Tabs follow the ARIA tab pattern
+  (role tab/tablist/tabpanel, Left/Right/Home/End). The two-card scroll (D-49) applies within each tab.
+
+### D-51 · Refactor: dashboard split into section components; Apex in controller / service / DTO layers — Accepted (user, 2026‑10‑28)
+
+- **LWC.** `tsAbcHopeDonorDashboard` is now the container: it loads the summary and open campaigns, switches
+  `view=home|giving`, lays out the page and section headings (they keep the `data-section` anchors), reloads after
+  a gift changes and scrolls to `#section`. Each section is its own internal component (not exposed in Experience
+  Builder, so no site page changed): `tsAbcHopeDashboardBanner`, `…Kpis`, `…Campaigns`, `…Impact`, `…Stories`,
+  `…Causes`, `…Journey`, `…History` (loads its own pages, reloads on "gifts changed") and `…Assistant` (Ask panel,
+  header questions and `?ask=`). Shared formatting, campaign card models and agent-reply link parsing are in
+  `tsAbcHopeDashboardUtils`. Styles were split with each section; colours stay the dashboard's `--dd-*` tokens
+  (inherited). The assistant's host element is the sticky grid item. Builder properties are unchanged. Tests moved
+  with their sections (93 Jest tests).
+- **Apex.** Controllers hold only `@AuraEnabled` entry points (input parsing, error → AuraHandledException);
+  services hold logic and queries; DTO classes hold the data shapes:
+  - Donor portal: `TSAbcHopeDonorPortalController` → `TSAbcHopeDonorPortalService` (throws `PortalException`) +
+    `TSAbcHopeDonorPortalDto`.
+  - Donation journey: `TSAbcHopeDonationIntakeController` → `TSAbcHopeDonationIntakeService` +
+    `TSAbcHopeDonationIntakeDto`; the read side (campaign cards and detail, programs, About totals) moved out of the
+    1,130-line intake service into `TSAbcHopeCampaignService` + `TSAbcHopeCampaignDto`.
+  - Ask panel: `TSAbcHopeDonorAgentController` (checks the user and message) → `TSAbcHopeDonorAgentService`
+    (Agent API) + `TSAbcHopeDonorAgentDto`.
+  - Recurring gifts: `TSAbcHopeMonthlyGiftService` + `TSAbcHopeMonthlyGiftDto`; the agent's
+    `TSAbcHopeAgentMonthlyGifts` now uses this service instead of its own copy of pause / resume / change / cancel.
+- Controller names, the guest profile's class access, permission sets and the agent action classes (names,
+  inputs, outputs) are unchanged, so no site-access change and no agent republish. 89 Apex tests pass.

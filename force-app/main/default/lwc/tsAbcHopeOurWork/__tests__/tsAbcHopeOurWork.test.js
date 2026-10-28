@@ -35,7 +35,7 @@ describe("c-ts-abc-hope-our-work", () => {
         campaigns: ["Christmas Giving 2026"],
         causes: ["School Supplies", "Learning Kits"],
         raised: 9421,
-        peopleServed: 80,
+        peopleReached: 3171,
         deliveries: [{ benefit: "Storybook", quantity: 159, unit: "Items" }]
       },
       { name: "Food Access", summary: "", campaigns: [], causes: [] }
@@ -62,7 +62,7 @@ describe("c-ts-abc-hope-our-work", () => {
       )
     ).toEqual([
       "USD 9,421raised",
-      "80people served",
+      "3,171people reached",
       "159storybooks delivered"
     ]);
     // Nothing to show for a program without gifts or deliveries.

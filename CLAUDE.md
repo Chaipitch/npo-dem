@@ -50,8 +50,9 @@ re-engagement journey for Maya Grande (#2), guest donation journey (#3), 10-item
 force-app/main/default/
   lwc/tsAbcHopeDonationJourney    4-step donation journey; campaign picker, ?campaign= and ?src=  (+ Jest tests)
   lwc/tsAbcHopeHero               Home carousel (featured slide + open campaigns)
-  lwc/tsAbcHopeDonorDashboard     view=home: campaign cards, KPIs, impact, stories, causes, journey, agent panel
-                                  view=giving: KPIs + giving history table
+  lwc/tsAbcHopeDonorDashboard     Container (D-51): loads data, view=home|giving, layout, section headings, #section scroll
+  lwc/tsAbcHopeDashboard*         Its sections: Banner, Kpis, Campaigns, Impact, Stories, Causes, Journey,
+                                  History (paged, loads itself), Assistant (Ask panel); Utils = shared helpers
   lwc/tsAbcHopeDonorMonthlyGifts  My Giving → Recurring Gifts: pause / resume / change / cancel (D-22)
   lwc/tsAbcHopeCampaignDetail     /campaign?name=… detail page: story, progress, programs, causes, Donate now
   lwc/tsAbcHopeProgramDetail      /program?name=… public program page: raised, people served, deliveries (D-33)
@@ -62,10 +63,13 @@ force-app/main/default/
   lwc/tsAbcHopePublicLayout       Theme layout for public pages (header nav, Donate, footer)
   lwc/tsAbcHopePortalLayout       Theme layout for portal pages (sidebar, top bar, user menu)
   lwc/tsAbcHopeIcon               Shared inline-SVG icon set
-  classes/TSAbcHopeDonationIntake*   Donation API: getOptions, getCampaigns, getPrograms, submitDonation (+ tests)
-  classes/TSAbcHopeDonorPortalController*  Dashboard + profile for the signed-in donor (+ tests)
-  classes/TSAbcHopeDonorAgentController*   Dashboard Ask panel → Agent API (+ tests)
-  classes/TSAbcHopeMonthlyGiftService      Recurring gift list and NPC pause/resume/change/cancel actions
+  Apex layers (D-51): *Controller = @AuraEnabled entry points only; *Service = logic + queries; *Dto = data shapes
+  classes/TSAbcHopeDonationIntake{Controller,Service,Dto}   Donation journey: options, submitDonation; the controller
+                                  also serves campaigns/programs (guest profile's only Apex class)
+  classes/TSAbcHopeCampaign{Service,Dto}         Campaign cards/detail, programs, About totals (read side)
+  classes/TSAbcHopeDonorPortal{Controller,Service,Dto}  Dashboard, giving pages, profile, recurring gifts (signed-in donor)
+  classes/TSAbcHopeDonorAgent{Controller,Service,Dto}   Dashboard Ask panel → Agent API
+  classes/TSAbcHopeMonthlyGift{Service,Dto}      Recurring gift list and NPC pause/resume/change/cancel (site and agent)
   classes/TSAbcHopeAgent*         Agent actions: CampaignInfo, GivingSummary, MonthlyGifts, UpdateProfile, Support (+ tests)
   classes/TSAbcHopeGiftNaming*    Gift naming rule "Campaign - Cause - Donor - date time", org time zone (D-38, D-39)
   triggers/TSAbcHopeGift*Naming   Name every new gift/commitment; re-name when its cause changes (D-39)
@@ -75,7 +79,7 @@ force-app/main/default/
   flows/ABC_Hope_Chat_Routing    Omni-Channel routing → the agent (the only flow; approved exception)
   messagingChannels/, EmbeddedServiceConfig/    ABC Hope Chat channel + deployment
   permissionsets/                ABC_Hope_Donor_Portal (portal users), ABC_Hope_Agent_Actions (agent user)
-  cspTrustedSites/               Unsplash_Images (img-src for the site)
+  cspTrustedSites/               Unsplash_Images (img-src for the site); ABC_Hope_Site (agent links not redacted, D-49)
   digitalExperiences/site/ABC_Hope1/            LWR routes, views, theme, theme layouts
   networks/, sites/, profiles/   Site settings and guest profile
 scripts/sitePages.py             Regenerates routes/views/theme layouts — use instead of hand-editing JSON

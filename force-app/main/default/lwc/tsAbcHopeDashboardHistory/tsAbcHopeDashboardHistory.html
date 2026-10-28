@@ -1,0 +1,69 @@
+<template>
+  <template lwc:if={historyLoading}>
+    <p class="muted" role="status">Loading your gifts…</p>
+  </template>
+  <template lwc:elseif={givingPageError}>
+    <p class="muted" role="alert">{givingPageError}</p>
+  </template>
+  <template lwc:elseif={hasGifts}>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Campaign</th>
+            <th scope="col">Designation</th>
+            <th scope="col">Program</th>
+            <th scope="col" class="num">Amount</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template for:each={gifts} for:item="g">
+            <tr key={g.id}>
+              <td data-label="Date">{g.dateDisplay}</td>
+              <td data-label="Campaign">{g.campaignName}</td>
+              <td data-label="Designation">{g.designations}</td>
+              <td data-label="Program">{g.programs}</td>
+              <td data-label="Amount" class="num strong">{g.amountDisplay}</td>
+              <td data-label="Status">
+                <span class={g.statusClass}>{g.status}</span>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+    <template lwc:if={showPager}>
+      <nav class="pager" aria-label="Giving history pages">
+        <span class="pager-summary muted" data-id="page-summary"
+          >{pageSummary}</span
+        >
+        <span class="pager-buttons">
+          <button
+            type="button"
+            class="pager-btn"
+            data-id="prev-page"
+            disabled={isFirstPage}
+            onclick={previousPage}
+          >
+            Previous
+          </button>
+          <span class="pager-label" aria-live="polite">{pageLabel}</span>
+          <button
+            type="button"
+            class="pager-btn"
+            data-id="next-page"
+            disabled={isLastPage}
+            onclick={nextPage}
+          >
+            Next
+          </button>
+        </span>
+      </nav>
+    </template>
+  </template>
+  <template lwc:else>
+    <p class="muted">No gifts yet — your first one will appear here.</p>
+  </template>
+</template>

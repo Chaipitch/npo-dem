@@ -1,0 +1,16 @@
+<template>
+  <div class="stories">
+    <template for:each={storyCards} for:item="s">
+      <article key={s.key} class="story">
+        <div class="story-art" aria-hidden="true">
+          <img src={s.imageUrl} alt="" title={s.imageCredit} loading="lazy" />
+        </div>
+        <div class="story-body">
+          <span class={s.tagClass}>{s.tag}</span>
+          <h3 class="story-title">{s.title}</h3>
+          <p class="story-text">{s.summary}</p>
+        </div>
+      </article>
+    </template>
+  </div>
+</template>

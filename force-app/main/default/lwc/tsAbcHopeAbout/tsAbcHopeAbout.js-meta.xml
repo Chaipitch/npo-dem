@@ -31,7 +31,7 @@
             <property
         name="facts"
         type="String"
-        label="Facts (value|label; …)"
+        label="Facts (no longer used: live totals from Programs)"
         default="8,400|People reached;12|Communities;6|Programs;125|Volunteers"
       />
             <property

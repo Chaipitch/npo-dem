@@ -32,7 +32,7 @@ private class TSAbcHopeAgentActionsTest {
   }
 
   static Id createDonorWithMonthlyGift(String email, Decimal amount) {
-    TSAbcHopeDonationIntakeService.Request req = new TSAbcHopeDonationIntakeService.Request();
+    TSAbcHopeDonationIntakeDto.Request req = new TSAbcHopeDonationIntakeDto.Request();
     req.campaignName = CAMPAIGN;
     req.frequency = TSAbcHopeDonationIntakeService.FREQ_MONTHLY;
     req.amount = amount;
@@ -163,6 +163,50 @@ private class TSAbcHopeAgentActionsTest {
     Assert.isTrue(
       r.donateUrl.endsWith('/donate?campaign=Christmas%20Giving%202026'),
       r.donateUrl
+    );
+  }
+
+  @IsTest
+  static void campaignInfoAsksWhichCampaignForALooseName() {
+    fundraisingCampaign(CAMPAIGN, Date.today().addDays(30), 'School Supplies');
+    fundraisingCampaign(
+      'Christmas Toy Drive 2026',
+      Date.today().addDays(30),
+      'Toys'
+    );
+    fundraisingCampaign(
+      'Test Spring Appeal',
+      Date.today().addDays(30),
+      'Trees'
+    );
+
+    Test.startTest();
+    TSAbcHopeAgentCampaignInfo.Result loose = campaignInfo('Christmas Gift');
+    TSAbcHopeAgentCampaignInfo.Result toys = campaignInfo('toy drive');
+    Test.stopTest();
+
+    Assert.isTrue(
+      loose.summary.startsWith('Several open campaigns match "Christmas Gift"'),
+      loose.summary
+    );
+    Assert.isTrue(
+      loose.summary.contains('/donate?campaign=Christmas%20Giving%202026'),
+      loose.summary
+    );
+    Assert.isTrue(
+      loose.summary.contains('/donate?campaign=Christmas%20Toy%20Drive%202026'),
+      loose.summary
+    );
+    Assert.isFalse(loose.summary.contains('Spring'), loose.summary);
+    Assert.isTrue(
+      toys.donateUrl.endsWith(
+        '/donate?campaign=Christmas%20Toy%20Drive%202026'
+      ),
+      toys.donateUrl
+    );
+    Assert.isTrue(
+      toys.summary.contains('Campaign: Christmas Toy Drive 2026'),
+      toys.summary
     );
   }
 
@@ -346,8 +390,8 @@ private class TSAbcHopeAgentActionsTest {
     Test.startTest();
     String line = TSAbcHopeAgentGivingSummary.programsLine(
       accountId,
-      TSAbcHopeDonorPortalController.buildDashboard(
-        TSAbcHopeDonorPortalController.loadAccount(accountId)
+      TSAbcHopeDonorPortalService.buildDashboard(
+        TSAbcHopeDonorPortalService.loadAccount(accountId)
       )
     );
     Test.stopTest();

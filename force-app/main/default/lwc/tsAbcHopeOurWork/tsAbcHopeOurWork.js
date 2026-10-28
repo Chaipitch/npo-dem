@@ -6,7 +6,7 @@ import { formatNumber, deliveryLabel } from "c/tsAbcHopeProgramDetail";
 /**
  * Public "Our Work" page (D-26): ABC Hope's active programs, each with the open campaigns and causes
  * that fund it (Program ← GiftDesignation.NGOTV_Program__c ← campaign default designations, D-21).
- * Each card shows live figures (raised, people served, the largest delivery) and links to /program (D-33).
+ * Each card shows live figures (raised, people reached, the largest delivery) and links to /program (D-33).
  */
 export default class AbcHopeOurWork extends LightningElement {
   @api heading = "Our Work";
@@ -57,16 +57,16 @@ export default class AbcHopeOurWork extends LightningElement {
   }
 }
 
-/** Raised, people served and the largest delivery, leaving out what is zero. */
+/** Raised, people reached and the largest delivery, leaving out what is zero. */
 function figures(p) {
   const list = [];
   if (Number(p.raised) > 0) {
     list.push({ value: `USD ${formatNumber(p.raised)}`, label: "raised" });
   }
-  if (Number(p.peopleServed) > 0) {
+  if (Number(p.peopleReached) > 0) {
     list.push({
-      value: formatNumber(p.peopleServed),
-      label: p.peopleServed === 1 ? "person served" : "people served"
+      value: formatNumber(p.peopleReached),
+      label: p.peopleReached === 1 ? "person reached" : "people reached"
     });
   }
   const top = (p.deliveries || [])[0];

@@ -43,7 +43,7 @@ public without sharing class TSAbcHopeAgentCampaignInfo {
     description='Lists the ABC Hope campaigns open for donations, or describes one campaign: purpose, dates, progress, causes you can support, suggested amounts and the donation link.'
   )
   public static List<Result> getInfo(List<Request> requests) {
-    List<TSAbcHopeDonationIntakeService.CampaignCard> open = TSAbcHopeDonationIntakeService.getCampaigns();
+    List<TSAbcHopeCampaignDto.CampaignCard> open = TSAbcHopeCampaignService.getCampaigns();
     List<Result> results = new List<Result>();
     for (Request req : requests) {
       String name = TSAbcHopeAgentSupport.clean(req?.campaignName, 80);
@@ -52,9 +52,7 @@ public without sharing class TSAbcHopeAgentCampaignInfo {
     return results;
   }
 
-  static Result listOpen(
-    List<TSAbcHopeDonationIntakeService.CampaignCard> open
-  ) {
+  static Result listOpen(List<TSAbcHopeCampaignDto.CampaignCard> open) {
     Result r = new Result();
     r.donateUrl = TSAbcHopeAgentSupport.siteUrl('/donate');
     List<String> lines = new List<String>();
@@ -68,7 +66,7 @@ public without sharing class TSAbcHopeAgentCampaignInfo {
           ' open for donations:'
       );
       Integer i = 1;
-      for (TSAbcHopeDonationIntakeService.CampaignCard card : open) {
+      for (TSAbcHopeCampaignDto.CampaignCard card : open) {
         lines.add(
           String.valueOf(i++) +
             '. ' +
@@ -91,14 +89,19 @@ public without sharing class TSAbcHopeAgentCampaignInfo {
 
   static Result describe(
     String name,
-    List<TSAbcHopeDonationIntakeService.CampaignCard> open
+    List<TSAbcHopeCampaignDto.CampaignCard> open
   ) {
+    // Loose names ("Christmas Gift") match open campaigns by their words; several matches → ask which (D-48).
+    List<TSAbcHopeCampaignDto.CampaignCard> matches = openMatches(name, open);
+    if (matches.size() > 1) {
+      return chooseOne(name, matches);
+    }
     Result r = new Result();
-    Campaign c = findCampaign(name);
+    Campaign c = findCampaign(matches.size() == 1 ? matches[0].name : name);
     if (c == null) {
       r.donateUrl = TSAbcHopeAgentSupport.siteUrl('/donate');
       List<String> names = new List<String>();
-      for (TSAbcHopeDonationIntakeService.CampaignCard card : open) {
+      for (TSAbcHopeCampaignDto.CampaignCard card : open) {
         names.add(card.name);
       }
       r.summary =
@@ -110,8 +113,8 @@ public without sharing class TSAbcHopeAgentCampaignInfo {
           : 'Campaigns open for donations: ' + String.join(names, '; ') + '.');
       return r;
     }
-    TSAbcHopeDonationIntakeService.CampaignCard card;
-    for (TSAbcHopeDonationIntakeService.CampaignCard o : open) {
+    TSAbcHopeCampaignDto.CampaignCard card;
+    for (TSAbcHopeCampaignDto.CampaignCard o : open) {
       if (o.id == String.valueOf(c.Id)) {
         card = o;
       }
@@ -144,6 +147,105 @@ public without sharing class TSAbcHopeAgentCampaignInfo {
         ? 'This campaign is closed. Ask about the campaigns open for donations instead.'
         : 'Donate here: ' + r.donateUrl
     );
+    r.summary = String.join(lines, '\n');
+    return r;
+  }
+
+  static final Set<String> NOISE_WORDS = new Set<String>{
+    'the',
+    'and',
+    'for',
+    'campaign',
+    'campaigns',
+    'donate',
+    'donation',
+    'give',
+    'giving',
+    'gift',
+    'gifts',
+    'fund',
+    'appeal',
+    'abc',
+    'hope',
+    '2026',
+    '2027'
+  };
+
+  /**
+   * Open campaigns the user's words point to: an exact name wins; else every open campaign whose name contains the
+   * whole phrase; else those sharing the most meaningful words with it ("Christmas Gift" → the Christmas campaigns).
+   */
+  @TestVisible
+  static List<TSAbcHopeCampaignDto.CampaignCard> openMatches(
+    String name,
+    List<TSAbcHopeCampaignDto.CampaignCard> open
+  ) {
+    String q = name.toLowerCase();
+    List<TSAbcHopeCampaignDto.CampaignCard> phrase = new List<TSAbcHopeCampaignDto.CampaignCard>();
+    for (TSAbcHopeCampaignDto.CampaignCard card : open) {
+      String n = card.name.toLowerCase();
+      if (n == q) {
+        return new List<TSAbcHopeCampaignDto.CampaignCard>{ card };
+      }
+      if (n.contains(q)) {
+        phrase.add(card);
+      }
+    }
+    if (!phrase.isEmpty()) {
+      return phrase;
+    }
+    List<String> words = new List<String>();
+    for (String w : q.split('[^a-z0-9]+')) {
+      if (w.length() >= 3 && !NOISE_WORDS.contains(w)) {
+        words.add(w);
+      }
+    }
+    Integer best = 0;
+    List<TSAbcHopeCampaignDto.CampaignCard> top = new List<TSAbcHopeCampaignDto.CampaignCard>();
+    for (TSAbcHopeCampaignDto.CampaignCard card : open) {
+      String n = card.name.toLowerCase();
+      Integer score = 0;
+      for (String w : words) {
+        if (n.contains(w)) {
+          score++;
+        }
+      }
+      if (score > best) {
+        best = score;
+        top.clear();
+      }
+      if (score > 0 && score == best) {
+        top.add(card);
+      }
+    }
+    return top;
+  }
+
+  /** Several open campaigns match: list them with their donate links so the user can pick one. */
+  static Result chooseOne(
+    String name,
+    List<TSAbcHopeCampaignDto.CampaignCard> matches
+  ) {
+    Result r = new Result();
+    r.donateUrl = TSAbcHopeAgentSupport.siteUrl('/donate');
+    List<String> lines = new List<String>{
+      'Several open campaigns match "' +
+      name +
+      '". Ask which one the user means, and give each one\'s donate link:'
+    };
+    Integer i = 1;
+    for (TSAbcHopeCampaignDto.CampaignCard card : matches) {
+      lines.add(
+        String.valueOf(i++) +
+          '. ' +
+          card.name +
+          ' — ' +
+          purpose(card.description) +
+          ' Donate: ' +
+          donateUrl(card.name)
+      );
+    }
+    lines.add(DEMO_FACTS);
     r.summary = String.join(lines, '\n');
     return r;
   }
@@ -234,7 +336,7 @@ public without sharing class TSAbcHopeAgentCampaignInfo {
       : 'Funds: ' + String.join(programs, ', ') + '. ';
   }
 
-  static String progress(TSAbcHopeDonationIntakeService.CampaignCard card) {
+  static String progress(TSAbcHopeCampaignDto.CampaignCard card) {
     String text =
       'Raised ' +
       TSAbcHopeAgentSupport.money(card.raised) +

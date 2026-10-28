@@ -4,7 +4,7 @@
  */
 public without sharing class TSAbcHopeDonationIntakeController {
   @AuraEnabled(cacheable=true)
-  public static TSAbcHopeDonationIntakeService.Options getOptions(
+  public static TSAbcHopeDonationIntakeDto.Options getOptions(
     String campaignName,
     String designationNames
   ) {
@@ -19,38 +19,44 @@ public without sharing class TSAbcHopeDonationIntakeController {
   }
 
   @AuraEnabled(cacheable=true)
-  public static List<TSAbcHopeDonationIntakeService.CampaignCard> getCampaigns() {
-    return TSAbcHopeDonationIntakeService.getCampaigns();
+  public static List<TSAbcHopeCampaignDto.CampaignCard> getCampaigns() {
+    return TSAbcHopeCampaignService.getCampaigns();
+  }
+
+  /** About page facts: totals over active programs (D-46). */
+  @AuraEnabled(cacheable=true)
+  public static TSAbcHopeCampaignDto.Impact getImpact() {
+    return TSAbcHopeCampaignService.getImpact();
   }
 
   @AuraEnabled(cacheable=true)
-  public static List<TSAbcHopeDonationIntakeService.ProgramCard> getPrograms() {
-    return TSAbcHopeDonationIntakeService.getPrograms();
+  public static List<TSAbcHopeCampaignDto.ProgramCard> getPrograms() {
+    return TSAbcHopeCampaignService.getPrograms();
   }
 
   @AuraEnabled(cacheable=true)
-  public static TSAbcHopeDonationIntakeService.ProgramCard getProgramDetail(
+  public static TSAbcHopeCampaignDto.ProgramCard getProgramDetail(
     String programName
   ) {
-    return TSAbcHopeDonationIntakeService.getProgramDetail(programName);
+    return TSAbcHopeCampaignService.getProgramDetail(programName);
   }
 
   @AuraEnabled(cacheable=true)
-  public static TSAbcHopeDonationIntakeService.CampaignDetail getCampaignDetail(
+  public static TSAbcHopeCampaignDto.CampaignDetail getCampaignDetail(
     String campaignName
   ) {
-    return TSAbcHopeDonationIntakeService.getCampaignDetail(campaignName);
+    return TSAbcHopeCampaignService.getCampaignDetail(campaignName);
   }
 
   @AuraEnabled
-  public static TSAbcHopeDonationIntakeService.Result submitDonation(
+  public static TSAbcHopeDonationIntakeDto.Result submitDonation(
     String requestJson
   ) {
-    TSAbcHopeDonationIntakeService.Request req;
+    TSAbcHopeDonationIntakeDto.Request req;
     try {
-      req = (TSAbcHopeDonationIntakeService.Request) JSON.deserializeStrict(
+      req = (TSAbcHopeDonationIntakeDto.Request) JSON.deserializeStrict(
         requestJson,
-        TSAbcHopeDonationIntakeService.Request.class
+        TSAbcHopeDonationIntakeDto.Request.class
       );
     } catch (Exception e) {
       throw auraError('Missing donation details.');
