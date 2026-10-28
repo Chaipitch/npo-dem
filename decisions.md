@@ -633,3 +633,10 @@ instead of failing when it is already scheduled.
   cause (no Non specified or Where Most Needed, D-52). Front end only (`tsAbcHopeDonationJourney`). Live: Christmas
   Toy Drive 2026 and Christmas Giving 2026 start on Non specified with the split hint; Girls' Education Scholarships
   starts on Scholarships.
+
+### D-54 · Chat campaign cards: buttons aligned at the bottom, one line — Accepted (user, 2026‑10‑28)
+
+- Each card in the assistant's replies is a column whose Donate now / View more row sits at the bottom
+  (`margin-top: auto`), so the buttons line up across cards; the button text is 11px and kept on one line. The card
+  row no longer inherits the reply bubble's `pre-line`, so template line breaks don't split the progress text.
+  Live: the three Christmas cards' button rows share one baseline, every button one line high.
