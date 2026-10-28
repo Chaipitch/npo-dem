@@ -60,19 +60,19 @@ private class TSAbcHopeDonorPortalControllerTest {
       );
     }
     createGift(maya, camp, gd, 999, Date.newInstance(2025, 2, 1), 'Canceled');
-    TSAbcHopeDonorPortalController.accountIdOverride = maya.Id;
+    TSAbcHopeDonorPortalService.accountIdOverride = maya.Id;
 
     Test.startTest();
-    TSAbcHopeDonorPortalController.GivingPage first = TSAbcHopeDonorPortalController.getGivingPage(
+    TSAbcHopeDonorPortalDto.GivingPage first = TSAbcHopeDonorPortalController.getGivingPage(
       1
     );
-    TSAbcHopeDonorPortalController.GivingPage second = TSAbcHopeDonorPortalController.getGivingPage(
+    TSAbcHopeDonorPortalDto.GivingPage second = TSAbcHopeDonorPortalController.getGivingPage(
       2
     );
-    TSAbcHopeDonorPortalController.GivingPage beyond = TSAbcHopeDonorPortalController.getGivingPage(
+    TSAbcHopeDonorPortalDto.GivingPage beyond = TSAbcHopeDonorPortalController.getGivingPage(
       9
     );
-    TSAbcHopeDonorPortalController.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();
+    TSAbcHopeDonorPortalDto.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();
     Test.stopTest();
 
     Assert.areEqual(7, first.total, 'cancelled gifts are not counted');
@@ -124,10 +124,10 @@ private class TSAbcHopeDonorPortalControllerTest {
       Date.newInstance(2025, 1, 1),
       'Unpaid'
     );
-    TSAbcHopeDonorPortalController.accountIdOverride = maya.Id;
+    TSAbcHopeDonorPortalService.accountIdOverride = maya.Id;
 
     Test.startTest();
-    TSAbcHopeDonorPortalController.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();
+    TSAbcHopeDonorPortalDto.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();
     Test.stopTest();
 
     Assert.areEqual(
@@ -151,14 +151,14 @@ private class TSAbcHopeDonorPortalControllerTest {
     Assert.areEqual('2025', d.journey[2].year);
     // One card per year, oldest first, with the year's causes and totals (D-35).
     Assert.areEqual(2, d.journeyYears.size());
-    TSAbcHopeDonorPortalController.JourneyYear y2024 = d.journeyYears[0];
+    TSAbcHopeDonorPortalDto.JourneyYear y2024 = d.journeyYears[0];
     Assert.areEqual('2024', y2024.year);
     Assert.isTrue(y2024.joined);
     Assert.areEqual(200, y2024.total);
     Assert.areEqual(1, y2024.giftCount);
     Assert.areEqual('Test Clean Water', y2024.items[0].cause);
     Assert.isTrue(y2024.items[0].isNew);
-    TSAbcHopeDonorPortalController.JourneyYear y2025 = d.journeyYears[1];
+    TSAbcHopeDonorPortalDto.JourneyYear y2025 = d.journeyYears[1];
     Assert.isFalse(y2025.joined);
     Assert.areEqual(250, y2025.total, 'canceled gift left out');
     Assert.areEqual('Test Education Access', y2025.items[0].program);
@@ -176,11 +176,11 @@ private class TSAbcHopeDonorPortalControllerTest {
     );
     insert gd;
     createGift(maya, camp, gd, 300, Date.newInstance(2024, 5, 1), 'Unpaid');
-    TSAbcHopeDonorPortalController.accountIdOverride = maya.Id;
+    TSAbcHopeDonorPortalService.accountIdOverride = maya.Id;
 
     Test.startTest();
-    TSAbcHopeDonorPortalController.Profile p = TSAbcHopeDonorPortalController.getProfile();
-    TSAbcHopeDonorPortalController.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();
+    TSAbcHopeDonorPortalDto.Profile p = TSAbcHopeDonorPortalController.getProfile();
+    TSAbcHopeDonorPortalDto.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();
     Test.stopTest();
 
     Assert.areEqual('2024', p.donorSince, 'first gift, not account creation');
@@ -190,16 +190,16 @@ private class TSAbcHopeDonorPortalControllerTest {
   @IsTest
   static void profileCanBeReadAndSaved() {
     Account maya = createDonor();
-    TSAbcHopeDonorPortalController.accountIdOverride = maya.Id;
+    TSAbcHopeDonorPortalService.accountIdOverride = maya.Id;
 
     Test.startTest();
-    TSAbcHopeDonorPortalController.Profile p = TSAbcHopeDonorPortalController.getProfile();
+    TSAbcHopeDonorPortalDto.Profile p = TSAbcHopeDonorPortalController.getProfile();
     p.phone = '+66 81 234 5678';
     p.city = 'Bangkok';
     p.country = 'Thailand';
     p.email = 'Maya.New@Example.com';
     p.emailOptOut = true;
-    TSAbcHopeDonorPortalController.Profile saved = TSAbcHopeDonorPortalController.saveProfile(
+    TSAbcHopeDonorPortalDto.Profile saved = TSAbcHopeDonorPortalController.saveProfile(
       JSON.serialize(p)
     );
     Test.stopTest();
@@ -213,8 +213,8 @@ private class TSAbcHopeDonorPortalControllerTest {
   @IsTest
   static void saveProfileValidatesInput() {
     Account maya = createDonor();
-    TSAbcHopeDonorPortalController.accountIdOverride = maya.Id;
-    TSAbcHopeDonorPortalController.Profile p = TSAbcHopeDonorPortalController.getProfile();
+    TSAbcHopeDonorPortalService.accountIdOverride = maya.Id;
+    TSAbcHopeDonorPortalDto.Profile p = TSAbcHopeDonorPortalController.getProfile();
     List<String> bodies = new List<String>{ 'garbage' };
     p.email = 'nope';
     bodies.add(JSON.serialize(p));
@@ -235,7 +235,7 @@ private class TSAbcHopeDonorPortalControllerTest {
   static void businessAccountProfileCannotBeEdited() {
     Account org = new Account(Name = 'Org Donor');
     insert org;
-    TSAbcHopeDonorPortalController.accountIdOverride = org.Id;
+    TSAbcHopeDonorPortalService.accountIdOverride = org.Id;
     try {
       TSAbcHopeDonorPortalController.saveProfile(
         '{"firstName":"a","lastName":"b","email":"a@b.co"}'
@@ -291,7 +291,7 @@ private class TSAbcHopeDonorPortalControllerTest {
       gds.add(new GiftDesignation(Name = 'Test Meals', IsActive = true));
       insert gds;
     }
-    TSAbcHopeDonationIntakeService.Request req = new TSAbcHopeDonationIntakeService.Request();
+    TSAbcHopeDonationIntakeDto.Request req = new TSAbcHopeDonationIntakeDto.Request();
     req.campaignName = 'Test Monthly Appeal';
     req.frequency = TSAbcHopeDonationIntakeService.FREQ_MONTHLY;
     req.amount = 500;
@@ -325,10 +325,10 @@ private class TSAbcHopeDonorPortalControllerTest {
 
   @IsTest
   static void donorPausesAndResumesOwnMonthlyGift() {
-    TSAbcHopeDonorPortalController.accountIdOverride = donorWithMonthlyGift(
+    TSAbcHopeDonorPortalService.accountIdOverride = donorWithMonthlyGift(
       'mona.pause@example.com'
     );
-    List<TSAbcHopeMonthlyGiftService.Gift> gifts = TSAbcHopeDonorPortalController.getMonthlyGifts();
+    List<TSAbcHopeMonthlyGiftDto.Gift> gifts = TSAbcHopeDonorPortalController.getMonthlyGifts();
     Assert.areEqual(1, gifts.size());
     Assert.areEqual(500, gifts[0].amount);
     Assert.areEqual('Test Meals', gifts[0].designation);
@@ -341,7 +341,7 @@ private class TSAbcHopeDonorPortalControllerTest {
     );
 
     Test.startTest();
-    TSAbcHopeDonorPortalController.MonthlyGiftsResult paused = TSAbcHopeDonorPortalController.manageMonthlyGift(
+    TSAbcHopeDonorPortalDto.MonthlyGiftsResult paused = TSAbcHopeDonorPortalController.manageMonthlyGift(
       gifts[0].id,
       'pause',
       2,
@@ -355,7 +355,7 @@ private class TSAbcHopeDonorPortalControllerTest {
       Date.today().addMonths(2).addDays(-1),
       paused.gifts[0].pausedUntil
     );
-    TSAbcHopeDonorPortalController.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();
+    TSAbcHopeDonorPortalDto.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();
     Assert.areEqual(
       0,
       d.activeMonthlyGifts,
@@ -365,7 +365,7 @@ private class TSAbcHopeDonorPortalControllerTest {
     Assert.isTrue(d.activeRecurringTypes.isEmpty(), 'only active gifts');
     Assert.areEqual(paused.gifts[0].pausedUntil, d.pausedUntil);
 
-    TSAbcHopeDonorPortalController.MonthlyGiftsResult resumed = TSAbcHopeDonorPortalController.manageMonthlyGift(
+    TSAbcHopeDonorPortalDto.MonthlyGiftsResult resumed = TSAbcHopeDonorPortalController.manageMonthlyGift(
       gifts[0].id,
       'resume',
       null,
@@ -374,7 +374,7 @@ private class TSAbcHopeDonorPortalControllerTest {
     Assert.isFalse(resumed.gifts[0].isPaused, resumed.message);
 
     // Paused again after a resume: from today, and for longer than the piece of schedule the resume left (D-44).
-    TSAbcHopeDonorPortalController.MonthlyGiftsResult again = TSAbcHopeDonorPortalController.manageMonthlyGift(
+    TSAbcHopeDonorPortalDto.MonthlyGiftsResult again = TSAbcHopeDonorPortalController.manageMonthlyGift(
       gifts[0].id,
       'pause',
       3,
@@ -390,13 +390,13 @@ private class TSAbcHopeDonorPortalControllerTest {
 
   @IsTest
   static void donorChangesAmountOfOwnMonthlyGift() {
-    TSAbcHopeDonorPortalController.accountIdOverride = donorWithMonthlyGift(
+    TSAbcHopeDonorPortalService.accountIdOverride = donorWithMonthlyGift(
       'mona.change@example.com'
     );
     String giftId = TSAbcHopeDonorPortalController.getMonthlyGifts()[0].id;
 
     Test.startTest();
-    TSAbcHopeDonorPortalController.MonthlyGiftsResult r = TSAbcHopeDonorPortalController.manageMonthlyGift(
+    TSAbcHopeDonorPortalDto.MonthlyGiftsResult r = TSAbcHopeDonorPortalController.manageMonthlyGift(
       giftId,
       'change_amount',
       null,
@@ -411,11 +411,11 @@ private class TSAbcHopeDonorPortalControllerTest {
   @IsTest
   static void donorCancelsOwnMonthlyGift() {
     Id accountId = donorWithMonthlyGift('mona.cancel@example.com');
-    TSAbcHopeDonorPortalController.accountIdOverride = accountId;
+    TSAbcHopeDonorPortalService.accountIdOverride = accountId;
     String giftId = TSAbcHopeDonorPortalController.getMonthlyGifts()[0].id;
 
     Test.startTest();
-    TSAbcHopeDonorPortalController.MonthlyGiftsResult r = TSAbcHopeDonorPortalController.manageMonthlyGift(
+    TSAbcHopeDonorPortalDto.MonthlyGiftsResult r = TSAbcHopeDonorPortalController.manageMonthlyGift(
       giftId,
       'cancel',
       null,
@@ -437,7 +437,7 @@ private class TSAbcHopeDonorPortalControllerTest {
   @IsTest
   static void donorCannotManageSomeoneElsesGiftOrSendBadInput() {
     Id owner = donorWithMonthlyGift('mona.owner@example.com');
-    TSAbcHopeDonorPortalController.accountIdOverride = owner;
+    TSAbcHopeDonorPortalService.accountIdOverride = owner;
     String giftId = TSAbcHopeDonorPortalController.getMonthlyGifts()[0].id;
 
     Assert.isTrue(
@@ -453,7 +453,7 @@ private class TSAbcHopeDonorPortalControllerTest {
       manageError(giftId, 'resume', null, null).contains('not paused')
     );
 
-    TSAbcHopeDonorPortalController.accountIdOverride = createDonor().Id;
+    TSAbcHopeDonorPortalService.accountIdOverride = createDonor().Id;
     Assert.isTrue(
       manageError(giftId, 'cancel', null, null).contains('could not be found'),
       'another donor cannot touch this gift'
@@ -471,9 +471,9 @@ private class TSAbcHopeDonorPortalControllerTest {
       new Program(Name = 'Test Active Program', Status = 'Active'),
       new Program(Name = 'Test Closed Program', Status = 'Completed')
     };
-    TSAbcHopeDonorPortalController.accountIdOverride = createDonor().Id;
+    TSAbcHopeDonorPortalService.accountIdOverride = createDonor().Id;
     Test.startTest();
-    TSAbcHopeDonorPortalController.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();
+    TSAbcHopeDonorPortalDto.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();
     Test.stopTest();
     Assert.areEqual(before + 1, d.activePrograms, 'only Active programs count');
   }
@@ -505,9 +505,9 @@ private class TSAbcHopeDonorPortalControllerTest {
         Volunteers_Engaged__c = 99
       )
     };
-    TSAbcHopeDonorPortalController.accountIdOverride = createDonor().Id;
+    TSAbcHopeDonorPortalService.accountIdOverride = createDonor().Id;
     Test.startTest();
-    TSAbcHopeDonorPortalController.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();
+    TSAbcHopeDonorPortalDto.Dashboard d = TSAbcHopeDonorPortalController.getDashboard();
     Test.stopTest();
     Assert.areEqual(
       sum(before.get('people')) + 120,

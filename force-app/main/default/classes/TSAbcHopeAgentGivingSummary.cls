@@ -45,8 +45,8 @@ public without sharing class TSAbcHopeAgentGivingSummary {
         results.add(r);
         continue;
       }
-      TSAbcHopeDonorPortalController.Dashboard d = TSAbcHopeDonorPortalController.buildDashboard(
-        TSAbcHopeDonorPortalController.loadAccount(accountId)
+      TSAbcHopeDonorPortalDto.Dashboard d = TSAbcHopeDonorPortalService.buildDashboard(
+        TSAbcHopeDonorPortalService.loadAccount(accountId)
       );
       r.isVerified = true;
       r.donorFirstName = d.firstName;
@@ -66,7 +66,7 @@ public without sharing class TSAbcHopeAgentGivingSummary {
       if (!d.gifts.isEmpty()) {
         lines.add('Recent gifts:');
         for (Integer i = 0; i < Math.min(5, d.gifts.size()); i++) {
-          TSAbcHopeDonorPortalController.Gift g = d.gifts[i];
+          TSAbcHopeDonorPortalDto.Gift g = d.gifts[i];
           lines.add(
             '- ' +
               g.giftDate.format() +
@@ -93,7 +93,7 @@ public without sharing class TSAbcHopeAgentGivingSummary {
             : ' (' + String.join(d.activeRecurringTypes, ', ') + ')')
       );
       List<String> journey = new List<String>();
-      for (TSAbcHopeDonorPortalController.Milestone m : d.journey) {
+      for (TSAbcHopeDonorPortalDto.Milestone m : d.journey) {
         journey.add(m.year + ' ' + m.label);
       }
       lines.add('Impact journey: ' + String.join(journey, ' → '));
@@ -110,14 +110,14 @@ public without sharing class TSAbcHopeAgentGivingSummary {
   @TestVisible
   static String programsLine(
     Id accountId,
-    TSAbcHopeDonorPortalController.Dashboard d
+    TSAbcHopeDonorPortalDto.Dashboard d
   ) {
     Set<String> programs = new Set<String>();
     // Across all counted gifts, not just the recent ones the dashboard sends (D-49).
     programs.addAll(d.programs);
     Boolean causeWithoutProgram = d.causeWithoutProgram;
     for (
-      TSAbcHopeMonthlyGiftService.Gift mg : TSAbcHopeMonthlyGiftService.load(
+      TSAbcHopeMonthlyGiftDto.Gift mg : TSAbcHopeMonthlyGiftService.load(
         accountId
       )
     ) {

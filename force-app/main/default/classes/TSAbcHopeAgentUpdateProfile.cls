@@ -68,7 +68,7 @@ public without sharing class TSAbcHopeAgentUpdateProfile {
       r.message = 'The user is not signed in. Contact details can only be changed after signing in on the ABC Hope site.';
       return r;
     }
-    Account acc = TSAbcHopeDonorPortalController.loadAccount(accountId);
+    Account acc = TSAbcHopeDonorPortalService.loadAccount(accountId);
     if (!acc.IsPersonAccount) {
       r.message = 'Only individual donor profiles can be updated here.';
       return r;

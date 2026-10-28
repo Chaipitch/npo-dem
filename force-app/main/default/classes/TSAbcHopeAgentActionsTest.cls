@@ -32,7 +32,7 @@ private class TSAbcHopeAgentActionsTest {
   }
 
   static Id createDonorWithMonthlyGift(String email, Decimal amount) {
-    TSAbcHopeDonationIntakeService.Request req = new TSAbcHopeDonationIntakeService.Request();
+    TSAbcHopeDonationIntakeDto.Request req = new TSAbcHopeDonationIntakeDto.Request();
     req.campaignName = CAMPAIGN;
     req.frequency = TSAbcHopeDonationIntakeService.FREQ_MONTHLY;
     req.amount = amount;
@@ -390,8 +390,8 @@ private class TSAbcHopeAgentActionsTest {
     Test.startTest();
     String line = TSAbcHopeAgentGivingSummary.programsLine(
       accountId,
-      TSAbcHopeDonorPortalController.buildDashboard(
-        TSAbcHopeDonorPortalController.loadAccount(accountId)
+      TSAbcHopeDonorPortalService.buildDashboard(
+        TSAbcHopeDonorPortalService.loadAccount(accountId)
       )
     );
     Test.stopTest();

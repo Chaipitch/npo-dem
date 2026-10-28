@@ -66,7 +66,7 @@ private class TSAbcHopeDonationIntakeControllerTest {
         People_Reached__c = 999
       )
     };
-    TSAbcHopeDonationIntakeService.Impact i = TSAbcHopeDonationIntakeController.getImpact();
+    TSAbcHopeCampaignDto.Impact i = TSAbcHopeDonationIntakeController.getImpact();
     Assert.areEqual(2, i.programs);
     Assert.areEqual(150, i.peopleReached);
     Assert.areEqual(5, i.communities);
@@ -75,7 +75,7 @@ private class TSAbcHopeDonationIntakeControllerTest {
 
   @IsTest
   static void getOptionsReturnsDesignations() {
-    TSAbcHopeDonationIntakeService.Options opts = TSAbcHopeDonationIntakeController.getOptions(
+    TSAbcHopeDonationIntakeDto.Options opts = TSAbcHopeDonationIntakeController.getOptions(
       CAMPAIGN,
       null
     );
@@ -96,7 +96,7 @@ private class TSAbcHopeDonationIntakeControllerTest {
   @IsTest
   static void submitDonationCreatesGift() {
     Test.startTest();
-    TSAbcHopeDonationIntakeService.Result res = TSAbcHopeDonationIntakeController.submitDonation(
+    TSAbcHopeDonationIntakeDto.Result res = TSAbcHopeDonationIntakeController.submitDonation(
       requestJson('guest.donor@example.com')
     );
     Test.stopTest();
@@ -120,7 +120,7 @@ private class TSAbcHopeDonationIntakeControllerTest {
     String body = requestJson('real.guest@example.com');
     Test.startTest();
     System.runAs(guest) {
-      TSAbcHopeDonationIntakeService.Result res = TSAbcHopeDonationIntakeController.submitDonation(
+      TSAbcHopeDonationIntakeDto.Result res = TSAbcHopeDonationIntakeController.submitDonation(
         body
       );
       Assert.isNotNull(res.reference);

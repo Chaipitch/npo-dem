@@ -1,8 +1,8 @@
 /**
  * Agent action: list and manage the verified donor's recurring gifts (gift commitments: weekly, monthly or yearly).
- * Mutations go through NPC's standard invocable actions after confirming the commitment
- * belongs to the verified donor. The agent must get explicit confirmation before calling
- * pause / resume / change_amount / cancel.
+ * The gifts and the pause / resume / change_amount / cancel logic are TSAbcHopeMonthlyGiftService's, the same as
+ * My Giving on the site (D-51); this class finds the verified donor, picks the gift by its number and words the
+ * results for the agent.
  */
 public without sharing class TSAbcHopeAgentMonthlyGifts {
   public static final Set<String> OPERATIONS = new Set<String>{
@@ -62,12 +62,7 @@ public without sharing class TSAbcHopeAgentMonthlyGifts {
     public String monthlyGifts;
   }
 
-  class Gift {
-    GiftCommitment commitment;
-    GiftCommitmentSchedule openSchedule; // open-ended CreateTransactions schedule
-    GiftCommitmentSchedule pauseSchedule; // current or upcoming pause
-    String designation;
-  }
+  static final String FAILED = 'The change could not be made right now. Offer to connect the donor with the ABC Hope team.';
 
   @InvocableMethod(
     label='ABC Hope: Manage My Recurring Gifts'
@@ -96,7 +91,9 @@ public without sharing class TSAbcHopeAgentMonthlyGifts {
       r.message = 'Unknown operation. Use list, pause, resume, change_amount or cancel.';
       return r;
     }
-    List<Gift> gifts = loadGifts(accountId);
+    List<TSAbcHopeMonthlyGiftDto.Gift> gifts = TSAbcHopeMonthlyGiftService.load(
+      accountId
+    );
     if (op == 'list') {
       r.success = true;
       r.monthlyGifts = describe(gifts);
@@ -109,7 +106,7 @@ public without sharing class TSAbcHopeAgentMonthlyGifts {
       r.message = 'The donor has no active recurring gifts to change.';
       return r;
     }
-    Gift target;
+    TSAbcHopeMonthlyGiftDto.Gift target;
     Integer giftNumber = req.giftNumber == null
       ? null
       : req.giftNumber.intValue();
@@ -128,243 +125,92 @@ public without sharing class TSAbcHopeAgentMonthlyGifts {
     }
 
     try {
-      if (op == 'pause') {
-        pause(
-          target,
-          req.pauseMonths == null ? null : req.pauseMonths.intValue(),
-          r
-        );
-      } else if (op == 'resume') {
-        resume(target, r);
-      } else if (op == 'change_amount') {
-        changeAmount(target, req.newAmount, r);
-      } else {
-        cancel(target, r);
-      }
+      apply(change(op, target, req), r);
     } catch (Exception e) {
       r.success = false;
-      r.message = 'The change could not be made right now. Offer to connect the donor with the ABC Hope team.';
+      r.message = FAILED;
       System.debug(
         LoggingLevel.ERROR,
         'Recurring gift ' + op + ' failed: ' + e.getMessage()
       );
     }
-    r.monthlyGifts = describe(loadGifts(accountId));
+    r.monthlyGifts = describe(TSAbcHopeMonthlyGiftService.load(accountId));
     return r;
   }
 
-  static void pause(Gift g, Integer months, Result r) {
-    if (g.pauseSchedule != null) {
-      r.message =
-        'This recurring gift is already paused until ' +
-        g.pauseSchedule.EndDate.format() +
-        '.';
-      return;
-    }
-    if (months == null || months < 1 || months > 12) {
-      r.message = 'Ask how many months to pause (1 to 12).';
-      return;
-    }
-    if (g.openSchedule == null) {
-      r.message = 'This recurring gift has no active schedule to pause.';
-      return;
-    }
-    // A pause starts today (the donor's date, which NPC also checks), so the gift shows Paused at once (D-43).
-    GiftCommitmentSchedule target = TSAbcHopeMonthlyGiftService.scheduleToPause(
-      g.commitment.Id,
-      months
-    );
-    if (target == null) {
-      r.message = 'This recurring gift has no active schedule to pause.';
-      return;
-    }
-    Date startDate = later(Date.today(), target.StartDate);
-    Date endDate = startDate.addMonths(months).addDays(-1);
-    if (target.EndDate != null && target.EndDate < endDate) {
-      r.message = TSAbcHopeMonthlyGiftService.tooLong(target.EndDate);
-      return;
-    }
-    Invocable.Action a = Invocable.Action.createStandardAction(
-      'pauseGiftCommitmentSchedule'
-    );
-    a.setInvocationParameter(
-      'giftCommitmentScheduleId',
-      String.valueOf(target.Id)
-    );
-    a.setInvocationParameter('startDate', startDate);
-    a.setInvocationParameter('endDate', endDate);
-    apply(
-      a,
-      r,
-      'Paused from ' +
-        startDate.format() +
-        ' to ' +
-        endDate.format() +
-        '. Gifts restart automatically after that.'
-    );
-  }
-
-  static void resume(Gift g, Result r) {
-    if (g.pauseSchedule == null) {
-      r.message = 'This recurring gift is not paused.';
-      return;
-    }
-    Invocable.Action a = Invocable.Action.createStandardAction(
-      'resumeGiftCommitmentSchedule'
-    );
-    a.setInvocationParameter(
-      'giftCommitmentScheduleId',
-      String.valueOf(g.pauseSchedule.Id)
-    );
-    apply(a, r, 'The recurring gift has been resumed.');
-  }
-
-  static void changeAmount(Gift g, Decimal amount, Result r) {
-    if (
-      amount == null ||
-      amount < TSAbcHopeDonationIntakeService.MIN_AMOUNT ||
-      amount > TSAbcHopeDonationIntakeService.MAX_AMOUNT
-    ) {
-      r.message = 'Ask for a new amount between USD 100 and USD 1,000,000.';
-      return;
-    }
-    if (g.openSchedule == null) {
-      r.message = 'This recurring gift has no active schedule to change.';
-      return;
-    }
-    Date effective = later(Date.today().addDays(1), g.openSchedule.StartDate);
-    Invocable.Action a = Invocable.Action.createStandardAction(
-      'manageRcrGiftCmtSchd'
-    );
-    a.setInvocationParameter(
-      'giftCommitmentSchedule',
-      new GiftCommitmentSchedule(
-        Id = g.openSchedule.Id,
-        TransactionAmount = amount.setScale(2)
-      )
-    );
-    a.setInvocationParameter('effectiveFromDate', effective);
-    apply(
-      a,
-      r,
-      'The amount is now ' +
-        TSAbcHopeAgentSupport.money(amount) +
-        ' per ' +
-        TSAbcHopeMonthlyGiftService.unit(g.openSchedule.TransactionPeriod) +
-        ', starting ' +
-        effective.format() +
-        '.'
-    );
-  }
-
-  static void cancel(Gift g, Result r) {
-    Invocable.Action a = Invocable.Action.createStandardAction(
-      'closeGiftCommitment'
-    );
-    a.setInvocationParameter(
-      'giftCommitmentId',
-      String.valueOf(g.commitment.Id)
-    );
-    apply(
-      a,
-      r,
-      'The recurring gift has been cancelled. No further gifts will be scheduled.'
-    );
-  }
-
-  static void apply(Invocable.Action a, Result r, String successMessage) {
-    List<Invocable.Action.Result> out = a.invoke();
-    r.success = !out.isEmpty() && out[0].isSuccess();
-    r.message = r.success
-      ? successMessage
-      : 'The change could not be made right now. Offer to connect the donor with the ABC Hope team.';
-    if (!r.success && !out.isEmpty()) {
-      System.debug(
-        LoggingLevel.ERROR,
-        'Standard action failed: ' + out[0].getErrors()
-      );
-    }
-  }
-
-  static List<Gift> loadGifts(Id accountId) {
-    Map<Id, GiftCommitment> commitments = new Map<Id, GiftCommitment>(
-      [
-        SELECT Id, Name, Status, Campaign.Name, CreatedDate
-        FROM GiftCommitment
-        WHERE DonorId = :accountId AND Status IN ('Active', 'Paused')
-        ORDER BY CreatedDate
-        LIMIT 20
-      ]
-    );
-    Map<Id, Gift> byId = new Map<Id, Gift>();
-    for (GiftCommitment gc : commitments.values()) {
-      Gift g = new Gift();
-      g.commitment = gc;
-      byId.put(gc.Id, g);
-    }
-    Date today = Date.today();
-    for (GiftCommitmentSchedule s : [
-      SELECT
-        Id,
-        GiftCommitmentId,
-        Type,
-        StartDate,
-        EndDate,
-        TransactionAmount,
-        TransactionPeriod
-      FROM GiftCommitmentSchedule
-      WHERE
-        GiftCommitmentId IN :byId.keySet()
-        AND (EndDate = NULL
-        OR EndDate >= :today)
-      ORDER BY StartDate
-    ]) {
-      Gift g = byId.get(s.GiftCommitmentId);
-      if (s.Type == 'PauseTransactions' && g.pauseSchedule == null) {
-        g.pauseSchedule = s;
-      } else if (s.Type == 'CreateTransactions' && s.EndDate == null) {
-        g.openSchedule = s;
+  /** Runs the change through the shared service; inputs the agent should ask for again are worded for it. */
+  static TSAbcHopeMonthlyGiftDto.Outcome change(
+    String op,
+    TSAbcHopeMonthlyGiftDto.Gift target,
+    Request req
+  ) {
+    if (op == 'pause') {
+      Integer months = req.pauseMonths == null
+        ? null
+        : req.pauseMonths.intValue();
+      if (
+        target.pauseSchedule == null &&
+        (months == null ||
+        months < 1 ||
+        months > TSAbcHopeMonthlyGiftService.MAX_PAUSE_MONTHS)
+      ) {
+        return new TSAbcHopeMonthlyGiftDto.Outcome(
+          false,
+          'Ask how many months to pause (1 to 12).'
+        );
       }
+      return TSAbcHopeMonthlyGiftService.pause(target, months);
     }
-    for (GiftDefaultDesignation gdd : [
-      SELECT ParentRecordId, GiftDesignation.Name
-      FROM GiftDefaultDesignation
-      WHERE ParentRecordId IN :byId.keySet()
-    ]) {
-      byId.get(gdd.ParentRecordId).designation = gdd.GiftDesignation.Name;
+    if (op == 'resume') {
+      return TSAbcHopeMonthlyGiftService.resume(target);
     }
-    List<Gift> gifts = new List<Gift>();
-    for (GiftCommitment gc : commitments.values()) {
-      gifts.add(byId.get(gc.Id));
+    if (op == 'change_amount') {
+      Decimal amount = req.newAmount;
+      if (
+        amount == null ||
+        amount < TSAbcHopeDonationIntakeService.MIN_AMOUNT ||
+        amount > TSAbcHopeDonationIntakeService.MAX_AMOUNT
+      ) {
+        return new TSAbcHopeMonthlyGiftDto.Outcome(
+          false,
+          'Ask for a new amount between USD 100 and USD 1,000,000.'
+        );
+      }
+      return TSAbcHopeMonthlyGiftService.changeAmount(target, amount);
     }
-    return gifts;
+    return TSAbcHopeMonthlyGiftService.cancel(target);
   }
 
-  static String describe(List<Gift> gifts) {
+  static void apply(TSAbcHopeMonthlyGiftDto.Outcome outcome, Result r) {
+    r.success = outcome.success;
+    r.message = outcome.message == TSAbcHopeMonthlyGiftService.FAILED
+      ? FAILED
+      : outcome.message;
+  }
+
+  static String describe(List<TSAbcHopeMonthlyGiftDto.Gift> gifts) {
     if (gifts.isEmpty()) {
       return 'No active recurring gifts.';
     }
     List<String> lines = new List<String>();
     for (Integer i = 0; i < gifts.size(); i++) {
-      Gift g = gifts[i];
+      TSAbcHopeMonthlyGiftDto.Gift g = gifts[i];
       String line =
         (i + 1) +
         '. ' +
         (g.openSchedule == null
           ? 'Recurring gift'
           : 'Recurring (' +
-            TSAbcHopeMonthlyGiftService.typeLabel(
-              g.openSchedule.TransactionPeriod
-            ) +
+            TSAbcHopeMonthlyGiftService.typeLabel(g.period) +
             '): ' +
-            TSAbcHopeAgentSupport.money(g.openSchedule.TransactionAmount) +
+            TSAbcHopeAgentSupport.money(g.amount) +
             ' per ' +
-            TSAbcHopeMonthlyGiftService.unit(g.openSchedule.TransactionPeriod));
+            TSAbcHopeMonthlyGiftService.unit(g.period));
       if (String.isNotBlank(g.designation)) {
         line += ' to ' + g.designation;
       }
-      if (g.commitment.Campaign != null) {
-        line += ' (' + g.commitment.Campaign.Name + ')';
+      if (String.isNotBlank(g.campaignName)) {
+        line += ' (' + g.campaignName + ')';
       }
       if (g.pauseSchedule != null) {
         line +=
@@ -378,9 +224,5 @@ public without sharing class TSAbcHopeAgentMonthlyGifts {
       lines.add(line);
     }
     return String.join(lines, '\n');
-  }
-
-  static Date later(Date a, Date b) {
-    return b != null && b > a ? b : a;
   }
 }
