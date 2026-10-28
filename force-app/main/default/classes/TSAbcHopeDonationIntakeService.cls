@@ -53,6 +53,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
     TSAbcHopeDonationIntakeDto.Options opts = new TSAbcHopeDonationIntakeDto.Options();
     opts.campaignName = camp.Name;
     opts.campaignDescription = camp.Description;
+    opts.campaignImageUrl = camp.Image_URL__c;
 
     // Designations: the admin-configured list if given; otherwise the campaign's own
     // default designations, plus "Where Most Needed" when it has two or more; otherwise every active designation.
@@ -334,7 +335,7 @@ public without sharing class TSAbcHopeDonationIntakeService {
 
   static Campaign findCampaign(String campaignName) {
     List<Campaign> camps = [
-      SELECT Id, Name, Description
+      SELECT Id, Name, Description, Image_URL__c
       FROM Campaign
       WHERE Name = :clean(campaignName, 80) AND IsActive = TRUE
       LIMIT 1

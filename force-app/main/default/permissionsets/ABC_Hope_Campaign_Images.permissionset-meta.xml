@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>ABC Hope Campaign Images</label>
+    <description
+  >Staff who manage the ABC Hope site: read and edit a campaign's Image URL (D-56). The site reads it through Apex, so site users need no access.</description>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Campaign.Image_URL__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <hasActivationRequired>false</hasActivationRequired>
+</PermissionSet>

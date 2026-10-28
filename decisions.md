@@ -649,3 +649,21 @@ instead of failing when it is already scheduled.
   amount per period, an Active / "Paused until …" pill, cause and program, campaign and the next gift date. The
   reply's intro stays above the cards and its question below; the "Manage recurring gifts" link comes last. If the
   gifts can't be loaded, the text is shown as it was. Front end only (`tsAbcHopeDashboardAssistant`).
+
+### D-56 · Campaign photo in a custom field, Campaign.Image_URL__c — Accepted (user, 2026‑10‑28; exception to the no-custom-fields rule)
+
+- Campaign photos were hard-coded: a fixed Unsplash photo per theme picked from the campaign name
+  (`c/tsAbcHopeCampaignPhotos`), plus the dashboard's "Campaign images" builder setting. The user asked for a field
+  to hold the link instead (an approved exception to "no custom fields").
+- **Field:** `Campaign.Image_URL__c` (URL, help text). On the "NGO FR Campaign Layout" and "Campaign Layout" page
+  layouts (the two our campaigns use; deployed to the org, not kept in the repo). Edit access: permission set
+  `ABC_Hope_Campaign_Images` (assigned to the admin). Site users need no field access: Apex reads it.
+- **Site:** `TSAbcHopeCampaignDto.CampaignCard.imageUrl` and `TSAbcHopeDonationIntakeDto.Options.campaignImageUrl`
+  carry it. `campaignPhoto(name, { imageUrl })` uses it when set (Unsplash links are re-sized per page and keep their
+  credit; other links are used as is), else the theme photo. Order: the campaign's field, then the old builder
+  settings (dashboard "Campaign images", hero background, journey review image), then the theme photo. Used by the
+  dashboard and chat cards, the home carousel, the campaign page and the donation journey; program pages still use
+  their theme photo.
+- **Data:** `scripts/apex/seedCampaignImages.apex` filled the 8 fundraising campaigns with the photos they already
+  showed, so nothing changed visually. Live check: switching Girls' Education Scholarships' field to another photo
+  changed its donate page photo at once (then put back).

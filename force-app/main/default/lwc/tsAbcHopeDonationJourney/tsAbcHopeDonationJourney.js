@@ -75,6 +75,7 @@ export default class DonationJourney extends LightningElement {
   optionsDesignationNames;
   activeCampaign;
   campaignDescription;
+  campaignImageUrl; // Campaign.Image_URL__c (D-56)
 
   /** Seconds left before the signed-in donor is taken to the dashboard (null = no redirect). */
   redirectIn = null;
@@ -124,6 +125,7 @@ export default class DonationJourney extends LightningElement {
     if (data) {
       this.activeCampaign = data.campaignName;
       this.campaignDescription = data.campaignDescription;
+      this.campaignImageUrl = data.campaignImageUrl;
       this.designations = data.designations || [];
       this.split = data.split || [];
       // Several causes: "Non specified" (split across them) is the default; else the campaign's cause (D-53).
@@ -174,17 +176,26 @@ export default class DonationJourney extends LightningElement {
   get campaignLabel() {
     return this.activeCampaign || this.campaignName;
   }
-  /** Admin-set review image, else a photo matching the campaign's theme. */
+  /** The campaign's own photo (Image URL, D-56), else the admin-set review image, else its theme photo. */
   get reviewImage() {
-    if (this.reviewImageUrl) return this.reviewImageUrl;
-    return campaignPhoto(this.campaignLabel, { width: 400, height: 300 }).url;
+    if (!this.campaignImageUrl && this.reviewImageUrl)
+      return this.reviewImageUrl;
+    return campaignPhoto(this.campaignLabel, {
+      width: 400,
+      height: 300,
+      imageUrl: this.campaignImageUrl
+    }).url;
   }
   /** Campaign photo across the top of the card on the choose and details steps. */
   get showBanner() {
     return this.isChoose || this.isDetails;
   }
   get banner() {
-    return campaignPhoto(this.campaignLabel, { width: 1280, height: 400 });
+    return campaignPhoto(this.campaignLabel, {
+      width: 1280,
+      height: 400,
+      imageUrl: this.campaignImageUrl
+    });
   }
   get subtitleText() {
     return (this.urlCampaign || this.pickedCampaign) && this.campaignDescription

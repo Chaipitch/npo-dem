@@ -44,7 +44,7 @@ public without sharing class TSAbcHopeCampaignService {
       );
     }
     for (Campaign c : [
-      SELECT Id, Name, Description, EndDate, ExpectedRevenue
+      SELECT Id, Name, Description, Image_URL__c, EndDate, ExpectedRevenue
       FROM Campaign
       WHERE Id IN :withDefaults
       ORDER BY EndDate ASC NULLS LAST, Name
@@ -54,6 +54,7 @@ public without sharing class TSAbcHopeCampaignService {
       card.id = c.Id;
       card.name = c.Name;
       card.description = c.Description;
+      card.imageUrl = c.Image_URL__c;
       card.endDate = c.EndDate;
       card.daysLeft = c.EndDate == null ? null : today.daysBetween(c.EndDate);
       card.goal = c.ExpectedRevenue;
