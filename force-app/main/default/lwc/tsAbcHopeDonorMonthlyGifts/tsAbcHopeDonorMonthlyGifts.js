@@ -13,13 +13,19 @@ const PERIODS = {
 const MIN_AMOUNT = 100;
 const MAX_AMOUNT = 1000000;
 
+/** Recurring gift cards shown before the list scrolls. */
+const VISIBLE_CARDS = 2;
+const TABS = [
+  { key: "active", label: "Active", empty: "No active recurring gifts." },
+  { key: "paused", label: "Paused", empty: "No paused recurring gifts." }
+];
+
 /**
  * My Giving → Recurring gifts: the signed-in donor pauses, resumes, changes or cancels their own
  * weekly, monthly or yearly gifts (D-22, D-24). The server checks every gift belongs to the running user.
+ * Gifts are split into Active and Paused tabs (D-50); "paused" includes an upcoming pause.
  * Fires "giftschange" after a change so the dashboard can refresh its counts.
  */
-/** Recurring gift cards shown before the list scrolls. */
-const VISIBLE_CARDS = 2;
 
 export default class DonorMonthlyGifts extends LightningElement {
   @api currencyLabel = "USD";
@@ -33,6 +39,8 @@ export default class DonorMonthlyGifts extends LightningElement {
   error;
   /** "<giftId>:pause" | "<giftId>:amount" | "<giftId>:cancel" — one open panel at a time */
   openPanel;
+  /** "active" | "paused"; chosen on first load (Active unless only paused gifts exist). */
+  activeTab;
   pauseMonths = "1";
   newAmount;
 
@@ -52,6 +60,7 @@ export default class DonorMonthlyGifts extends LightningElement {
     try {
       this.gifts = (await getMonthlyGifts()) || [];
       this.loadError = undefined;
+      this.pickTab();
     } catch (e) {
       this.loadError = message(e, "We could not load your recurring gifts.");
     }
@@ -62,9 +71,84 @@ export default class DonorMonthlyGifts extends LightningElement {
   get hasGifts() {
     return this.gifts.length > 0;
   }
-  /** More than two gifts: the list scrolls, showing two cards at a time (D-49). */
+
+  // ------------------------------------------------------------ tabs (D-50)
+  /**
+   * First load: Active, unless every gift is paused. Later loads keep the donor's tab, unless it
+   * emptied while the other tab has gifts (e.g. the assistant paused the only active gift).
+   */
+  pickTab() {
+    const count = (paused) =>
+      this.gifts.filter((g) => !!g.isPaused === paused).length;
+    if (!this.activeTab) {
+      this.activeTab = count(false) || !this.gifts.length ? "active" : "paused";
+      return;
+    }
+    const paused = this.activeTab === "paused";
+    if (!count(paused) && count(!paused)) {
+      this.activeTab = paused ? "active" : "paused";
+    }
+  }
+  get tabs() {
+    return TABS.map((t) => {
+      const selected = t.key === (this.activeTab || "active");
+      const count = this.gifts.filter(
+        (g) => !!g.isPaused === (t.key === "paused")
+      ).length;
+      return {
+        ...t,
+        count,
+        ariaSelected: selected ? "true" : "false",
+        id: `tab-${t.key}`,
+        tabIndex: selected ? "0" : "-1",
+        className: selected ? "tab tab_on" : "tab"
+      };
+    });
+  }
+  get tabGifts() {
+    const paused = this.activeTab === "paused";
+    return this.gifts.filter((g) => !!g.isPaused === paused);
+  }
+  get tabEmpty() {
+    return this.tabGifts.length === 0;
+  }
+  get tabEmptyText() {
+    return (TABS.find((t) => t.key === this.activeTab) || TABS[0]).empty;
+  }
+  get panelLabelledBy() {
+    return `tab-${this.activeTab || "active"}`;
+  }
+  selectTab(event) {
+    this.showTab(event.currentTarget.dataset.tab);
+  }
+  showTab(key) {
+    if (key === this.activeTab) return;
+    this.activeTab = key;
+    this.openPanel = undefined;
+    this.error = undefined;
+  }
+  /** Left / Right (and Home / End) move between tabs, as in a standard tab list. */
+  handleTabKey(event) {
+    const keys = TABS.map((t) => t.key);
+    const at = keys.indexOf(this.activeTab);
+    let next;
+    if (event.key === "ArrowRight") next = keys[(at + 1) % keys.length];
+    else if (event.key === "ArrowLeft")
+      next = keys[(at - 1 + keys.length) % keys.length];
+    else if (event.key === "Home") next = keys[0];
+    else if (event.key === "End") next = keys[keys.length - 1];
+    if (!next) return;
+    event.preventDefault();
+    this.showTab(next);
+    // eslint-disable-next-line @lwc/lwc/no-async-operation
+    requestAnimationFrame(() =>
+      this.template.querySelector(`[data-tab="${next}"]`)?.focus()
+    );
+  }
+
+  /** More than two gifts in the tab: the list scrolls, showing two cards at a time (D-49). */
   get scrolls() {
-    return this.gifts.length > VISIBLE_CARDS;
+    return this.tabGifts.length > VISIBLE_CARDS;
   }
   get listClass() {
     return this.scrolls ? "gift-list gift-list_scroll" : "gift-list";
@@ -103,7 +187,7 @@ export default class DonorMonthlyGifts extends LightningElement {
     }));
   }
   get cards() {
-    return this.gifts.map((g) => {
+    return this.tabGifts.map((g) => {
       const panel = this.openPanel?.startsWith(`${g.id}:`)
         ? this.openPanel.split(":")[1]
         : "";
@@ -209,6 +293,9 @@ export default class DonorMonthlyGifts extends LightningElement {
       this.gifts = res.gifts || [];
       this.notice = res.message;
       this.openPanel = undefined;
+      // Follow the gift to its new tab, so the donor sees it there.
+      if (operation === "pause") this.activeTab = "paused";
+      if (operation === "resume") this.activeTab = "active";
       this.dispatchEvent(new CustomEvent("giftschange"));
       markGiftsChanged();
     } catch (e) {

@@ -240,4 +240,63 @@ describe("c-ts-abc-hope-donor-monthly-gifts", () => {
     expect(list.getAttribute("tabindex")).toBe("0");
     expect(list.querySelectorAll(".gift")).toHaveLength(3);
   });
+
+  it("splits gifts into Active and Paused tabs", async () => {
+    const el = await mount([
+      ACTIVE,
+      { ...PAUSED, id: "p1" },
+      { ...ACTIVE, id: "a2" }
+    ]);
+    const tabs = () =>
+      [...el.shadowRoot.querySelectorAll('[role="tab"]')].map((t) => [
+        `${t.firstChild.textContent.trim()} ${t.querySelector(".tab-count").textContent}`,
+        t.getAttribute("aria-selected")
+      ]);
+    expect(tabs()).toEqual([
+      ["Active 2", "true"],
+      ["Paused 1", "false"]
+    ]);
+    expect(el.shadowRoot.querySelectorAll(".gift")).toHaveLength(2);
+    el.shadowRoot
+      .querySelector('[data-tab="paused"]')
+      .dispatchEvent(new CustomEvent("click"));
+    await flush();
+    expect(el.shadowRoot.querySelectorAll(".gift")).toHaveLength(1);
+    expect(text(el, '[data-id="status"]')).toBe("Paused until 22 Dec 2026");
+    // Arrow keys move between tabs.
+    el.shadowRoot
+      .querySelector('[role="tablist"]')
+      .dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
+    await flush();
+    expect(tabs()[0][1]).toBe("true");
+  });
+
+  it("shows the paused gift in the Paused tab after pausing it", async () => {
+    const el = await mount([ACTIVE]);
+    manageMonthlyGift.mockResolvedValue({
+      message: "Paused.",
+      gifts: [PAUSED]
+    });
+    click(el, "open-pause");
+    await flush();
+    click(el, "confirm-pause");
+    await flush();
+    expect(
+      el.shadowRoot
+        .querySelector('[data-tab="paused"]')
+        .getAttribute("aria-selected")
+    ).toBe("true");
+    expect(text(el, '[data-id="status"]')).toBe("Paused until 22 Dec 2026");
+  });
+
+  it("says when a tab has no gifts", async () => {
+    const el = await mount([ACTIVE]);
+    el.shadowRoot
+      .querySelector('[data-tab="paused"]')
+      .dispatchEvent(new CustomEvent("click"));
+    await flush();
+    expect(text(el, '[data-id="tab-empty"]')).toBe(
+      "No paused recurring gifts."
+    );
+  });
 });

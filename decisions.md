@@ -583,3 +583,11 @@ instead of failing when it is already scheduled.
 - **Campaign cards in the chat:** when a question is about campaigns or giving, the panel shows a card for each campaign
   the reply names or links to (photo, progress, days left, Donate now, View more), in a sideways-scrolling row; their
   Donate buttons replace the plain links.
+
+### D-50 · Recurring Gifts split into Active and Paused tabs — Accepted (user, 2026‑10‑28)
+
+- `tsAbcHopeDonorMonthlyGifts` shows a tab list, **Active** and **Paused**, each with its count; "Paused" includes a
+  gift with an upcoming pause (the same rule as the card's status). The first load opens Active unless every gift is
+  paused; after Pause the Paused tab opens on the gift, after Resume Active does; if a reload empties the open tab
+  (e.g. the assistant paused the only active gift) it switches to the other. Tabs follow the ARIA tab pattern
+  (role tab/tablist/tabpanel, Left/Right/Home/End). The two-card scroll (D-49) applies within each tab.

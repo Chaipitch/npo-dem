@@ -51,6 +51,58 @@ ul {
   color: var(--mg-purple);
   font-weight: 600;
 }
+/* Active / Paused tabs (D-50) */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--mg-border);
+}
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  color: var(--mg-muted);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tab:hover {
+  color: var(--mg-navy);
+}
+.tab_on {
+  color: var(--mg-purple);
+  border-bottom-color: var(--mg-purple);
+}
+.tab:focus-visible {
+  outline: 2px solid var(--mg-purple);
+  outline-offset: -2px;
+  border-radius: 8px 8px 0 0;
+}
+.tab-count {
+  min-width: 24px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #eef0f6;
+  color: var(--mg-navy);
+  font-size: 12px;
+  text-align: center;
+}
+.tab_on .tab-count {
+  background: #f3efff;
+  color: var(--mg-purple);
+}
+.tab-empty {
+  padding: 14px 0;
+  font-size: 14px;
+}
 .gift-list {
   display: grid;
   gap: 12px;
