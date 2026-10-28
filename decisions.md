@@ -633,3 +633,19 @@ instead of failing when it is already scheduled.
   cause (no Non specified or Where Most Needed, D-52). Front end only (`tsAbcHopeDonationJourney`). Live: Christmas
   Toy Drive 2026 and Christmas Giving 2026 start on Non specified with the split hint; Girls' Education Scholarships
   starts on Scholarships.
+
+### D-54 · Chat campaign cards: buttons aligned at the bottom, one line — Accepted (user, 2026‑10‑28)
+
+- Each card in the assistant's replies is a column whose Donate now / View more row sits at the bottom
+  (`margin-top: auto`), so the buttons line up across cards; the button text is 11px and kept on one line. The card
+  row no longer inherits the reply bubble's `pre-line`, so template line breaks don't split the progress text.
+  Live: the three Christmas cards' button rows share one baseline, every button one line high.
+
+### D-55 · The assistant's recurring gift list shows as cards — Accepted (user, 2026‑10‑28)
+
+- When an agent reply lists recurring gifts ("Recurring (Monthly): USD … per month to …"), the Ask panel loads the
+  donor's gifts fresh (`getMonthlyGifts`, so a change the agent just made shows) and shows one card per gift instead
+  of the text lines: its number (the same order the agent numbers them, so "pause gift 2" means card 2), type,
+  amount per period, an Active / "Paused until …" pill, cause and program, campaign and the next gift date. The
+  reply's intro stays above the cards and its question below; the "Manage recurring gifts" link comes last. If the
+  gifts can't be loaded, the text is shown as it was. Front end only (`tsAbcHopeDashboardAssistant`).

@@ -2,6 +2,7 @@ import { createElement } from "lwc";
 import DashboardAssistant from "c/tsAbcHopeDashboardAssistant";
 import askAgent from "@salesforce/apex/TSAbcHopeDonorAgentController.ask";
 import usesVerifiedAgent from "@salesforce/apex/TSAbcHopeDonorAgentController.usesVerifiedAgent";
+import getMonthlyGifts from "@salesforce/apex/TSAbcHopeDonorPortalController.getMonthlyGifts";
 
 jest.mock(
   "@salesforce/apex/TSAbcHopeDonorAgentController.ask",
@@ -14,6 +15,11 @@ jest.mock(
     const { createApexTestWireAdapter } = require("@salesforce/sfdx-lwc-jest");
     return { default: createApexTestWireAdapter(jest.fn()) };
   },
+  { virtual: true }
+);
+jest.mock(
+  "@salesforce/apex/TSAbcHopeDonorPortalController.getMonthlyGifts",
+  () => ({ default: jest.fn() }),
   { virtual: true }
 );
 jest.mock(
@@ -314,5 +320,80 @@ describe("c-ts-abc-hope-dashboard-assistant", () => {
     });
     await ask(el, "What was my last gift?");
     expect($(el, '[data-id="chat-cards"]')).toBeNull();
+  });
+
+  it("shows the recurring gift list as numbered cards (D-55)", async () => {
+    askAgent.mockResolvedValue({
+      sessionId: "s-20",
+      text: "Here are your recurring gifts:\n\nRecurring (Monthly): USD 1,000 per month to EF Grady Housing Facility (Capital Campaign) — paused 10/28/2026 to 12/27/2026\n2. Recurring (Yearly): USD 1,000 per year to Handwashing Stations (Clean Water for Rural Schools)\n\nWould you like to pause, resume, change the amount, or cancel any of these gifts?"
+    });
+    getMonthlyGifts.mockResolvedValue([
+      {
+        id: "gc1",
+        period: "Monthly",
+        amount: 1000,
+        designation: "EF Grady Housing Facility",
+        campaignName: "Capital Campaign",
+        isPaused: true,
+        pausedFrom: "2026-10-28",
+        pausedUntil: "2026-12-27"
+      },
+      {
+        id: "gc2",
+        period: "Yearly",
+        amount: 1000,
+        designation: "Handwashing Stations",
+        program: "Clean Water",
+        campaignName: "Clean Water for Rural Schools",
+        isPaused: false,
+        nextGiftDate: "2027-01-01"
+      }
+    ]);
+    const el = await mount();
+    usesVerifiedAgent.emit(true);
+    await flush();
+    await ask(el, "Show my recurring gifts");
+    await flush();
+    // The intro sits above the cards, the question below them; the gift lines are gone.
+    const bubble = $$(el, ".chat-log .bubble_agent").pop();
+    const parts = [...bubble.querySelectorAll(".chat-text")].map((p) =>
+      p.textContent.trim()
+    );
+    expect(parts).toEqual([
+      "Here are your recurring gifts:",
+      "Would you like to pause, resume, change the amount, or cancel any of these gifts?"
+    ]);
+    expect(bubble.textContent).not.toContain("USD 1,000 per month");
+    expect(
+      bubble
+        .querySelector(".gift-cards")
+        .compareDocumentPosition(bubble.querySelector(".chat-text_after")) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    const cards = $$(el, '[data-id="gift-cards"] .gift-card');
+    expect(cards).toHaveLength(2);
+    const t = (n, sel) => n.querySelector(sel).textContent.trim();
+    expect(t(cards[0], ".gift-number")).toBe("1");
+    expect(t(cards[0], ".gift-amount")).toBe("USD 1,000 / month");
+    expect(t(cards[0], ".gift-status_paused")).toBe("Paused until 27 Dec 2026");
+    expect(t(cards[1], ".gift-type")).toBe("Recurring (Yearly)");
+    expect(t(cards[1], ".gift-status_active")).toBe("Active");
+    expect(cards[1].textContent).toContain(
+      "Handwashing Stations · Clean Water program"
+    );
+    expect(cards[1].textContent).toContain("Next gift 1 Jan 2027");
+  });
+
+  it("keeps the text when the gifts cannot be loaded", async () => {
+    askAgent.mockResolvedValue({
+      sessionId: "s-21",
+      text: "Recurring (Monthly): USD 500 per month to Grocery Vouchers"
+    });
+    getMonthlyGifts.mockRejectedValue(new Error("offline"));
+    const el = await mount();
+    await ask(el, "Which campaigns are open?");
+    await flush();
+    expect(lastReply(el)).toContain("USD 500 per month");
+    expect($(el, '[data-id="gift-cards"]')).toBeNull();
   });
 });
