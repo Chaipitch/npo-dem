@@ -435,3 +435,95 @@ ol {
 .bubble_agent {
   min-width: 0; /* lets the card row scroll inside the bubble */
 }
+
+/* Recurring gift cards in the assistant's replies (D-55): one per gift, numbered as the assistant numbers them. */
+.gift-cards {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  white-space: normal; /* the reply bubble keeps line breaks (pre-line); the cards should not */
+}
+
+.gift-card {
+  padding: 10px 12px;
+  border: 1px solid var(--dd-border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.gift-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.gift-number {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--dd-purple-soft);
+  color: var(--dd-purple);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.gift-card-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.gift-type {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dd-purple);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.gift-amount {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--dd-navy);
+}
+
+.gift-meta {
+  margin-top: 4px;
+  padding-left: 34px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--dd-muted);
+}
+
+.gift-campaign {
+  margin-top: 0;
+}
+
+.gift-status {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.gift-status_active {
+  background: #e6f6ea;
+  color: #1d7a3f;
+}
+
+.gift-status_paused {
+  background: #fff4dc;
+  color: #8a5a00;
+}
+
+.chat-text_after {
+  margin-top: 10px;
+}

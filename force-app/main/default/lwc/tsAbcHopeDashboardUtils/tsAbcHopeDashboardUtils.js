@@ -208,3 +208,44 @@ function linkLabel(href) {
   }
   return "Open link";
 }
+
+// Schedule period → label and unit; anything else (e.g. Custom) reads as Monthly (D-24).
+const PERIODS = {
+  Weekly: { type: "Weekly", unit: "week" },
+  Monthly: { type: "Monthly", unit: "month" },
+  Yearly: { type: "Yearly", unit: "year" }
+};
+
+/**
+ * Card view models for the donor's recurring gifts (getMonthlyGifts), numbered in the same order the assistant
+ * numbers them, so "pause gift 2" means card 2 (D-55).
+ */
+export function recurringGiftCards(gifts, { currencyLabel = "USD" } = {}) {
+  return (gifts || []).map((g, i) => {
+    const period = PERIODS[g.period] || PERIODS.Monthly;
+    return {
+      key: g.id || `r${i}`,
+      number: i + 1,
+      typeLabel: `Recurring (${period.type})`,
+      amountDisplay: g.amount
+        ? `${money(g.amount, currencyLabel)} / ${period.unit}`
+        : "Recurring gift",
+      cause: [g.designation, g.program ? `${g.program} program` : ""]
+        .filter(Boolean)
+        .join(" · "),
+      campaign: g.campaignName || "",
+      statusLabel: g.isPaused
+        ? g.pausedUntil
+          ? `Paused until ${formatDate(g.pausedUntil)}`
+          : "Paused"
+        : "Active",
+      statusClass: g.isPaused
+        ? "gift-status gift-status_paused"
+        : "gift-status gift-status_active",
+      nextGift:
+        !g.isPaused && g.nextGiftDate
+          ? `Next gift ${formatDate(g.nextGiftDate)}`
+          : ""
+    };
+  });
+}

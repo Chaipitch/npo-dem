@@ -98,6 +98,36 @@
               </template>
               <div class={m.bubbleClass}>
                 <p class="chat-text">{m.text}</p>
+                <template lwc:if={m.hasGiftCards}>
+                  <ul class="gift-cards" data-id="gift-cards">
+                    <template for:each={m.giftCards} for:item="g">
+                      <li key={g.key} class="gift-card">
+                        <div class="gift-card-head">
+                          <span class="gift-number" aria-label="Gift number"
+                            >{g.number}</span
+                          >
+                          <div class="gift-card-main">
+                            <p class="gift-type">{g.typeLabel}</p>
+                            <p class="gift-amount">{g.amountDisplay}</p>
+                            <span class={g.statusClass}>{g.statusLabel}</span>
+                          </div>
+                        </div>
+                        <template lwc:if={g.cause}>
+                          <p class="gift-meta">{g.cause}</p>
+                        </template>
+                        <template lwc:if={g.campaign}>
+                          <p class="gift-meta gift-campaign">{g.campaign}</p>
+                        </template>
+                        <template lwc:if={g.nextGift}>
+                          <p class="gift-meta">{g.nextGift}</p>
+                        </template>
+                      </li>
+                    </template>
+                  </ul>
+                </template>
+                <template lwc:if={m.textAfter}>
+                  <p class="chat-text chat-text_after">{m.textAfter}</p>
+                </template>
                 <template for:each={m.links} for:item="l">
                   <a key={l.key} class="chat-link" href={l.href}>{l.label}</a>
                 </template>

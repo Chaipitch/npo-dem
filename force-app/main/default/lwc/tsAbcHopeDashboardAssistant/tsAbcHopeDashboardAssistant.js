@@ -2,12 +2,14 @@ import { LightningElement, api, wire } from "lwc";
 import { markGiftsChanged } from "c/tsAbcHopeGiftEvents";
 import askAgent from "@salesforce/apex/TSAbcHopeDonorAgentController.ask";
 import usesVerifiedAgent from "@salesforce/apex/TSAbcHopeDonorAgentController.usesVerifiedAgent";
+import getMonthlyGifts from "@salesforce/apex/TSAbcHopeDonorPortalController.getMonthlyGifts";
 import {
   campaignCards,
   extractLinks,
   formatDate,
   linkCampaign,
   money,
+  recurringGiftCards,
   recurringSummary,
   sitePath,
   splitList
@@ -18,6 +20,9 @@ const ASK_EVENT = "abchope:ask";
 /** A question about campaigns or giving: the reply's campaigns show as cards (D-49). */
 const CAMPAIGN_QUESTION =
   /campaign|donat|\bgive\b|giving|appeal|drive|fund|christmas|support/i;
+/** A line of the agent's recurring gift list, e.g. "2. Recurring (Monthly): USD 500 per month to …" (D-55). */
+const RECURRING_LINE =
+  /^[ \t]*(?:[-•*]\s*)?(?:\d+[.)]\s*)?Recurring (?:\((?:Weekly|Monthly|Yearly|Custom)\)|gift\b).*$/gim;
 
 /**
  * Donor dashboard Ask panel (D-23, D-51): chat with the ABC Hope Donor Assistant through
@@ -187,8 +192,13 @@ export default class DashboardAssistant extends LightningElement {
     this.sendChat(event.currentTarget.dataset.text);
   }
 
-  addChat(role, text, link) {
+  addChat(role, rawText, link, gifts) {
     this._chatSeq += 1;
+    // With gift cards, the reply's gift lines are dropped: its intro goes above the cards, the rest below (D-55).
+    const around = gifts?.length
+      ? aroundGiftLines(rawText)
+      : { before: rawText, after: "" };
+    const text = around.before;
     // Agent replies: links in the text become buttons ("Donate to <campaign>", D-48).
     const parsed =
       role === "agent"
@@ -212,6 +222,12 @@ export default class DashboardAssistant extends LightningElement {
         links: links.map((l, i) => ({ ...l, key: `m${this._chatSeq}-l${i}` })),
         cards: cards.map((c) => ({ ...c, key: `m${this._chatSeq}-${c.key}` })),
         hasCards: cards.length > 0,
+        giftCards: (gifts || []).map((g) => ({
+          ...g,
+          key: `m${this._chatSeq}-${g.key}`
+        })),
+        hasGiftCards: (gifts || []).length > 0,
+        textAfter: around.after,
         isUser: role === "user",
         rowClass: role === "user" ? "msg msg_user" : "msg msg_agent",
         bubbleClass:
@@ -266,8 +282,10 @@ export default class DashboardAssistant extends LightningElement {
     }
     if (reply.sessionId) this.chatSessionId = reply.sessionId;
     if (!reply.error) {
+      // A recurring gift list in the reply shows as cards instead of text lines (D-55).
+      const gifts = await this.recurringGiftsFor(reply.text);
       // Keep the page link the local answer would have offered (e.g. Manage recurring gifts).
-      this.addChat("agent", reply.text, local?.link);
+      this.addChat("agent", reply.text, local?.link, gifts);
       // The agent may have paused, resumed, changed or cancelled a gift: show the current state.
       if (this.verifiedAgent) markGiftsChanged();
     } else if (local) {
@@ -276,6 +294,21 @@ export default class DashboardAssistant extends LightningElement {
       this.addChat("error", reply.error);
     }
     this.chatBusy = false;
+  }
+
+  /**
+   * The donor's recurring gifts as cards when the reply lists them; fetched fresh, since the agent may have just
+   * paused, resumed, changed or cancelled one. [] when the reply has no list or the gifts cannot be loaded.
+   */
+  async recurringGiftsFor(text) {
+    if (!giftLines(text).length) return [];
+    try {
+      return recurringGiftCards(await getMonthlyGifts(), {
+        currencyLabel: this.currencyLabel
+      });
+    } catch {
+      return [];
+    }
   }
 
   /** Answers about the donor's own giving, from the dashboard data; null = ask the agent. */
@@ -348,4 +381,25 @@ export default class DashboardAssistant extends LightningElement {
     }
     return null;
   }
+}
+
+/** The reply's text before its first recurring gift line and after its last one (the lines show as cards). */
+function aroundGiftLines(text) {
+  const value = String(text || "");
+  const lines = giftLines(value);
+  if (!lines.length) return { before: value, after: "" };
+  const last = lines[lines.length - 1];
+  return {
+    before: value.slice(0, lines[0].index).trim(),
+    after: value.slice(last.index + last[0].length).trim()
+  };
+}
+
+/** The reply's recurring gift lines (a fresh regex each time: a shared global one remembers its position). */
+function giftLines(text) {
+  return [
+    ...String(text || "").matchAll(
+      new RegExp(RECURRING_LINE.source, RECURRING_LINE.flags)
+    )
+  ];
 }
