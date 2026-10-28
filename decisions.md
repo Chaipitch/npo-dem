@@ -625,3 +625,11 @@ instead of failing when it is already scheduled.
   The admin-configured list on the default Christmas Giving 2026 page is unchanged. Live: Girls' Education
   Scholarships shows only Scholarships; Christmas Toy Drive 2026 still shows its three causes, Where Most Needed and
   Non specified.
+
+### D-53 · "Non specified" is the default cause when a campaign has several — Accepted (user, 2026‑10‑28)
+
+- On donation step 1, a campaign with two or more causes now starts on **Non specified** (split across its causes,
+  D-48), shown first in the Support list; donors can still pick one cause. A campaign with one cause starts on that
+  cause (no Non specified or Where Most Needed, D-52). Front end only (`tsAbcHopeDonationJourney`). Live: Christmas
+  Toy Drive 2026 and Christmas Giving 2026 start on Non specified with the split hint; Girls' Education Scholarships
+  starts on Scholarships.

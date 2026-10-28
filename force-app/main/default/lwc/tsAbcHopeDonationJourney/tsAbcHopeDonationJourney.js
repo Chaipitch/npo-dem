@@ -126,7 +126,10 @@ export default class DonationJourney extends LightningElement {
       this.campaignDescription = data.campaignDescription;
       this.designations = data.designations || [];
       this.split = data.split || [];
-      this.designationId = this.designationId || data.defaultDesignationId;
+      // Several causes: "Non specified" (split across them) is the default; else the campaign's cause (D-53).
+      this.designationId =
+        this.designationId ||
+        (this.split.length > 1 ? NON_SPECIFIED : data.defaultDesignationId);
       this.currentDonor = data.currentDonor;
       this.loadError = undefined;
       this.isLoading = false;
@@ -267,7 +270,8 @@ export default class DonationJourney extends LightningElement {
   get designationOptions() {
     const list = [...this.designations];
     if (this.split.length > 1) {
-      list.push({ label: "Non specified", value: NON_SPECIFIED });
+      // First, as it is the default (D-53).
+      list.unshift({ label: "Non specified", value: NON_SPECIFIED });
     }
     return list.map((d) => ({
       ...d,
