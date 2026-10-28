@@ -256,16 +256,40 @@ private class TSAbcHopeAgentActionsTest {
       Date.today().addDays(10),
       'Test Meals'
     );
+    GiftDesignation blankets = new GiftDesignation(
+      Name = 'Test Blankets',
+      IsActive = true
+    );
+    insert blankets;
+    insert new GiftDefaultDesignation(
+      ParentRecordId = [
+        SELECT Id
+        FROM Campaign
+        WHERE Name = 'Test Spring Appeal'
+      ]
+      .Id,
+      GiftDesignationId = blankets.Id,
+      AllocatedPercentage = 0
+    );
+    fundraisingCampaign(
+      'Test Single Cause',
+      Date.today().addDays(10),
+      'Test Wells'
+    );
 
     TSAbcHopeAgentCampaignInfo.Result r = campaignInfo('Test Spring Appeal');
-
-    Assert.isTrue(
-      r.summary.contains(
-        'Causes donors can choose: Test Meals; Where Most Needed'
-      ),
-      r.summary
+    TSAbcHopeAgentCampaignInfo.Result single = campaignInfo(
+      'Test Single Cause'
     );
+
+    Assert.isTrue(r.summary.contains('Test Meals'), r.summary);
+    Assert.isTrue(r.summary.contains('Test Blankets'), r.summary);
+    Assert.isTrue(r.summary.contains('; Where Most Needed\n'), r.summary);
     Assert.isFalse(r.summary.contains('School Supplies'), r.summary);
+    Assert.isTrue(
+      single.summary.contains('Causes donors can choose: Test Wells\n'),
+      'one cause: no Where Most Needed (D-52) ' + single.summary
+    );
   }
 
   @IsTest

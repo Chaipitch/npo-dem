@@ -616,3 +616,12 @@ instead of failing when it is already scheduled.
     `TSAbcHopeAgentMonthlyGifts` now uses this service instead of its own copy of pause / resume / change / cancel.
 - Controller names, the guest profile's class access, permission sets and the agent action classes (names,
   inputs, outputs) are unchanged, so no site-access change and no agent republish. 89 Apex tests pass.
+
+### D-52 · "Where Most Needed" only when a campaign has two or more causes — Accepted (user, 2026‑10‑28)
+
+- With a single cause, "Where Most Needed" adds no real choice, so the donation page's Support list
+  (`TSAbcHopeDonationIntakeService.getOptions`) and the assistant's campaign facts (`TSAbcHopeAgentCampaignInfo`)
+  now add it only when the campaign has two or more active causes. "Non specified" already needed two (D-48).
+  The admin-configured list on the default Christmas Giving 2026 page is unchanged. Live: Girls' Education
+  Scholarships shows only Scholarships; Christmas Toy Drive 2026 still shows its three causes, Where Most Needed and
+  Non specified.

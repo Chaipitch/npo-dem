@@ -464,22 +464,39 @@ private class TSAbcHopeDonationIntakeServiceTest {
   }
 
   @IsTest
-  static void getOptionsWithoutNamesUsesCampaignDefaultsPlusGeneral() {
+  static void getOptionsAddsWhereMostNeededOnlyForSeveralCauses() {
     insert new GiftDesignation(
       Name = TSAbcHopeDonationIntakeService.GENERAL_DESIGNATION,
       IsActive = true
     );
     Test.startTest();
+    TSAbcHopeDonationIntakeDto.Options single = TSAbcHopeDonationIntakeService.getOptions(
+      CAMPAIGN,
+      null
+    );
+    // A second cause: now there is a choice, so "Where Most Needed" is offered too (D-52).
+    insert new GiftDefaultDesignation(
+      ParentRecordId = [SELECT Id FROM Campaign WHERE Name = :CAMPAIGN]
+      .Id,
+      GiftDesignationId = designationId('Test Learning Kits'),
+      AllocatedPercentage = 0
+    );
     TSAbcHopeDonationIntakeDto.Options opts = TSAbcHopeDonationIntakeService.getOptions(
       CAMPAIGN,
       null
     );
     Test.stopTest();
-    Assert.areEqual(2, opts.designations.size());
+    Assert.areEqual(
+      1,
+      single.designations.size(),
+      'one cause: no Where Most Needed'
+    );
+    Assert.areEqual('Test School Supplies', single.designations[0].label);
+    Assert.areEqual(3, opts.designations.size());
     Assert.areEqual('Test School Supplies', opts.designations[0].label);
     Assert.areEqual(
       TSAbcHopeDonationIntakeService.GENERAL_DESIGNATION,
-      opts.designations[1].label
+      opts.designations[2].label
     );
   }
 
