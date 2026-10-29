@@ -696,9 +696,11 @@ instead of failing when it is already scheduled.
   Maya had given to it. `TSAbcHopeAgentGivingSummary` now adds two lines from real data: "Open campaigns the donor
   has given to: …" (campaigns of their counted gifts and active/paused recurring gifts) and "Open campaigns the
   donor has not given to yet: … (Donate: <link>)", against the open campaigns (D-18).
-- Agent v18 (active): the router sends "which campaigns have/haven't I given (contributed, donated) to" to My Giving,
-  which always calls the giving summary first; the Campaign FAQ topic can also call it for that question, since
-  routing between the two is not fully reliable. Both answer only from those lines and share each donate link.
+- Agent v19 (active): the router sends "which campaigns have/haven't I given (contributed, donated) to" to My Giving.
+  In v18 the model sometimes skipped the lookup and told a signed-in donor to sign in, so My Giving now runs the
+  giving summary itself in `before_reasoning` (every turn, not left to the model) and answers from the result; it
+  asks to sign in only when that lookup says the user is not verified. The Campaign FAQ topic can also call it for
+  that question. Both answer only from those lines and share each donate link.
 - Ask panel: a reply that links to campaigns shows cards for exactly those (so campaigns named as already given to
   get no card); a reply without links still shows cards for the campaigns it names when the question is about
   campaigns, giving or contributing.

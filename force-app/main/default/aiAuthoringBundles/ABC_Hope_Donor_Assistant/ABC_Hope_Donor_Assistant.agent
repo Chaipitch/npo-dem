@@ -29,6 +29,8 @@ variables:
         description: "True once a giving lookup confirmed the chat user is a signed-in ABC Hope donor"
     donor_first_name: mutable string = ""
         description: "First name of the verified donor"
+    giving_summary: mutable string = ""
+        description: "The signed-in donor's giving summary, looked up before every my_giving answer (D-59)"
     verified_account_id: mutable string = ""
         description: "Account Id of the signed-in donor. Set only by the ABC Hope dashboard when it starts the conversation through the Agent API (D-23); never taken from what the user types."
         visibility: "External"
@@ -138,10 +140,20 @@ subagent my_giving:
                     description: "Plain-text giving summary, or a note that the user is not signed in"
             target: "apex://TSAbcHopeAgentGivingSummary"
 
+    before_reasoning:
+        run @actions.get_giving_summary
+            with messagingSessionId=@variables.RoutableId
+            with verifiedAccountId=@variables.verified_account_id
+            set @variables.is_verified_donor = @outputs.isVerified
+            set @variables.donor_first_name = @outputs.donorFirstName
+            set @variables.giving_summary = @outputs.summary
+
     reasoning:
         instructions: ->
-            | Always call {!@actions.get_giving_summary} first, for every question in this topic, before answering; then answer from its summary only. Never assume the user is signed out without calling it.
-              Only if its isVerified output is false, explain kindly that they need to sign in on the ABC Hope site to see their giving, and offer to tell them about ABC Hope's campaigns instead.
+            | The donor's giving summary has already been looked up for you. Answer only from it:
+              {!@variables.giving_summary}
+              Donor verified: {!@variables.is_verified_donor}
+              If "Donor verified" is false, explain kindly that their giving is shown only to signed-in donors on the ABC Hope site, and offer to tell them about ABC Hope's campaigns instead. If it is true, never ask them to sign in.
               Never guess amounts, dates or causes. Never reveal another person's information.
               Greet verified donors by first name and highlight the causes they have supported.
               When asked which campaigns the user has not given (contributed, donated) to yet, answer only from the "Open campaigns the donor has not given to yet" line: name each campaign and share its donate link, written out in full. Never work it out from causes. If that line says none, say they have given to every open campaign and thank them.
