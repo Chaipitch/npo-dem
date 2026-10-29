@@ -29,6 +29,12 @@ variables:
         description: "True once a giving lookup confirmed the chat user is a signed-in ABC Hope donor"
     donor_first_name: mutable string = ""
         description: "First name of the verified donor"
+    current_task: mutable string = ""
+        description: "The task a follow-up message continues (monthly_gifts or update_profile); empty otherwise"
+    recurring_gifts: mutable string = ""
+        description: "The signed-in donor's numbered recurring gift list, looked up before every monthly_gifts answer"
+    recurring_note: mutable string = ""
+        description: "The list lookup's message, e.g. that the user is not signed in"
     giving_summary: mutable string = ""
         description: "The signed-in donor's giving summary, looked up before every my_giving answer (D-59)"
     verified_account_id: mutable string = ""
@@ -44,9 +50,16 @@ start_agent agent_router:
     label: "Agent Router"
     description: "Welcome the user and route them to the right ABC Hope topic"
 
+    before_reasoning:
+        if @variables.current_task == "monthly_gifts":
+            transition to @subagent.monthly_gifts
+        if @variables.current_task == "update_profile":
+            transition to @subagent.update_profile
+
     reasoning:
         instructions: ->
-            | Route the user's message to the best topic:
+            | Always route by calling exactly one of your go_to actions; never answer the user yourself.
+              Route the user's message to the best topic:
               - Any question about which campaigns the user has, or has not yet, given, contributed or donated to (for example "Which campaigns haven't I supported?" or "Which one haven't I contributed to?") is about their OWN giving: my_giving, never campaign_faq.
               - Questions about ABC Hope's campaigns (which or how many there are, Christmas Giving 2026 or any other campaign), what donations fund, how or where to donate, amounts, recurring (weekly, monthly or yearly) giving in general, or ABC Hope itself: campaign_faq.
               - Questions about the user's OWN giving, totals, history, causes, impact or journey: my_giving.
@@ -98,6 +111,9 @@ subagent campaign_faq:
                     description: "Plain-text giving summary, or a note that the user is not signed in"
             target: "apex://TSAbcHopeAgentGivingSummary"
 
+    before_reasoning:
+        set @variables.current_task = ""
+
     reasoning:
         instructions: ->
             | Use {!@actions.get_campaign_info} to get campaign facts before answering, then answer only from its summary.
@@ -141,6 +157,7 @@ subagent my_giving:
             target: "apex://TSAbcHopeAgentGivingSummary"
 
     before_reasoning:
+        set @variables.current_task = ""
         run @actions.get_giving_summary
             with messagingSessionId=@variables.RoutableId
             with verifiedAccountId=@variables.verified_account_id
@@ -202,12 +219,27 @@ subagent monthly_gifts:
                     description: "Numbered list of the donor's recurring gifts, each with its type (Weekly, Monthly or Yearly)"
             target: "apex://TSAbcHopeAgentMonthlyGifts"
 
+    before_reasoning:
+        set @variables.current_task = "monthly_gifts"
+        run @actions.manage_monthly_gifts
+            with messagingSessionId=@variables.RoutableId
+            with verifiedAccountId=@variables.verified_account_id
+            with operation="list"
+            set @variables.recurring_gifts = @outputs.monthlyGifts
+            set @variables.recurring_note = @outputs.message
+
     reasoning:
         instructions: ->
-            | First call {!@actions.manage_monthly_gifts} with operation "list" to see the donor's recurring gifts, and show them as a short numbered list with each gift's type, e.g. "Recurring (Weekly)".
-              If the action says the user is not signed in, explain they need to sign in on the ABC Hope site and stop.
+            | The donor's recurring gifts have already been looked up for you (numbered as the donor sees them):
+              {!@variables.recurring_gifts}
+              Lookup note: {!@variables.recurring_note}
+              Use only this list; never invent or guess gifts. When the donor asks to see their gifts, show this list as it is, one gift per line with its number and type, e.g. "Recurring (Weekly)".
+              If the list is empty and the note says the user is not signed in, explain they need to sign in on the ABC Hope site and stop.
               When the donor's message already says which gift and what to do (for pause, how many months, 1 to 12; for change_amount, the new amount in USD), call the action in the same turn without asking for a separate yes. The donor's own request is their confirmation.
               Ask a question only when a detail is missing: which gift (if they have more than one), how many months to pause, or the new amount (the gift stays weekly, monthly or yearly). When the donor answers, carry out the request they started.
+              A pause always starts today and lasts the number of months given; there is no start date to choose. Never ask when a pause should start or for specific dates, and never ask for a yes when the gift number and months are known: call the action with operation "pause" straight away.
+              Follow-up messages in this conversation come straight here. If the user's message is a new request about something else, call the matching go_to action instead of answering: campaigns or donating (go_to_campaign_faq), their giving summary or history (go_to_my_giving), changing contact details (go_to_update_profile), talking to a person (go_to_escalation), anything unrelated (go_to_off_topic).
+              If the donor's message only confirms ("yes", "go ahead", "start right away"), carry out the change discussed just before.
               For cancel, first make sure it is clear which gift; cancelling stops all future payments for it.
               After a change, relay the action's message and the updated list. If it fails, apologise and offer to connect them with the ABC Hope team.
         actions:
@@ -218,6 +250,11 @@ subagent monthly_gifts:
                 with giftNumber=...
                 with pauseMonths=...
                 with newAmount=...
+            go_to_campaign_faq: @utils.transition to @subagent.campaign_faq
+            go_to_my_giving: @utils.transition to @subagent.my_giving
+            go_to_escalation: @utils.transition to @subagent.escalation
+            go_to_off_topic: @utils.transition to @subagent.off_topic
+            go_to_update_profile: @utils.transition to @subagent.update_profile
 
 
 subagent update_profile:
@@ -256,10 +293,14 @@ subagent update_profile:
                     description: "What happened, to relay to the donor"
             target: "apex://TSAbcHopeAgentUpdateProfile"
 
+    before_reasoning:
+        set @variables.current_task = "update_profile"
+
     reasoning:
         instructions: ->
             | Ask which details the donor wants to change and collect the new values.
               When the donor has given the new values, call {!@actions.update_contact_details} in the same turn (their request is their confirmation) and repeat the saved values back.
+              Follow-up messages in this conversation come straight here. If the user's message is a new request about something else, call the matching go_to action instead of answering: campaigns or donating (go_to_campaign_faq), their giving summary or history (go_to_my_giving), their recurring gifts (go_to_monthly_gifts), talking to a person (go_to_escalation), anything unrelated (go_to_off_topic).
               Only pass the fields the donor wants to change. Names can be changed on the My Profile page, not here.
               If the action says the user is not signed in, explain they need to sign in on the ABC Hope site first.
         actions:
@@ -271,11 +312,19 @@ subagent update_profile:
                 with street=...
                 with city=...
                 with country=...
+            go_to_campaign_faq: @utils.transition to @subagent.campaign_faq
+            go_to_my_giving: @utils.transition to @subagent.my_giving
+            go_to_escalation: @utils.transition to @subagent.escalation
+            go_to_off_topic: @utils.transition to @subagent.off_topic
+            go_to_monthly_gifts: @utils.transition to @subagent.monthly_gifts
 
 
 subagent escalation:
     label: "Escalation"
     description: "Handles requests from users who want to transfer or escalate their conversation to a live human agent."
+
+    before_reasoning:
+        set @variables.current_task = ""
 
     reasoning:
         instructions: ->
@@ -288,6 +337,9 @@ subagent escalation:
 subagent off_topic:
     label: "Off Topic"
     description: "Redirect conversation to relevant topics when user request goes off-topic"
+
+    before_reasoning:
+        set @variables.current_task = ""
 
     reasoning:
         instructions: ->
@@ -310,6 +362,9 @@ subagent off_topic:
 subagent ambiguous_question:
     label: "Ambiguous Question"
     description: "Redirect conversation to relevant topics when user request is too ambiguous"
+
+    before_reasoning:
+        set @variables.current_task = ""
 
     reasoning:
         instructions: ->

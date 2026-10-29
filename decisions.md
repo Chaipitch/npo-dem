@@ -718,3 +718,22 @@ instead of failing when it is already scheduled.
 - A line about a campaign that already has a campaign card is left out (no duplicate), and a gift list's
   campaigns get no campaign cards. Recurring gift lists keep their own cards (D-55).
 - Cards have a plain 1px border (the user asked to drop the thicker left accent).
+
+### D-61 · Recurring gift changes in chat: no start-date question, follow-ups stay on task — Accepted (user, 2026‑10‑29)
+
+- "Pause gift number 5 for 2 months" was answered with a question about start dates, and the reply ("start right
+  away") was routed as a new question to the Campaign FAQ. Agent v21 (active):
+  - A pause always starts today; the agent never asks for a start date or a separate yes once gift and months
+    are known.
+  - `current_task` variable: Manage Recurring Gifts and Update Contact Details set it, every other topic clears
+    it, and the router's `before_reasoning` sends the next message straight back to that task. Both tasks can
+    hand off (`go_to_*`) when the person changes subject. The router must always route, never answer itself.
+  - Manage Recurring Gifts looks up the donor's gift list in `before_reasoning` (`recurring_gifts`), so the
+    model cannot skip it and invent gifts (seen live once: "you only have one recurring gift").
+- Agentforce's built-in safety filter (Prompt_Injection / Reverse_Engineering, platform side, before our router)
+  sometimes refuses short or follow-up messages ("2 months", "resume gift 5"). It is not ours to switch off, so
+  the dashboard Ask panel (`tsAbcHopeDashboardAssistant`):
+  - sends a short reply (≤ 4 words, not a question) to an assistant question as "My answer to your question: …";
+  - on the filter's "Sorry, I can't assist with that" reply, asks once more as "Please help me with my ABC Hope
+    request: …" in the same session. The donor only ever sees their own words.
+- The embedded Messaging chat has no such panel, so a refusal can still appear there; rephrasing works.

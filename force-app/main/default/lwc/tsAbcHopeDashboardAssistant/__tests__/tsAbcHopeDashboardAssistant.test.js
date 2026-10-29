@@ -499,4 +499,60 @@ describe("c-ts-abc-hope-dashboard-assistant", () => {
     expect(lastReply(el)).toContain("USD 500 per month");
     expect($(el, '[data-id="gift-cards"]')).toBeNull();
   });
+
+  it("sends a short reply to the assistant's question as an answer to it (D-61)", async () => {
+    askAgent
+      .mockResolvedValueOnce({
+        sessionId: "s-40",
+        text: "How many months would you like to pause gift 5?"
+      })
+      .mockResolvedValueOnce({ sessionId: "s-40", text: "Gift 5 is paused." })
+      .mockResolvedValueOnce({ sessionId: "s-40", text: "Anything else?" })
+      .mockResolvedValueOnce({ sessionId: "s-40", text: "Done." });
+    const el = await mount();
+    usesVerifiedAgent.emit(true);
+    await flush();
+    await ask(el, "I want to pause gift 5");
+    await ask(el, "2 months");
+    expect(askAgent).toHaveBeenLastCalledWith({
+      message: "My answer to your question: 2 months",
+      sessionId: "s-40"
+    });
+    // The donor sees their own words.
+    const userBubbles = $$(el, ".chat-log .msg_user .chat-text");
+    expect(userBubbles.pop().textContent).toBe("2 months");
+    // After a reply that is not a question, a short message goes as typed.
+    await ask(el, "thanks");
+    expect(askAgent).toHaveBeenLastCalledWith({
+      message: "thanks",
+      sessionId: "s-40"
+    });
+    // A longer message, or a question, is never changed.
+    await ask(el, "What is my total?");
+    expect(askAgent).toHaveBeenLastCalledWith({
+      message: "What is my total?",
+      sessionId: "s-40"
+    });
+  });
+
+  it("asks once more in other words when the safety filter refuses (D-61)", async () => {
+    askAgent
+      .mockResolvedValueOnce({
+        sessionId: "s-41",
+        text: "Sorry, I can't assist with that request. I can help with campaigns."
+      })
+      .mockResolvedValueOnce({ sessionId: "s-41", text: "Gift 5 is resumed." });
+    const el = await mount();
+    usesVerifiedAgent.emit(true);
+    await flush();
+    await ask(el, "resume gift 5");
+    await flush();
+    expect(askAgent).toHaveBeenCalledTimes(2);
+    expect(askAgent).toHaveBeenLastCalledWith({
+      message: "Please help me with my ABC Hope request: resume gift 5",
+      sessionId: "s-41"
+    });
+    expect(lastReply(el)).toBe("Gift 5 is resumed.");
+    expect(el.shadowRoot.textContent).not.toContain("Sorry");
+  });
 });

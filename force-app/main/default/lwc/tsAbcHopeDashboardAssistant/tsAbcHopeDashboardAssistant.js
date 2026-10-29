@@ -25,6 +25,12 @@ const CAMPAIGN_QUESTION =
 const RECURRING_LINE =
   /^[ \t]*(?:[-•*]\s*)?(?:\d+[.)]\s*)?Recurring (?:\((?:Weekly|Monthly|Yearly|Custom)\)|gift\b).*$/gim;
 
+/** A reply this short to the assistant's question is sent as an answer to it (D-61). */
+const SHORT_REPLY_WORDS = 4;
+/** The reply Agentforce's safety filter gives when it refuses a message (D-61). */
+const FILTER_REFUSAL = /^\s*Sorry, I can(?:'|’|no)t assist with that/i;
+const RETRY_PREFIX = "Please help me with my ABC Hope request: ";
+
 /**
  * Donor dashboard Ask panel (D-23, D-51): chat with the ABC Hope Donor Assistant through
  * TSAbcHopeDonorAgentController. Questions typed in the header box or sent with /dashboard?ask=… are asked
@@ -290,6 +296,7 @@ export default class DashboardAssistant extends LightningElement {
     const text = (raw || "").trim();
     if (!text || this.chatBusy) return;
     this._lastQuestion = text;
+    const outgoing = this.withContext(text);
     this.addChat("user", text);
     this.chatDraft = "";
     const local = this.localAnswer(text);
@@ -299,16 +306,11 @@ export default class DashboardAssistant extends LightningElement {
       return;
     }
     this.chatBusy = true;
-    let reply;
-    try {
-      reply = await askAgent({
-        message: text,
-        sessionId: this.chatSessionId || null
-      });
-    } catch {
-      reply = { error: "The assistant could not answer right now." };
+    let reply = await this.askOnce(outgoing);
+    // Agentforce's safety filter sometimes refuses an ordinary request; ask once more in other words (D-61).
+    if (!reply.error && FILTER_REFUSAL.test(reply.text || "")) {
+      reply = await this.askOnce(`${RETRY_PREFIX}${text}`);
     }
-    if (reply.sessionId) this.chatSessionId = reply.sessionId;
     if (!reply.error) {
       // A recurring gift list in the reply shows as cards instead of text lines (D-55).
       const gifts = await this.recurringGiftsFor(reply.text);
@@ -322,6 +324,37 @@ export default class DashboardAssistant extends LightningElement {
       this.addChat("error", reply.error);
     }
     this.chatBusy = false;
+  }
+
+  /** One message to the agent; keeps the session for the next one. */
+  async askOnce(message) {
+    let reply;
+    try {
+      reply = await askAgent({
+        message,
+        sessionId: this.chatSessionId || null
+      });
+    } catch {
+      reply = { error: "The assistant could not answer right now." };
+    }
+    if (reply.sessionId) this.chatSessionId = reply.sessionId;
+    return reply;
+  }
+
+  /**
+   * A short reply ("2 months", "yes") to the assistant's question, sent as an answer to it. Agentforce's own
+   * safety filter sometimes reads a bare reply as an attempt to probe the agent and refuses it (D-61); the
+   * donor still sees their own words.
+   */
+  withContext(text) {
+    const last = [...this.chatMessages].reverse().find((m) => !m.isUser);
+    const asked = `${last?.text || ""} ${last?.textAfter || ""}`
+      .trim()
+      .endsWith("?");
+    const short = text.split(/\s+/).length <= SHORT_REPLY_WORDS;
+    return asked && short && !text.endsWith("?")
+      ? `My answer to your question: ${text}`
+      : text;
   }
 
   /**
