@@ -114,16 +114,6 @@ p {
   height: 100%;
   object-fit: cover;
 }
-.banner-credit {
-  position: absolute;
-  right: 12px;
-  bottom: 10px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.45);
-  color: #fff;
-  font-size: 11px;
-}
 .loading {
   text-align: center;
   color: var(--dj-muted);

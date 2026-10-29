@@ -55,15 +55,6 @@ ol {
   object-position: center 60%;
 }
 
-.banner-credit {
-  position: absolute;
-  right: 14px;
-  bottom: 8px;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.8);
-  z-index: 1;
-}
-
 .banner-shade {
   position: absolute;
   inset: 0;

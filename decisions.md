@@ -682,3 +682,10 @@ instead of failing when it is already scheduled.
 - **Data:** `scripts/apex/seedProgramImages.apex` filled all 10 programs: the three story programs with the photos
   the stories already showed (so the dashboard looks the same; their program pages now show those photos too), the
   others with the photo their program page already showed. Live: /program?name=Clean Water shows its record's photo.
+
+### D-58 · No photo credits on the site — Accepted (user, 2026‑10‑29)
+
+- The "Photo: … / Unsplash" captions were removed from the dashboard banner, home carousel, campaign and program
+  pages and the donation journey banner, and the credit tooltips from the dashboard campaign cards and stories (with
+  their CSS). The credit values still exist in `c/tsAbcHopeCampaignPhotos` and the builder properties, unused by the
+  pages. Live: no "Photo:" text or credit tooltip on /, /donate, /program, /dashboard or /campaign.
