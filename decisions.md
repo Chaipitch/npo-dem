@@ -682,3 +682,58 @@ instead of failing when it is already scheduled.
 - **Data:** `scripts/apex/seedProgramImages.apex` filled all 10 programs: the three story programs with the photos
   the stories already showed (so the dashboard looks the same; their program pages now show those photos too), the
   others with the photo their program page already showed. Live: /program?name=Clean Water shows its record's photo.
+
+### D-58 · No photo credits on the site — Accepted (user, 2026‑10‑29)
+
+- The "Photo: … / Unsplash" captions were removed from the dashboard banner, home carousel, campaign and program
+  pages and the donation journey banner, and the credit tooltips from the dashboard campaign cards and stories (with
+  their CSS). The credit values still exist in `c/tsAbcHopeCampaignPhotos` and the builder properties, unused by the
+  pages. Live: no "Photo:" text or credit tooltip on /, /donate, /program, /dashboard or /campaign.
+
+### D-59 · The assistant can tell a donor which open campaigns they haven't given to — Accepted (user, 2026‑10‑29)
+
+- The agent used to guess from causes ("Girls' Education Scholarships may not match your past giving") — wrong, as
+  Maya had given to it. `TSAbcHopeAgentGivingSummary` now adds two lines from real data: "Open campaigns the donor
+  has given to: …" (campaigns of their counted gifts and active/paused recurring gifts) and "Open campaigns the
+  donor has not given to yet: … (Donate: <link>)", against the open campaigns (D-18).
+- Agent v19 (active): the router sends "which campaigns have/haven't I given (contributed, donated) to" to My Giving.
+  In v18 the model sometimes skipped the lookup and told a signed-in donor to sign in, so My Giving now runs the
+  giving summary itself in `before_reasoning` (every turn, not left to the model) and answers from the result; it
+  asks to sign in only when that lookup says the user is not verified. The Campaign FAQ topic can also call it for
+  that question. Both answer only from those lines and share each donate link.
+- Ask panel: a reply that links to campaigns shows cards for exactly those (so campaigns named as already given to
+  get no card); a reply without links still shows cards for the campaigns it names when the question is about
+  campaigns, giving or contributing.
+- Maya has given to all 7 open campaigns, so her answer is "none". The cards for not-yet campaigns are covered by
+  Apex and Jest tests.
+
+### D-60 · Lists in assistant replies show as cards — Accepted (user, 2026‑10‑29)
+
+- A list in an Ask panel reply (bulleted, numbered, or two or more plain lines in a row) shows as one card per
+  line instead of text lines; the text before it stays above the cards and the rest below. Parsing is in
+  `chatList` (`tsAbcHopeDashboardUtils`), so it needs no agent change.
+- Gift lines ("USD 1,000 on 10/28/2026 to Toys & Gifts (Christmas Toy Drive 2026)", or date first) become gift
+  cards: amount, date (28 Oct 2026), causes and campaign. Other lines become a title and a detail
+  ("Name — detail" or "Name: detail").
+- A line about a campaign that already has a campaign card is left out (no duplicate), and a gift list's
+  campaigns get no campaign cards. Recurring gift lists keep their own cards (D-55).
+- Cards have a plain 1px border (the user asked to drop the thicker left accent).
+
+### D-61 · Recurring gift changes in chat: no start-date question, follow-ups stay on task — Accepted (user, 2026‑10‑29)
+
+- "Pause gift number 5 for 2 months" was answered with a question about start dates, and the reply ("start right
+  away") was routed as a new question to the Campaign FAQ. Agent v21 (active):
+  - A pause always starts today; the agent never asks for a start date or a separate yes once gift and months
+    are known.
+  - `current_task` variable: Manage Recurring Gifts and Update Contact Details set it, every other topic clears
+    it, and the router's `before_reasoning` sends the next message straight back to that task. Both tasks can
+    hand off (`go_to_*`) when the person changes subject. The router must always route, never answer itself.
+  - Manage Recurring Gifts looks up the donor's gift list in `before_reasoning` (`recurring_gifts`), so the
+    model cannot skip it and invent gifts (seen live once: "you only have one recurring gift").
+- Agentforce's built-in safety filter (Prompt_Injection / Reverse_Engineering, platform side, before our router)
+  sometimes refuses short or follow-up messages ("2 months", "resume gift 5"). It is not ours to switch off, so
+  the dashboard Ask panel (`tsAbcHopeDashboardAssistant`):
+  - sends a short reply (≤ 4 words, not a question) to an assistant question as "My answer to your question: …";
+  - on the filter's "Sorry, I can't assist with that" reply, asks once more as "Please help me with my ABC Hope
+    request: …" in the same session. The donor only ever sees their own words.
+- The embedded Messaging chat has no such panel, so a refusal can still appear there; rephrasing works.

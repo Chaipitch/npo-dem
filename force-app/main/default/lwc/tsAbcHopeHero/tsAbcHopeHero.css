@@ -187,15 +187,6 @@
   }
 }
 
-.credit {
-  position: absolute;
-  left: 14px;
-  bottom: 10px;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.75);
-  z-index: 1;
-}
-
 /* Carousel controls */
 .arrow {
   position: absolute;
@@ -287,11 +278,5 @@
     top: 28%;
     width: 38px;
     height: 38px;
-  }
-  .credit {
-    left: auto;
-    right: 12px;
-    top: 10px;
-    bottom: auto;
   }
 }

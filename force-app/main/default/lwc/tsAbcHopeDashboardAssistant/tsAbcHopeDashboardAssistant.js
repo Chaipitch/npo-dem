@@ -5,6 +5,7 @@ import usesVerifiedAgent from "@salesforce/apex/TSAbcHopeDonorAgentController.us
 import getMonthlyGifts from "@salesforce/apex/TSAbcHopeDonorPortalController.getMonthlyGifts";
 import {
   campaignCards,
+  chatList,
   extractLinks,
   formatDate,
   linkCampaign,
@@ -19,10 +20,16 @@ import {
 const ASK_EVENT = "abchope:ask";
 /** A question about campaigns or giving: the reply's campaigns show as cards (D-49). */
 const CAMPAIGN_QUESTION =
-  /campaign|donat|\bgive\b|giving|appeal|drive|fund|christmas|support/i;
+  /campaign|donat|\bgive\b|giving|contribut|appeal|drive|fund|christmas|support/i;
 /** A line of the agent's recurring gift list, e.g. "2. Recurring (Monthly): USD 500 per month to …" (D-55). */
 const RECURRING_LINE =
   /^[ \t]*(?:[-•*]\s*)?(?:\d+[.)]\s*)?Recurring (?:\((?:Weekly|Monthly|Yearly|Custom)\)|gift\b).*$/gim;
+
+/** A reply this short to the assistant's question is sent as an answer to it (D-61). */
+const SHORT_REPLY_WORDS = 4;
+/** The reply Agentforce's safety filter gives when it refuses a message (D-61). */
+const FILTER_REFUSAL = /^\s*Sorry, I can(?:'|’|no)t assist with that/i;
+const RETRY_PREFIX = "Please help me with my ABC Hope request: ";
 
 /**
  * Donor dashboard Ask panel (D-23, D-51): chat with the ABC Hope Donor Assistant through
@@ -209,16 +216,33 @@ export default class DashboardAssistant extends LightningElement {
         : { text, links: [] };
     let links = [...parsed.links];
     if (link && !links.some((l) => l.href === link.href)) links.push(link);
-    // Campaign answers show a card per campaign (D-49); its Donate button replaces the plain link.
+    // A list in an agent reply shows as cards (D-60), e.g. "Show my recent gifts".
+    const list =
+      role === "agent" && !gifts?.length
+        ? chatList(parsed.text)
+        : { before: parsed.text, items: [], after: around.after };
+    // Campaign answers show a card per campaign (D-49); its Donate button replaces the plain link. A gift
+    // list's campaigns are part of each gift, not campaigns to show.
     const cards =
-      role === "agent" ? this.chatCampaignCards(parsed.text, links) : [];
+      role === "agent"
+        ? this.chatCampaignCards(
+            list.gifts ? `${list.before}\n${list.after}` : parsed.text,
+            links
+          )
+        : [];
     const shown = new Set(cards.map((c) => c.name.toLowerCase()));
     links = links.filter((l) => !shown.has(linkCampaign(l.href)));
+    // A list line about a campaign that already has a card is left out.
+    const items = list.items.filter(
+      (it) =>
+        it.isGift ||
+        ![...shown].some((name) => it.title.toLowerCase().includes(name))
+    );
     this.chatMessages = [
       ...this.chatMessages,
       {
         key: `m${this._chatSeq}`,
-        text: parsed.text,
+        text: list.before,
         links: links.map((l, i) => ({ ...l, key: `m${this._chatSeq}-l${i}` })),
         cards: cards.map((c) => ({ ...c, key: `m${this._chatSeq}-${c.key}` })),
         hasCards: cards.length > 0,
@@ -227,7 +251,12 @@ export default class DashboardAssistant extends LightningElement {
           key: `m${this._chatSeq}-${g.key}`
         })),
         hasGiftCards: (gifts || []).length > 0,
-        textAfter: around.after,
+        listCards: items.map((it) => ({
+          ...it,
+          key: `m${this._chatSeq}-${it.key}`
+        })),
+        hasListCards: items.length > 0,
+        textAfter: list.after,
         isUser: role === "user",
         rowClass: role === "user" ? "msg msg_user" : "msg msg_agent",
         bubbleClass:
@@ -245,8 +274,13 @@ export default class DashboardAssistant extends LightningElement {
    * question was about campaigns or giving (e.g. "Which campaigns are open?").
    */
   chatCampaignCards(text, links) {
-    const linked = new Set(links.map((l) => linkCampaign(l.href)));
-    const aboutCampaigns = CAMPAIGN_QUESTION.test(this._lastQuestion || "");
+    const linked = new Set(
+      links.map((l) => linkCampaign(l.href)).filter(Boolean)
+    );
+    // A reply that links to campaigns is about exactly those (e.g. "not given to yet" leaves out the ones
+    // named as already given to, D-59); without links, the campaigns it names when the question is about them.
+    const aboutCampaigns =
+      linked.size === 0 && CAMPAIGN_QUESTION.test(this._lastQuestion || "");
     const lower = (text || "").toLowerCase();
     return campaignCards(this.campaigns, {
       campaignImages: this.campaignImages,
@@ -262,6 +296,7 @@ export default class DashboardAssistant extends LightningElement {
     const text = (raw || "").trim();
     if (!text || this.chatBusy) return;
     this._lastQuestion = text;
+    const outgoing = this.withContext(text);
     this.addChat("user", text);
     this.chatDraft = "";
     const local = this.localAnswer(text);
@@ -271,16 +306,11 @@ export default class DashboardAssistant extends LightningElement {
       return;
     }
     this.chatBusy = true;
-    let reply;
-    try {
-      reply = await askAgent({
-        message: text,
-        sessionId: this.chatSessionId || null
-      });
-    } catch {
-      reply = { error: "The assistant could not answer right now." };
+    let reply = await this.askOnce(outgoing);
+    // Agentforce's safety filter sometimes refuses an ordinary request; ask once more in other words (D-61).
+    if (!reply.error && FILTER_REFUSAL.test(reply.text || "")) {
+      reply = await this.askOnce(`${RETRY_PREFIX}${text}`);
     }
-    if (reply.sessionId) this.chatSessionId = reply.sessionId;
     if (!reply.error) {
       // A recurring gift list in the reply shows as cards instead of text lines (D-55).
       const gifts = await this.recurringGiftsFor(reply.text);
@@ -294,6 +324,37 @@ export default class DashboardAssistant extends LightningElement {
       this.addChat("error", reply.error);
     }
     this.chatBusy = false;
+  }
+
+  /** One message to the agent; keeps the session for the next one. */
+  async askOnce(message) {
+    let reply;
+    try {
+      reply = await askAgent({
+        message,
+        sessionId: this.chatSessionId || null
+      });
+    } catch {
+      reply = { error: "The assistant could not answer right now." };
+    }
+    if (reply.sessionId) this.chatSessionId = reply.sessionId;
+    return reply;
+  }
+
+  /**
+   * A short reply ("2 months", "yes") to the assistant's question, sent as an answer to it. Agentforce's own
+   * safety filter sometimes reads a bare reply as an attempt to probe the agent and refuses it (D-61); the
+   * donor still sees their own words.
+   */
+  withContext(text) {
+    const last = [...this.chatMessages].reverse().find((m) => !m.isUser);
+    const asked = `${last?.text || ""} ${last?.textAfter || ""}`
+      .trim()
+      .endsWith("?");
+    const short = text.split(/\s+/).length <= SHORT_REPLY_WORDS;
+    return asked && short && !text.endsWith("?")
+      ? `My answer to your question: ${text}`
+      : text;
   }
 
   /**

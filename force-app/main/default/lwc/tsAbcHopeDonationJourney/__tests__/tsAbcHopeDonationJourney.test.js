@@ -147,7 +147,7 @@ describe("c-ts-abc-hope-donation-journey", () => {
     await flush();
     const img = $(el, '[data-id="banner"] img');
     expect(img.getAttribute("src")).toContain("images.unsplash.com");
-    expect($(el, ".banner-credit").textContent).toContain("Unsplash");
+    expect($(el, ".banner-credit")).toBeNull(); // no photo credit on the page
     click($(el, '[data-id="next"]'));
     await flush();
     expect($(el, '[data-id="banner"]')).not.toBeNull();

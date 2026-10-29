@@ -3,7 +3,7 @@
     <template for:each={storyCards} for:item="s">
       <article key={s.key} class="story">
         <div class="story-art" aria-hidden="true">
-          <img src={s.imageUrl} alt="" title={s.imageCredit} loading="lazy" />
+          <img src={s.imageUrl} alt="" loading="lazy" />
         </div>
         <div class="story-body">
           <span class={s.tagClass}>{s.tag}</span>

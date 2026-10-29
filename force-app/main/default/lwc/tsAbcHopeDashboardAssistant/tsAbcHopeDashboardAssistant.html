@@ -125,6 +125,26 @@
                     </template>
                   </ul>
                 </template>
+                <template lwc:if={m.hasListCards}>
+                  <ul class="list-cards" data-id="list-cards">
+                    <template for:each={m.listCards} for:item="it">
+                      <li key={it.key} class="list-card">
+                        <div class="list-card-head">
+                          <p class="list-card-title">{it.title}</p>
+                          <template lwc:if={it.date}>
+                            <span class="list-card-date">{it.date}</span>
+                          </template>
+                        </div>
+                        <template lwc:if={it.detail}>
+                          <p class="list-card-detail">{it.detail}</p>
+                        </template>
+                        <template lwc:if={it.campaign}>
+                          <p class="list-card-campaign">{it.campaign}</p>
+                        </template>
+                      </li>
+                    </template>
+                  </ul>
+                </template>
                 <template lwc:if={m.textAfter}>
                   <p class="chat-text chat-text_after">{m.textAfter}</p>
                 </template>

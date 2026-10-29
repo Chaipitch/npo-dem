@@ -399,6 +399,41 @@ private class TSAbcHopeAgentActionsTest {
   }
 
   @IsTest
+  static void givingSummaryListsOpenCampaignsNotGivenToYet() {
+    fundraisingCampaign(CAMPAIGN, Date.today().addDays(30), 'School Supplies');
+    fundraisingCampaign(
+      'Test Spring Appeal',
+      Date.today().addDays(30),
+      'Trees'
+    );
+    Id accountId = createDonorWithMonthlyGift('campaigns@example.com', 500);
+    TSAbcHopeAgentSupport.accountIdOverride = accountId;
+    TSAbcHopeAgentGivingSummary.Request req = new TSAbcHopeAgentGivingSummary.Request();
+    req.messagingSessionId = 'session';
+    Test.startTest();
+    TSAbcHopeAgentGivingSummary.Result r = TSAbcHopeAgentGivingSummary.getSummary(
+      new List<TSAbcHopeAgentGivingSummary.Request>{ req }
+    )[0];
+    Test.stopTest();
+    Assert.isTrue(
+      r.summary.contains(
+        'Open campaigns the donor has given to: ' + CAMPAIGN + '\n'
+      ),
+      r.summary
+    );
+    Assert.isTrue(
+      r.summary.contains(
+        'Open campaigns the donor has not given to yet: Test Spring Appeal (Donate: '
+      ),
+      r.summary
+    );
+    Assert.isTrue(
+      r.summary.contains('/donate?campaign=Test%20Spring%20Appeal)'),
+      r.summary
+    );
+  }
+
+  @IsTest
   static void givingSummaryNamesProgramsNotCauses() {
     Program edu = new Program(
       Name = 'Test Education Access',
