@@ -252,3 +252,108 @@ export function recurringGiftCards(gifts, { currencyLabel = "USD" } = {}) {
     };
   });
 }
+
+/** A list line's bullet or number ("- ", "• ", "2. ", "3) "). */
+const LIST_MARK = /^\s*(?:[-•*]|\d+[.)])\s+/;
+/** A gift's amount, date, causes and campaign, in either order: "USD 1,000 on 10/28/2026 to Books (Toy Drive)"
+ * or "10/28/2026: USD 1,000 to Books (Toy Drive)" (also "28 Oct 2026 — …"). */
+const AMOUNT = "([A-Z]{3}\\s?[\\d,]+(?:\\.\\d+)?)";
+const DATE = "(\\d{1,2}\\/\\d{1,2}\\/\\d{4}|\\d{1,2} [A-Z][a-z]{2,8} \\d{4})";
+const CAUSES = "(?:\\s+to\\s+(.+?))?(?:\\s+\\(([^()]+)\\))?\\.?$";
+const GIFT_AMOUNT_FIRST = new RegExp(`^${AMOUNT}\\s+on\\s+${DATE}${CAUSES}`);
+const GIFT_DATE_FIRST = new RegExp(
+  `^${DATE}\\s*(?::|[—–-])\\s*${AMOUNT}${CAUSES}`
+);
+
+/**
+ * The first list in a chat reply, so it can show as cards (D-60): lines with a bullet or number, or two or more
+ * lines in a row of one paragraph (a line ending in ":" stays the list's heading). Gift lines are split into
+ * amount, date, causes and campaign; other items into a title and a detail ("Name — detail" or "Name: detail").
+ * Returns { before, items, after, gifts } where gifts is true when every item is a gift; items is [] without a list.
+ */
+export function chatList(text) {
+  const value = String(text || "");
+  const lines = value.split("\n");
+  const isItem = (i) => {
+    const line = lines[i]?.trim();
+    if (!line) return false;
+    if (LIST_MARK.test(line)) return true;
+    // A heading ("Your recent gifts:") or a long sentence is text, not a list item.
+    if (line.endsWith(":") || line.length > 160) return false;
+    // Without bullets, a paragraph's lines are a list when the line next to it is a plain line too (not a
+    // heading, and not a bulleted list this line introduces).
+    const plain = (other) =>
+      Boolean(other) && !other.endsWith(":") && !LIST_MARK.test(other);
+    return plain(lines[i - 1]?.trim()) || plain(lines[i + 1]?.trim());
+  };
+  const start = lines.findIndex((l, i) => isItem(i));
+  let end = start;
+  while (start >= 0 && end + 1 < lines.length && isItem(end + 1)) end += 1;
+  if (start < 0 || end === start) {
+    return { before: value.trim(), items: [], after: "", gifts: false };
+  }
+  const items = lines
+    .slice(start, end + 1)
+    .map((l, i) => listItem(l.replace(LIST_MARK, "").trim(), i));
+  return {
+    before: lines.slice(0, start).join("\n").trim(),
+    items,
+    after: lines
+      .slice(end + 1)
+      .join("\n")
+      .trim(),
+    gifts: items.every((it) => it.isGift)
+  };
+}
+
+function listItem(raw, i) {
+  // Bold marks go, and so does a dash or colon left at the end once a link was taken out.
+  const line = raw
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\s*[—–:-]\s*$/, "");
+  let gift = GIFT_AMOUNT_FIRST.exec(line);
+  if (gift)
+    gift = {
+      amount: gift[1],
+      date: gift[2],
+      causes: gift[3],
+      campaign: gift[4]
+    };
+  else {
+    gift = GIFT_DATE_FIRST.exec(line);
+    if (gift)
+      gift = {
+        date: gift[1],
+        amount: gift[2],
+        causes: gift[3],
+        campaign: gift[4]
+      };
+  }
+  if (gift) {
+    return {
+      key: `li${i}`,
+      isGift: true,
+      title: gift.amount.replace(/^([A-Z]{3})(?=\d)/, "$1 "),
+      date: giftDate(gift.date),
+      detail: gift.causes || "",
+      campaign: gift.campaign || ""
+    };
+  }
+  const split = /^(.{2,80}?)(?:\s+[—–]\s+|:\s+)(.+)$/.exec(line);
+  return {
+    key: `li${i}`,
+    isGift: false,
+    title: split ? split[1] : line,
+    date: "",
+    detail: split ? split[2] : "",
+    campaign: ""
+  };
+}
+
+/** "10/28/2026" (month first, as the agent writes it) as "28 Oct 2026"; any other date as written. */
+function giftDate(value) {
+  const us = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(value);
+  return us
+    ? formatDate(`${us[3]}-${us[1].padStart(2, "0")}-${us[2].padStart(2, "0")}`)
+    : value;
+}

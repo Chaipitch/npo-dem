@@ -139,8 +139,82 @@ describe("c-ts-abc-hope-dashboard-assistant", () => {
       .dispatchEvent(new CustomEvent("click"));
     await flush();
     expect(lastReply(el)).toContain("Your most recent gifts:");
-    expect(lastReply(el)).toContain("USD 1,000 to Food Insecurity Fund");
+    // The bullet list shows as cards (D-60).
+    const card = $(el, '[data-id="list-cards"] .list-card');
+    expect(card.querySelector(".list-card-title").textContent).toBe(
+      "USD 1,000"
+    );
+    expect(card.querySelector(".list-card-detail").textContent).toBe(
+      "Food Insecurity Fund"
+    );
     expect(askAgent).not.toHaveBeenCalled();
+  });
+
+  it("shows the agent's gift list as cards (D-60)", async () => {
+    askAgent.mockResolvedValue({
+      sessionId: "s-30",
+      text: "Hi Maya! Here are your most recent gifts:\n\nUSD 1,000 on 10/28/2026 to Toys & Gifts, Books for Kids (Christmas Toy Drive 2026)\nUSD 300 on 10/28/2026 to School Supplies (Christmas Giving 2026)\nUSD 1,000 on 10/27/2026 to Handwashing Stations (Clean Water for Rural Schools)\n\nWould you like to learn more about your impact?"
+    });
+    const el = await mount({
+      campaigns: [{ id: "c1", name: "Christmas Toy Drive 2026", raised: 10 }]
+    });
+    await ask(el, "Show my recent giving");
+    const bubble = $$(el, ".chat-log .bubble_agent").pop();
+    expect(bubble.querySelector(".chat-text").textContent).toBe(
+      "Hi Maya! Here are your most recent gifts:"
+    );
+    expect(bubble.querySelector(".chat-text_after").textContent).toBe(
+      "Would you like to learn more about your impact?"
+    );
+    const cards = $$(el, '[data-id="list-cards"] .list-card');
+    expect(cards).toHaveLength(3);
+    const t = (n, sel) => n.querySelector(sel).textContent.trim();
+    expect(t(cards[0], ".list-card-title")).toBe("USD 1,000");
+    expect(t(cards[0], ".list-card-date")).toBe("28 Oct 2026");
+    expect(t(cards[0], ".list-card-detail")).toBe(
+      "Toys & Gifts, Books for Kids"
+    );
+    expect(t(cards[0], ".list-card-campaign")).toBe("Christmas Toy Drive 2026");
+    expect(t(cards[2], ".list-card-date")).toBe("27 Oct 2026");
+    // A gift's campaign is part of the gift: no campaign cards for it.
+    expect($(el, '[data-id="chat-cards"]')).toBeNull();
+  });
+
+  it("leaves out list lines for campaigns that have a card", async () => {
+    askAgent.mockResolvedValue({
+      sessionId: "s-31",
+      text: "You have given to every open campaign, including:\n\nChristmas Toy Drive 2026\nClean Water\n\nThank you!"
+    });
+    const el = await mount({
+      campaigns: [
+        { id: "c1", name: "Christmas Toy Drive 2026", raised: 10 },
+        { id: "c2", name: "Clean Water", raised: 5 }
+      ]
+    });
+    await ask(el, "Which campaigns have I given to?");
+    expect($$(el, '[data-id="chat-cards"] .chat-card')).toHaveLength(2);
+    expect($(el, '[data-id="list-cards"]')).toBeNull();
+    const bubble = $$(el, ".chat-log .bubble_agent").pop();
+    expect(bubble.textContent).not.toContain("Clean Water\n");
+    expect(bubble.querySelector(".chat-text_after").textContent).toBe(
+      "Thank you!"
+    );
+  });
+
+  it("shows a bulleted list of programs as titled cards", async () => {
+    askAgent.mockResolvedValue({
+      sessionId: "s-32",
+      text: "Your gifts fund:\n- Clean Water — wells and filters\n- Education Access: books and scholarships"
+    });
+    const el = await mount();
+    await ask(el, "Tell me about the programs");
+    const cards = $$(el, '[data-id="list-cards"] .list-card');
+    expect(
+      cards.map((c) => c.querySelector(".list-card-title").textContent)
+    ).toEqual(["Clean Water", "Education Access"]);
+    expect(cards[1].querySelector(".list-card-detail").textContent).toBe(
+      "books and scholarships"
+    );
   });
 
   it("points recurring gift requests to My Giving", async () => {
@@ -261,7 +335,12 @@ describe("c-ts-abc-hope-dashboard-assistant", () => {
     const el = await mount();
     await ask(el, "I want to donate to Christmas Gift");
     expect(lastReply(el)).not.toContain("https://");
-    expect(lastReply(el)).toContain("1. Christmas Giving 2026");
+    // The numbered choices show as cards (D-60).
+    expect(
+      $$(el, '[data-id="list-cards"] .list-card-title').map(
+        (n) => n.textContent
+      )
+    ).toEqual(["Christmas Giving 2026", "Christmas Toy Drive 2026"]);
     expect(
       $$(el, ".chat-log a.chat-link").map((a) => [
         a.textContent,

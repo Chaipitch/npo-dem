@@ -1,5 +1,6 @@
 import {
   campaignCards,
+  chatList,
   extractLinks,
   money,
   recurringSummary
@@ -117,5 +118,56 @@ describe("tsAbcHopeDashboardUtils", () => {
       text: "No links here.",
       links: []
     });
+  });
+
+  it("finds the list in a chat reply (D-60)", () => {
+    const gifts = chatList(
+      "Here are your gifts:\n\nUSD 1,000 on 10/28/2026 to Toys & Gifts (Christmas Toy Drive 2026)\nUSD 300 on 1/5/2026\n\nAnything else?"
+    );
+    expect(gifts.before).toBe("Here are your gifts:");
+    expect(gifts.after).toBe("Anything else?");
+    expect(gifts.gifts).toBe(true);
+    expect(gifts.items[0]).toMatchObject({
+      title: "USD 1,000",
+      date: "28 Oct 2026",
+      detail: "Toys & Gifts",
+      campaign: "Christmas Toy Drive 2026"
+    });
+    expect(gifts.items[1]).toMatchObject({
+      title: "USD 300",
+      date: "5 Jan 2026",
+      detail: "",
+      campaign: ""
+    });
+
+    // Date first, as the agent also writes it, and the dashboard's own "1 Jun 2025: …" lines.
+    expect(
+      chatList(
+        "10/27/2026: USD 1,000 to Handwashing Stations (Clean Water for Rural Schools)\n1 Jun 2025: USD 50 to Food"
+      ).items.map((i) => [i.title, i.date, i.detail, i.campaign])
+    ).toEqual([
+      [
+        "USD 1,000",
+        "27 Oct 2026",
+        "Handwashing Stations",
+        "Clean Water for Rural Schools"
+      ],
+      ["USD 50", "1 Jun 2025", "Food", ""]
+    ]);
+
+    const titled = chatList(
+      "Which one?\n1. **Clean Water** — wells\n2) Books: reading for kids"
+    );
+    expect(titled.before).toBe("Which one?");
+    expect(titled.gifts).toBe(false);
+    expect(titled.items.map((i) => [i.title, i.detail])).toEqual([
+      ["Clean Water", "wells"],
+      ["Books", "reading for kids"]
+    ]);
+
+    // Paragraphs and a single line are text, not a list.
+    expect(chatList("Hi Maya!\n\nYou gave USD 5.").items).toEqual([]);
+    expect(chatList("Your gifts:\n- one").items).toEqual([]);
+    expect(chatList("").before).toBe("");
   });
 });

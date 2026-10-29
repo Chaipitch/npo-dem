@@ -706,3 +706,15 @@ instead of failing when it is already scheduled.
   campaigns, giving or contributing.
 - Maya has given to all 7 open campaigns, so her answer is "none". The cards for not-yet campaigns are covered by
   Apex and Jest tests.
+
+### D-60 · Lists in assistant replies show as cards — Accepted (user, 2026‑10‑29)
+
+- A list in an Ask panel reply (bulleted, numbered, or two or more plain lines in a row) shows as one card per
+  line instead of text lines; the text before it stays above the cards and the rest below. Parsing is in
+  `chatList` (`tsAbcHopeDashboardUtils`), so it needs no agent change.
+- Gift lines ("USD 1,000 on 10/28/2026 to Toys & Gifts (Christmas Toy Drive 2026)", or date first) become gift
+  cards: amount, date (28 Oct 2026), causes and campaign. Other lines become a title and a detail
+  ("Name — detail" or "Name: detail").
+- A line about a campaign that already has a campaign card is left out (no duplicate), and a gift list's
+  campaigns get no campaign cards. Recurring gift lists keep their own cards (D-55).
+- Cards have a plain 1px border (the user asked to drop the thicker left accent).

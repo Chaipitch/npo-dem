@@ -5,6 +5,7 @@ import usesVerifiedAgent from "@salesforce/apex/TSAbcHopeDonorAgentController.us
 import getMonthlyGifts from "@salesforce/apex/TSAbcHopeDonorPortalController.getMonthlyGifts";
 import {
   campaignCards,
+  chatList,
   extractLinks,
   formatDate,
   linkCampaign,
@@ -209,16 +210,33 @@ export default class DashboardAssistant extends LightningElement {
         : { text, links: [] };
     let links = [...parsed.links];
     if (link && !links.some((l) => l.href === link.href)) links.push(link);
-    // Campaign answers show a card per campaign (D-49); its Donate button replaces the plain link.
+    // A list in an agent reply shows as cards (D-60), e.g. "Show my recent gifts".
+    const list =
+      role === "agent" && !gifts?.length
+        ? chatList(parsed.text)
+        : { before: parsed.text, items: [], after: around.after };
+    // Campaign answers show a card per campaign (D-49); its Donate button replaces the plain link. A gift
+    // list's campaigns are part of each gift, not campaigns to show.
     const cards =
-      role === "agent" ? this.chatCampaignCards(parsed.text, links) : [];
+      role === "agent"
+        ? this.chatCampaignCards(
+            list.gifts ? `${list.before}\n${list.after}` : parsed.text,
+            links
+          )
+        : [];
     const shown = new Set(cards.map((c) => c.name.toLowerCase()));
     links = links.filter((l) => !shown.has(linkCampaign(l.href)));
+    // A list line about a campaign that already has a card is left out.
+    const items = list.items.filter(
+      (it) =>
+        it.isGift ||
+        ![...shown].some((name) => it.title.toLowerCase().includes(name))
+    );
     this.chatMessages = [
       ...this.chatMessages,
       {
         key: `m${this._chatSeq}`,
-        text: parsed.text,
+        text: list.before,
         links: links.map((l, i) => ({ ...l, key: `m${this._chatSeq}-l${i}` })),
         cards: cards.map((c) => ({ ...c, key: `m${this._chatSeq}-${c.key}` })),
         hasCards: cards.length > 0,
@@ -227,7 +245,12 @@ export default class DashboardAssistant extends LightningElement {
           key: `m${this._chatSeq}-${g.key}`
         })),
         hasGiftCards: (gifts || []).length > 0,
-        textAfter: around.after,
+        listCards: items.map((it) => ({
+          ...it,
+          key: `m${this._chatSeq}-${it.key}`
+        })),
+        hasListCards: items.length > 0,
+        textAfter: list.after,
         isUser: role === "user",
         rowClass: role === "user" ? "msg msg_user" : "msg msg_agent",
         bubbleClass:
