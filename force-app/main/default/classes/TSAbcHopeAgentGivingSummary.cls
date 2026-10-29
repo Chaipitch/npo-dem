@@ -85,6 +85,7 @@ public without sharing class TSAbcHopeAgentGivingSummary {
         }
       }
       lines.add(programsLine(accountId, d));
+      lines.addAll(campaignLines(accountId));
       lines.add(
         'Active recurring gifts: ' +
           d.activeMonthlyGifts +
@@ -101,6 +102,68 @@ public without sharing class TSAbcHopeAgentGivingSummary {
       results.add(r);
     }
     return results;
+  }
+
+  /**
+   * Which open campaigns the donor has given to and which not yet (D-59): campaigns of their counted gifts and of
+   * their active or paused recurring gifts, against the campaigns open for donations (the dashboard cards, D-18).
+   * Each campaign not yet given to comes with its donate link.
+   */
+  @TestVisible
+  static List<String> campaignLines(Id accountId) {
+    Set<Id> given = new Set<Id>();
+    for (GiftTransaction gt : [
+      SELECT CampaignId
+      FROM GiftTransaction
+      WHERE
+        DonorId = :accountId
+        AND CampaignId != NULL
+        AND Status NOT IN (
+          'Canceled',
+          'Failed',
+          'Fully Refunded',
+          'Written-Off'
+        )
+    ]) {
+      given.add(gt.CampaignId);
+    }
+    for (GiftCommitment gc : [
+      SELECT CampaignId
+      FROM GiftCommitment
+      WHERE
+        DonorId = :accountId
+        AND CampaignId != NULL
+        AND Status IN ('Active', 'Paused')
+    ]) {
+      given.add(gc.CampaignId);
+    }
+    List<String> givenNames = new List<String>();
+    List<String> notYet = new List<String>();
+    for (
+      TSAbcHopeCampaignDto.CampaignCard card : TSAbcHopeCampaignService.getCampaigns()
+    ) {
+      if (given.contains(card.id)) {
+        givenNames.add(card.name);
+      } else {
+        notYet.add(
+          card.name +
+            ' (Donate: ' +
+            TSAbcHopeAgentSupport.siteUrl(
+              '/donate?campaign=' +
+              EncodingUtil.urlEncode(card.name, 'UTF-8').replace('+', '%20')
+            ) +
+            ')'
+        );
+      }
+    }
+    return new List<String>{
+      'Open campaigns the donor has given to: ' +
+      (givenNames.isEmpty() ? 'none yet' : String.join(givenNames, ', ')),
+      'Open campaigns the donor has not given to yet: ' +
+      (notYet.isEmpty()
+        ? 'none, the donor has given to every open campaign'
+        : String.join(notYet, '; '))
+    };
   }
 
   /**

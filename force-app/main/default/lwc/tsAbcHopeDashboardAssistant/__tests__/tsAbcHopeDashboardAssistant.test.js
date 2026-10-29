@@ -282,7 +282,7 @@ describe("c-ts-abc-hope-dashboard-assistant", () => {
   it("shows campaign cards when the assistant answers about campaigns", async () => {
     askAgent.mockResolvedValue({
       sessionId: "s-11",
-      text: "Two campaigns are open: Christmas Toy Drive 2026 and Clean Water. Donate: https://x.my.site.com/donate?campaign=Clean%20Water"
+      text: "Two campaigns are open: Christmas Toy Drive 2026 and Clean Water."
     });
     const el = await mount({
       campaigns: [
@@ -306,6 +306,30 @@ describe("c-ts-abc-hope-dashboard-assistant", () => {
     expect(
       cards[0].querySelector(".chat-card-donate").getAttribute("href")
     ).toBe("/donate?campaign=Christmas%20Toy%20Drive%202026");
+    expect($$(el, ".chat-log a.chat-link")).toHaveLength(0);
+  });
+
+  it("shows cards only for the campaigns a reply links to (not given to yet, D-59)", async () => {
+    askAgent.mockResolvedValue({
+      sessionId: "s-13",
+      text: "You have given to Christmas Toy Drive 2026. Not yet: Clean Water (Donate: https://x.my.site.com/donate?campaign=Clean%20Water)."
+    });
+    const el = await mount({
+      campaigns: [
+        {
+          id: "c1",
+          name: "Christmas Toy Drive 2026",
+          raised: 2500,
+          goal: 10000
+        },
+        { id: "c2", name: "Clean Water", raised: 1000, goal: 0 }
+      ]
+    });
+    await ask(el, "Which campaigns haven't I contributed to?");
+    const names = $$(el, '[data-id="chat-cards"] .chat-card-name').map(
+      (n) => n.textContent
+    );
+    expect(names).toEqual(["Clean Water"]);
     // The card's Donate button replaces the plain link for that campaign.
     expect($$(el, ".chat-log a.chat-link")).toHaveLength(0);
   });

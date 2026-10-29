@@ -19,7 +19,7 @@ import {
 const ASK_EVENT = "abchope:ask";
 /** A question about campaigns or giving: the reply's campaigns show as cards (D-49). */
 const CAMPAIGN_QUESTION =
-  /campaign|donat|\bgive\b|giving|appeal|drive|fund|christmas|support/i;
+  /campaign|donat|\bgive\b|giving|contribut|appeal|drive|fund|christmas|support/i;
 /** A line of the agent's recurring gift list, e.g. "2. Recurring (Monthly): USD 500 per month to …" (D-55). */
 const RECURRING_LINE =
   /^[ \t]*(?:[-•*]\s*)?(?:\d+[.)]\s*)?Recurring (?:\((?:Weekly|Monthly|Yearly|Custom)\)|gift\b).*$/gim;
@@ -245,8 +245,13 @@ export default class DashboardAssistant extends LightningElement {
    * question was about campaigns or giving (e.g. "Which campaigns are open?").
    */
   chatCampaignCards(text, links) {
-    const linked = new Set(links.map((l) => linkCampaign(l.href)));
-    const aboutCampaigns = CAMPAIGN_QUESTION.test(this._lastQuestion || "");
+    const linked = new Set(
+      links.map((l) => linkCampaign(l.href)).filter(Boolean)
+    );
+    // A reply that links to campaigns is about exactly those (e.g. "not given to yet" leaves out the ones
+    // named as already given to, D-59); without links, the campaigns it names when the question is about them.
+    const aboutCampaigns =
+      linked.size === 0 && CAMPAIGN_QUESTION.test(this._lastQuestion || "");
     const lower = (text || "").toLowerCase();
     return campaignCards(this.campaigns, {
       campaignImages: this.campaignImages,

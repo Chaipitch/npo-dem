@@ -689,3 +689,18 @@ instead of failing when it is already scheduled.
   pages and the donation journey banner, and the credit tooltips from the dashboard campaign cards and stories (with
   their CSS). The credit values still exist in `c/tsAbcHopeCampaignPhotos` and the builder properties, unused by the
   pages. Live: no "Photo:" text or credit tooltip on /, /donate, /program, /dashboard or /campaign.
+
+### D-59 · The assistant can tell a donor which open campaigns they haven't given to — Accepted (user, 2026‑10‑29)
+
+- The agent used to guess from causes ("Girls' Education Scholarships may not match your past giving") — wrong, as
+  Maya had given to it. `TSAbcHopeAgentGivingSummary` now adds two lines from real data: "Open campaigns the donor
+  has given to: …" (campaigns of their counted gifts and active/paused recurring gifts) and "Open campaigns the
+  donor has not given to yet: … (Donate: <link>)", against the open campaigns (D-18).
+- Agent v18 (active): the router sends "which campaigns have/haven't I given (contributed, donated) to" to My Giving,
+  which always calls the giving summary first; the Campaign FAQ topic can also call it for that question, since
+  routing between the two is not fully reliable. Both answer only from those lines and share each donate link.
+- Ask panel: a reply that links to campaigns shows cards for exactly those (so campaigns named as already given to
+  get no card); a reply without links still shows cards for the campaigns it names when the question is about
+  campaigns, giving or contributing.
+- Maya has given to all 7 open campaigns, so her answer is "none". The cards for not-yet campaigns are covered by
+  Apex and Jest tests.

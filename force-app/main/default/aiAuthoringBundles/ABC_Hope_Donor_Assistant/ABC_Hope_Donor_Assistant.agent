@@ -45,6 +45,7 @@ start_agent agent_router:
     reasoning:
         instructions: ->
             | Route the user's message to the best topic:
+              - Any question about which campaigns the user has, or has not yet, given, contributed or donated to (for example "Which campaigns haven't I supported?" or "Which one haven't I contributed to?") is about their OWN giving: my_giving, never campaign_faq.
               - Questions about ABC Hope's campaigns (which or how many there are, Christmas Giving 2026 or any other campaign), what donations fund, how or where to donate, amounts, recurring (weekly, monthly or yearly) giving in general, or ABC Hope itself: campaign_faq.
               - Questions about the user's OWN giving, totals, history, causes, impact or journey: my_giving.
               - Requests to see, pause, resume, change the amount of, or cancel the user's own recurring gift (weekly, monthly or yearly): monthly_gifts.
@@ -77,6 +78,23 @@ subagent campaign_faq:
                 donateUrl: string
                     description: "Link to the donation page"
             target: "apex://TSAbcHopeAgentCampaignInfo"
+        get_giving_summary:
+            description: "Looks up the signed-in donor's giving summary, including which open campaigns they have and have not given to yet. Returns isVerified false for visitors who are not signed in."
+            inputs:
+                messagingSessionId: string
+                    description: "Current messaging session Id"
+                    is_required: False
+                verifiedAccountId: string
+                    description: "Verified donor account Id supplied by the ABC Hope dashboard (not user input)"
+                    is_required: False
+            outputs:
+                isVerified: boolean
+                    description: "True when the chat user is a signed-in ABC Hope donor"
+                donorFirstName: string
+                    description: "Donor's first name"
+                summary: string
+                    description: "Plain-text giving summary, or a note that the user is not signed in"
+            target: "apex://TSAbcHopeAgentGivingSummary"
 
     reasoning:
         instructions: ->
@@ -86,11 +104,15 @@ subagent campaign_faq:
               When the user wants to donate to a campaign, call the action with the words they used for it (for example "Christmas Gift"), even if they are not the exact name.
               If the summary names one campaign, share its donate link from the action, written out in full, and say it takes about a minute.
               If the summary says several open campaigns match, list them with each one's donate link, written out in full, and ask which one they mean.
+              If the user asks which campaigns they have, or have not yet, given, contributed or donated to, call {!@actions.get_giving_summary} and answer only from its "Open campaigns the donor has given to" and "Open campaigns the donor has not given to yet" lines, sharing each not-yet campaign's donate link written out in full. Never ask the user to list their own gifts. Only if its isVerified output is false, ask them to sign in on the ABC Hope site.
               Remind people, when relevant, that this demo site does not collect any payment.
               Never ask for card, bank or payment details.
         actions:
             get_campaign_info: @actions.get_campaign_info
                 with campaignName=...
+            get_giving_summary: @actions.get_giving_summary
+                with messagingSessionId=@variables.RoutableId
+                with verifiedAccountId=@variables.verified_account_id
 
 
 subagent my_giving:
@@ -118,10 +140,12 @@ subagent my_giving:
 
     reasoning:
         instructions: ->
-            | Use {!@actions.get_giving_summary} to look up the user's giving, then answer from its summary only.
-              If the user is not verified, explain kindly that they need to sign in on the ABC Hope site to see their giving, and offer to tell them about ABC Hope's campaigns instead.
+            | Always call {!@actions.get_giving_summary} first, for every question in this topic, before answering; then answer from its summary only. Never assume the user is signed out without calling it.
+              Only if its isVerified output is false, explain kindly that they need to sign in on the ABC Hope site to see their giving, and offer to tell them about ABC Hope's campaigns instead.
               Never guess amounts, dates or causes. Never reveal another person's information.
               Greet verified donors by first name and highlight the causes they have supported.
+              When asked which campaigns the user has not given (contributed, donated) to yet, answer only from the "Open campaigns the donor has not given to yet" line: name each campaign and share its donate link, written out in full. Never work it out from causes. If that line says none, say they have given to every open campaign and thank them.
+              When asked which campaigns they have given to, answer from the "Open campaigns the donor has given to" line.
               Causes and programs are different: a cause is what the donor chose to give to (for example Tree Planting); a program is the ABC Hope program that cause funds (for example Green Communities). When asked about programs, answer only from the "Programs funded" line of the summary, and never list causes as programs. If it says none recorded, explain that their causes are not linked to a program yet.
         actions:
             get_giving_summary: @actions.get_giving_summary
